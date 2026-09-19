@@ -356,6 +356,34 @@ export const SCENES = {
     step: `__cw.advance(SECS);`
   },
 
+  /* CUTTING INTO ONE, which is the beat nothing else here shows.
+
+     The approach scene proves a wreck announces itself and the opened one
+     proves it reads as a ship. Neither shows the thing the player actually
+     DOES: two hull plates at three and a quarter times the band, the one line
+     the ship's instruments say when the first of them breaks, and the hold
+     behind them. Straight down column WX from four metres above, which is the
+     way anybody would meet it. */
+  wreckcut: {
+    secs: 1.2,
+    frames: 12,
+    enter: true,
+    setup: `
+      const WX = 10, WD = 46;
+      const dug = [];
+      for (let d = 0; d <= WD - 6; d++) dug.push(WX + ',' + d);
+      __cw.g.dug = new Set(dug);
+      /* A real drill rather than the stock one: at tier 0 two hull plates is
+         most of a minute and the sheet would be twelve frames of the same
+         rock face. This is what a player who has reached 46 m actually has. */
+      __cw.g.up.drill = 3;
+      __cw.g.px = WX; __cw.g.pd = WD - 6;
+      __cw.resetBlocks();
+      __cw.advance(0.4);
+    `,
+    step: `__cw.R.held = 'down'; __cw.advance(SECS);`
+  },
+
   /* And the same wreck opened up, so the hull, the hold and the lamp can be
      judged as a tableau rather than as a glow. */
   wreckin: {

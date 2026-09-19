@@ -5917,6 +5917,50 @@ inflected American form back. **A check that reproduces another check's pattern
 inherits its blind spots**, and the only thing that showed it was planting the
 two real words rather than a word chosen to be easy.
 
+## 2026-09-19, desk playtest: meeting a wreck and cutting into it
+
+Filmed rather than screenshotted, because the milestone changes what the player
+sees and a single frame proves one state (rule 6). Two sheets: `film-wreck` at
+twelve frames of 0.35 s, the approach; `film-wreckcut` at twelve of 1.2 s, the
+whole beat from four metres above to the hold. The six questions, in order:
+
+**Feedback in the same frame as each action.** Yes. Every plate gives the drill
+flash, the shard spray and the hit-stop the rock already gives, and the first
+one adds the line. Nothing is silent.
+
+**Acceleration and coasting.** Unchanged - the wreck is rock with different
+numbers on it and the flight model never sees it.
+
+**Anything popping in, or drawn over what it belongs behind.** No. The panels
+come into frame at the streaming edge exactly as terrain does, and the crates in
+the hold sit inside the cell rather than over its face. **This is the question
+that failed three times before the film**, and all three were fixed by then: the
+hull bulging like rock, the hull wearing the rock's grain, and the lamp having no
+halo at all.
+
+**The short states visible in at least one frame.** The "Hull plate · not ours"
+toast is legible in frame 3 of the cut sheet, in the warm toast colour under the
+ship against grey panels - checked by zooming rather than by assuming, because it
+is one line over a light surface and that is where a toast is weakest.
+
+**A win and a visible next goal in the first sixty seconds.** Not this beat's
+job, and the wreck does not interfere: the shallowest is at 46 m, well past the
+opening.
+
+**Any frame where the player would not know what to do.** None. The panels read
+as a wall, a wall in this game means dig, and the room behind it is the reward
+the language already promises.
+
+**One thing the film showed that nothing else would have.** The first wreck a
+player opens hands over a supply they have never held, so it gets the full
+`foundBanner` card rather than a toast - `cacheSupply`'s "something you have
+never held while anything is left" rule, which the hold inherited by becoming a
+cache. That is a better first meeting than anything designed for it, and it was
+not designed at all. It also means the first wreck reads partly as a supply
+cache in a fancy room; acceptable, because `CACHE.min` is 20 and wrecks start at
+46, so most players will have met a real cache first and the wreck will hand
+over something else.
+
 ## A flake that was a fixed sleep waiting on an async state change
 
 `focus loss pauses the audio context and coming back resumes it` failed one full
