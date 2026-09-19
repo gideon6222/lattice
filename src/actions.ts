@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { W, HULL_MAX, DEF, isOre, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf } from './sim/config';
+import { W, HULL_MAX, DEF, isOre, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf, LODE_COLLAPSE } from './sim/config';
 import { clamp, key, stream } from './sim/util';
 import { FIND_OF } from './sim/finds';
 import { hap } from './haptics';
@@ -195,6 +195,34 @@ export function tremor(): number {
   for (const k of taken) {
     const c = k.split(',');
     spray(worldX(+c[0]), -(+c[1]), RUBBLE.color, 16, 4.5, 1.1);
+  }
+  save();
+  return taken.length;
+}
+
+/* The lode's side of the bargain: the ground you dug comes down.
+
+   Round twelve, V5. Deliberately the same machinery as `tremor()` and not a
+   second collapse path - `planCollapse` is where the two guarantees live, that
+   the cells taken are ones you already dug ABOVE you and outside a safe radius,
+   and that the whole thing reverts if the ship can no longer reach the pad.
+   That second one is `CLAUDE.md`'s "a tremor must never take the run", and it
+   is what makes this a hard decision rather than an unfair one: cutting a lode
+   can cost you the easy way home and can never cost you the run.
+
+   Its own stream rather than the tremor counter, so a lode cut and a tremor
+   landing in the same descent cannot consume each other's rolls - the same
+   separation every generator here keeps, for the same reason.
+
+   Returns how many cells came down so the caller can decide what to say. */
+export function lodeCollapse(): number {
+  const taken = planCollapse(
+    LODE_COLLAPSE, stream(R.lodeN++, Math.round(g.pd), g.planet + 887));
+  if (!taken.length) return 0;
+  syncBlocks(true);
+  for (const k of taken) {
+    const c = k.split(',');
+    spray(worldX(+c[0]), -(+c[1]), RUBBLE.color, 18, 5, 1.2);
   }
   save();
   return taken.length;

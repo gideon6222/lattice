@@ -49,7 +49,7 @@ import { aimRelic } from './relic';
 import { stepParallax, fadeParallax, setParallaxTint } from './parallax';
 import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner } from './ui';
 import { stepGauges } from './gauges';
-import { sell, goSurface, die, tremor, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorLit, vaultReached } from './actions';
+import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorLit, vaultReached } from './actions';
 import { sfx, setDepth, setMood, setDuck } from './audio';
 import { isDocked, stepStation, renderStation } from './station';
 import { introTick, eyeAt, titleEye, arriveTick, arriveEye, INTRO,
@@ -539,6 +539,28 @@ export function tick(raw: number, draw = true) {
               'ore');
           } else if (b.value >= 400) {
             toast(b.name + '  +◈ ' + Math.round(b.value * valueM()).toLocaleString());
+          }
+          /* ---------- the lode's price ----------
+
+             Round twelve, V5. The ore is already in the hold by the time this
+             runs, and that order is the design: you GET the thing, and then the
+             ground answers. A collapse that fired before the payout would read
+             as the game refusing you rather than as a bargain you struck.
+
+             `lodeCollapse` goes through the same `planCollapse` a tremor does,
+             so the guarantee that the ship can still reach the pad is the one
+             already written and tested - it can cost you the easy way home and
+             can never cost you the run. When it reverts, `taken` is zero and
+             the player is simply told the ground held, which is a real outcome
+             and not a silent no-op. */
+          if (b.lode) {
+            const fell = lodeCollapse();
+            R.shake = Math.max(R.shake, 0.9);
+            hap.boom();
+            sfx.boom();
+            toast(fell
+              ? 'The lode gives · ' + fell + ' cells come down behind you'
+              : 'The lode gives · the ground holds');
           }
           R.digging = null;
           save();

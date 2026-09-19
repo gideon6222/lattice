@@ -79,6 +79,13 @@ export interface Block {
      device's name: every crate is the same block, and `findHere()` in world.ts
      says which one this cell holds. See the note in blockAt. */
   find?: boolean;
+  /* Rock under load. It pays better than anything at its depth AND brings dug
+     ground down behind you when it is cut, which is what makes it the game's
+     first EVENT rather than another hazard: both branches cost something. It
+     still enters the hold like any ore, so unlike `hazard` and `cache` this
+     flag adds to the cargo branch rather than diverting past it - see the note
+     in config.ts. */
+  lode?: boolean;
 }
 
 export type UpgradeKey =

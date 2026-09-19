@@ -80,13 +80,23 @@ function census() {
    `sim/state.ts` (save, load and `setWorld`); everything else is a read that
    would be written as `regionAt(x, d)` today. */
 const FROZEN = {
-  'actions.ts': 3,
+  /* 3 -> 4 on 2026-09-18, round twelve V5: `lodeCollapse` seeds its collapse
+     stream on `g.planet + 887`. That is a SEED use, which is the one thing
+     `g.planet` is still legitimately for - the field survives precisely because
+     it seeds the generator - and it sits beside the tremor's own
+     `g.planet + 211` two lines away. Not a read that `regionAt(x, d)` could
+     answer: there is no cell being asked about, only a stream being started. */
+  'actions.ts': 4,
   'blocks.ts': 20,
   'growth.ts': 3,
   'loop.ts': 14,
   'relic.ts': 4,
   'sim/state.ts': 11,
-  'sim/world.ts': 18,
+  /* 18 -> 19 on the same commit: the strained lode's placement hash,
+     `rnd(x + 71, d + 419, g.planet + 887)`. The generator is the other
+     legitimate reader, and every pocket in this file already reads it the same
+     way. */
+  'sim/world.ts': 19,
   'ui.ts': 2
 };
 

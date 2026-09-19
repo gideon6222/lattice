@@ -28,7 +28,12 @@ const ALL_IDS = [
      is not an error at record time, it is a silent "undefined" that two
      different ids can both spell, and the day a woken world gets snapshotted
      is not the day to find that out. */
-  H.BLOOM.id
+  H.BLOOM.id,
+  /* Round twelve's strained lode. Unlike the Bloom this one DOES appear in the
+     snapshot - it generates below 90 m on any world, woken or not - so the
+     legend character is load-bearing rather than defensive. The test refused to
+     record without it and said exactly why, which is the note above working. */
+  H.LODE.id
 ].sort();
 const CHAR = new Map(ALL_IDS.map((id, i) => [id, ALPHA[i]]));
 
@@ -200,6 +205,15 @@ const PRE = JSON.parse(
    cannot move an ore, and the cells it takes are the only cells it touches. */
 const OVERWRITERS = new Set([
   '(empty)', H.GAS.id, H.GEODE.id, H.CACHE.id, 'relic', 'schematic',
+  /* The strained lode, round twelve, V5. Added deliberately and the claim that
+     makes it legal is the same one every id above rests on: it rolls on its OWN
+     hash (offset 887) and consumes nothing from the ore stream, so it replaces
+     the cell it lands on and cannot change what any other cell holds. The diff
+     that came with it was read - the census golden moved by a handful of rock
+     cells becoming lodes below 90 m, and not one ore count changed except where
+     a lode is standing on top of it. That is what "this new feature overwrites
+     cells" looks like, as opposed to "this new feature moved the ore around". */
+  H.LODE.id,
   /* `part` is a Jump Drive component, and there are none any more - the chart
      and the drive went with the old ending in W9. It stays on this list
      because the FROZEN baseline still has them in it, and an overwriter

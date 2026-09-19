@@ -1,5 +1,5 @@
 import { W, START_X, ORES, DEF, baseRock, coreDepth, hardMult, valueMult,
-         GEODE, GAS, CACHE, BLOOM, BLOOM_MAX, RUBBLE, RUBBLE_HARD, SEAM, SEAM_CHANCE, TREMOR_SAFE_RADIUS,
+         GEODE, GAS, CACHE, BLOOM, BLOOM_MAX, LODE, RUBBLE, RUBBLE_HARD, SEAM, SEAM_CHANCE, TREMOR_SAFE_RADIUS,
          RELIC_COLOR, RELIC_HOST, relicAt, relicFor,
          CAVE_MIN_DEPTH, caveChanceOn, gasChanceOn, geodeChanceOn, SUPPLIES, traitOf } from './config';
 import { key, mixHex, rnd } from './util';
@@ -389,6 +389,27 @@ export function blockAt(x: number, d: number): Block | null {
     return { id: BLOOM.id, name: BLOOM.name, color: BLOOM.color, host: BLOOM.host,
              glow: BLOOM.glow, shards: BLOOM.shards, tone: BLOOM.tone,
              hard: BLOOM.hard * hm, wt: BLOOM.wt, value: BLOOM.value, ore: true };
+  }
+  /* A strained lode. Round twelve, V5 - see the long note in config.ts for why
+     this and not a telegraphed gas pocket.
+
+     A fifth pocket rather than a twelfth ore, for exactly the reason the Bloom
+     is: it is an OVERWRITER on its own hash, so adding it moves nothing that was
+     already generated. That is the invariant `blocks-frozen.json` defends, and
+     the census golden's own legal-change list names the overwriters by name
+     because the claim is what makes them legal - they replace a cell and
+     consume no roll.
+
+     Offset 887, which was free: 11, 23, 41, 77, 91, 131, 137, 173, 211, 257,
+     311, 313, 421, 431, 601, 619, 643, 977 and 1013 are taken.
+
+     Unlike the Bloom it does NOT wait for the planet to wake. Ground under load
+     is a property of the deep and not of the Lattice being disturbed, and the
+     wake is already carrying enough meaning of its own. */
+  if (d >= LODE.min && rnd(x + 71, d + 419, g.planet + 887) < LODE.chance) {
+    return { id: LODE.id, name: LODE.name, color: LODE.color, host: LODE.host,
+             glow: LODE.glow, shards: LODE.shards, tone: LODE.tone,
+             hard: LODE.hard * hm, wt: LODE.wt, value: LODE.value, ore: true, lode: true };
   }
   if (d >= GEODE.min && pr > 1 - geodeChanceOn(tr)) {
     return { id: GEODE.id, name: GEODE.name, color: GEODE.color, host: GEODE.host, glow: GEODE.glow,

@@ -26,6 +26,11 @@ export const R = {
      collapse, so the roll that decides which cells fall is reproducible - the
      one event in the game a replay could not repeat until M5. */
   tremorN: 0,
+  /* The same, for lodes. Its own counter rather than sharing the tremor's, so
+     a lode cut and a tremor landing in one descent cannot consume each other's
+     rolls - the separation every generator in this game keeps, and for the same
+     reason: a shared stream makes one feature's change move another's output. */
+  lodeN: 0,
   /* Wall-clock seconds since landing on this world, for the fastest-core
      record. Reset by arrive(); read once, when a core breaks. */
   worldT: 0,

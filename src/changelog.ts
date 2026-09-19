@@ -16,9 +16,17 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.49.0';
+export const VERSION = '0.50.0';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.50.0', date: '2026-09-18', title: 'Rock that is holding something up',
+    notes: [
+      'Below ninety meters you will start seeing a warm glow in the rock that is worth more than anything else down there. Cutting it pays better than any ore at that depth. It also brings the tunnel you came down in partly down behind you, so the way home is one you have to find again. Both choices cost you something, which is the point of it.',
+      'It can take your easy way out. It can never take your run - if the ground coming down would leave you with no route to the pad at all, it holds instead.',
+      'The Survey map now writes the name of a region you have calmed in the Anchors’ own color, so you can see how much of the planet is settled without counting markers.'
+    ]
+  },
   {
     version: '0.49.0', date: '2026-09-18', title: 'The game says what it wants',
     notes: [

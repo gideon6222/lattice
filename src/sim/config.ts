@@ -408,6 +408,70 @@ export const BLOOM: Ore = {
    thing per kilo there is; below it, the deep is left alone. */
 export const BLOOM_MAX = Math.round(WORLD_DEPTH * 0.5);
 
+/* ---------- the strained lode: the first thing in this game that is an EVENT
+
+   Round twelve, V5. His ask was *"make more encounters and random events as you
+   go"*, and scoping it found the game further along than the research assumed:
+   gas already glows at 0.45 through unlit rock, and a tremor already sounds a
+   warning before it lands. Both are TELEGRAPHED, which by the research's own
+   definition makes them encounters rather than hazards.
+
+   What the game had none of is an EVENT: a once-off decision that costs
+   something on EVERY branch. Slay the Spire's Golden Idol is the reference -
+   four buttons and not one of them free. Take the idol and you are Cursed or
+   hurt; walk away and you have nothing. That shape is what makes a beat get
+   retold, and it is what neither gas nor a tremor asks, because the only honest
+   answer to both is "avoid it".
+
+   A lode is rock under load. It pays better than anything else at its depth and
+   cutting it brings down ground you have already dug. Both branches cost:
+
+     TAKE IT   the best cell in reach, and the shaft you came down closes
+               behind you, so the way home is one you have to find
+     LEAVE IT  the tunnel stays open and you walked past the richest thing on
+               this descent, which you can see glowing while you decide
+
+   The collapse goes through `planCollapse`, which already reverts entirely if
+   the ship can no longer reach the pad - `CLAUDE.md`'s "a tremor must never
+   take the run". So this can cost you the easy way home and can never cost you
+   the run, which is the difference between a hard decision and an unfair one.
+
+   **Heavy on purpose.** At 7 kg it is also a cargo decision: a full hold cannot
+   take one without leaving something behind, so the temptation bites twice and
+   the second bite is the one the whole game is built on.
+
+   Below the tremor band at 90 m, because ground under load is the fiction of
+   the deep and a lode at 12 m would be a free 5,200 in the first ten minutes.
+   Rarer than a Bloom: this is meant to be the thing you remember about a
+   descent, and two in one run would make it a resource.
+
+   **Measured rather than asserted.** At 0.0055 over the 22,082 cells below
+   90 m, the census records 85 to 113 lodes per world across five planets - call
+   it one cell in 184 of the deep. A descent that cuts 150 cells down there
+   meets about one, and sees a couple more glowing through rock that it chooses
+   to leave. That ratio is the design: the decision should come up most deep
+   descents, because it is a temptation rather than a one-off story, and seeing
+   one you do not take is as much the mechanic as cutting one. */
+export const LODE: Ore = {
+  id: 'lode', name: 'Strained Lode', color: 0xffb347, host: 0x3a2a18,
+  hard: 6.2, wt: 7, value: 5200, min: 90, chance: 0.0055, glow: 0.78, shards: 9, tone: 8
+};
+
+/* How many dug cells come down when one is cut.
+
+   Sized against something the game already does rather than picked: a lode
+   should cost about what the WORST tremor costs, because it is a tremor you
+   chose. If it cost more, the deliberate choice would be worse than the
+   accident, which is the wrong way round.
+
+   **Written as 6 first, with a comment claiming that was the tremor's own
+   strongest value. It is not - the measured worst is 5.** `tremorCells` caps at
+   9 but never reaches it: at the bottom of the world it computes 5, because the
+   band it divides by is a fifth of the core depth. The test asserted the
+   relationship rather than the number and caught the invented one immediately,
+   which is the whole reason it asserts a relationship. */
+export const LODE_COLLAPSE = 5;
+
 /* ---------- relics ----------
 
    Exactly one per planet, buried below the halfway mark, in no particular
@@ -734,6 +798,12 @@ DEF[CACHE.id] = CACHE;
 DEF[SEAM.id] = SEAM;
 DEF[GAS.id] = GAS;
 DEF[BLOOM.id] = BLOOM;
+/* Required, not optional: CLAUDE.md's invariant is that anything which can
+   reach `g.cargo` must have a DEF entry, because the manifest, the debrief and
+   the sale all look materials up by id. A lode goes in the hold, so a missing
+   row here is the crash that shipped once already - the game runs, the manifest
+   opens, and then it does not, depending on what you picked up. */
+DEF[LODE.id] = LODE;
 for (const r of ROCKS) DEF[r.id] = r;
 
 /* ---------- supplies ----------

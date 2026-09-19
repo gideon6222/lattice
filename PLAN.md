@@ -3185,8 +3185,45 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       two beats on a full dive. Verified by reintroducing the bug: removing the
       gap rule fails two tests by name.
 
-- [ ] **V5 The first three encounters.** The research's top three, which are top
-      because each extends a system this repo already has rather than adding one.
+- [x] **V5 The first EVENT.** Was "the first three encounters", and scoping it
+      changed the milestone rather than the schedule.
+
+      **Two of the research's top three are already built**, which is why this
+      is one thing and not three. The telegraphed gas pocket already telegraphs:
+      `GAS.glow` is 0.45 against copper's 0.10 and goes through `coreGlow()`,
+      the curve that deliberately does not switch off in unlit rock. The cave-in
+      already warns: `tremorTick` has had a warning window for rounds. Both are
+      ENCOUNTERS by the research's own definition - hazards made legible before
+      they resolve - and the game has had them all along.
+
+      What it had none of is an **event**: a once-off decision that costs
+      something on EVERY branch. That is what neither gas nor a tremor asks,
+      because the only honest answer to both is "avoid it".
+
+      **The strained lode**, done 2026-09-18 as v0.50.0. Rock under load below
+      90 m, worth more than any ore at its depth, and cutting it brings dug
+      ground down behind you. Take it and the way home is one you find again;
+      leave it and you walked past the richest thing on the descent while
+      watching it glow. At 7 kg it is a cargo decision too. Measured density: 85
+      to 113 per world, about one cell in 184 of the deep, so a descent meets
+      roughly one and sees a couple it chooses to leave.
+
+      The collapse is `planCollapse` and not a second path, so the guarantee
+      that it reverts rather than stranding the ship is the one already written
+      and tested. It can cost the easy way home and never the run.
+
+      Eight tests, and four separate guards fired while building it - the
+      collapse size was an invented number, the frozen overwriter list needed
+      the deliberate entry, the census golden refused to record without a legend
+      character, and the vestigial-fields census added this morning caught both
+      new `g.planet` reads on the first code to touch it. `NOTES.md` has each.
+
+- [ ] **V5b The other two archetypes**, if a playtest asks for them. The cracked
+      vein and the derelict drill ship are in
+      `C:\dev\plans\lattice\ENCOUNTERS.md`, and they wait on the lode being
+      played rather than on anything technical: one real event may be enough,
+      and three of them competing for the same descent is the wallpaper the
+      frame's own cap exists to prevent.
 
       **1. The telegraphed gas bloom.** The existing gas pocket gets a visible
       tell two or three cells out. That single change converts the game's most

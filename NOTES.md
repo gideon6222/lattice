@@ -5422,6 +5422,70 @@ Verified by reintroducing the bug - removing the gap rule fails two tests by
 name, and one of them asserts the rule lives in `eligible` rather than in the
 convenience `walk` around it, so a refactor that moves the check cannot pass.
 
+## V5: the game's first EVENT, and what scoping it found
+
+**The research's top three archetypes were mostly already built, and finding
+that out changed the milestone.** Archetype 1 asks for a telegraphed gas pocket:
+`GAS.glow` is 0.45 against copper's 0.10 and goes through `coreGlow()`, the
+find-the-vein curve that deliberately does not switch off in unlit rock, so a
+gas pocket is already visible before you cut it. Archetype 4's cave-in already
+sounds a warning - `tremorTick` has had a `TREMOR_WARN` window for rounds. By
+the research's own definitions both are ENCOUNTERS already: hazards made legible
+before they resolve.
+
+What the game had none of is an **EVENT**: a once-off decision that costs
+something on every branch. That is the Golden Idol shape, and it is what neither
+gas nor a tremor asks, because the only honest answer to both is "avoid it".
+
+So V5 is one thing rather than three, and it is the temptation archetype. A
+**strained lode** is rock under load below 90 m. It pays more than any ore at
+its depth and cutting it brings dug ground down behind you:
+
+- **take it** and you have the best cell in reach and the shaft you came down is
+  partly gone, so the way home is one you find again
+- **leave it** and the tunnel stays open and you walked past the richest thing
+  on the descent, watching it glow while you decided
+
+It is also 7 kg, so a full hold cannot take one without leaving something
+behind. The temptation bites twice and the second bite is the cargo decision the
+whole game is built on.
+
+### Three guarantees, and none of them is new code
+
+The collapse goes through `planCollapse`, not a second path. That is where the
+guarantee lives that the cells taken are ones you already dug ABOVE you and
+outside a safe radius, and that the whole thing REVERTS if the ship can no
+longer reach the pad - `CLAUDE.md`'s "a tremor must never take the run". So a
+lode can cost you the easy way home and can never cost you the run, which is the
+difference between a hard decision and an unfair one. When it reverts the player
+is told the ground held, which is a real outcome rather than a silent no-op.
+
+### Four things the suite said, in order
+
+1. **`LODE_COLLAPSE` was 6 with a comment claiming that was the tremor's own
+   strongest value.** It is not: `tremorCells` caps at 9 and never reaches it,
+   computing 5 at the bottom of the world. The test asserted the RELATIONSHIP -
+   a chosen cost must not exceed the worst accident - and caught the invented
+   number immediately. Now 5.
+2. **The frozen ore-stream test failed**, which is the one that must not. It was
+   the known-overwriter list, not a moved stream: adding `lode` to `OVERWRITERS`
+   is the deliberate act the list documents, and the claim that makes it legal is
+   that the lode rolls on its own hash (offset 887) and consumes nothing.
+3. **The census golden refused to re-record at all**, with "block id lode has no
+   legend character - add it to ALL_IDS, or it will be indistinguishable from
+   every other missing id". That guard was written defensively for the Bloom,
+   which never appears in the snapshot. The lode does, so it was load-bearing.
+4. **The vestigial-fields census I added this morning caught the two new reads**
+   of `g.planet` - the lode's placement hash and its collapse stream - and its
+   own failure message names the legitimate case and says to record the reason.
+   Both are seed uses, which is the one thing that field still exists for. The
+   guard worked exactly as designed, on the first new code to touch it.
+
+Verified by reintroducing the bug twice: dropping the `lode` flag fails "it is
+flagged so the loop can charge for it", and removing the `DEF` row fails "a lode
+has a DEF entry, because it reaches the hold" - which is the crash class this
+game has already shipped once.
+
 ## A second shot tool, and one refactor that came with it
 
 `scripts/shot.mjs` is `filmstrip.mjs`'s single-frame sibling, at 1080x2340. The
