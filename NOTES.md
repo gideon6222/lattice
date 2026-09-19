@@ -5144,6 +5144,15 @@ one has is frame time under a thumb, thermal after ten minutes, and the PWA
 install and offline check, which `WEB.md` says cannot be exercised anywhere but
 real Chrome or the handset.
 
+**This is NOT an ask of Gideon**, and bulletin `2026-09-18-robots-do-the-running`
+is why the line is here. Nobody is to be asked to plug the phone in or to run a
+pass: the Porter installs and takes the owed reading on the Courier's round with
+no one asking. What that bulletin cannot fix here is that **the Porter's lane is
+Godot-shaped too** - it drives a game's own `scripts\device.ps1`, and this game
+has none. So the reading is not waiting on him and not waiting on a robot; it is
+waiting on the tooling below, which is a studio decision and belongs to
+`/studio-admin` rather than to a build session or to a person.
+
 **Not started, because it is a decision rather than a task.** Either this game
 gets a web `device.ps1` (claim the lease, drive Chrome at the live URL, read
 `dumpsys gfxinfo`, screenshot, release) and `DEVICE.md` grows a web section, or
