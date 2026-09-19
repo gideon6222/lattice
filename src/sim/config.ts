@@ -472,6 +472,39 @@ export const LODE: Ore = {
    which is the whole reason it asserts a relationship. */
 export const LODE_COLLAPSE = 5;
 
+/* ---------- the derelict's hold ----------
+
+   Round thirteen, W2. What is left in a wrecked drill ship, and the third of
+   the research's ranked archetypes (`C:\dev\plans\lattice\ENCOUNTERS.md`):
+   *"a wrecked prior ship sits in a seeded cell with salvageable ore. No choice
+   required, which is the point: it is the wordless tableau."*
+
+   **It is a CACHE, and value and weight here are zero on purpose.** The first
+   build made it a material paying `BLOOM.value`, derived on the argument that
+   the game sorts prizes by what they cost you and a wreck costs only a detour,
+   exactly as a Bloom does. The derivation was sound and the source was wrong,
+   which an e2e caught within the hour: **a Bloom is gated on `isAwake`**, so
+   its 4,200 is calibrated against the economy of a player who has lit five
+   Anchors. A wreck is not gated on anything - Rustmoor's is at 13 m - and
+   copper is 40 a unit down there, so one hold was several runs of income in the
+   first ten minutes, three of them in the top sixty metres. The test that
+   found it is `the shallow world holds three materials, and the deep ones are a
+   prize`, and it was right in a way the taxonomy fix would have silenced.
+
+   `cachePrize(x, d)` is the thing that already solves this, and it has since
+   long before this room existed: it hands over *"the deepest three minerals
+   this depth can hold, so a deep cache is worth more than a shallow one
+   without needing a separate table"*. That is balanced, it is already tested,
+   and it happens to be the exactly right FICTION - a hold holds what that crew
+   had dug, and they dug where they died. A shallow wreck is full of copper.
+
+   So what survives here is the block's appearance and nothing about money. */
+export const SALVAGE: Ore = {
+  id: 'salvage', name: 'Ship\u2019s Hold', color: 0xc9d8e8, host: 0x2b3442,
+  hard: 4.2, wt: 0, value: 0, min: 0, chance: 0, glow: 0.70,
+  shards: 9, tone: 9
+};
+
 /* ---------- what the wake takes back ----------
 
    Round twelve, V6. How many already-dug cells the fifth Anchor closes, and in
@@ -847,6 +880,8 @@ DEF[BLOOM.id] = BLOOM;
    row here is the crash that shipped once already - the game runs, the manifest
    opens, and then it does not, depending on what you picked up. */
 DEF[LODE.id] = LODE;
+/* Same requirement, same reason: a salvaged hold goes into the hold. */
+DEF[SALVAGE.id] = SALVAGE;
 for (const r of ROCKS) DEF[r.id] = r;
 
 /* ---------- supplies ----------

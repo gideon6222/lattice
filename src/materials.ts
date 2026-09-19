@@ -150,7 +150,18 @@ export const ROCK_BUMP: Record<string, number> = {
      so it is very nearly flat, and at play scale that is the difference you
      notice first: a smooth face in a world with no smooth faces in it. No new
      texture, no new material, one number. */
-  worked: 0.03, sealed: 0.02, anchor: 0.05, anchorlit: 0.05, fallen: 0.36
+  worked: 0.03, sealed: 0.02, anchor: 0.05, anchorlit: 0.05, fallen: 0.36,
+  /* And a hull plate is flatter than cut stone, which is the flattest thing
+     above it. Round thirteen, W2, and it was found by looking rather than by
+     reasoning: the first version left the wreck out of this table entirely, so
+     it fell through to the default 0.2 and rendered as a patch of pale grey
+     ROCK. Colour alone did not save it - a blue-grey block with the full rock
+     grain on it reads as a different stone, not as a made thing, because in
+     this world the grain is what says "the planet did this".
+
+     Zero, and it is the only zero here. Worked stone is CUT and still has a
+     mason's roughness; a hull was rolled. */
+  hulk: 0.0, derelictlamp: 0.02
 };
 
 /* How many world units of rock one tile of the normal map covers, as a
@@ -386,7 +397,33 @@ export function mat(color: number, glow?: number, grain = true, vcol = false) {
    change - everything downstream is stock three. Done in the same injection as
    the displacement, because that is where the world position is already in
    hand and computing it twice invites the two drifting apart. */
+/* The ids whose surface was MADE rather than broken, and which therefore get
+   no rock relief at all.
+
+   Round thirteen, W2, and it took three looks to find. Flattening the
+   displacement (`ROCK_BUMP`) stops a hull plate BULGING like rock and is not
+   enough on its own: the normal and roughness maps are still painted across
+   it, so the plate came back as a polished stone slab. In a world where the
+   grain is what says "the planet did this", a made object has to have no grain.
+
+   `roughness` is set here and deliberately left OUT of `rockMats`, so the
+   visuals tier's rock-surface dial does not reach it - a hull is not rock and
+   should not get rougher when the rock does. Kept well above metal: CLAUDE.md
+   records that anything genuinely metallic takes its colour from the
+   environment map and renders as blown-out highlights over near-black, which
+   is what the ship's hull did until the env got its colourSpace fixed. This is
+   a smooth DIFFUSE surface that catches the lamp as one broad sweep, which is
+   all the read needs. */
+const MADE = new Set(['hulk', 'derelictlamp']);
+const MADE_ROUGH = 0.55;
+
 export function rockRelief(m: THREE.MeshStandardMaterial, band?: string) {
+  if (band && MADE.has(band)) {
+    m.normalMap = null;
+    m.roughnessMap = null;
+    m.roughness = MADE_ROUGH;
+    return;
+  }
   const surf = (band && BAND_SURFACE[band]) || { n: rockNormal, r: rockRough };
   m.normalMap = surf.n;
   m.roughnessMap = surf.r;

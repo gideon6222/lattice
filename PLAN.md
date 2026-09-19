@@ -3218,12 +3218,30 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       character, and the vestigial-fields census added this morning caught both
       new `g.planet` reads on the first code to touch it. `NOTES.md` has each.
 
-- [ ] **V5b The other two archetypes**, if a playtest asks for them. The cracked
-      vein and the derelict drill ship are in
-      `C:\dev\plans\lattice\ENCOUNTERS.md`, and they wait on the lode being
-      played rather than on anything technical: one real event may be enough,
-      and three of them competing for the same descent is the wallpaper the
-      frame's own cap exists to prevent.
+- [x] **V5b The other two archetypes.** Closed 2026-09-19, and the two halves
+      were closed differently. **Archetype 2, the cracked vein, is the lode**,
+      and that was established by reading the brief's own row against what V5
+      shipped rather than by opinion: *"a visibly rich, glowing vein sits just
+      past a tremor-adjacent wall. Dig it now - big ore payout, tunnel collapses
+      behind you, must find a new way out - or leave it and keep the safe path."*
+      Point for point that is `LODE`: glow 0.78 against copper's 0.10, `min` 90
+      against a tremor band starting at 85, the best value at its depth, and
+      `LODE_COLLAPSE` cells of your own tunnel down behind you through
+      `planCollapse`. Building it a second time would have been two of the same
+      event competing for one descent, which is the wallpaper the encounter
+      frame's cap exists to prevent. **Archetype 3 was the one genuinely
+      missing, and it is W1 below.**
+
+      **Also found while closing this: `src/sim/encounter.ts` has no caller in
+      `src/` at all.** It is a tested pure frame that nothing in the game runs,
+      because V5's lode and W1's wreck both turned out to be WORLD PLACEMENT
+      rather than rolled beats - a lode is rock you cut and a wreck has been
+      lying there for ever, and neither can be a thing a per-descent roll
+      conjures without breaking the promise that a given planet plays the same
+      beats in the same places. The frame's first real caller will be archetype
+      4, the cave-in race, or 5, the buyer's spike, both of which genuinely are
+      rolled. Owed and written into `NOTES.md` rather than deleted, because the
+      frame is right and it is the content that has not needed it yet.
 
       **1. The telegraphed gas bloom.** The existing gas pocket gets a visible
       tell two or three cells out. That single change converts the game's most
@@ -3424,3 +3442,70 @@ replaced OBJECTIVE as the most expensive stand-in there is).
 
       Not done here, and deliberately: the feature graphic, which is already a
       real frame of the game and needs nothing.
+
+- [x] **W2 The derelict drill ship.** Done 2026-09-19 as v0.54.0. Archetype 3 of
+      the research's ranked list, and the half of his round-twelve ask that the
+      lode did not touch: *"more rounded and story like."* A wrecked prior ship,
+      one per region, twelve on the planet.
+
+      **A room, not a roll.** It is a `Vault` template like the Anchor halls and
+      the expedition room, with three new characters: `H` hull plate, `S` the
+      hold, `L` the ship's own lamp still faintly on. Eighteen plates, one hold,
+      one lamp, six cells of spoil where it ploughed in.
+
+      **Its own slots, and NOT the `WILD` pool, which is the load-bearing
+      decision.** `wildSlot` picks with `WILD[floor(rnd(..) * WILD.length)]`, so
+      a thirteenth entry changes the divisor and moves rooms at all sixteen
+      slots on a world the seed promises is fixed. Placed last in `vaultPlan`
+      instead, one per region on offset 733 with `anchorAt`'s own geometry, and
+      dropped whole on any overlap. Every room that existed before this round is
+      bit-identical and a wreck can only take cells the generator made.
+
+      **The retry ladder was measured, and then re-measured.** One attempt each
+      placed eight of twelve - region 10 draws a cell the Vault is standing on,
+      which it can never win. Six places all twelve once the `CACHE.min` floor
+      squeezed the shallow row into a shorter band, where four had sufficed
+      before it; the constant is eight, so retuning some other room cannot
+      silently cost a region its wreck, and a test asserts all twelve rather
+      than trusting the margin. That a change somewhere else entirely moved this
+      number is the argument for the margin.
+
+      **What it pays: a derivation that was sound about the wrong source.** The
+      hold first paid `BLOOM.value`, on the rule that the game sorts prizes by
+      what they COST and a wreck asks only for a detour, as a Bloom does. The
+      rule was right; **a Bloom is gated on `isAwake`**, so its 4,200 is priced
+      against a five-Anchor economy, while a wreck is gated on nothing and
+      Rustmoor's drew 13 m. The hold is a cache now: `cachePrize(x, d)` has
+      always handed over the deepest minerals a depth allows, which is balanced,
+      tested, and the better fiction - a hold holds what that crew had dug, and
+      they dug where they died. Hull hardness stayed the midpoint of worked and
+      sealed stone.
+
+      **Three e2e tests failed on this and all three were right.** The shallow
+      materials guard caught the flat price (and the one-word fix that would
+      have silenced it is recorded beside the list it tempted me to edit). The
+      cache-rarity guard then caught the hold walking under `CACHE.min`, a
+      deliberate pacing gate, so `derelictAt` floors at `CACHE.min + VAULT_H/2`.
+      And the drilling-collision test had hard-coded column 6 for eleven
+      versions, which a wreck now stamps over; it searches for plain rock now,
+      because its claim was never about that column.
+
+      **Three separate things had to be fixed by LOOKING, and none of them was
+      visible in the code.** The first build was judged from inside a shaft and
+      passed; shot side-on it was obviously a patch of pale rock. (1) The hull
+      fell through `ROCK_BUMP` to the default 0.2 and bulged like stone. (2)
+      Flattening it was not enough - the rock normal and roughness maps are
+      still painted across it, so it came back a polished slab; a made surface
+      needs NO grain, which is the new `MADE` set in materials.ts. (3) The lamp
+      had glow 0.88, correct emissive, and was completely invisible in unlit
+      ground, because blocks.ts emits the additive halo on the `ore` path alone
+      and the halo is what carries a glow through rock. It now uses the Anchor's
+      `ore: true, spoil: true` pair, and the test says why so nobody tidies it
+      away. The hold also drew as white gems until it was given the crate
+      geometry: it is somebody else's haul, not something the planet grew.
+
+      Twelve tests in `test/derelict.test.mjs`, three guards fired while
+      building it (the census golden, the vestigial-fields census, and the
+      overwriter set), and two faults were planted and seen to fail. A third
+      planted fault corrected a claim in `blocks.test.mjs` that was simply
+      wrong - see the note there.

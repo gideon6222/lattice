@@ -54,8 +54,8 @@
    saves the stamping code from ever having to think about it. */
 
 import { rnd } from './util';
-import { W } from './config';
-import { REGION_COLS, REGION_ROWS, WORLD_DEPTH, regionAt } from './region';
+import { W, CACHE } from './config';
+import { REGION_COLS, REGION_ROWS, REGION_COUNT, WORLD_DEPTH, regionAt } from './region';
 
 /* The size of an ORDINARY room. The Vault is bigger, so the stamp reads each
    template's own dimensions and these two are only the figure the wild slots
@@ -68,7 +68,7 @@ export const vaultH = (v: Vault) => v.rows.length;
 
 export interface Vault {
   id: string;
-  kind: 'anchor' | 'expedition' | 'vein' | 'quiet' | 'vault';
+  kind: 'anchor' | 'expedition' | 'vein' | 'quiet' | 'vault' | 'derelict';
   rows: string[];
 }
 
@@ -185,6 +185,50 @@ const QUIET_ROOM: Vault = {
   ]
 };
 
+/* Somebody was here first, and this time they did not leave.
+
+   Round thirteen, W2, and the third of the research's ranked archetypes. The
+   expedition room above says a crew worked here; this says a ship came down
+   here and stopped. The brief's own words: *"a wrecked prior ship sits in a
+   seeded cell with salvageable ore. No choice required, which is the point: it
+   is the wordless tableau, and it is how the player learns this world holds
+   more than hazards."*
+
+   **Four characters, and the whole beat is in the order you meet them.**
+
+   `L` is the wreck's own lamp, still faintly on, and it is the telegraph. Glow
+   goes through `coreGlow()` rather than `coreLit()` - the find-the-vein curve -
+   so a glowing cell shows THROUGH unbroken rock. You see a light in the ground
+   before you see what is around it, which is exactly the "telegraph before the
+   stakes land" the encounter research is built on, and it costs nothing because
+   the mechanism is the one ore already uses.
+
+   `H` is hull plate. It is the room's wall, and it is a wall that reads as
+   MADE: harder than the masonry of a worked room, softer than a sealed one.
+
+   `S` is the hold, one cell, amidships and behind two plates whichever way you
+   come in. `r` is spoil where it ploughed in.
+
+   **The silhouette is the point and it is canted.** A wreck drawn upright is a
+   box; the lean in rows five and six is what makes it a thing that fell rather
+   than a thing that was built. It is also why the lamp is at the low end - a
+   ship nose-down has its lamp pointing into the floor, which is a sentence
+   without a word in it. */
+const DERELICT: Vault = {
+  id: 'derelict', kind: 'derelict',
+  rows: [
+    '           ',
+    '   .....   ',
+    '  ..HHH..  ',
+    ' ..HHHHH.. ',
+    ' ..HHSHH.. ',
+    ' ..HHHH... ',
+    ' .rHLH..r. ',
+    '  rr...rr  ',
+    '   .....   '
+  ]
+};
+
 /* ---------- the Vault ----------
 
    The centre of the planet, and the end of the game.
@@ -242,7 +286,7 @@ const WILD: Vault[] = [
   VEIN_ROOM, VEIN_ROOM
 ];
 
-export const VAULTS: Vault[] = [ANCHOR_HALL, SEALED_HALL, EXPEDITION, VEIN_ROOM, QUIET_ROOM];
+export const VAULTS: Vault[] = [ANCHOR_HALL, SEALED_HALL, EXPEDITION, VEIN_ROOM, QUIET_ROOM, DERELICT];
 
 /* ---------- where the Anchors are ----------
 
@@ -332,6 +376,103 @@ export function wildSlot(i: number): { x: number; d: number; vault: Vault } {
   return { x, d, vault };
 }
 
+/* ---------- the wrecks ----------
+
+   One per region, twelve on the planet, and they have their OWN slots rather
+   than joining the wild pool. That is the load-bearing decision here and it is
+   not about design, it is about not moving the world.
+
+   `wildSlot` picks its room with `WILD[floor(rnd(...) * WILD.length)]`. Adding
+   a thirteenth entry to that array changes the divisor, which changes the pick
+   at every one of the sixteen slots, which moves rooms the player has already
+   met on a planet the seed promises is fixed. `test/baseline/blocks-frozen.json`
+   would have read that as the room stream moving, and it would have been right.
+   Placed last in `vaultPlan`, a wreck can only ever take cells that were rock,
+   and every room that existed before this round is bit-identical.
+
+   Per REGION rather than on a lattice, because the brief's pity rule is
+   per-region ("guaranteed-once per region, per Slay the Spire's seen-pool
+   logic") and because that is what makes a wreck part of the character of a
+   place: you work Rustmoor, you meet Rustmoor's wreck. The geometry is
+   `anchorAt`'s, deliberately - same box, same padding, same shape of jitter -
+   because a second way of saying "somewhere inside region r" is a second thing
+   to keep in step with the region grid when it moves.
+
+   Offset 733, which was free: 11, 23, 41, 77, 91, 131, 137, 173, 211, 257,
+   311, 313, 421, 431, 601, 619 (and 620, 621, the slot seed's neighbours),
+   643, 887, 977 and 1013 are taken. */
+const WRECK_SEED = 733;
+
+export const DERELICT_SLOTS = REGION_COUNT;
+
+/* How many places a region is allowed to try before it goes without.
+
+   Measured, not chosen, and the first version had no ladder at all:
+
+     tries    wrecks placed    deepest attempt actually used
+       1         8 of 12                  1
+       2        10 of 12                  2
+       3        10 of 12                  2
+       4        11 of 12                  4
+       5        11 of 12                  4
+       6        12 of 12                  6
+       8        12 of 12                  6
+
+   With one attempt each, four regions went without - region 10 draws a cell the
+   Vault core is standing on, a collision it can never win, and three others
+   landed on a hall or a wild room. Six attempts is what this world actually
+   needs and the sixth is genuinely used.
+
+   **This table was re-measured after the `CACHE.min` floor went in below, and
+   it moved.** Before the floor, four attempts sufficed; squeezing the shallow
+   row into a shorter band costs two more. That is the reason to keep margin
+   rather than to set this to exactly what works: a change somewhere else
+   entirely moves this number, and the version that fits exactly is the version
+   that silently stops fitting.
+
+   Eight rather than six, and the two spare are the point: at exactly six, any
+   retune of any OTHER room - a hall moving, a wild slot's jitter changing -
+   silently costs a region its wreck, and "guaranteed once per region" would
+   quietly stop being true with nothing to say so. The margin is not trusted
+   either: `test/derelict.test.mjs` asserts all twelve are placed, so if the
+   world ever does get crowded enough to exhaust the ladder it fails there
+   rather than in a descent nobody takes. */
+export const DERELICT_TRIES = 8;
+
+/* Where region `r` would put its wreck on its `t`th attempt.
+
+   `t` goes into the hash rather than being a nudge off the first position, so
+   a retry is a fresh draw from the same region box instead of a slide in some
+   fixed direction. A nudge would walk every crowded wreck the same way and
+   pile them against the same wall of whatever pushed them. */
+export function derelictAt(r: number, t = 0): { x: number; d: number } {
+  const row = Math.floor(r / REGION_COLS), col = r % REGION_COLS;
+  const band = WORLD_DEPTH / REGION_ROWS;
+  const span = W / REGION_COLS;
+  const dPad = 7 + VAULT_H / 2 + 1;
+  const xPad = 3 + VAULT_W / 2 + 1;
+  /* The shallow floor is CACHE's, and it is imported rather than chosen.
+
+     A wreck's hold is a cache (see config.ts), and `CACHE.min` is a deliberate
+     pacing gate: no consumable is handed to anybody in the first twenty metres,
+     because finding your first one is a discovery and it should not happen
+     before the player has a reason to want it. Round thirteen's first build put
+     Rustmoor's wreck at 13 m and walked straight under that gate - caught by
+     `a cache is rare enough to be a surprise and common enough to be met`,
+     which has guarded that floor since long before this room existed.
+
+     Half a room's height on top, so the whole wreck clears it and not merely
+     its centre. Costs nothing: the shallow band runs to 113 m. */
+  const floor = CACHE.min + VAULT_H / 2;
+  const d0 = Math.max(row * band + dPad, floor), d1 = (row + 1) * band - dPad;
+  const x0 = Math.max(xPad, col * span + xPad);
+  const x1 = Math.min(W - 1 - xPad, (col + 1) * span - xPad);
+
+  const d = Math.round(d0 + rnd(r * 19 + 3 + t * 53, r * 41 + t * 7, WRECK_SEED) * (d1 - d0));
+  const x = Math.round(x0 + rnd(r * 29 + t * 11, r * 13 + 11 + t * 37, WRECK_SEED + 1) * (x1 - x0));
+  return { x, d };
+}
+
 /* ---------- the stamp ----------
 
    Every authored cell in the world, keyed by cell, built once.
@@ -375,6 +516,23 @@ export function vaultPlan(): Placed[] {
       Math.abs(t.x - s.x) < (vaultW(t.vault) + VAULT_W) / 2 &&
       Math.abs(t.d - s.d) < (vaultH(t.vault) + VAULT_H) / 2)) continue;
     out.push(s);
+  }
+  /* The wrecks last of all, and that ORDER is the whole reason they are safe
+     to add to a world people have already played: everything above this line
+     is placed exactly where it was before they existed, and a wreck that would
+     touch any of it is dropped rather than clipped, like a wild room. So a
+     wreck can only ever take cells the generator made, which is what puts it
+     in `OVERWRITERS` honestly rather than by assertion. */
+  for (let r = 0; r < DERELICT_SLOTS; r++) {
+    for (let t = 0; t < DERELICT_TRIES; t++) {
+      const w = derelictAt(r, t);
+      const s: Placed = { x: w.x, d: w.d, vault: DERELICT };
+      if (out.some((o) =>
+        Math.abs(o.x - s.x) < (vaultW(o.vault) + vaultW(s.vault)) / 2 &&
+        Math.abs(o.d - s.d) < (vaultH(o.vault) + vaultH(s.vault)) / 2)) continue;
+      out.push(s);
+      break;
+    }
   }
   return out;
 }
@@ -463,6 +621,17 @@ export function anchorInRegion(r: number): boolean {
    even after you have the key. */
 export const WORKED_HARD = 2.1;
 export const SEALED_HARD = 4.4;
+
+/* And a wreck's hull plate is exactly between them, which is a derivation
+   rather than a third number to keep in step (INDEX.md rule 10b).
+
+   It says the right thing in both directions. A hull is a made object somebody
+   meant to keep four hundred metres of rock out, so it is not masonry; and it
+   is not a door either - nothing about it is waiting for a tool, it is only
+   thick. Halfway is the one value that cannot drift away from that sentence
+   when either neighbour is retuned, and `test/derelict.test.mjs` asserts the
+   ordering rather than the figure. */
+export const HULK_HARD = (WORKED_HARD + SEALED_HARD) / 2;
 
 
 /* ---------- the Vault's own rules ----------

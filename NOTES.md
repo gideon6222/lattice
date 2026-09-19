@@ -5726,6 +5726,173 @@ day it was written is now a mechanism. Both faults were planted: moving the rect
 32 px fails naming the two numbers and the command to run, and flattening the
 PNG onto black fails with "covers 100.0% and has lost its transparency".
 
+## W2: the derelict, and three faults that only a screenshot could find
+
+Round thirteen. Closing V5b started with reading the research's own rows against
+what round twelve actually shipped, and **archetype 2, the cracked vein, turned
+out to be the lode** - point for point, not approximately: a visibly rich
+glowing thing past a tremor-adjacent wall, best value at its depth, tunnel down
+behind you when you cut it, safe path if you leave it. Building it again would
+have put two of the same event in one descent, which is the wallpaper the
+encounter frame's cap exists to prevent. So only archetype 3 was missing.
+
+**The lesson that generalises is about the ranked list, not about this game.** A
+plan written before the work ranks archetypes by their DESCRIPTIONS, and two
+descriptions written weeks apart can name one mechanic. Nothing catches that
+except reading the shipped thing against the row before starting, and the cost
+of not doing it is a whole milestone of duplicate content that looks like
+progress.
+
+### Its own slots, because the alternative moves the world
+
+A wreck is a `Vault` template like every other room. The one real decision was
+NOT adding it to `WILD`: that pool is picked with
+`WILD[floor(rnd(..) * WILD.length)]`, so a thirteenth entry changes the divisor
+and therefore the pick at all sixteen wild slots, moving rooms on a planet the
+seed promises is fixed. Appended last in `vaultPlan` instead, one per region on
+offset 733, dropped whole on any overlap - so every room that existed before is
+bit-identical and a wreck only ever takes cells the generator made.
+
+**The census diff was read before it was re-recorded and it conserves exactly.**
+453 cells change hands on every planet, positives and negatives summing to zero,
+and per wreck it is 18 hull, 6 rubble, 1 lamp, 1 hold. That arithmetic is the
+proof that a stamp is all this was.
+
+**The retry ladder is measured**: 1 attempt places 8 of 12, 2 places 11, 4
+places all twelve and the fourth is genuinely used. Set to 6 so that retuning
+another room cannot silently cost a region its wreck, with a test on the count
+rather than trust in the margin.
+
+**A region's x freedom is about ONE cell**, which was learnt by writing a test
+that assumed otherwise. The column band is `W / REGION_COLS` ≈ 20 and a room's
+padding is `3 + VAULT_W/2 + 1` ≈ 9.5 either side, so every wreck in a column
+lands at 10, 31 or 50 whatever it draws - exactly the property that makes three
+Anchors share each of three columns. A retry is a redraw in DEPTH and nothing
+else, and the test now asserts the spread rather than demanding both axes move.
+
+### Three faults that no amount of reading the code would have found
+
+The first build was judged from inside a shaft, where it passed. Shot side-on it
+was obviously a patch of pale rock. Each fix was found by looking again:
+
+1. **The hull fell through `ROCK_BUMP` to the default 0.2** and bulged like
+   stone. Worked stone is 0.03 with a note calling it "the flattest, which is
+   the entire read on W7's authored rooms" - and a new id that is not in that
+   table gets the full rock displacement silently.
+2. **Flattening it was not enough.** The rock normal and roughness maps are
+   still painted across a flat block, so it came back as a polished slab. In
+   this world the GRAIN is what says the planet made a thing, so a made object
+   needs none - hence the `MADE` set in materials.ts, which drops both maps and
+   sets a roughness that is deliberately outside the visuals tier's rock dial.
+   Not metalness: CLAUDE.md records that anything genuinely metallic takes its
+   colour from the env map and renders as highlights over near-black.
+3. **The lamp was invisible, with every number correct.** Glow 0.88, emissive
+   computed, `coreGlow` applied - and nothing. blocks.ts emits the additive
+   HALO on the `ore` path alone, and the halo is what carries a glow through
+   unbroken rock; body emissive on its own does not. It now carries the
+   Anchor's `ore: true, spoil: true` pair, which is safe for the reason the
+   Anchor's is: `spoil` diverts past the cargo branch before `ore` is consulted.
+
+   **This is the third time this session a feature shipped invisible with
+   correct numbers** - V7's grade, V9's pull-back, and now this - and the
+   pattern is identical every time: the sim is right, a presentation term the
+   design never mentioned is what actually carries the read, and only a picture
+   shows it.
+
+4. And the hold drew as white gems until it was given the crate geometry the
+   caches already use. It is somebody else's haul, not something the planet
+   grew.
+
+### What it pays: a derivation that was sound about the wrong source
+
+`HULK_HARD` is `(WORKED_HARD + SEALED_HARD) / 2` and stayed that way: a hull is
+not masonry and is not a door, and halfway is the only value that cannot drift
+away from that sentence.
+
+The hold did not. It shipped for an hour as a material paying `BLOOM.value`,
+derived on a real rule - the game sorts prizes by what they COST you, a lode is
+a decision that costs on every branch, a Bloom is a thing you find and take, and
+a wreck is the second kind. **The rule was right and the source was wrong: a
+Bloom is gated on `isAwake`.** Its 4,200 is priced against a player who has lit
+five Anchors. A wreck is gated on nothing, Rustmoor's drew 13 m, and copper down
+there is 40 a unit - so one hold was several runs of income in the first ten
+minutes and three of them sat in the top sixty metres.
+
+**The generalisable half: when you derive a constant from another constant,
+check what GATES the source, not only what it is worth.** Two numbers that
+describe the same kind of prize are still incomparable if one of them only
+exists after a threshold. Nothing in `BLOOM`'s own definition says so - the gate
+is in `blockAt`, forty lines from the value.
+
+The fix is `cachePrize(x, d)`, which has handed over *"the deepest three
+minerals this depth can hold, so a deep cache is worth more than a shallow one
+without needing a separate table"* since long before this room existed. It is
+balanced, it is tested, and it is the better FICTION: a hold holds what that
+crew had dug, and they dug where they died. So the hold is `cache: true` with
+value and weight zero, `grantCache` took a label so the toast reads "Ship's hold
+· 4 emerald", and `SALVAGE` survives as appearance only.
+
+### Two e2e tests caught this, and one of them would have been easy to silence
+
+- **`the shallow world holds three materials, and the deep ones are a prize`**
+  failed because `salvage` appeared in the top sixty metres. The tempting fix
+  was one word - add the id to that test's `notOre` list, where `geode`,
+  `cache` and `anchor` already sit for a perfectly good reason. That fix
+  compiles, passes, and throws away the finding. The id IS on the list now, and
+  the comment beside it says it is there because the design changed rather than
+  because the test was too strict.
+- **`a cache is rare enough to be a surprise and common enough to be met`** then
+  failed on `a cache appeared at 13 m, above its floor`. `CACHE.min` is 20 and
+  it is a pacing gate - no consumable is handed to anybody in the first twenty
+  metres, because finding your first one is a discovery. Making the hold a cache
+  walked straight under a gate that has been guarded since before this room
+  existed. `derelictAt` now floors at `CACHE.min + VAULT_H / 2`, imported rather
+  than written in, so the whole wreck clears it and not merely its centre.
+
+**And the floor moved the retry ladder**, which is worth keeping as the reason
+to leave margin in a measured constant: squeezing the shallow row into a shorter
+band took the attempts needed from 4 to 6, so `DERELICT_TRIES` went to 8. A
+constant set to exactly what works is a constant that stops working when
+something else changes.
+
+### The third e2e failure was a fixture, not a claim
+
+`drilling holds the ship against the rock, never inside it` hard-coded column 6
+for eleven versions. Verdax's wreck stamps x 5..15 over d 34..42, so the cell the
+sideways probe cut became a wreck's spoil - softer than the band - and the cell
+the ship sat in became room air. The test failed correctly and about the wrong
+thing: its claim is collision and the column was only ever fixture. It now
+SEARCHES for a column whose cells are all plain rock and reports the one it
+used, which is robust to the next room anybody adds. That search needed `ROCKS`
+on the debug seam beside `ORES`, which is the same kind of export and one word.
+
+**Rewriting a fixture means re-verifying the test under rule 11, and the first
+attempt at that was itself wrong.** The obvious fault to plant was deleting
+`R.vx = 0; R.vy = 0;` from the digging branch in loop.ts - and the test still
+passed, correctly: while a dig is running the flight branch does not run at all,
+so those two are never integrated and removing the line changes nothing this
+fixture can see. The bug the test actually guards is in `sweep`, where
+`ny = row - sign(vy) * (0.5 + r + SKIN)` keeps the ship's own radius out of the
+cell. Dropping the `r` puts the hull's centre at 49.4999 against a bar of 49.2
+and the test fails by name. **A planted fault that does not fail is not proof the
+test is weak - it is proof the fault was in the wrong place**, and the way to
+tell the two apart is to go and read what the assertion's number is made of.
+
+## Open: the encounter frame has no caller
+
+`src/sim/encounter.ts` is a tested pure frame that nothing in `src/` runs. Both
+of the beats round twelve and thirteen actually built - the lode and the wreck -
+turned out to be WORLD PLACEMENT rather than rolled events, and correctly so: a
+lode is rock you cut and a wreck has been lying there for ever, and a per-descent
+roll that conjured either would break the promise that a given planet plays the
+same beats in the same places.
+
+Kept rather than deleted, because the frame is right and it is the content that
+has not needed it. Its first real caller is archetype 4, the cave-in race, or 5,
+the buyer's spike, both of which genuinely are rolled. Whoever builds one should
+check the frame's constants against what the game has become first: `FIRE_CHANCE`
+was measured against a three-entry fixture pool that does not exist.
+
 ## Open: the wrapper's icon lags the deploy by one step, by design
 
 `twa/twa-manifest.json` fetches `iconUrl` from

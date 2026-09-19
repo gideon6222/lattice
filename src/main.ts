@@ -2,7 +2,7 @@
    body, which is what the single-file version got for free by being written
    top to bottom. */
 import * as THREE from 'three';
-import { HULL_MAX, UPGRADES, SUPPLIES, ORES, shelfStock, tremorDepth, heatDepth, traitAt, W, START_X, CAVE_MIN_DEPTH, costOf, matCost, GROWTH_BAND } from './sim/config';
+import { HULL_MAX, UPGRADES, SUPPLIES, ORES, ROCKS, shelfStock, tremorDepth, heatDepth, traitAt, W, START_X, CAVE_MIN_DEPTH, costOf, matCost, GROWTH_BAND } from './sim/config';
 import { g, S, save, load, hasSave, coreM, padRegion, worldUnrest, markSeen, onPad, docked, atSurface } from './sim/state';
 import { R } from './sim/runtime';
 import { camera, lamp, resize, scene, amb, sun, rim, fog, renderer } from './scene';
@@ -223,7 +223,12 @@ if (new URLSearchParams(location.search).has('debug')) {
     drawerOpen, roomDrawer, kitCases, refreshKit,
     /* So a spec can open a cache the way the drill does, and ask what a given
        cell would pay before it opens one. */
-    cachePrize, grantCache, haulValue, ORES, foundBanner,
+    /* `ROCKS` beside `ORES` so a fixture can ask whether a cell is PLAIN rock
+       rather than assuming a column is. Round thirteen: the drilling-collision
+       test had written column 6 into itself for eleven versions and a derelict
+       was stamped over it, which failed the test about the wrong thing. It
+       searches now, and searching needs the list of what counts as rock. */
+    cachePrize, grantCache, haulValue, ORES, ROCKS, foundBanner,
     /* The danger lines, so a fixture can dig to one instead of to a literal
        depth that meant something in a world this no longer is. */
     tremorDepth, heatDepth, regionAt, traitAt, regionName, W, CAVE_MIN_DEPTH,

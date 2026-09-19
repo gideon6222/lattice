@@ -1591,9 +1591,35 @@ test('drilling holds the ship against the rock, never inside it', async ({ page 
   const out = await page.evaluate(() => {
     const w = (window as any).__cw;
     w.stopClock();
+    /* The column this drills down, chosen by asking the world rather than
+       written in.
+
+       It was 6 for eleven versions, and round thirteen's derelicts broke it:
+       Verdax's wreck stamps x 5..15 over d 34..42, so the cell the sideways
+       probe was cutting became a wreck's spoil - softer than the band, and the
+       cell the ship was sitting in became the room's own air. The test failed
+       correctly and about the wrong thing, because its CLAIM is about
+       collision and the column was only ever fixture.
+
+       So it looks for a column where everything it is about to touch is plain
+       rock: the two cells it cuts, and the shaft it digs to get there. Robust
+       to the next room anybody adds, which on this evidence is the point. */
+    const ROCKS = new Set(w.ROCKS.map((r: any) => r.id));
+    const plain = (x: number, d: number) => {
+      const b = w.blockAt(x, d);
+      return !!b && ROCKS.has(b.id);
+    };
+    let CX = -1;
+    for (let x = 1; x < w.W - 1 && CX < 0; x++) {
+      let ok = plain(x, 50) && plain(x + 1, 40) && plain(x + 1, 49);
+      for (let d = 30; d <= 49 && ok; d++) ok = plain(x, d);
+      if (ok) CX = x;
+    }
+    if (CX < 0) return { fail: 'no column of plain rock to drill in' } as any;
+
     const probe = (dir: string, px: number, pd: number) => {
       w.g.dug.clear();
-      for (let d = 0; d <= 49; d++) w.g.dug.add('6,' + d);
+      for (let d = 0; d <= 49; d++) w.g.dug.add(CX + ',' + d);
       w.g.up.drill = 0; w.g.px = px; w.g.pd = pd; w.g.damage = {};
       w.R.digging = null; w.R.vx = 0; w.R.vy = 0;
       w.R.held = dir;
@@ -1606,9 +1632,9 @@ test('drilling holds the ship against the rock, never inside it', async ({ page 
         worstY = Math.max(worstY, w.g.pd);
       }
       w.R.held = null;
-      return { worstX, worstY, dug: w.g.dug.has('6,50') };
+      return { worstX, worstY, dug: w.g.dug.has(CX + ',50') };
     };
-    return { down: probe('down', 6, 49), right: probe('right', 6, 40) };
+    return { cx: CX, down: probe('down', CX, 49), right: probe('right', CX, 40) };
   });
 
   /* A cell spans [n-0.5, n+0.5] and the ship's half-width is 0.34, so resting
@@ -1617,11 +1643,12 @@ test('drilling holds the ship against the rock, never inside it', async ({ page 
      the skin the collision leaves. */
   expect(out.down.worstY,
     'drilling down drove the ship into the cell it was cutting').toBeLessThan(49.2);
+  expect((out as any).fail, 'the probe could not find plain rock').toBeUndefined();
   expect(out.right.worstX,
-    'drilling sideways drove the ship into the cell it was cutting').toBeLessThan(6.2);
+    'drilling sideways drove the ship into the cell it was cutting').toBeLessThan(out.cx + 0.2);
   /* and the perpendicular axis is still held on the line, which is what
      DIG_ALIGN is actually for */
-  expect(out.down.worstX).toBeCloseTo(6, 2);
+  expect(out.down.worstX).toBeCloseTo(out.cx, 2);
 });
 
 /* The shop and the ship are the same object.
@@ -2743,8 +2770,24 @@ test('the shallow world holds three materials, and the deep ones are a prize', a
      An Anchor wants the second and cannot do the first - it never breaks - so
      it is flagged and belongs on this list, next to the crates and pockets
      that were already here for the same reason. */
+  /* Round thirteen's derelict adds two more, and the SECOND of them is the
+     reason this test earned its keep today rather than merely passing.
+
+     `derelictlamp` is the easy one: it carries the flag purely to be drawn with
+     a halo, it is `spoil`, and it can never enter the hold - exactly the Anchor
+     three lines up.
+
+     `salvage` is on this list only because the design was changed to put it
+     here. It shipped for an hour as a material paying a Bloom's 4,200, derived
+     on an argument that was sound about the wrong source: a Bloom is gated on
+     `isAwake` and is priced against a five-Anchor economy, while a wreck is
+     gated on nothing and Rustmoor's is at 13 m where copper is 40 a unit. This
+     test failed, and the tempting fix - adding the id here and moving on -
+     would have silenced a real finding. The hold is a CACHE now, so its prize
+     is `cachePrize(x, d)`, which has always handed over the deepest minerals a
+     depth allows. It belongs here for the same reason `cache` does. */
   const notOre = new Set(['__cells', 'geode', 'gas', 'cache', 'schematic', 'relic', 'part',
-                          'anchor', 'anchorlit']);
+                          'anchor', 'anchorlit', 'salvage', 'derelictlamp']);
   const shallow = Object.keys(counts.shallow).filter((k) => !notOre.has(k));
   expect(shallow.sort().join(','), 'the top sixty metres holds more than the starter three')
     .toBe('copper,iron,silver');

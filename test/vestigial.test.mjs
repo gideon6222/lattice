@@ -100,7 +100,19 @@ const FROZEN = {
      `rnd(x + 71, d + 419, g.planet + 887)`. The generator is the other
      legitimate reader, and every pocket in this file already reads it the same
      way. */
-  'sim/world.ts': 19,
+  /* 19 -> 21 on 2026-09-19, round thirteen W2: the derelict's hull plate and
+     its dead lamp each take their hardness off the LOCAL BAND, which is
+     `baseRock(d, g.planet, x)` - the identical call worked stone, sealed
+     stone, the Vault seal and rubble all make within forty lines of them, and
+     for the identical reason: a wall at 300 m has to cost more to open than
+     the same wall at 40 m, or the deepest rooms are the cheapest in the game.
+
+     Not a read `regionAt(x, d)` could answer. The region decides the TRAIT and
+     the unrest, both of which are already applied here as `hm`; the band is a
+     depth question, and `g.planet` is in it because the band boundaries wander
+     per world. This is the generator, which is what the field still exists
+     for. */
+  'sim/world.ts': 21,
   'ui.ts': 2
 };
 

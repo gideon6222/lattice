@@ -474,7 +474,11 @@ export function tick(raw: number, draw = true) {
           /* A cache pays in something other than ore, so it never enters the
              hold - which also means it never costs you cargo weight, and a
              full hold is no reason to leave one in the ground. */
-          grantCache(R.digging.x, R.digging.d);
+          /* A wreck's hold is a cache with a different label on it, and the
+             label is the whole difference: "Supply cache · 4 emerald" in a
+             room with a dead crew in it would be the game forgetting where the
+             player is standing. */
+          grantCache(R.digging.x, R.digging.d, b.salvage ? 'Ship’s hold' : 'Supply cache');
           spray(worldX(R.digging.x), -R.digging.d, b.color, 70, 7, 1.2);
           flash('rgba(255,150,215,.22)', 340);
           R.digging = null;
@@ -486,6 +490,21 @@ export function tick(raw: number, draw = true) {
              hold, which also means the id never has to survive a DEF lookup:
              it did not, and opening the manifest after cutting into a hall
              threw on `DEF['worked'].value`. */
+          /* ---------- what a wreck says ----------
+
+             Round thirteen, W2. One line, present tense, in the voice of the
+             ship's own instruments rather than a narrator's - which is the
+             rule `ENCOUNTERS.md` section 7 sets for a near-wordless beat.
+
+             It is here, on the FIRST PLATE, and not on the salvage, because
+             the thing worth marking is recognising what you have cut into. By
+             the time the hold opens you already know. Four words do the whole
+             tableau: it names the object, and "not ours" is the entire story
+             this room has to tell. */
+          if (b.id === 'hulk' && !R.sawWreck) {
+            R.sawWreck = true;
+            toast('Hull plate · not ours');
+          }
           R.digging = null;
           save();
         }

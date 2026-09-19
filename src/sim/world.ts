@@ -1,10 +1,10 @@
 import { W, START_X, ORES, DEF, baseRock, coreDepth, hardMult, valueMult,
-         GEODE, GAS, CACHE, BLOOM, BLOOM_MAX, LODE, RUBBLE, RUBBLE_HARD, SEAM, SEAM_CHANCE, TREMOR_SAFE_RADIUS,
+         GEODE, GAS, CACHE, BLOOM, BLOOM_MAX, LODE, SALVAGE, RUBBLE, RUBBLE_HARD, SEAM, SEAM_CHANCE, TREMOR_SAFE_RADIUS,
          RELIC_COLOR, RELIC_HOST, relicAt, relicFor,
          CAVE_MIN_DEPTH, caveChanceOn, gasChanceOn, geodeChanceOn, SUPPLIES, traitOf } from './config';
 import { key, mixHex, rnd } from './util';
 import { regionAt, REGION_COUNT } from './region';
-import { vaultCells, anchorHere, WORKED_HARD, SEALED_HARD,
+import { vaultCells, anchorHere, WORKED_HARD, SEALED_HARD, HULK_HARD,
          vaultOpen, VAULT_WALL_HARD, ANCHOR_COUNT, anchorAt, VAULT_W, VAULT_H } from './vaults';
 import { isCollapsed, hardScale, isAwake, UNREST_BANDS } from './unrest';
 import { g , coreM, valueM, worldTrait} from './state';
@@ -342,6 +342,61 @@ export function blockAt(x: number, d: number): Block | null {
       return { id: GEODE.id, name: GEODE.name, color: GEODE.color, host: GEODE.host, glow: GEODE.glow,
                shards: GEODE.shards, tone: GEODE.tone, hard: GEODE.hard * hm, wt: GEODE.wt,
                value: GEODE.value, ore: true };
+    }
+    /* ---------- the derelict, round thirteen ---------- */
+    if (vch === 'H') {
+      /* Hull plate. Off the local band like every other authored wall, for the
+         same reason: a wreck at 300 m has to cost more to open than a wreck at
+         40 m, or the deepest ones are the cheapest walls in the game.
+
+         `spoil`, so cutting it puts nothing in the hold. A hull that paid would
+         turn twelve tableaux into twelve quarries, and the one thing this room
+         is for is being looked at. */
+      return { id: 'hulk', name: 'Hull Plate', color: 0x6d7a88, host: 0x252c34,
+               glow: 0.09, hard: baseRock(d, g.planet, x).hard * hm * HULK_HARD,
+               wt: 0, value: 0, spoil: true };
+    }
+    if (vch === 'L') {
+      /* The wreck's own lamp, and it is the telegraph rather than a prize.
+
+         Glow rides `coreGlow()`, the find-the-vein curve, so it shows through
+         unbroken rock exactly as ore does - which means the beat arrives in the
+         right order: a light in the ground first, and what is around it second.
+         Worth nothing and cuttable at a hull plate's price, because a player
+         who drills straight at the light should find it was only a light. */
+      /* `ore: true` and it is not ore, which is the Anchor's own trick two
+         hundred lines above and it is here for the same reason plus one more.
+
+         blocks.ts reads that flag to choose between "pebbles on a rock face"
+         and "a dark housing with bright shards in it", and a lamp wants the
+         second. **And the additive HALO is emitted on the ore path only** -
+         found by looking, after a first build in which this block had glow
+         0.88, correct emissive, and was completely invisible in unlit ground.
+         Emissive alone does not carry through rock; the halo is what does, and
+         it is the same mechanism that lets you see a vein before you reach it.
+         Without the flag the telegraph simply does not exist.
+
+         Safe, because the only other thing `ore` does is decide what enters the
+         hold, and `spoil` diverts past that branch before it is reached. The
+         shards read as the lens in pieces, which is the right accident. */
+      return { id: 'derelictlamp', name: 'Dead Lamp', color: 0xffd9a0, host: 0x2a2620,
+               glow: 0.88, shards: 5, tone: 7, ore: true, spoil: true,
+               hard: baseRock(d, g.planet, x).hard * hm * HULK_HARD,
+               wt: 0, value: 0 };
+    }
+    if (vch === 'S') {
+      /* `cache: true`, so breaking it goes through `grantCache` and hands over
+         `cachePrize(x, d)` - the deepest minerals this depth allows, or a
+         supply, or credits. See the note in config.ts for why it is not a
+         material with a price: a wreck is not depth-gated and a flat price put
+         several runs of income at 13 m.
+
+         `salvage` alongside it is presentation only: it picks the crate
+         geometry over crystal shards, and it names the toast. */
+      return { id: SALVAGE.id, name: SALVAGE.name, color: SALVAGE.color, host: SALVAGE.host,
+               glow: SALVAGE.glow, shards: SALVAGE.shards, tone: SALVAGE.tone,
+               hard: SALVAGE.hard * hm, wt: 0, value: 0,
+               ore: true, cache: true, salvage: true };
     }
   }
 

@@ -109,6 +109,7 @@ export function goSurface() {
   setMark(g.best.depth);
   g.px = START_X; g.pd = -1; g.face = 'down';
   R.warnedFull = false;
+  R.sawWreck = false;
   R.vx = 0; R.vy = 0; R.flight = null;
   /* landing on the pad must not re-trigger the sale that just happened */
   R.wasAtSurface = true;
@@ -399,7 +400,7 @@ export function grantFind(key: UpgradeKey, x: number, d: number) {
 
 /* Pulled out of the frame loop so ordnance can open a cache too - a bomb that
    silently destroyed one would be the worst possible surprise. */
-export function grantCache(x: number, d: number) {
+export function grantCache(x: number, d: number, from = 'Supply cache') {
   const p = cachePrize(x, d);
   addMark('c', x, d);
   if (p.kind === 'supply') {

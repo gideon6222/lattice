@@ -33,7 +33,13 @@ const ALL_IDS = [
      snapshot - it generates below 90 m on any world, woken or not - so the
      legend character is load-bearing rather than defensive. The test refused to
      record without it and said exactly why, which is the note above working. */
-  H.LODE.id
+  H.LODE.id,
+  /* Round thirteen's derelict. Three ids for one room, and they are three
+     because they are three different things to a player: a wall you cut
+     through, a light that is still on, and the hold behind them. The salvage
+     is the only one that enters the hold, which is why it is the only one with
+     a DEF row. */
+  'hulk', 'derelictlamp', H.SALVAGE.id
 ].sort();
 const CHAR = new Map(ALL_IDS.map((id, i) => [id, ALPHA[i]]));
 
@@ -235,6 +241,30 @@ const OVERWRITERS = new Set([
      and not two, for the reason the Anchor needed two - a wall you cannot cut
      and a wall you can are different things to a player. */
   'vaultwall', 'vaultopen', 'vaultcore', 'vaultlit', H.RUBBLE.id,
+  /* Round thirteen's derelict, and the claim that makes it legal is narrower
+     and stronger than "it is a room".
+
+     The wrecks are stamped LAST in `vaultPlan()`, after the Vault, the nine
+     halls and the sixteen wild slots, and one that would touch any of them is
+     dropped whole exactly as a wild room is. So a wreck can only ever take
+     cells the GENERATOR made - never a cell another room was already holding -
+     which is what keeps every room that existed before this round bit-identical
+     while three new ids appear on rock.
+
+     They also deliberately do NOT join the `WILD` pool. Adding a thirteenth
+     entry there changes the divisor in `wildSlot`'s pick and therefore moves
+     rooms at all sixteen slots.
+
+     **And THIS test would not have noticed**, which is worth writing down
+     because the first version of this note claimed it would. Planted on
+     2026-09-19: with the derelict pushed into `WILD`, the census golden fails
+     and `derelict.test.mjs`'s per-region count fails, and the assertion below
+     passes clean - correctly, because every id a wild room swaps between is
+     already on this list and the ore stream underneath genuinely did not move.
+     This test guards the ORE STREAM and nothing else. The golden is what
+     guards the rooms, and the reason to keep the wrecks out of the pool is the
+     world staying where the player left it, not this assertion. */
+  'hulk', 'derelictlamp', H.SALVAGE.id,
   /* And the Bloom, for the same reason as the pockets above it: rolled on its
      own seed after every other roll has happened, so it can change what a cell
      holds and can never change what any other cell holds. */

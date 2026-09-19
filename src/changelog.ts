@@ -16,9 +16,17 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.53.1';
+export const VERSION = '0.54.0';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.54.0', date: '2026-09-19', title: 'Somebody else got here first',
+    notes: [
+      'There is a wrecked drill ship buried in every region of the planet - twelve of them, always in the same places. You will see the shape of it in the dark before you see what it is: flat plates where the ground has none, and its own lamp still faintly lit at the low end where it went in nose-first.',
+      'Cutting the plates gives you nothing. They are a wall, and what is behind them is that ship\'s hold, still holding whatever that crew had dug before they stopped. A wreck near the surface is full of copper; one near the bottom is not. It costs you no cargo weight, so a full hold is never a reason to leave one.',
+      'It asks you for nothing else. There is no choice to make and no clock on it - it is just a thing that happened down here before you arrived, and the only reason it is in the game is so the planet stops reading as somewhere nothing has ever happened.'
+    ]
+  },
   {
     version: '0.53.1', date: '2026-09-19', title: 'The icon is the game now',
     notes: [

@@ -299,6 +299,82 @@ export const SCENES = {
     step: `__cw.R.held = 'down'; __cw.advance(SECS);`
   },
 
+  /* A WRECK, round thirteen W2. Verdax's, at 10,46, because it is the
+     shallowest of the twelve and so the one a first descent actually meets.
+
+     The cell is written in rather than derived, and that is a deliberate
+     trade: `derelictAt` is not on the debug seam and putting it there to serve
+     a screenshot would be adding a hole to the game for a picture. The test
+     suite is what keeps the position honest; if the wreck ever moves, this
+     scene shows rock and says so loudly - which it did once already, when the
+     CACHE.min floor pushed Rustmoor's wreck from 13 m to Verdax's at 46.
+
+     The tunnel stops two cells SHORT of the hull on purpose. What this scene
+     is for is the approach - the dead lamp glowing through unbroken rock,
+     which is the whole telegraph - and a shot from inside the wreck would only
+     show that a room exists. */
+  wreck: {
+    secs: 0.4,
+    frames: 4,
+    enter: true,
+    setup: `
+      const WX = 10, WD = 46;
+      const dug = [];
+      for (let d = 0; d <= WD - 6; d++) dug.push(WX + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = WX; __cw.g.pd = WD - 7;
+      __cw.resetBlocks();
+      __cw.advance(0.5);
+    `,
+    step: `__cw.R.held = 'down'; __cw.advance(SECS);`
+  },
+
+  /* The wreck's whole flank, cleared from the side.
+
+     Not a state any player reaches, and that is what it is for: judging whether
+     eighteen hull plates, a hold and a lamp read as a SHIP needs the silhouette
+     entire and lit, which a tunnel's-eye view can never show. The first pass of
+     W2 was judged from inside a shaft and passed; side-on it was obviously a
+     patch of pale rock. */
+  wreckopen: {
+    secs: 0.4,
+    frames: 2,
+    enter: true,
+    setup: `
+      const WX = 10, WD = 46;
+      const dug = [];
+      /* Through to x = WX - 5, which is the room's own border column. The first
+         version stopped one short and left a wall of natural rock between the
+         ship and the wreck: the lamp's flood does not pass rock, so the whole
+         room sat in the dark and the shot showed a void. */
+      for (let d = 0; d <= WD + 8; d++) for (let x = WX - 13; x <= WX - 5; x++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = WX - 4; __cw.g.pd = WD;
+      __cw.resetBlocks();
+      __cw.advance(0.6);
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
+  /* And the same wreck opened up, so the hull, the hold and the lamp can be
+     judged as a tableau rather than as a glow. */
+  wreckin: {
+    secs: 0.4,
+    frames: 4,
+    enter: true,
+    setup: `
+      const WX = 10, WD = 46;
+      const dug = [];
+      for (let d = 0; d <= WD - 3; d++) dug.push(WX + ',' + d);
+      for (let x = WX - 5; x <= WX + 5; x++) dug.push(x + ',' + (WD - 4));
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = WX; __cw.g.pd = WD - 4;
+      __cw.resetBlocks();
+      __cw.advance(0.5);
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
   act3: {
     secs: 0.4,
     frames: 4,

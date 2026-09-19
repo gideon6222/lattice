@@ -86,6 +86,16 @@ export interface Block {
      flag adds to the cargo branch rather than diverting past it - see the note
      in config.ts. */
   lode?: boolean;
+  /* A wrecked ship's hold. It enters the hold like any ore, so like `lode` it
+     adds to the cargo branch rather than diverting past it; the flag exists
+     for the DRAWING of it.
+
+     `ore: true` gets crystal shards, which is right for everything the planet
+     made and wrong for this - the first build rendered the hold as a cluster of
+     white gems sitting in a wreck, which read as a geode somebody had built a
+     ship around. It is somebody else's haul, still crated, so it draws with the
+     crate geometry the supply caches and the device crates already use. */
+  salvage?: boolean;
 }
 
 export type UpgradeKey =

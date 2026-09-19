@@ -104,6 +104,16 @@ export const R = {
   /* Say "hold full" once per trip, not once per block. */
   warnedFull: false,
 
+  /* And say what a wreck is once per descent, not once per plate.
+
+     Round thirteen, W2. A hull plate is five or six cells of the same block, so
+     a line on every break would be the toast repeating at itself while the
+     player cuts one wall. Once per trip rather than once ever, because a wreck
+     is per region and each descent is a different one - and because the whole
+     purpose of the line is the moment of recognising what you have cut into,
+     which happens again in Kryllon even though it happened in Rustmoor. */
+  sawWreck: false,
+
   /* Credits handed back for a deleted upgrade, so main.ts can say so once the
      HUD exists. Set during load(), which runs long before anything can show a
      toast. */

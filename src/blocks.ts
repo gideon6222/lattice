@@ -131,7 +131,10 @@ function poolFor(b: Block): Pool {
     /* A sealed crate is a crate, not a shard. It carries `ore: true` so it
        sprays and sounds like something worth having, which would otherwise
        have drawn it as eight floating gems - see finds.ts. */
-    b.cache || b.find ? crateGeo : b.ore ? shardGeo : pebbleGeo, detailMat,
+    /* A wreck's hold is crated too, and for the same reason: it is somebody
+       else's haul rather than something the planet grew. Drawn as gems it read
+       as a geode with a ship built round it. */
+    b.cache || b.find || b.salvage ? crateGeo : b.ore ? shardGeo : pebbleGeo, detailMat,
     b.ore || b.seam ? MAX_DETAILS : MAX_CELLS
   );
   detail.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
