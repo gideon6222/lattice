@@ -3206,6 +3206,33 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       through 8 are in `C:\dev\plans\lattice\ENCOUNTERS.md` and wait on these
       three being playtested first.
 
+      **Two things found while scoping this on 2026-09-18, so the next session
+      does not rediscover them.**
+
+      **The gas bloom's TELL is already built.** `GAS.glow` is 0.45 against
+      copper's 0.10, and glow goes through `coreGlow()` - the find-the-vein
+      curve that deliberately does not switch off in unlit rock. So a gas pocket
+      is already visible before you cut it, which by the research's own
+      definition makes it an encounter rather than a hazard. What it lacks is
+      the DECISION: there is no reason to cut one on purpose. The missing half
+      is something worth taking behind it.
+
+      **And that prize must be an OVERWRITER, never a change to the ore roll.**
+      Biasing the roll near gas would move the ore stream, which is the one
+      thing `blocks-frozen.json` exists to catch and the reason its legal-change
+      list names `schematic` and `part` specifically: they replace a cell and
+      consume no roll. A prize behind the gas gets its own seed offset and joins
+      that list, or it does not ship.
+
+      **Archetype 7, the fuel-leak cache, is REFUSED rather than deferred.**
+      The research ranks it cheap and it is, but `INDEX.md` rule 16a names this
+      exact failure: "a game that hand-rolls a fuel gauge is a game that will
+      feel free again", because a fuel gauge always grows a rescue. Fuel is this
+      game's clock and its whole stake. A pocket of free fuel mid-descent is the
+      rescue, and it would cost the one decision the game is built on - turning
+      round with half a tank. Recorded here so it is not picked up later as an
+      easy win.
+
 - [ ] **V6 The wake rewrites what you dug.** The story brief's highest-ranked
       technique: at the fifth Anchor, tunnels the player already cut visibly
       change. It reuses `collapse.ts` and the stamper, needs no text, and
