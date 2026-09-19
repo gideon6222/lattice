@@ -3348,9 +3348,32 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       corrected in the same pass - it had claimed the returning player is told
       the objective "never again", and this screenshot is what disproved it.
 
-- [ ] **V9 The ending shows the world.** A pull-back over the dug planet behind
+- [x] **V9 The ending shows the world.** A pull-back over the dug planet behind
       the existing card, so the ending hands back a place the player can see
-      they made.
+      they made. Done 2026-09-18 as v0.53.0.
+
+      **The camera DISTANCE and nothing else.** The framing in `resize()` is
+      eighteen rows solved against the panel and multiplied by the Scanner, and
+      it took five sessions of lighting work to calibrate; a bespoke ending
+      camera would be a second framing to keep in step with the first for ever.
+      `camZBoost` is an additive scalar the camera already has for this shape of
+      thing, so the ending is a number added to it and the existing frame logic
+      is untouched.
+
+      Rise, hold, fall over six seconds. **The hold is the milestone** - a
+      pull-back that turns round the instant it arrives reads as a camera error,
+      and the research's whole point is that the player gets a moment to look at
+      what they dug. Started when the Vault is reached rather than when the card
+      closes, so it runs behind the card: the card is the moment they look away
+      from the frame, not at it.
+
+      Two receipts, for the same reason V7 needed two. The unit tests pin the
+      curve's shape - starts and ends at zero, monotonic each way, actually
+      holds at full extent - and an e2e reads `camera.position.z` off the
+      running game, because the curve being right and nothing moving on screen
+      is precisely how V7 shipped invisible earlier in this round. Verified by
+      reintroducing the bug: shrinking the pull-back to 0.2 fails the e2e with
+      "the shot never reached a frame".
 
 **V0 through V3 are the round's first delivery** and they are the ones that
 answer asks 4 and 5. V4 and V5 answer ask 3. V6 through V9 answer ask 2.

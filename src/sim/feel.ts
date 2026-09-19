@@ -111,6 +111,43 @@ export const CAM_ZOOM_RATE = asExpRate(4);
 
 /* the same conversion for the smaller smoothings inside the frame loop */
 export const CAM_BOOST_DECAY = asExpRate(4);
+
+/* ---------- the ending shot ----------
+
+   Round twelve, V9. The story research's last technique: the ending should SHOW
+   the traversed world rather than only state a sentence about it. Shadow of the
+   Colossus ends on a tableau; this game ends on a card that says *"the ground is
+   yours. There is more of it than you have seen."* and then puts you back in a
+   frame eighteen rows tall.
+
+   Deliberately the camera DISTANCE and nothing else. The framing in `resize()`
+   is eighteen rows solved against the panel and multiplied by the Scanner, and
+   it took five sessions of lighting work to calibrate - a bespoke ending camera
+   would be a second framing to keep in step with the first. `camZBoost` is an
+   additive scalar that already exists for exactly this shape of thing, so the
+   ending is a number added to it and the whole of the existing frame logic is
+   untouched.
+
+   The curve: rise, hold, fall. The hold is what makes it a SHOT rather than a
+   lurch - a pull-back that immediately returns reads as a camera error, and the
+   research's point is that the player should get a moment to look at what they
+   dug. Six seconds total against a card they are reading anyway.
+
+   Pure and frame-rate independent: it is a function of elapsed time, not an
+   accumulator, so a dropped frame cannot shorten it and the filmstrip can hold
+   it still. */
+export const ENDING_SECS = 6.0;
+export const ENDING_BACK = 9.0;
+const ENDING_RISE = 1.6;
+const ENDING_FALL = 2.2;
+
+export function endingBoost(t: number): number {
+  if (t <= 0 || t >= ENDING_SECS) return 0;
+  if (t < ENDING_RISE) return ENDING_BACK * easeInOut(t / ENDING_RISE);
+  const fallStart = ENDING_SECS - ENDING_FALL;
+  if (t <= fallStart) return ENDING_BACK;
+  return ENDING_BACK * (1 - easeInOut((t - fallStart) / ENDING_FALL));
+}
 export const BANK_INTO_MOVE = asExpRate(8);
 export const BANK_SETTLE = asExpRate(6);
 export const FACE_TURN_RATE = asExpRate(14);

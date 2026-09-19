@@ -97,3 +97,43 @@ test('an out of range act does not throw, it clamps', () => {
   assert.deepEqual(H.gradeOf(-1), H.gradeOf(H.ACT_DEAD));
   assert.deepEqual(H.gradeOf(99), H.gradeOf(H.ACT_QUIET));
 });
+
+/* ---------- V9: the ending shot ---------- */
+
+test('the ending shot rises, holds, and comes back', () => {
+  /* The hold is what makes it a SHOT rather than a lurch. A pull-back that
+     turns round the instant it arrives reads as a camera error, and the
+     research's whole point is that the player gets a moment to look at what
+     they dug. Asserted as a shape so the three durations stay free to retune. */
+  assert.equal(H.endingBoost(0), 0, 'it starts already pulled back');
+  assert.equal(H.endingBoost(H.ENDING_SECS), 0, 'it never returns');
+  assert.equal(H.endingBoost(H.ENDING_SECS + 1), 0, 'it is still running after it ended');
+  assert.equal(H.endingBoost(-1), 0, 'it is running before it started');
+
+  /* Rises to the full pull-back... */
+  const mid = H.endingBoost(H.ENDING_SECS / 2);
+  assert.ok(Math.abs(mid - H.ENDING_BACK) < 1e-9,
+    `halfway through the shot it is at ${mid}, not the full ${H.ENDING_BACK} - there is no hold`);
+
+  /* ...monotonically on the way out and on the way back, so it never jitters. */
+  let prev = -1;
+  for (let t = 0; t <= H.ENDING_SECS / 2; t += 0.05) {
+    const v = H.endingBoost(t);
+    assert.ok(v >= prev - 1e-9, `the shot fell back at ${t.toFixed(2)}s on the way out`);
+    prev = v;
+  }
+  prev = Infinity;
+  for (let t = H.ENDING_SECS / 2; t <= H.ENDING_SECS; t += 0.05) {
+    const v = H.endingBoost(t);
+    assert.ok(v <= prev + 1e-9, `the shot rose again at ${t.toFixed(2)}s on the way back`);
+    prev = v;
+  }
+});
+
+test('the ending pulls back far enough to be a different picture', () => {
+  /* The frame is eighteen rows. A boost that is a rounding error on that is a
+     shot nobody sees, which is the failure the V7 grade already made once
+     today. */
+  assert.ok(H.ENDING_BACK >= 6, `pulling back ${H.ENDING_BACK} on an 18-row frame is not a shot`);
+  assert.ok(H.ENDING_SECS >= 3, 'the shot is over before it registers');
+});

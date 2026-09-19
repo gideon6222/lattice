@@ -4855,3 +4855,42 @@ test('each act paints the world differently', async ({ page }) => {
   expect(act3, 'the ending does not change the sky at all, so act three is invisible').not.toBe(act1);
   expect(act3, 'act two and act three paint the same sky, so they are not two acts').not.toBe(act2);
 });
+
+/* Round twelve, V9: the ending shows the world you dug.
+
+   `grade.test.mjs` proves the curve rises, holds and returns. Only a running
+   game can say the curve reaches the CAMERA, which is the half that would
+   silently not ship - and did exactly that for the V7 grade earlier in this
+   round, where the shape was right and nothing on screen moved. */
+test('the ending pulls the camera back over the world, and gives it back', async ({ page }) => {
+  await enterGame(page);
+
+  const z = async () => await page.evaluate(() =>
+    (window as unknown as { __cw: { camera: { position: { z: number } } } }).__cw.camera.position.z);
+
+  const settle = async (secs: number) => await page.evaluate((s) =>
+    (window as unknown as { __cw: { advance: (n: number) => void } }).__cw.advance(s), secs);
+
+  await settle(1.0);
+  const before = await z();
+
+  /* Fired through the runtime clock the loop reads rather than by calling
+     vaultReached, which would also put a modal up and end the game - this test
+     is about the camera and nothing else. */
+  await page.evaluate(() => {
+    (window as unknown as { __cw: { R: { endShot: number } } }).__cw.R.endShot = 0;
+  });
+  /* Into the hold, where the pull-back is at full extent. */
+  await settle(3.0);
+  const during = await z();
+
+  /* And out the far side. */
+  await settle(4.0);
+  const after = await z();
+
+  expect(during, `the camera sat at ${during} through the ending, so the shot never reached a frame`)
+    .toBeGreaterThan(before + 2);
+  expect(Math.abs(after - before),
+    `the camera ended at ${after} against ${before} before, so the ending never gave the frame back`)
+    .toBeLessThan(1.5);
+});

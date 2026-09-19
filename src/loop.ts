@@ -30,7 +30,8 @@ import {
   FUEL_PER_MOVE, HULL_REGEN, FLY_ACCEL, FLY_DRAG, SHIP_R, DIG_ALIGN,
   LANE_PULL, DIG_ALIGNED,
   depthT, heatT, easeInOut, approach, zoomForScan, digFuelForStep, heatDamagePerSecond, soakAfter,
-  tremorTick, TREMOR_EVERY, TREMOR_JITTER, chargeAfter, fuelToClimb, fuelState, FUEL_IDLE
+  tremorTick, TREMOR_EVERY, TREMOR_JITTER, chargeAfter, fuelToClimb, fuelState, FUEL_IDLE,
+  endingBoost, ENDING_SECS
 } from './sim/feel';
 import { scene, camera, renderer, gameEl, amb, sun, rim, lamp, LAMP_COLOR, fog, shipKey, renderWorld } from './scene';
 import { lerpHex, worldX, crackGeo, crackMat } from './materials';
@@ -1123,7 +1124,16 @@ export function tick(raw: number, draw = true) {
      the underground framing - which was calibrated over five sessions of
      lighting work - moves at all. */
   const surfaceT = clamp(1 - v.pd / 8, 0, 1);
-  const zNow = (R.camZ + surfaceT * CAM_SURFACE_BACK) * zoomForScan(g.up.scan) + camZBoost;
+  /* The ending shot rides on camZBoost, which is the additive scalar the camera
+     already has for exactly this - see ENDING_SECS in feel.ts for why the
+     ending does not get a framing of its own. Read off an elapsed clock rather
+     than accumulated, so a dropped frame cannot shorten it. */
+  if (R.endShot >= 0) {
+    R.endShot += raw;
+    if (R.endShot >= ENDING_SECS) R.endShot = -1;
+  }
+  const endBack = R.endShot >= 0 ? endingBoost(R.endShot) : 0;
+  const zNow = (R.camZ + surfaceT * CAM_SURFACE_BACK) * zoomForScan(g.up.scan) + camZBoost + endBack;
   const halfW = Math.tan((camera.fov * Math.PI) / 360) * zNow * camera.aspect;
   const lim = Math.max(0, W / 2 - halfW);
   const flying = g.mode === 'fly';

@@ -779,6 +779,15 @@ export function planetAnswers() {
    next time round. */
 export function vaultReached() {
   g.won = true;
+  /* The ending shot. Round twelve, V9.
+
+     Started HERE rather than when the card is dismissed, so the pull-back is
+     running behind the card while it is being read. The research's point is
+     that the ending should SHOW the world the player crossed rather than only
+     state a sentence about it, and a shot that waits for the card to close is a
+     shot most players never see - the card is the moment they look away from
+     the frame, not at it. `src/sim/feel.ts` owns the curve. */
+  R.endShot = 0;
   const x = worldX(g.px), y = -g.pd;
   spray(x, y, 0xfff0b8, 420, 18, 3.2);
   spray(x, y, 0xffffff, 220, 26, 2.2);

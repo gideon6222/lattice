@@ -5620,6 +5620,37 @@ to `actions.ts` - a seed for its own collapse stream, legitimate and now
 recorded in FROZEN with its reason. That is the vestigial census earning its
 place for the second time in one day.
 
+## V9: the ending shows the world, and the lesson V7 taught got used
+
+The story research's last technique: an ending should SHOW the world the player
+crossed rather than only state a sentence about it. This game's ending says *"the
+ground is yours. There is more of it than you have seen"* and then puts you back
+in a frame eighteen rows tall.
+
+**The camera distance and nothing else.** The framing in `resize()` is eighteen
+rows solved against the panel and multiplied by the Scanner, and it took five
+sessions of lighting work to calibrate. A bespoke ending camera would be a
+second framing to keep in step with the first for ever. `camZBoost` is an
+additive scalar the camera already carries for exactly this shape of thing, so
+the whole milestone is a number added to it.
+
+Rise, hold, fall over six seconds, read off an elapsed clock rather than
+accumulated so a dropped frame cannot shorten it. **The hold is the milestone.**
+A pull-back that turns round the instant it arrives reads as a camera error; the
+research's point is that the player gets a moment to look at what they dug. It
+starts when the Vault is reached rather than when the card closes, so it runs
+behind the card - the card is the moment they look away from the frame, not at
+it.
+
+**Two receipts, and the second one exists because of V7.** Earlier in this round
+the three-act grade had a correct curve and changed nothing on screen, because it
+only touched the sky. So V9 got the same pair from the start: unit tests pin the
+curve's shape, and an e2e reads `camera.position.z` off the running game.
+Shrinking the pull-back to 0.2 fails that e2e with "the shot never reached a
+frame" - which is exactly what V7's first version would have said if it had had
+this test. A mistake made once in a session is cheap; the same mistake twice in
+one session would have been the session not learning.
+
 ## A second shot tool, and one refactor that came with it
 
 `scripts/shot.mjs` is `filmstrip.mjs`'s single-frame sibling, at 1080x2340. The

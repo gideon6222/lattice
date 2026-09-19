@@ -16,9 +16,15 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.52.0';
+export const VERSION = '0.53.0';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.53.0', date: '2026-09-18', title: 'The ending shows you the world',
+    notes: [
+      'When the Vault opens, the camera pulls back over the planet while you read the card, holds there long enough to look at what you dug, and then hands the frame back. The ending says the ground is yours and there is more of it than you have seen - now you can see some of it.'
+    ]
+  },
   {
     version: '0.52.0', date: '2026-09-18', title: 'The ground will not be as you left it',
     notes: [

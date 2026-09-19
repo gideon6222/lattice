@@ -31,6 +31,13 @@ export const R = {
      rolls - the separation every generator in this game keeps, and for the same
      reason: a shared stream makes one feature's change move another's output. */
   lodeN: 0,
+  /* Seconds elapsed in the ending shot, or -1 when it is not running.
+
+     Round twelve, V9. Counts UP so `endingBoost(t)` stays a pure function of
+     elapsed time rather than an accumulator the loop decays - a dropped frame
+     cannot shorten a shot that is read off a clock. -1 rather than 0 because 0
+     is a real instant in it. */
+  endShot: -1,
   /* Wall-clock seconds since landing on this world, for the fastest-core
      record. Reset by arrive(); read once, when a core breaks. */
   worldT: 0,
