@@ -34,7 +34,7 @@
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LIST = 'C:/dev/gamedev-notes/scripts/us-english.txt';
@@ -80,12 +80,12 @@ if (!pairs.length) {
    The list is still the single source of what is British. This only changes
    what counts as the same word, and `US` keys on the STEM so the suggestion
    carries the ending back: "greyed" is reported as wanting "grayed". */
-const ENDINGS = ['', 's', 'ed', 'ing'];
-const RE = new RegExp('\\b(' + pairs.map((p) => p[0]).join('|') + ')(s|ed|ing)?\\b', 'gi');
+export const ENDINGS = ['', 's', 'ed', 'ing'];
+export const RE = new RegExp('\\b(' + pairs.map((p) => p[0]).join('|') + ')(s|ed|ing)?\\b', 'gi');
 const US = new Map(pairs.map(([b, a]) => [b.toLowerCase(), a]));
 
 /* What the American form of a matched word is, ending and all. */
-function americanFor(word) {
+export function americanFor(word) {
   const w = word.toLowerCase();
   for (const end of ENDINGS) {
     const stem = end && w.endsWith(end) ? w.slice(0, -end.length) : w;
@@ -101,7 +101,7 @@ function americanFor(word) {
    without is an id, a CSS class, a storage key or a colour name. Identifiers,
    import paths and code are all out of scope by construction rather than by
    exception, which is the property that makes a FAIL safe. */
-function stringsIn(src) {
+export function stringsIn(src) {
   const out = [];
   /* Single, double and template literals. The template case matters: half the
      HUD's text is built with one. */
@@ -122,7 +122,7 @@ function lineOf(src, index) {
    repo's comments are long enough that scanning them would bury every real hit.
    Stripped rather than skipped, so a string inside a commented-out block does
    not count either. */
-function stripComments(src) {
+export function stripComments(src) {
   return src
     .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
     .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '));
@@ -138,6 +138,16 @@ function tsFiles(dir) {
   return out;
 }
 
+/* ---------- the scan ----------
+
+   In a function, and run only when this file is the thing node was asked to
+   run, so `test/words.test.mjs` can import the matching and assert it finds the
+   words it is supposed to. The studio's own precedent for testing a checker is
+   `scripts\doctor-tests.ps1`, which plants a fault per doctor check and asserts
+   the FAIL; the reason it exists applies here with force, because the first
+   version of THIS file inspected the whole repo, matched nothing, and printed
+   "clean" with the two spellings it was written for sitting in the changelog. */
+export function scan() {
 const hits = [];
 
 /* Every TypeScript string a player could read. `env.d.ts` and `types.ts` emit
@@ -197,6 +207,17 @@ if (existsSync(store)) {
   walk(store);
 }
 
+return hits;
+}
+
+/* Imported by the test, run by the gate. `process.argv[1]` is the script node
+   was asked to run, so this is false whenever the module is imported. */
+const RUN = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (!RUN) { /* imported: the exports above are the whole point */ }
+else {
+
+const hits = scan();
+
 if (!hits.length) {
   console.log('us-english: ' + pairs.length + ' words checked, clean');
   process.exit(0);
@@ -209,3 +230,5 @@ for (const h of hits) {
   console.error('      ' + h.text.slice(0, 110));
 }
 process.exit(1);
+
+}

@@ -5917,6 +5917,17 @@ inflected American form back. **A check that reproduces another check's pattern
 inherits its blind spots**, and the only thing that showed it was planting the
 two real words rather than a word chosen to be easy.
 
+**And then the checker got a checker**, `test/words.test.mjs`, seven tests in
+the shape `scripts\doctor-tests.ps1` uses in the knowledge base: plant what the
+check exists to catch and assert it is caught. A gate step that stops inspecting
+things is worse than no gate step, because it prints "clean" and is believed -
+which is precisely what the first version did. The scan moved into an exported
+`scan()` behind an entry-point guard so it can be imported without running, and
+the tests pin the matching and the SCOPE rather than the word list's contents,
+because the list lives in another repo and a test that pinned its words would
+fail every time somebody added one. Verified by putting the whole-word pattern
+back: it fails with `"greyed" is not matched at all`.
+
 ## 2026-09-19, desk playtest: meeting a wreck and cutting into it
 
 Filmed rather than screenshotted, because the milestone changes what the player
