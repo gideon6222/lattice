@@ -5363,6 +5363,60 @@ the numbers answered it in one run: `#btnMap` is not a toggle (`#mapClose`
 closes the map), so clicking it twice re-entered `openMap` and the test was
 comparing two byte-identical canvases. Deleted once it had answered.
 
+## V4: the encounter frame, and a rate picked by eye that lasted one test run
+
+`src/sim/encounter.ts` is the frame for his *"make more encounters and random
+events as you go"*. It decides WHAT fires, WHEN and HOW OFTEN; what each one
+does belongs to content that registers with it, because a frame that knows about
+gas pockets is a frame that cannot be tested without them.
+
+**The three words the ask turns on**, from the research, and this game was on
+the wrong side of the line. A HAZARD is an unconditional rule with no choice
+attached - a gas pocket opening the hull - and hazards are all this game has,
+which is exactly why the world reads as a place things happen TO you. An
+ENCOUNTER is a hazard made legible before it resolves: a visible tell plus a
+response using a verb you already have. An EVENT is an encounter with a once-off
+decision that costs something on every branch, which is what makes it
+retellable. Slay the Spire's Golden Idol is the clean case - four buttons and
+not one of them free.
+
+**The frame exists for the rate, not for the content**, because that is where
+the sourced failures are: telegraph before the stakes land, throttle repeats or
+a good beat becomes wallpaper, and leave clean ground. `MAX_PER_RUN` is 3 and
+`MIN_GAP` is 28 m, both from Deep Rock's shape, and their whole job is to make
+an uneventful dive possible.
+
+### FIRE_CHANCE was picked by eye and the suite caught it immediately
+
+0.13 per 4 m band looked reasonable and was not. Measured over 400 seeds: one
+shallow descent in a HUNDRED was quiet and 399 of 400 full dives hit the cap.
+That is a planet where something is always happening, which is the wallpaper the
+cap and the gap exist to prevent - the frame would have shipped defeating its
+own purpose.
+
+The test that caught it is *"an uneventful descent is possible"*, and it is
+worth naming why it exists: every other property in that file is satisfied
+trivially by a frame that fires constantly. Determinism, the cap, the gap, the
+once-only rule and the depth bands all pass at 0.13. Only the quiet-run
+assertion fails, and it is the one that would have been easiest not to write.
+
+The replacement is a table rather than a nudge, and the table is in the file:
+
+    chance   quiet 120 m descents   full 452 m descents 0/1/2/3   mean
+    0.130      3 of 400   ( 1%)         0 /   0 /   1 / 399       3.00
+    0.060     59 of 400   (15%)         0 /   4 /  29 / 367       2.91
+    0.035    131 of 400   (33%)         5 /  34 /  94 / 267       2.56
+    0.025    188 of 400   (47%)        22 /  82 / 128 / 168       2.10
+    0.018    232 of 400   (58%)        60 / 120 / 119 / 101       1.65
+
+0.025: about half of shallow descents quiet, so an encounter is an event rather
+than a feature of the ground, and a full dive averages two so a long descent
+still has a shape.
+
+Verified by reintroducing the bug - removing the gap rule fails two tests by
+name, and one of them asserts the rule lives in `eligible` rather than in the
+convenience `walk` around it, so a refactor that moves the check cannot pass.
+
 ## A second shot tool, and one refactor that came with it
 
 `scripts/shot.mjs` is `filmstrip.mjs`'s single-frame sibling, at 1080x2340. The

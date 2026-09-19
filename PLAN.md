@@ -2790,10 +2790,24 @@ commit messages, not restated here.
       tremors named, and the ore order runs copper (`min: 3`) then iron
       (`min: 16`) with amethyst, emerald and ruby called by name.
 
-      **Measured against Play's limits, 2026-09-14:** title 11 of 30
-      characters, short description 66 of 80, full description 1,945 of 4,000.
-      Nothing is near a cap, so his edits have room and none of the three needs
-      cutting to fit.
+      **Refreshed 2026-09-18 at his ask** ("then update the listing
+      information"), because round twelve changed what the game IS and a listing
+      that describes the version before it is the same fault this box was
+      originally raised for. Two paragraphs are new - the marks under the depth
+      readout, in the paragraph about the campaign, and a section on the eight
+      buried devices including the Receiver, which is the first thing in the
+      copy that tells a reader the world hands things over rather than only
+      taking. The release notes are rewritten for 0.49.0.
+
+      **Measured against Play's limits, 2026-09-18:** title 11 of 30 characters,
+      short description 66 of 80, full description 2,351 of 4,000, release notes
+      354 of 500. Nothing is near a cap, so his edits have room and none of the
+      four needs cutting to fit.
+
+      **Still his, and still unread.** Refreshing the facts is a session's job;
+      the pitch is not, and nothing goes to Play until he has read it. The store
+      lane cannot send it on its own either - `autoListing` is off and the Store
+      tab's Sync button is the only path.
 
 # The second month
 
@@ -3125,7 +3139,7 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       the names calmed - and the bar sits at +700 where only the names can
       reach it.
 
-- [ ] **V4 The encounter frame.** One pure module: a weighted pool, a pity
+- [x] **V4 The encounter frame.** One pure module: a weighted pool, a pity
       timer, once-only beats, and a seeded roll on its own offset, with the
       archetypes as data. No content yet - this is the frame the content lands
       in, and it is renderer-free and fully testable.
@@ -3149,6 +3163,16 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       caps it the other way, at most two mutators per mission and at most one
       anomaly, with at least one mission per rotation left clean. **A clean
       descent has to stay possible**, or the pressure stops reading as pressure.
+
+      **Done 2026-09-18.** `src/sim/encounter.ts`, pure and renderer-free, on
+      seed offset 431. Ten tests, and one of them earned its place immediately:
+      *an uneventful descent is possible* failed on the first run, because
+      `FIRE_CHANCE` had been picked by eye at 0.13 and that left one shallow
+      descent in a hundred quiet, with 399 of 400 full dives hitting the cap.
+      The replacement was measured across five values and the whole table is in
+      the file - 0.025 leaves about half of shallow descents quiet and averages
+      two beats on a full dive. Verified by reintroducing the bug: removing the
+      gap rule fails two tests by name.
 
 - [ ] **V5 The first three encounters.** The research's top three, which are top
       because each extends a system this repo already has rather than adding one.

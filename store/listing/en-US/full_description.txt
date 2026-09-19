@@ -3,7 +3,7 @@ Hold down and the ship digs. Everything below you is rock until you cut it, and 
 A mining game about depth, fuel, and knowing when to turn around.
 
 THERE IS SOMETHING DOWN THERE
-Nine Anchors are buried across a planet four hundred and fifty meters deep, and each one lights when you stand in its hall. Light them all and the Vault at the center opens. That is the whole campaign, and it is the reason to keep going down rather than a score to beat.
+Nine Anchors are buried across a planet four hundred and fifty meters deep, and each one lights when you stand in its hall. Light them all and the Vault at the center opens. That is the whole campaign, and it is the reason to keep going down rather than a score to beat. Nine marks under the depth readout fill as you light them, so the game never stops telling you what it wants.
 
 DIG WHERE YOU LIKE
 There is no route. The whole face is diggable, so the shaft is whatever shape you make it, and the one you cut on the way down is the one you climb on the way back. Cutting straight is fast and cutting wide finds more.
@@ -13,6 +13,9 @@ Nothing hunts you, but the ground is not safe. Gas pockets open the hull, deep r
 
 THE HOLD FILLS UP
 Copper near the surface, then iron, silver and gold, and further down amethyst, emerald, ruby, and things with no names you would recognize. Weight is real: a full hold climbs slower and burns more. Deciding what to leave in the rock is the decision the whole game is built on.
+
+THE ROCK GIVES THINGS UP
+Eight devices are buried out there and none of them is for sale. A cutting laser, a salvage magnet, a repair drone, and a receiver that hears an unlit Anchor through solid rock and tells you how near it is, never which way. You still have to choose a direction and dig it.
 
 SPEND IT BETWEEN RUNS
 Sell the haul at the landing pad and put it into the ship. A bigger tank, a better drill, a stronger hull, a lamp that reaches further. Each one buys depth, and depth is what the Anchors are waiting in.

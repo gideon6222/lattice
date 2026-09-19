@@ -20,3 +20,4 @@ export * from '../src/sim/region';
 export * from '../src/sim/ambience';
 export * from '../src/sim/intro';
 export * from '../src/sim/call';
+export * from '../src/sim/encounter';

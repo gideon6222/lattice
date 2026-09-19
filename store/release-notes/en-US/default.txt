@@ -1,1 +1,1 @@
-Steadier controls, a clearer manifest, and the shop reads at a glance.
+The game now says what it wants. Nine marks under the depth readout, one per Anchor, filling as you light them, and a tenth for the Vault they open. The Survey map names settled ground in the Anchors' own color. And a new device, buried like the rest: the Lattice Receiver hears an unlit Anchor through rock and tells you how near it is, never which way.
