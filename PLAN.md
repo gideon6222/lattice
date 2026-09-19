@@ -484,13 +484,35 @@ depth, danger and zone off one scheduler, and nothing available can do that.
 
 ### Phase 2: the look
 
-- [~] **M7 — The UV fix and the mineral surfaces.** The new technique, then the six imported
+- [x] **M7 — The UV fix and the mineral surfaces.** The new technique, then the imported
       normal and roughness pairs, then the hull normal. Filmed on a cavern, before and after.
       Writes `assets/CREDITS.md`, which this repo has never had, and backfills the four
       textures already in `src/textures/` that are recorded nowhere.
-      **UV fix and CREDITS.md done 2026-09-10. The six surfaces are not in:** the fetch
-      works, the JPEG-to-WebP downscale does not (sharp-cli returned a 342-byte solid
-      colour). See the M7 section in `NOTES.md` for what is needed.
+
+      **Done 2026-09-10, and this box carried `- [~]` until 2026-09-18 saying the
+      surfaces were not in.** They landed the same day the blocker was written down,
+      and the prose under the box was never updated. `- [~]` is not a legal marker
+      (INDEX.md rule 3b): `progress.ps1` and `doctor.ps1` both count it as done, so
+      for eight days this read as finished to every count and as owed to every
+      reader, which is the worst of both. Partial progress belongs in prose like this,
+      never in the box.
+
+      **What landed, against what was asked:** the UV fix is the triplanar projection
+      at `src/materials.ts:245` picking the plane per face off `abs(normal)`.
+      `assets/CREDITS.md` exists and is backfilled. The surfaces are THREE pairs and
+      not six, deliberately - `Ground110` for dirt, `Gravel043` for the stone band,
+      and granite, scoria and basalt keep `Rock035` (`BAND_SURFACE`,
+      `src/materials.ts:321`). A surface per BAND was the design once colour was
+      ruled out as the material cue, and six would have been three maps nothing
+      sampled. **The hull normal was fetched, measured and dropped**: ambientCG
+      `Metal038` converted to a 462-byte file with a luminance standard deviation of
+      0.4, so the source had almost no relief. Dropped on the measurement rather than
+      shipped as an invisible improvement.
+
+      **The JPEG-to-WebP blocker was solved with a different tool**, Python Pillow
+      rather than a fix to `sharp-cli`, which was never diagnosed and is not claimed
+      fixed. Every conversion is variance-checked before it is wired in, which is what
+      caught `Metal038`.
 - [x] **M8 — Haptics, the debrief and the record book.** The three POLISH lines this game has
       never had, in one pass because they are all "what happens when a run ends".
 - [x] **M9 — The screens as pictures.** Every screen at 460x996, the shop, the chart, the
@@ -2738,26 +2760,26 @@ commit messages, not restated here.
       cannot catch a wrong state in a game whose stars twinkle - assert the sim,
       not the picture.
 
-- [ ] **P5 Gideon reads the listing text, and three things in it are wrong.**
-      Title, short description and full description are drafted in
-      `store/listing/en-US/`. Nothing goes to Play until he has read them, and
-      the PITCH is his call and not a session's - which is why the draft is
-      flagged here rather than quietly rewritten. What is not a matter of pitch
-      is that the copy describes the game as it was around round three:
+- [ ] **P5 Gideon reads the listing text.** Title, short description and full
+      description are drafted in `store/listing/en-US/`. Nothing goes to Play
+      until he has read them, and the PITCH is his call and not a session's -
+      which is why the draft is flagged here rather than quietly rewritten.
+      This box is his and only his; it is not waiting on any work.
 
-      **It never mentions the Anchors, the Lattice or the Vault.** The game's
-      own title screen says *"Dig down. Light the Anchors. Open the center."*
-      and the full description says *"depth is the only score that matters"*.
-      This game has nine Anchors, a campaign and an ending; the draft sells a
-      scoreless sandbox, and a player who buys that one and finds this one has
-      been told the wrong thing about the product.
-      **"Nothing is chasing you" appears twice and is not true.** Gas pockets,
-      heat soak, tremors, and from the fifth Anchor a planet that reshapes the
-      ground behind you.
-      **The ore order is reversed.** Copper is the shallow one (`min: 3`) and
-      iron is below it (`min: 16`); the draft has it the other way, and then
-      compresses amethyst, emerald, ruby, magmite, coreite, umbrite and
-      solmarrow into "stranger things".
+      **The three factual errors this milestone used to name are fixed**, in
+      `a401b59` (the v0.42.0 ship), and the body above said otherwise for a day
+      after they were. Recorded rather than deleted, because the plan claiming
+      a fault the repo does not have is the same failure in the other
+      direction: the copy now opens on the Anchors and the Vault and says the
+      campaign is the reason to go down, "nothing is chasing you" is gone for
+      "nothing hunts you, but the ground is not safe" with the gas, heat and
+      tremors named, and the ore order runs copper (`min: 3`) then iron
+      (`min: 16`) with amethyst, emerald and ruby called by name.
+
+      **Measured against Play's limits, 2026-09-14:** title 11 of 30
+      characters, short description 66 of 80, full description 1,945 of 4,000.
+      Nothing is near a cap, so his edits have room and none of the three needs
+      cutting to fit.
 
 # The second month
 
