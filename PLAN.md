@@ -3106,8 +3106,24 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       the price (3500 is the only value that fits the ladder at 48 m), the
       unlock depth, and the entry's position in `FINDS`.
 
-- [ ] **V3 The Survey map separates lit from unlit at a glance.** Ask 5's other
-      half. The map already knows; it does not currently say.
+- [x] **V3 The Survey map says which ground is settled.** Ask 5's other half.
+
+      **The box's own premise was half wrong and that is worth recording.** It
+      said "the map already knows; it does not currently say" - but the map
+      already said it per ANCHOR, in three states, with a filled ring for lit.
+      What it could not say was anything about the PLANET: nine rings over four
+      screens of scrolling is a list, and reading it is counting. So the change
+      is at REGION scale. A region whose Anchor is lit now carries its name in
+      the lit ring's own mint, which spends a meaning the player has already
+      learned instead of inventing a legend.
+
+      **Done 2026-09-18.** Verified by reintroducing the bug, and the first
+      version of that check passed when it should not have: three lit Anchors
+      put three mint rings on the map whatever the names do, so a threshold of
+      +40 pixels was satisfied by the rings alone. The three counts are measured
+      into the test - 50 with nothing lit, 539 with the rings only, 1057 with
+      the names calmed - and the bar sits at +700 where only the names can
+      reach it.
 
 - [ ] **V4 The encounter frame.** One pure module: a weighted pool, a pity
       timer, once-only beats, and a seeded roll on its own offset, with the

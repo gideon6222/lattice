@@ -5327,6 +5327,42 @@ The reading goes out as a CSS custom property rounded to hundredths and the
 stylesheet's own transition does the smoothing, so nothing animates per frame
 and a fresh 17-digit string is not written sixty times a second.
 
+## V3: the map says which ground is settled, and a test that passed wrongly
+
+The milestone's own premise was half wrong. `PLAN.md` said "the map already
+knows; it does not currently say" - but it already said it per ANCHOR, in three
+states, with a filled ring for lit, a hollow one for found and a third colour
+for sealed. What it could not say was anything about the PLANET. Nine rings
+spread over four screens of scrolling is a list, and reading it is counting.
+
+So the change is at REGION scale: a region whose Anchor is lit carries its name
+in the lit ring's own mint. That spends a meaning the player has already learned
+from the ring rather than inventing a legend, which is the same reasoning the
+HUD pips used for amber. Region i holds Anchor i by construction, and the
+deepest row has no Anchor, so its three regions are never drawn as though they
+are waiting for one.
+
+**The rule-11 check passed when it should have failed, for the second time
+today and for a different reason.** Disabling the calmed colour left the test
+green, because three lit Anchors put three filled mint RINGS on the map whatever
+the names do - so a threshold of "+40 mint pixels" was being satisfied by the
+rings alone and the test was asserting nothing about this milestone at all.
+
+The fix is a measured number rather than a bigger guess. Counted on the fixture
+at 375x812: 50 mint pixels with nothing lit, 539 with three lit but the names
+not calmed, 1057 with the names calmed. The bar is +700, which sits between the
+last two so the rings cannot reach it. All three numbers are written into the
+test, because a threshold whose derivation is not recorded is a threshold the
+next person will move to make a failure go away.
+
+**And a throwaway probe was worth writing.** Two identical pixel counts could
+have been three different things - the map not redrawing, the fixture not
+taking, or the mint coming from somewhere else - and guessing between them is
+how an afternoon goes. A thirty-line script that drove the real page and printed
+the numbers answered it in one run: `#btnMap` is not a toggle (`#mapClose`
+closes the map), so clicking it twice re-entered `openMap` and the test was
+comparing two byte-identical canvases. Deleted once it had answered.
+
 ## A second shot tool, and one refactor that came with it
 
 `scripts/shot.mjs` is `filmstrip.mjs`'s single-frame sibling, at 1080x2340. The

@@ -4747,3 +4747,72 @@ test('the row fills as Anchors are lit, and the Vault opens only on the last', a
       `${lit} lit and the Vault pip is ${wantOpen ? 'shut' : 'open'}`).toHaveCount(wantOpen ? 1 : 0);
   }
 });
+
+/* Round twelve, V3: the Survey map says which regions are settled.
+
+   The map could already say where an Anchor was and whether it was lit, one
+   marker at a time. What it could not say was how far through the planet you
+   are - nine rings over four screens of scrolling is a list, and reading it is
+   counting. A calmed region now carries its name in the lit ring's own mint.
+
+   Asserted on the CANVAS, by sampling the pixels the region name is drawn in,
+   because that is the only thing that proves the player can see it. */
+test('the Survey map shows a calmed region differently from an uncalmed one', async ({ page }) => {
+  await enterGame(page);
+
+  const sample = async (lit: number[]) => {
+    return await page.evaluate((litList) => {
+      const cw = (window as unknown as { __cw: {
+        g: { ground: { lit: number[] }; seen: string[] };
+        openMap: () => void; closeMap: () => void; mapDraw: () => void } }).__cw;
+      cw.g.ground.lit = litList;
+      /* The map only draws ground you have surveyed, which is the rule it runs
+         on, so the fixture has to have been there. */
+      const seen: string[] = [];
+      for (let tx = 0; tx < 40; tx++) for (let ty = 0; ty < 40; ty++) seen.push(tx + ',' + ty);
+      cw.g.seen = seen;
+      /* Opened through the game's own openMap/mapDraw rather than by clicking
+         the button twice. The button is not a toggle - `#mapClose` is what
+         closes the map - so a second click re-enters openMap and the first
+         version of this test compared two byte-identical canvases and reported
+         no difference at all. Same path the button takes, one call in. */
+      cw.openMap();
+      cw.mapDraw();
+      const cv = document.querySelector('#map canvas') as HTMLCanvasElement | null;
+      if (!cv) return null;
+      const ctx = cv.getContext('2d')!;
+      const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
+      /* Count pixels that are distinctly mint: green well above red and blue
+         above red too, which is #8fffc8 and nothing else this map draws. */
+      let mint = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] < 40) continue;
+        if (d[i + 1] > d[i] + 40 && d[i + 2] > d[i] + 20) mint++;
+      }
+      cw.closeMap();
+      return mint;
+    }, lit);
+  };
+
+  const none = await sample([]);
+  const some = await sample([0, 1, 2]);
+  expect(none, 'the map canvas was never found, so this test proves nothing').not.toBeNull();
+  /* +700, and the number is MEASURED rather than picked to pass.
+
+     Three lit Anchors put three filled mint RINGS on the map whatever the
+     region names do, so a small threshold passes on the rings alone and proves
+     nothing about this milestone. The three states, counted on this fixture at
+     375x812:
+
+       nothing lit .......................  50 mint pixels
+       three lit, names NOT calmed ....... 539   (the rings by themselves)
+       three lit, names calmed ........... 1057
+
+     700 sits between the last two, so the rings cannot satisfy it and only the
+     names can. Verified by planting exactly that fault - the first version of
+     this assertion used +40 and passed with the calmed colour disabled, which
+     is the whole reason these numbers are written down. Re-measure them if the
+     font, the canvas size or the fixture changes. */
+  expect(some!, `three regions calmed drew ${some} mint pixels against ${none} with none calmed`)
+    .toBeGreaterThan(none! + 700);
+});

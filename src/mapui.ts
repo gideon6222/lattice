@@ -247,8 +247,27 @@ export function draw() {
     const cx = ((i % REGION_COLS) + 0.5) * (W / REGION_COLS) * s;
     const hit = known.has(i);
     const down = isCollapsed(g.ground, i);
+    /* ---------- calmed, which is the map's answer to "how far through" ----------
+
+       Round twelve, V3. Until now the map could tell you where an Anchor was
+       and whether it was lit, one marker at a time, and said nothing at all
+       about the PLANET: nine rings scattered over four screens of scrolling is
+       a list, and reading it is counting.
+
+       A region whose Anchor is lit is calmed, and its name is written in the
+       same mint the lit ring uses. That is the whole change, and it is the
+       research's point - direction comes from a visible contrast between
+       resolved and unresolved that reads at a glance without reading a word.
+       The player has already learned that mint means lit from the ring; this
+       spends that meaning at region scale instead of inventing a legend.
+
+       Region i holds Anchor i for i < ANCHOR_COUNT, by construction in
+       `anchorAt` - the deepest row has no Anchor, so its regions are never
+       calmed and are never drawn as though they are waiting for one. */
+    const calm = i < ANCHOR_COUNT && isLit(g.ground, i);
     x.font = '700 10px "Chakra Petch", system-ui, sans-serif';
     x.fillStyle = down ? 'rgba(214,58,74,.75)'
+      : calm ? 'rgba(143,255,200,.78)'
       : hit ? 'rgba(232,228,218,.42)' : 'rgba(130,145,170,.26)';
     x.fillText(down ? regionName(i).toUpperCase() : hit ? regionName(i).toUpperCase() : '? ? ?',
                cx, py(cd));
