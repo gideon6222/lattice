@@ -2373,11 +2373,25 @@ No new design asks came in during round eight. Every milestone below is either
 something the round left behind or something `POLISH.md` wants before a ship;
 the shape of the game is not up for revision until R9a has happened.
 
-- [ ] **R9a A human play of the whole campaign.** `/playtest`. Round eight has
+- [x] **R9a A human play of the whole campaign.** `/playtest`. Round eight has
       had no human minute in it, and the long-play probe cannot answer the
       questions that matter: does hunting Anchors feel like a hunt or like a
       checklist, is the Survey map worth opening, does the Ballast read as a
       stake or as a chore, and does the fifth Anchor land as an event.
+
+      **Done 2026-09-18.** He played the live v0.48.0 build on his phone and
+      liked it, and his words are in `playtests/lattice.md`. **Ticked on the
+      judgement, not on a completion**: he did not say he reached the Vault, and
+      three of the four questions above are still unanswered - the Survey map,
+      the Ballast, and whether the fifth Anchor lands. What he did answer is the
+      first one and the one that mattered most, sideways: *"I think any more
+      than 7 anchors would feel like a checklist."* That is the checklist half
+      of question one, and it was enough to retire the second month's
+      ranked-first candidate and to set the governing rule of Round twelve.
+
+      The three open questions are worth asking again after T2 and T3 ship,
+      because both of them change what the map and the tally do, and an answer
+      about the old screens would be an answer about a game that no longer runs.
 
       Everything after this is provisional until it is done. Whatever comes out
       of it goes to `playtests/lattice.md` verbatim, and it outranks every
@@ -2783,6 +2797,17 @@ commit messages, not restated here.
 
 # The second month
 
+> **ANSWERED 2026-09-18, and the answer retired candidate 1.** R9a happened: he
+> played the build on his phone and liked it. His first sentence was *"I think
+> any more than 7 anchors would feel like a checklist."* This section's
+> ranked-first candidate was nine MORE Anchors in the deep, which is eighteen.
+> It is dead, and the reasoning below is left standing rather than deleted
+> because **why it was ranked first is the useful part**: it was chosen for
+> being cheapest to build and best fitted to the world's existing shape, and
+> nobody asked whether another nine of the same thing would feel like anything.
+> That is the failure mode this note exists to leave on the record. What
+> replaced it is **Round twelve**, below, and his ceiling is its governing rule.
+
 **A sketch, not a plan, and it is deliberately not started.** `POLISH.md` asks
 for the next month's content to be in this file even when it is not built, and
 the reason to write it now is that round eight ended the game without saying
@@ -2866,3 +2891,206 @@ the version that does, and that is what `src/sim/vaults.ts` is.
 
 **No star chart.** It was a good screen for a game about visiting places and
 this is a game about one place. It comes back if a sequel does.
+
+# Round twelve: the world gets a voice
+
+**His words, 2026-09-18, verbatim in `playtests/lattice.md`:**
+
+> "I think any more than 7 anchors would feel like a checklist. For now, I like
+> how everything is laid out. I want to get this first version onto the play
+> store. Can you set up a plan to make the game feel more rounded and story
+> like? Make more encounters and random events as you go. Make the game feel
+> like it is pushing you in a specific direction, so it doesn't just feel open
+> with no point to the game. Make sure the player knows the objective or is
+> subtly pointed in the correct direction. Expand on all of these requests,
+> research how to do this, then implement it."
+
+## The five asks, numbered
+
+1. **The Play store, for this version.** Ordered first by the word "first", and
+   it is a separate track from everything below. `P5` is what blocks it.
+2. **More rounded and story like.**
+3. **More encounters and random events as you go.**
+4. **Pushed in a specific direction, rather than open with no point.**
+5. **The player knows the objective, or is subtly pointed at it.**
+
+**2 through 5 are one problem in four voices**, and reading them separately is
+how this round would get built wrong. The world is a place with no pressure and
+no voice in it. Story, encounters, direction and objective are four different
+symptoms of that, and the fix for all four is the same: **the world has to say
+something.** They are kept as separate asks below only so that each can be
+checked off against his words.
+
+## The governing rule of this round
+
+**The answer to "the game needs more" is never another Anchor.** Nine ship; he
+has named seven as the ceiling where collecting stops being a hunt. Every
+milestone here is checked against that rule, and the rule is the reason the
+second month's ranked-first candidate is dead rather than deferred.
+
+Read it as a ceiling on the COUNT and not as an instruction to cut: *"for now, I
+like how everything is laid out"* is the sentence beside it, and nine laid-out
+Anchors are what he likes. **What he is refusing is more collectibles in an
+empty world**, which is exactly what the Anchors were being asked to supply and
+exactly what they cannot.
+
+## The diagnosis, measured rather than asserted
+
+Four findings, each checked against the running build at v0.48.0 rather than
+against memory.
+
+**The objective is never on screen.** A screenshot of the pad at 375x812 shows
+the whole HUD: the region name (`Rustmoor`), `HAUL ◈ 0`, `◈ 0`, `DEPTH 0 m /
+452 m DEEP`, a fuel gauge, a d-pad, and five buttons. **Not one pixel names the
+Anchors, the Vault or the Lattice.** The only goal-shaped number on screen is
+`452 m DEEP`, which says go down and never says why. That single frame is most
+of asks 4 and 5.
+
+**The objective is stated once, to a player who no longer exists.** It is three
+lines in the intro (`src/sim/intro.ts`): *"Whoever cut these halls is gone."*,
+*"Nine Anchors, buried across one world."*, *"Light all nine, and the center
+opens."* The intro plays only when there is NO save (`main.ts` shows the title
+instead when one exists), so the campaign is explained exactly once, to a player
+who has never played, and never again to the player who comes back on day three.
+
+**The tally exists but is buried.** `src/input.ts:371` renders `Anchors lit, of
+nine` with a count - inside the pause sheet's record book, under Relics and
+Records. It is a statistic in a menu, not a goal on a screen.
+
+**94% of the world is silent.** 23 authored rooms, 1,764 cells, 5.8% of the
+planet. The other 94% holds ore, three hazards and nothing that would ever be
+retold. `src/sim/finds.ts` is the one exception and it is the proof the idea
+works: seven devices buried in hashed cells, each granting a verb, each a small
+story when it surfaces.
+
+## What the research settled
+
+Three briefs, 2026-09-18, kept at `C:\dev\plans\lattice\DIRECTION.md` and
+`STORY.md` with their sources.
+
+**Both independently reached his conclusion before being told it.** The
+direction brief: *"the fix is not more Anchors - it's making the Ballast, the
+Survey map and the Anchors' calmed/uncalmed state readable from a distance and
+audible from underground."* The story brief: *"a wordless game's story is not
+delivered, it is noticed."* His instinct and the reference games agree, which is
+the strongest signal this round has.
+
+**Direction, the three ingredients every reference game shares.** A
+limited-visibility instrument that makes the unknown adjacent rather than
+distant; a signal that ARRIVES from the world and can be ignored; and a visible
+contrast between resolved and unresolved that reads at a glance without reading
+a word. The Lattice already has the first (the lamp) and the third in data (lit
+versus unlit regions) but has never drawn it where the player looks.
+
+**Story, the four rules.** Push on what exists rather than adding. Make the wake
+a visible rewrite of ground already dug. Keep every found record a silent
+tableau rather than a log. **And pair every beat with a visual or haptic
+carrier, never audio alone** - a phone game is played muted, and the sourced
+finding is that needless audio gets muted immediately and stays muted.
+
+**What the research says to SKIP**, recorded so it is not rediscovered: audio
+logs and data slates (players skip them, and this game is muted-first), voice
+acting, cutscenes (they contradict this game's own grammar, where the `#found`
+banner is deliberately not a modal), Outer Wilds' dense knowledge web (needs
+20+ nodes, and nine would read thin - and it is the most tempting way to
+accidentally rebuild "more things to find"), and Hollow Knight's NPC-dialogue
+half (needs a written character).
+
+## The design
+
+Four systems. Every one of them reuses machinery this repo already has, and not
+one of them adds an Anchor.
+
+**T1 The Call - direction as an instrument, not a marker.** An unlit Anchor is
+ancient machinery and it should be audible from underground. The ship gets a
+RESONANCE reading in the instrument cluster that strengthens with true proximity
+to the nearest unlit Anchor. It is warmer-and-colder, never a bearing arrow and
+never a 3D waypoint: the player still has to choose a direction and dig it, which
+is the decision the whole game is built on. The fiction and the instrument are one
+object, which `mechanics\FOUNDATIONS.md` asks for.
+
+**The receiver is one of the FINDS.** It is not owned at the start; it is dug up,
+like the laser. That costs nothing extra (`finds.ts` is built and tested), makes
+the direction system arrive as a discovery rather than as a UI feature, and means
+the first descent is still the unguided one it should be.
+
+**T2 The objective, always legible.** A standing Anchor tally in the HUD's top
+row, in the Lattice's own glyph rather than as a quest line, plus the Survey map
+redrawn so lit and unlit regions separate at a glance. This is the cheapest
+milestone in the round and it answers ask 5 almost by itself.
+
+**T3 Encounters - the 94% gets something to say.** Authored pockets stamped into
+seeded slots, the way `vaults.ts` already stamps Anchor halls, each asking a
+QUESTION the player answers with the verbs they have (fly, dig, carry, sell,
+buy). No combat and no new verb. The detailed archetypes are in the milestone
+table below.
+
+**T4 The world changes, which is the story.** The wake at the fifth Anchor is
+already a threshold event and it is the shape to copy: a three-act grade over
+the existing Unrest thresholds, the wake rewriting tunnels the player themselves
+cut, and an ending that shows the dug world rather than only stating a sentence
+about it.
+
+## Milestones
+
+Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
+
+- [ ] **T0 The Play store, this version.** Ask 1, and it runs beside the rest
+      rather than after it. The machine side is done: listing text, four
+      screenshots, feature graphic, 512 icon, release notes, the TWA, and
+      assetlinks. A current bundle was built 2026-09-18 and is 1.29 MB.
+      **What blocks it is his, at the console**, and `C:\dev\PLAY-HANDOFF.md`
+      lists it: the tester list, the category and contact email, his read of the
+      listing words (P5), and pressing Sync listing, which is the only way a
+      listing reaches Google now that `autoListing` defaults off.
+      **Also owed: Play carries v0.39.0.** The store switch records one upload,
+      `v0.39.0` to internal on 2026-09-13. He played 0.48.0. A ship has to put
+      the current bundle on a `v*` release before any of his console steps mean
+      anything.
+
+- [ ] **T1 The Call.** `src/sim/` gets a pure `resonance(x, d, lit)` returning
+      0..1 from true distance to the nearest UNLIT Anchor, and nothing else. The
+      receiver joins `FINDS` on its own seed offset - **11, 23, 41, 77, 91, 131,
+      137, 173, 211, 257, 311, 313, 421, 601, 619, 977 and 1013 are taken**, so
+      it takes one that is not. Proved by: a test that the reading rises
+      monotonically along a straight approach, that lighting an Anchor drops its
+      contribution to zero, and that with all nine lit the reading is flat zero
+      everywhere. Renderer-free, so `milestone-builder` can take it.
+
+- [ ] **T2 The reading, and the tally.** T1 drawn: a resonance needle in the
+      instrument cluster, and the standing `n / 9` Anchor tally in the HUD top
+      row. **Both carry visually, and the audio ping is an addition to the
+      needle and never the only carrier** - the muted-phone rule. Judged by eye
+      at 375x812 and on the phone, so it stays with this session.
+
+- [ ] **T3 The Survey map separates lit from unlit at a glance.** Ask 5's other
+      half. The map already knows; it does not currently say.
+
+- [ ] **T4 The encounter frame.** One pure module: a weighted pool, a pity
+      timer, once-only beats, and a seeded roll on its own offset, with the
+      archetypes as data. No content yet - this is the frame the content lands
+      in, and it is renderer-free and fully testable.
+
+- [ ] **T5 The first three encounters.** Three archetypes from the research,
+      each asking a question answered with fly, dig, carry, sell or buy. Each
+      one deterministic from a seed and asserted by a test.
+
+- [ ] **T6 The wake rewrites what you dug.** The story brief's highest-ranked
+      technique: at the fifth Anchor, tunnels the player already cut visibly
+      change. It reuses `collapse.ts` and the stamper, needs no text, and
+      survives a muted phone.
+
+- [ ] **T7 The three-act grade.** A palette and lighting grade driven off the
+      existing Unrest thresholds, so the planet visibly darkens as it wakes.
+
+- [ ] **T8 The first ten seconds show a ruin.** The story brief's first-minute
+      finding: worked geometry in view before it is reachable, no text. The
+      intro already has the shot; what it lacks is the glimpse for the RETURNING
+      player, who never sees the intro at all.
+
+- [ ] **T9 The ending shows the world.** A pull-back over the dug planet behind
+      the existing card, so the ending hands back a place the player can see
+      they made.
+
+**T0 through T3 are the round's first delivery** and they are the ones that
+answer asks 4 and 5. T4 and T5 answer ask 3. T6 through T9 answer ask 2.
