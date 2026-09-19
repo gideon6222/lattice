@@ -5118,3 +5118,35 @@ folder list is ps1, py, gd, md, yml, with no ts, mjs or js). Scanned by hand
 instead: 263 hand-written text files, no byte under 32 other than tab, LF or
 CR. Filed as a lesson against `WEB.md`; the fix is in a different repo, which
 rule 13c makes somebody else's.
+
+## Open: the measured phone pass has no tooling in this game
+
+**Both handsets are connected as of 2026-09-18** (`phone.ps1 devices`: the main
+S26 Ultra and the floor S22+), so the pass owed since round nine is no longer
+blocked on the cable. It is blocked on this instead, and both halves are the
+same shape as the finding above:
+
+- **This game has no `scripts\device.ps1`.** All seven Godot repos carry the
+  template's 1,068-line copy; the one web game has never had one. `INDEX.md`
+  says the handset "is always taken through the game's `scripts\device.ps1` ...
+  and never through a bare `adb` call", so for The Lattice there is currently no
+  sanctioned way to take the phone at all.
+- **`DEVICE.md` does not mention web, Chrome or a PWA anywhere.** Rule 18c says
+  to ask `DEVICE.md` first and the handset only for what it has not answered.
+  For this stack it has answered nothing, because its three visuals tiers and
+  their GPU-millisecond budgets are written against a Godot game printing a
+  `VISUALS` line.
+
+**What is owed is the MEASURED half only.** Gideon played the live build on his
+phone on 2026-09-18 and it is the first human play this game has had, so the
+feel half of the pass is done and is recorded in `playtests/lattice.md`. What no
+one has is frame time under a thumb, thermal after ten minutes, and the PWA
+install and offline check, which `WEB.md` says cannot be exercised anywhere but
+real Chrome or the handset.
+
+**Not started, because it is a decision rather than a task.** Either this game
+gets a web `device.ps1` (claim the lease, drive Chrome at the live URL, read
+`dumpsys gfxinfo`, screenshot, release) and `DEVICE.md` grows a web section, or
+the studio decides a web game's pass is the hand pass he already did and says so
+in `WEB.md`. Writing 1,068 lines of Godot-shaped harness for one game without
+that decision is how the studio ends up with two answers to the same question.
