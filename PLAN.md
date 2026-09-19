@@ -2960,12 +2960,23 @@ Anchors, the Vault or the Lattice.** The only goal-shaped number on screen is
 `452 m DEEP`, which says go down and never says why. That single frame is most
 of asks 4 and 5.
 
-**The objective is stated once, to a player who no longer exists.** It is three
-lines in the intro (`src/sim/intro.ts`): *"Whoever cut these halls is gone."*,
-*"Nine Anchors, buried across one world."*, *"Light all nine, and the center
-opens."* The intro plays only when there is NO save (`main.ts` shows the title
-instead when one exists), so the campaign is explained exactly once, to a player
-who has never played, and never again to the player who comes back on day three.
+**The objective is stated at the door and never once inside.** It is three lines
+in the intro (`src/sim/intro.ts`): *"Whoever cut these halls is gone."*, *"Nine
+Anchors, buried across one world."*, *"Light all nine, and the center opens."*
+The intro plays only when there is NO save, and a returning player gets the
+title screen instead.
+
+**This finding was first written as "never again to the player who comes back"
+and that was too strong.** Shooting the title screen for V8 disproved it: it
+carries *"Dig down. Light the Anchors. Open the center."* under the name and
+*"Rustmoor - 140 m of 452 - 0 of 9 Anchors lit"* along the foot. A returning
+player is told, clearly, on the way in. Corrected here rather than quietly
+softened, because an overstated diagnosis is the same fault as a stale one and
+this round has already retired one of those (M7).
+
+**What was true is the sharper claim**, and it is the one V2 answered: the
+objective was on the way IN and nowhere in the game. Once play starts, the
+title is gone and the HUD named nothing.
 
 **The tally exists but is buried.** `src/input.ts:371` renders `Anchors lit, of
 nine` with a count - inside the pause sheet's record book, under Relics and
@@ -3203,10 +3214,23 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
 - [ ] **V7 The three-act grade.** A palette and lighting grade driven off the
       existing Unrest thresholds, so the planet visibly darkens as it wakes.
 
-- [ ] **V8 The first ten seconds show a ruin.** The story brief's first-minute
-      finding: worked geometry in view before it is reachable, no text. The
-      intro already has the shot; what it lacks is the glimpse for the RETURNING
-      player, who never sees the intro at all.
+- [x] **V8 The first ten seconds show a ruin.** The story brief's first-minute
+      finding: worked geometry in view before it is reachable, no text.
+
+      **Already true, and the box was written on a wrong assumption.** It said
+      the returning player "never sees the intro at all" and therefore lacks the
+      shot. They do not see the intro, but they see the TITLE, and the title
+      screen IS the first Anchor's hall in the dark with the Anchor's own glow
+      the only light in it. Shot at 1080x2340 on 2026-09-18 to check rather than
+      to trust the comment: cut stone walls standing in rough rock, one glowing
+      goal-shaped object in the middle of them and no way to reach it yet, which
+      is exactly the Dark Souls / Hollow Knight / Inside opening the research
+      describes. It also carries "Dig down. Light the Anchors. Open the center."
+      and "0 of 9 Anchors lit".
+
+      Ticked on the evidence rather than built, and the diagnosis above was
+      corrected in the same pass - it had claimed the returning player is told
+      the objective "never again", and this screenshot is what disproved it.
 
 - [ ] **V9 The ending shows the world.** A pull-back over the dug planet behind
       the existing card, so the ending hands back a place the player can see

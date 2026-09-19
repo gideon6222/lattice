@@ -5172,9 +5172,14 @@ complaint completely:
 
 - The objective is stated three times, in `src/sim/intro.ts`.
 - **The intro only plays when there is NO save.** `main.ts` shows the title
-  instead when one exists. So the campaign is explained exactly once, to a
-  player who has never played, and never again to the one who comes back on day
-  three - which is every session after the first.
+  instead when one exists.
+- **And the first version of this note then over-reached**, saying the returning
+  player is told "never again". Shooting the title screen for V8 disproved it:
+  it carries "Dig down. Light the Anchors. Open the center." and "0 of 9 Anchors
+  lit" along the foot. The true claim is narrower and sharper - the objective is
+  on the way IN and nowhere in the game itself. Corrected rather than softened,
+  because this same round retired an M7 box for being stale in the other
+  direction.
 - The tally exists at `src/input.ts:371` as `Anchors lit, of nine`, inside the
   pause sheet's record book under Relics and Records. A statistic in a menu is
   not a goal on a screen.
