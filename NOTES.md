@@ -5928,6 +5928,28 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## 2026-09-19: the listing is approved, and V0 is not
+
+Verbatim: *"The listing looks good. What is V0?"*
+
+**P5 is done and that is all that is done.** The listing words were the box
+blocking the Play work, and they are approved. The hold on V0 was given the day
+before in different words - *"I will hold off on adding anything to the play
+store for now"* - and approving the copy does not lift it. Reading the two as
+one approval would ship a build he did not ask to ship, which is the single
+irreversible act on this list: a bundle on Play cannot be withdrawn, only
+superseded.
+
+**That he had to ask what V0 IS, is the finding.** The milestone codes are this
+plan's shorthand and they are useless to him, because he reads the reports and
+not the plan. Every report that names a box should say what the box is in the
+same sentence, or it is written for the file rather than for him. Three reports
+in a row here ended with "P5, V0 and V5b" and expected that to mean something.
+
+**OWED:** his words belong in `C:\dev\gamedev-notes\playtests\lattice.md` and
+the Courier held the knowledge-base lease when this was written. Append them
+there when it clears.
+
 ## 2026-09-19, desk playtest: meeting a wreck and cutting into it
 
 Filmed rather than screenshotted, because the milestone changes what the player

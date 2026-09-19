@@ -2774,8 +2774,18 @@ commit messages, not restated here.
       cannot catch a wrong state in a game whose stars twinkle - assert the sim,
       not the picture.
 
-- [ ] **P5 Gideon reads the listing text.** Title, short description and full
-      description are drafted in `store/listing/en-US/`. Nothing goes to Play
+- [x] **P5 Gideon reads the listing text.** **Approved 2026-09-19: "The listing
+      looks good."** Title, short description and full description in
+      `store/listing/en-US/`, as refreshed that day for rounds twelve and
+      thirteen - the strained lode, which the copy had never mentioned at all,
+      and the derelict drill ships.
+
+      **This is approval of the WORDS and not of the ship.** The hold on V0 was
+      given separately and in different words ("I will hold off on adding
+      anything to the play store for now") and nothing here lifts it.
+
+      Title, short description and full description are drafted in
+      `store/listing/en-US/`. Nothing goes to Play
       until he has read them, and the PITCH is his call and not a session's -
       which is why the draft is flagged here rather than quietly rewritten.
       This box is his and only his; it is not waiting on any work.
@@ -3067,15 +3077,24 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       Ask 1, and it runs beside the rest
       rather than after it. The machine side is done: listing text, four
       screenshots, feature graphic, 512 icon, release notes, the TWA, and
-      assetlinks. A current bundle was built 2026-09-18 and is 1.29 MB.
+      assetlinks. The bundle is rebuilt at 0.54.0, version code 6, 4.31 MB - up
+      from 1.29 MB because bubblewrap derives the splash screen from the icon
+      and the icon is a photograph now; an AAB splits by density, so a phone
+      downloads about 1.4 MB more than before rather than the whole 3 MB.
       **What blocks it is his, at the console**, and `C:\dev\PLAY-HANDOFF.md`
-      lists it: the tester list, the category and contact email, his read of the
-      listing words (P5), and pressing Sync listing, which is the only way a
-      listing reaches Google now that `autoListing` defaults off.
-      **Also owed: Play carries v0.39.0.** The store switch records one upload,
-      `v0.39.0` to internal on 2026-09-13. He played 0.48.0. A ship has to put
+      lists it: the tester list (nobody can install from Play until an internal
+      tester list exists and he opens the opt-in link on the phone), the
+      category and contact email, and pressing Sync listing, which is the only
+      way a listing reaches Google now that `autoListing` defaults off. Then
+      promotion to closed, open or production, where the first production
+      release goes through a Google review that takes days.
+      **P5 is no longer among them** - the listing words were approved
+      2026-09-19, "The listing looks good."
+      **The one part that is a session's and is still owed: Play carries
+      v0.39.0.** The store switch records one upload, `v0.39.0` to internal on
+      2026-09-13. He played 0.48.0 and the game is 0.54.0 now. A ship has to put
       the current bundle on a `v*` release before any of his console steps mean
-      anything.
+      anything, and that is the first thing to do the moment the hold is lifted.
 
 - [x] **V1 The Call.** `src/sim/call.ts`, pure and renderer-free:
       `resonance(x, d, lit)` is the loudest unlit Anchor's voice, 0..1, over a
