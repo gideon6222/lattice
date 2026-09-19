@@ -3090,11 +3090,27 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       release goes through a Google review that takes days.
       **P5 is no longer among them** - the listing words were approved
       2026-09-19, "The listing looks good."
-      **The one part that is a session's and is still owed: Play carries
-      v0.39.0.** The store switch records one upload, `v0.39.0` to internal on
-      2026-09-13. He played 0.48.0 and the game is 0.54.0 now. A ship has to put
-      the current bundle on a `v*` release before any of his console steps mean
-      anything, and that is the first thing to do the moment the hold is lifted.
+      **The session's part is DONE, 2026-09-19**, at his word ("complete what
+      you can on your end"): `v0.54.0` carries `lattice.aab`, 4,308,819 bytes,
+      version code 6. Play still carries v0.39.0 and will until he says
+      otherwise.
+
+      **And the release was NOT inert, which is the thing to read before doing
+      this again.** `agent\store.ps1 -Auto` runs every Courier round, about
+      every ten minutes, and its own documentation says *"a game with autoUpload
+      on whose newest v* release holds a bundle not yet uploaded is uploaded to
+      internal ... with nobody pressing anything."* `autoUpload` was TRUE for
+      this game. Cutting the tag would have put the bundle on Play inside ten
+      minutes and breached the hold - a bundle on Play cannot be withdrawn, only
+      superseded. It was described to him as "my side, separate from the console
+      which is yours", and that separation does not exist on this machine.
+
+      He chose the safe order: `autoUpload` off first (through
+      `store.ps1 -Action set`, not by hand, so the Courier's writer is not
+      raced), then the release. **So flipping that switch back on is now part of
+      lifting the hold**, and the dashboard's Store tab is where it lives. The
+      one-key diff was verified before and after, and the `uploaded` record was
+      watched across two Courier rounds and still shows only v0.39.0.
 
 - [x] **V1 The Call.** `src/sim/call.ts`, pure and renderer-free:
       `resonance(x, d, lit)` is the loudest unlit Anchor's voice, 0..1, over a
