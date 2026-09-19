@@ -5735,3 +5735,20 @@ Anyone changing the icon again owes the same second step, and a wrapper rebuilt
 too early carries the old picture while every other surface has the new one -
 which is the exact disagreement `test/icons.test.mjs` exists to stop, in the one
 place that test cannot see.
+
+**And the icon is the SPLASH, which is where the bundle went.** Rebuilding at
+v0.53.1 took `build/lattice.aab` from 1.29 MB to 4.31 MB, and the whole of that
+is one thing: bubblewrap has no splash field, it derives the splash screen from
+`iconUrl`, and a photograph does not compress the way the flat vector did.
+Measured out of the bundle rather than guessed - `splash.png` is 1.19 MB at
+xxxhdpi, 0.78 at xxhdpi, 0.43 at xhdpi, 0.28 at hdpi and 0.14 at mdpi, 2.82 MB
+of the 3.02 MB added. The launcher and maskable icons together are 440 KB across
+all five densities, and the 2.08 MB `proguard.map` is BUNDLE-METADATA and is not
+delivered to anyone.
+
+**An AAB splits by density, so no phone downloads that.** An xxxhdpi handset
+gets one splash, one maskable and one launcher icon: about 1.4 MB more than
+before, on an install of roughly 2.5 MB. Left as it is, deliberately. The one
+way to cut it is a second, cheaper encoding of the same picture for `iconUrl`,
+and a second rendering that can drift from the first is the entire failure this
+round was about - for about a megabyte.
