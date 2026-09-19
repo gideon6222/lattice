@@ -7,6 +7,7 @@ import { heatDamagePerSecond } from './sim/feel';
 import type { Upgrade, Supply } from './types';
 import { VERSION, CHANGELOG } from './changelog';
 import { haulValue } from './sim/world';
+import { ANCHOR_COUNT, vaultOpen } from './sim/vaults';
 import { lamp } from './scene';
 import { setDrillTier, setUpgradeHardware } from './ship';
 import { sfx, audioState, audioVolume } from './audio';
@@ -31,6 +32,7 @@ export const mustEl = (id: string): HTMLElement => {
 };
 export const ui = {
   planet: mustEl('planet'), credits: mustEl('credits'), haul: mustEl('haul'), depth: mustEl('depth'),
+  anchors: mustEl('anchors'),
   cargoTxt: mustEl('cargoTxt'), fuelTxt: mustEl('fuelTxt'),
   toast: mustEl('toast'), shop: mustEl('shop'), shopCredits: mustEl('shopCredits'),
   shopCard: mustEl('shopCard'), shopHint: mustEl('shopHint'),
@@ -187,6 +189,45 @@ export function flash(color: string, ms?: number) {
 export const atSurface = aboveGround;
 export { docked };
 
+/* The Anchor tally, built once and then only reclassed.
+
+   Nine pips and a Vault diamond. Built here rather than in index.html because
+   ANCHOR_COUNT is the source of how many there are - CLAUDE.md's own note on the
+   Outfitter records what the literal version of that costs: an e2e asserted one
+   display case per upgrade against a hard-coded 10, failed for the wrong reason,
+   and "would have been fixed by editing the number". A row of nine hand-written
+   <i> tags is the same mistake waiting for the day the grid changes. */
+let anchorPips: HTMLElement[] = [];
+let vaultPip: HTMLElement | null = null;
+function buildAnchorPips() {
+  if (anchorPips.length) return;
+  for (let i = 0; i < ANCHOR_COUNT; i++) {
+    const pip = document.createElement('i');
+    anchorPips.push(pip);
+    ui.anchors.appendChild(pip);
+  }
+  vaultPip = document.createElement('i');
+  vaultPip.className = 'vault';
+  ui.anchors.appendChild(vaultPip);
+}
+
+/* Which pip means which Anchor is deliberately NOT the region order.
+
+   A pip lights when the COUNT reaches its index, so the row fills left to
+   right whatever order they are found in. Mapping pip i to Anchor i would make
+   the row a map - a gap in the middle would say "you have not done the middle
+   one", which is a location, and this game's whole direction design is that the
+   instrument says near and never says where (src/sim/call.ts). The row answers
+   "how far through", and the Survey map answers "which". */
+function paintAnchorPips() {
+  buildAnchorPips();
+  const lit = g.ground.lit.length;
+  for (let i = 0; i < anchorPips.length; i++) {
+    anchorPips[i].classList.toggle('lit', i < lit);
+  }
+  if (vaultPip) vaultPip.classList.toggle('open', vaultOpen(lit));
+}
+
 export function updateHUD() {
   /* The chip names WHERE YOU ARE, and it is the only always-visible place that
      happens.
@@ -213,6 +254,7 @@ export function updateHUD() {
      just how deep it goes, and naming it after the thing you used to break
      there points the player at an objective that is no longer the objective. */
   ui.depth.textContent = 'DEPTH ' + Math.max(0, Math.round(g.pd)) + ' m   /   ' + coreM() + ' m DEEP';
+  paintAnchorPips();
   /* The dials take fractions and do their own smoothing - see gauges.ts. The
      two numbers under them are the exact reading a needle cannot give you, and
      fuel is the one that decides whether to turn round. Rounded UP, so a gauge

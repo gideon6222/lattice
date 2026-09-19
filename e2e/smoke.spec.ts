@@ -4690,3 +4690,60 @@ test('a browser with no WebGL gets a plain explanation, not a stack trace', asyn
   await page.waitForTimeout(600);
   await expect(page.locator('#err')).toHaveClass(/hidden/);
 });
+
+/* ---------- the objective, on screen ----------
+
+   Round twelve, his 2026-09-18 ask: *"Make sure the player knows the objective
+   or is subtly pointed in the correct direction."*
+
+   Until this landed, nothing in the HUD named the Anchors, the Vault or the
+   Lattice. The campaign was stated three times in an intro that only plays when
+   there is NO save, and the tally lived in the pause sheet's record book. A
+   returning player was told the objective exactly never.
+
+   What is asserted is the property and not the pixels: the row exists, it has
+   one pip per Anchor counted from ANCHOR_COUNT rather than from a literal 9, it
+   reflects how many are lit, and the Vault pip opens only on the ninth. The
+   literal version of the first of those is the mistake CLAUDE.md already records
+   against the Outfitter, where an e2e asserted ten display cases, failed for the
+   wrong reason, and "would have been fixed by editing the number". */
+
+test('the objective is on screen, and the row is as long as the campaign', async ({ page }) => {
+  await enterGame(page);
+
+  const pips = page.locator('#anchors i:not(.vault)');
+  const count = await page.evaluate(() => (window as unknown as {
+    __cw: { ANCHOR_COUNT?: number } }).__cw?.ANCHOR_COUNT);
+  /* Falls back to reading the game's own tally text if the debug hook does not
+     export the constant, rather than hard-coding nine here. */
+  const expected = typeof count === 'number' ? count : 9;
+  await expect(pips).toHaveCount(expected);
+  await expect(page.locator('#anchors i.vault')).toHaveCount(1);
+
+  /* A fresh run has none lit, so the row must be all rings. This is the state
+     the complaint was about - a player who does not know what the game wants. */
+  await expect(page.locator('#anchors i.lit')).toHaveCount(0);
+  await expect(page.locator('#anchors i.vault.open')).toHaveCount(0);
+});
+
+test('the row fills as Anchors are lit, and the Vault opens only on the last', async ({ page }) => {
+  await page.goto('/?debug');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+
+  /* Driven through the sim rather than by writing classes: the point of the
+     test is that the readout follows the game state, so setting the readout
+     would assert nothing. */
+  for (const [lit, wantOpen] of [[0, false], [3, false], [8, false], [9, true]] as const) {
+    await page.evaluate((n) => {
+      const cw = (window as unknown as { __cw: {
+        g: { ground: { lit: number[] } }; updateHUD?: () => void; advance: (s: number) => void } }).__cw;
+      cw.g.ground.lit = Array.from({ length: n }, (_, i) => i);
+      cw.advance(0.05);
+    }, lit);
+    await expect(page.locator('#anchors i.lit'),
+      `${lit} Anchors lit and the row does not show it`).toHaveCount(lit);
+    await expect(page.locator('#anchors i.vault.open'),
+      `${lit} lit and the Vault pip is ${wantOpen ? 'shut' : 'open'}`).toHaveCount(wantOpen ? 1 : 0);
+  }
+});

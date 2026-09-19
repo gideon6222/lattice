@@ -3001,7 +3001,7 @@ half (needs a written character).
 Four systems. Every one of them reuses machinery this repo already has, and not
 one of them adds an Anchor.
 
-**T1 The Call - direction as an instrument, not a marker.** An unlit Anchor is
+**The Call - direction as an instrument, not a marker.** An unlit Anchor is
 ancient machinery and it should be audible from underground. The ship gets a
 RESONANCE reading in the instrument cluster that strengthens with true proximity
 to the nearest unlit Anchor. It is warmer-and-colder, never a bearing arrow and
@@ -3014,18 +3014,18 @@ like the laser. That costs nothing extra (`finds.ts` is built and tested), makes
 the direction system arrive as a discovery rather than as a UI feature, and means
 the first descent is still the unguided one it should be.
 
-**T2 The objective, always legible.** A standing Anchor tally in the HUD's top
+**The objective, always legible.** A standing Anchor tally in the HUD's top
 row, in the Lattice's own glyph rather than as a quest line, plus the Survey map
 redrawn so lit and unlit regions separate at a glance. This is the cheapest
 milestone in the round and it answers ask 5 almost by itself.
 
-**T3 Encounters - the 94% gets something to say.** Authored pockets stamped into
+**Encounters - the 94% gets something to say.** Authored pockets stamped into
 seeded slots, the way `vaults.ts` already stamps Anchor halls, each asking a
 QUESTION the player answers with the verbs they have (fly, dig, carry, sell,
 buy). No combat and no new verb. The detailed archetypes are in the milestone
 table below.
 
-**T4 The world changes, which is the story.** The wake at the fifth Anchor is
+**The world changes, which is the story.** The wake at the fifth Anchor is
 already a threshold event and it is the shape to copy: a three-act grade over
 the existing Unrest thresholds, the wake rewriting tunnels the player themselves
 cut, and an ending that shows the dug world rather than only stating a sentence
@@ -3035,7 +3035,7 @@ about it.
 
 Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
 
-- [ ] **T0 The Play store, this version.** Ask 1, and it runs beside the rest
+- [ ] **V0 The Play store, this version.** Ask 1, and it runs beside the rest
       rather than after it. The machine side is done: listing text, four
       screenshots, feature graphic, 512 icon, release notes, the TWA, and
       assetlinks. A current bundle was built 2026-09-18 and is 1.29 MB.
@@ -3048,49 +3048,110 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       the current bundle on a `v*` release before any of his console steps mean
       anything.
 
-- [ ] **T1 The Call.** `src/sim/` gets a pure `resonance(x, d, lit)` returning
-      0..1 from true distance to the nearest UNLIT Anchor, and nothing else. The
-      receiver joins `FINDS` on its own seed offset - **11, 23, 41, 77, 91, 131,
-      137, 173, 211, 257, 311, 313, 421, 601, 619, 977 and 1013 are taken**, so
-      it takes one that is not. Proved by: a test that the reading rises
-      monotonically along a straight approach, that lighting an Anchor drops its
-      contribution to zero, and that with all nine lit the reading is flat zero
-      everywhere. Renderer-free, so `milestone-builder` can take it.
+- [x] **V1 The Call.** `src/sim/call.ts`, pure and renderer-free:
+      `resonance(x, d, lit)` is the loudest unlit Anchor's voice, 0..1, over a
+      40-cell reach chosen against the region grid rather than by eye. **A
+      proximity reading and deliberately not a bearing** - it answers "is one
+      near here" and never "it is that way", because choosing a direction and
+      digging it is the decision the game is built on, and an arrow deletes it.
+      **Done 2026-09-18**, nine tests. The receiver that carries it moved to V2b
+      with the needle, since a device with nothing drawing it is a dead key.
 
-- [ ] **T2 The reading, and the tally.** T1 drawn: a resonance needle in the
-      instrument cluster, and the standing `n / 9` Anchor tally in the HUD top
-      row. **Both carry visually, and the audio ping is an addition to the
-      needle and never the only carrier** - the muted-phone rule. Judged by eye
-      at 375x812 and on the phone, so it stays with this session.
+      Two things worth carrying forward. The monotonic-on-approach property
+      belongs to `callFrom` (one Anchor) and NOT to `resonance` (the max over
+      unlit ones), because walking toward a far Anchor while leaving a near one
+      should make the reading fall - the first test asserted it on the wrong
+      function and failed on the real layout, where three Anchors sit in a row.
+      And the taken seed offsets are **11, 23, 41, 77, 91, 131, 137, 173, 211,
+      257, 311, 313, 421, 601, 619, 977 and 1013**; this milestone needed none,
+      because it rolls nothing.
 
-- [ ] **T3 The Survey map separates lit from unlit at a glance.** Ask 5's other
+- [x] **V2 The tally, always on screen.** Nine pips under the depth line that
+      fill as Anchors are lit, and a tenth diamond for the Vault that opens only
+      on the ninth. Pips and not `3 / 9` because the research is specific: what
+      creates direction is a visible contrast between resolved and unresolved
+      that reads AT A GLANCE without reading a word, and a count has to be read
+      and compared. Built from `ANCHOR_COUNT` and never from a literal nine, and
+      so is the e2e that counts them.
+      **Done 2026-09-18, v0.49.0.** Verified by reintroducing the bug: opening
+      the Vault pip one Anchor early fails the e2e naming it.
+
+- [ ] **V2b The resonance needle.** V1's reading drawn in the instrument
+      cluster, and the receiver that carries it added to `FINDS` so it arrives
+      as a discovery rather than as a UI feature. Split out of V2 on 2026-09-18
+      rather than left as a half-ticked box (rule 3b): the tally needed no new
+      device and shipped the same day, and the needle needs an upgrade key, a
+      display case in `station.ts` - which throws at boot without one - and the
+      e2e that counts cases against `UPGRADES.length`.
+      **Both carry visually, and the audio ping is an addition to the needle and
+      never the only carrier** - the muted-phone rule. Judged by eye at 375x812
+      and on the phone, so it stays with a session rather than a builder.
+
+- [ ] **V3 The Survey map separates lit from unlit at a glance.** Ask 5's other
       half. The map already knows; it does not currently say.
 
-- [ ] **T4 The encounter frame.** One pure module: a weighted pool, a pity
+- [ ] **V4 The encounter frame.** One pure module: a weighted pool, a pity
       timer, once-only beats, and a seeded roll on its own offset, with the
       archetypes as data. No content yet - this is the frame the content lands
       in, and it is renderer-free and fully testable.
 
-- [ ] **T5 The first three encounters.** Three archetypes from the research,
-      each asking a question answered with fly, dig, carry, sell or buy. Each
-      one deterministic from a seed and asserted by a test.
+      **The three definitions this round works to**, from the research, because
+      the whole ask turns on them. A **hazard** is an unconditional rule the sim
+      applies with no choice attached - a gas pocket opening the hull is a
+      hazard, and this game currently has only hazards. An **encounter** is a
+      hazard made legible BEFORE it resolves: a visible tell, plus a response
+      using a verb the player already has. An **event** is an encounter with a
+      named, once-off decision that costs something on EVERY branch, which is
+      what makes it retellable. Slay the Spire's Golden Idol is the clean case:
+      four buttons and not one of them is free.
 
-- [ ] **T6 The wake rewrites what you dug.** The story brief's highest-ranked
+      **Two numbers the frame exists to enforce**, both measured in shipped
+      games. Telegraph before the stakes land (Deep Rock's mission warnings,
+      Terraria's "a goblin army is approaching"). And throttle repeats
+      explicitly, or a good beat becomes wallpaper: Slay the Spire removes a
+      one-time event from the pool once seen in a run, and Terraria decays an
+      invasion's chance from 1/3 to 1/30 to 1/60 after it is beaten. Deep Rock
+      caps it the other way, at most two mutators per mission and at most one
+      anomaly, with at least one mission per rotation left clean. **A clean
+      descent has to stay possible**, or the pressure stops reading as pressure.
+
+- [ ] **V5 The first three encounters.** The research's top three, which are top
+      because each extends a system this repo already has rather than adding one.
+
+      **1. The telegraphed gas bloom.** The existing gas pocket gets a visible
+      tell two or three cells out. That single change converts the game's most
+      common hazard into a decision: vent it now for the ore behind it at hull
+      risk, or route around it slowly. Small build, reuses the hazard whole.
+      **2. The cracked vein.** A visibly rich vein sits past a tremor-adjacent
+      wall. Dig it and the tunnel closes behind you and you leave by another
+      way; leave it and keep the safe path. Medium build, needs a one-way
+      collapse flag. One guaranteed per two or three regions, on a pity timer.
+      **3. The derelict drill ship.** A wrecked prior ship in a seeded cell with
+      salvage in its hold. No choice demanded, which is the point: it is the
+      wordless tableau the story brief ranks second, and it is how the player
+      learns this world holds more than hazards. A stamped micro-room of five to
+      ten cells, guaranteed once per region.
+
+      Each deterministic from a seed and asserted by a test. Archetypes 4
+      through 8 are in `C:\dev\plans\lattice\ENCOUNTERS.md` and wait on these
+      three being playtested first.
+
+- [ ] **V6 The wake rewrites what you dug.** The story brief's highest-ranked
       technique: at the fifth Anchor, tunnels the player already cut visibly
       change. It reuses `collapse.ts` and the stamper, needs no text, and
       survives a muted phone.
 
-- [ ] **T7 The three-act grade.** A palette and lighting grade driven off the
+- [ ] **V7 The three-act grade.** A palette and lighting grade driven off the
       existing Unrest thresholds, so the planet visibly darkens as it wakes.
 
-- [ ] **T8 The first ten seconds show a ruin.** The story brief's first-minute
+- [ ] **V8 The first ten seconds show a ruin.** The story brief's first-minute
       finding: worked geometry in view before it is reachable, no text. The
       intro already has the shot; what it lacks is the glimpse for the RETURNING
       player, who never sees the intro at all.
 
-- [ ] **T9 The ending shows the world.** A pull-back over the dug planet behind
+- [ ] **V9 The ending shows the world.** A pull-back over the dug planet behind
       the existing card, so the ending hands back a place the player can see
       they made.
 
-**T0 through T3 are the round's first delivery** and they are the ones that
-answer asks 4 and 5. T4 and T5 answer ask 3. T6 through T9 answer ask 2.
+**V0 through V3 are the round's first delivery** and they are the ones that
+answer asks 4 and 5. V4 and V5 answer ask 3. V6 through V9 answer ask 2.

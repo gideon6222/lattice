@@ -5150,3 +5150,102 @@ gets a web `device.ps1` (claim the lease, drive Chrome at the live URL, read
 the studio decides a web game's pass is the hand pass he already did and says so
 in `WEB.md`. Writing 1,068 lines of Godot-shaped harness for one game without
 that decision is how the studio ends up with two answers to the same question.
+
+# Round twelve, T1 and T2, 2026-09-18: the world gets a voice
+
+His R9a answer opened with *"I think any more than 7 anchors would feel like a
+checklist"*, which retired the second month's ranked-first candidate (nine more
+Anchors) before a line of it was written. The four asks that came with it -
+story, encounters, direction, knowing the objective - are one problem, and
+`PLAN.md`'s round twelve is the whole of it. Two milestones landed here.
+
+## The diagnosis was a screenshot, not an argument
+
+The fastest way to see what he was complaining about was to shoot the running
+build at the phone's own aspect and look at the top of the screen. `Rustmoor`,
+`HAUL ◈ 0`, `◈ 0`, `DEPTH 0 m / 452 m DEEP`, a fuel gauge and a d-pad. **Not one
+pixel named the Anchors, the Vault or the Lattice.** The only goal-shaped number
+on screen was `452 m DEEP`, which says go down and never says why.
+
+Three more findings behind it, and the second is the one that explains the
+complaint completely:
+
+- The objective is stated three times, in `src/sim/intro.ts`.
+- **The intro only plays when there is NO save.** `main.ts` shows the title
+  instead when one exists. So the campaign is explained exactly once, to a
+  player who has never played, and never again to the one who comes back on day
+  three - which is every session after the first.
+- The tally exists at `src/input.ts:371` as `Anchors lit, of nine`, inside the
+  pause sheet's record book under Relics and Records. A statistic in a menu is
+  not a goal on a screen.
+
+## T1, the Call: a proximity instrument and deliberately not a bearing
+
+`src/sim/call.ts` is pure and renderer-free. `resonance(x, d, lit)` is the
+loudest unlit Anchor's voice, 0..1, over a 40-cell reach chosen against the
+region grid rather than by eye: a region is 113 m deep and 20 columns wide, so
+40 lights up when you are roughly inside the right region and says nothing about
+where in it.
+
+**It answers "is one near here" and never "it is that way", and that is the
+design and not a limitation.** `CLAUDE.md` records that the portrait frame shows
+7 to 8 of 13 columns deliberately, so that which way to dig is a real choice
+rather than a formality. A bearing arrow deletes that choice and turns a mining
+game into a following game. There is a test asserting four points at equal
+distance read equal, so nothing downstream can extract a heading from it.
+
+**The test file got the property attached to the wrong function first, and that
+is worth recording.** Monotonic-on-approach is true of `callFrom` (one Anchor)
+and false of `resonance` (the max over unlit ones), because walking toward a far
+Anchor while walking away from a near one SHOULD make the reading fall. The
+first version asserted it on `resonance` and failed on the real layout - three
+Anchors sit in a row and standing between two of them is an ordinary place to
+be. The code was right and the test was wrong. What ties them is now asserted
+directly and is the strongest line in the file: the loudest voice is always the
+nearest one, swept over the world against two different lit sets.
+
+Verified by reintroducing the bug (rule 11): changing the max to a sum fails
+that test and nothing else, which is exactly the blast radius it should have.
+
+## T2, the tally: nine pips, not a counter
+
+Under the depth line, nine rings that fill as Anchors are lit, and a tenth
+diamond for the Vault that opens only on the ninth.
+
+**Pips rather than `3 / 9` because of what the research found.** Six reference
+games create direction with a visible contrast between resolved and unresolved
+that reads AT A GLANCE without reading a word. A count has to be read and
+compared. A row with three of ten alight is apprehended. It also scales
+honestly: the shape of the row is the shape of the campaign, so being one short
+looks like being one short, and an unlit pip is a ring rather than nothing so
+the row always shows how many there ARE.
+
+**The pips are built from `ANCHOR_COUNT`, never from a literal nine**, and so is
+the e2e that counts them. `CLAUDE.md` already records what the literal version
+costs: the Outfitter's display-case test asserted ten, failed for the wrong
+reason, and "would have been fixed by editing the number".
+
+**Which pip means which Anchor is deliberately not the region order.** A pip
+lights when the COUNT reaches its index, so the row fills left to right whatever
+order they are found in. Mapping pip i to Anchor i would make the row a map - a
+gap in the middle would say "you have not done the middle one", which is a
+location, and this game's whole direction design is that the instrument says
+near and never says where. The row answers how far through; the Survey map
+answers which.
+
+Verified by reintroducing the bug: `vaultOpen(lit)` changed to
+`lit >= ANCHOR_COUNT - 1` opens the Vault pip one Anchor early and the e2e fails
+naming it. **The first attempt at that check passed and should not have**, because
+Playwright runs against `dist` and the fault was only in `src`. A planted fault
+has to be built before it means anything, and a rule-11 check that skips the
+build is a rule-11 check that proves the opposite of what it claims.
+
+## A second shot tool, and one refactor that came with it
+
+`scripts/shot.mjs` is `filmstrip.mjs`'s single-frame sibling, at 1080x2340. The
+sheet tool composites many frames and scales each one down, which is right for
+motion and useless for judging a six-pixel pip. Both now drive the same
+scenarios: `SCENES` moved out to `scripts/scenes.mjs`, because it was unreachable
+inside filmstrip (importing that file starts a server and launches a browser at
+module scope) and two tools that disagree about what "the dig" means is how a
+shot stops being comparable to the sheet beside it.

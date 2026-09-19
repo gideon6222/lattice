@@ -16,9 +16,16 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.48.0';
+export const VERSION = '0.49.0';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.49.0', date: '2026-09-18', title: 'The game says what it wants',
+    notes: [
+      'Nine marks now sit under the depth readout, one for each Anchor, and they light as you light them. The game used to tell you what it wanted once, during the opening, and then never mention it again - so if you came back the next day there was nothing on screen saying what you were down there for.',
+      'The tenth mark is the Vault. It stays dark until all nine Anchors are lit, and then it is the only thing left on the row.'
+    ]
+  },
   {
     version: '0.48.0', date: '2026-09-14', title: 'It says why it cannot run',
     notes: [
