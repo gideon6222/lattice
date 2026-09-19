@@ -1,6 +1,11 @@
 node_modules/
 dist/
-.claude/
+# Only the worktrees, not the whole folder. `.claude/` wholesale meant this repo
+# could not carry a `.claude/settings.json`, and without one a background session
+# here is forced into `.claude/worktrees/` and its work never reaches main - the
+# doctor's `bg isolation` check, 2026-09-19. The worktrees genuinely are a second
+# checkout and stay ignored; the settings file is configuration and is not.
+.claude/worktrees/
 test-results/
 playwright-report/
 blob-report/

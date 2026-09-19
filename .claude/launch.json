@@ -1,0 +1,28 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "coreward-dev",
+      "runtimeExecutable": "C:/Program Files/nodejs/node.exe",
+      "runtimeArgs": [
+        "node_modules/vite/bin/vite.js",
+        "--port",
+        "4317",
+        "--strictPort"
+      ],
+      "port": 4317
+    },
+    {
+      "name": "coreward-preview",
+      "runtimeExecutable": "C:/Program Files/nodejs/node.exe",
+      "runtimeArgs": [
+        "node_modules/vite/bin/vite.js",
+        "preview",
+        "--port",
+        "4318",
+        "--strictPort"
+      ],
+      "port": 4318
+    }
+  ]
+}

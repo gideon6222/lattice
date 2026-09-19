@@ -5878,6 +5878,67 @@ and the test fails by name. **A planted fault that does not fail is not proof th
 test is weak - it is proof the fault was in the wrong place**, and the way to
 tell the two apart is to go and read what the assertion's number is made of.
 
+## The gate never ran the doctor, and the doctor cannot read this game anyway
+
+Two findings, one afternoon, and the second one only appeared because the first
+fix was verified instead of assumed.
+
+**The gate never ran the doctor.** `npm run check` was typecheck, test, build,
+size, e2e - so every rule whose receipt is a doctor check (control bytes, plan
+outline, phone debt, bulletins, US English) held here only on the weekly sweep.
+The doctor's own `doctor in gate` check says so and has been saying so. It is a
+step now, at ten seconds, and it exits 0 on WARN so it reports rather than
+blocks.
+
+**It does not cover this game's words, and planting the fault is what showed
+it.** `Test-UsEnglish`'s documented scope is a double-quoted string with a space
+in it in `src\**\*.gd`, `text`/`tooltip_text` in a `.tscn`, every line of a
+Markdown changelog, and README prose. Every one of those is Godot-shaped. This
+game's player-facing strings are TypeScript literals, its changelog is
+`src/changelog.ts`, and its shell is `index.html`, so rule 15's receipt had
+never read a word of it - which is how "greys out" and "greyed out" sat in the
+What's New panel for about ten versions and were found by eye.
+
+That gap is in `gamedev-notes`, so under rule 13c it is named and left rather
+than fixed from here. `scripts/check-us-english.mjs` covers this side, reads the
+studio's word list FROM DISK rather than copying it so the two can never
+disagree about what the rule is, and FAILs rather than warns - the doctor's
+reason for warning ("a FAIL would block a commit on a word in a README that has
+nothing to do with the change") does not apply to a check that reads nothing but
+text a player sees.
+
+**And the whole-word pattern misses every inflection, which bites Godot games
+too.** The first version of that script reproduced the doctor's `\b<british>\b`
+faithfully and reported the repo clean with both spellings planted back in. The
+list has `grey=gray`; `\bgrey\b` cannot match "greyed" or "greys" because the
+`y` is followed by a word character. Both words this game actually shipped were
+inflections. It matches an optional `s`, `ed` or `ing` now and suggests the
+inflected American form back. **A check that reproduces another check's pattern
+inherits its blind spots**, and the only thing that showed it was planting the
+two real words rather than a word chosen to be easy.
+
+## A flake that was a fixed sleep waiting on an async state change
+
+`focus loss pauses the audio context and coming back resumes it` failed one full
+gate run with "the audio never came back" - `suspended` instead of `running` -
+and then passed three times out of three on its own minutes later. That shape is
+the signature, and the cause was in the test: it called `audioFocus(true)`,
+slept a fixed 150 ms, and read the state once. `AudioContext.resume()` returns a
+promise and the state flips when the audio thread gets to it, which is however
+long the machine takes - and this machine was running an Android build and three
+node processes at the time.
+
+It polls to a one-second deadline now. That asserts exactly the same claim - the
+state DOES change, and within a time a player would not notice - without also
+asserting how fast the machine was. Verified under rule 11 by making
+`audioFocus(true)` a no-op: it still fails with the same message, so polling
+made it robust rather than toothless.
+
+**The general shape: a fixed sleep before reading a value that changes
+asynchronously is a flake waiting for a busy afternoon**, and this PC runs
+several sessions at once by design, so "it passes on its own" is not evidence of
+anything. Wait for the condition with a deadline instead.
+
 ## Open: the encounter frame has no caller
 
 `src/sim/encounter.ts` is a tested pure frame that nothing in `src/` runs. Both

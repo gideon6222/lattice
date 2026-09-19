@@ -162,7 +162,7 @@ export const CHANGELOG: Release[] = [
   {
     version: '0.36.0', date: '2026-09-13', title: 'Options that do what they say',
     notes: [
-      'Music and sound have volume sliders now, not just on and off. Where you set them is remembered, and a slider greys out when its own channel is muted.',
+      'Music and sound have volume sliders now, not just on and off. Where you set them is remembered, and a slider grays out when its own channel is muted.',
       'The Outfitter can be driven without a thumb: up and down walk the cases in the aisle you are standing in, left and right change department, and the card you are looking at is the confirm. Arrow keys and Enter do the same thing.',
       'CREDITS in the pause menu, listing every texture and font in the game and who made them.',
       'Put the game in the background and the sound stops, instead of playing on to nobody. It comes back when you do.'
@@ -357,7 +357,7 @@ export const CHANGELOG: Release[] = [
       'The intro is a flight now, not a slide show - worlds come up out of the dark, pass you, and fall behind.',
       'It says less. You are told what to look for and nothing else.',
       'Both the intro and CONTINUE end by flying down to a planet - CONTINUE takes you to the world you are actually on.',
-      'CONTINUE is greyed out until you have a game to continue.',
+      'CONTINUE is grayed out until you have a game to continue.',
       'The Outfitter only stocks what you can buy plus the next thing you cannot, so it starts at six cases instead of fifteen.',
       'Nothing on a display plate is cut off any more, and the supply chips have room for their names.',
       'Planets have real surface relief instead of being colored spheres.'

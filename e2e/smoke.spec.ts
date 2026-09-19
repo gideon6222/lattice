@@ -3849,14 +3849,35 @@ test('focus loss pauses the audio context and coming back resumes it', async ({ 
   expect(await page.evaluate(() => (window as any).__cw.audioCtxState()),
     'no audio graph after a real gesture').toBe('running');
 
+  /* Waited FOR rather than slept through, and the difference is a flake.
+
+     `AudioContext.suspend()` and `.resume()` both return promises and the state
+     flips when the audio thread gets to it, which is not a fixed number of
+     milliseconds - it is however long the machine takes. This used to sleep
+     150 ms for each and read the state once, and it failed in a full gate run
+     on 2026-09-19 with "the audio never came back", `suspended` instead of
+     `running`, while an Android build and three node processes were competing
+     for the machine. It passed three times out of three on its own minutes
+     later, which is the signature.
+
+     Polling to a deadline asserts exactly the same thing - the state DOES
+     change, and within a time a player would not notice - without asserting
+     how fast this particular machine was. A second is far longer than the
+     change ever takes and far shorter than anybody would sit through. */
   const states = await page.evaluate(async () => {
     const cw = (window as any).__cw;
+    const settle = async (want: string) => {
+      const until = Date.now() + 1000;
+      while (Date.now() < until) {
+        if (cw.audioCtxState() === want) break;
+        await new Promise((r) => setTimeout(r, 20));
+      }
+      return cw.audioCtxState();
+    };
     cw.audioFocus(false);
-    await new Promise((r) => setTimeout(r, 150));
-    const off = cw.audioCtxState();
+    const off = await settle('suspended');
     cw.audioFocus(true);
-    await new Promise((r) => setTimeout(r, 150));
-    return { off, back: cw.audioCtxState() };
+    return { off, back: await settle('running') };
   });
   expect(states.off, 'the audio kept running with the app in the background').toBe('suspended');
   expect(states.back, 'the audio never came back').toBe('running');

@@ -1,1 +1,3 @@
-The game now says what it wants. Nine marks under the depth readout, one per Anchor, filling as you light them, and a tenth for the Vault they open. The Survey map names settled ground in the Anchors' own color. And a new device, buried like the rest: the Lattice Receiver hears an unlit Anchor through rock and tells you how near it is, never which way.
+Somebody else got here first. A wrecked drill ship is buried in every region of the planet, twelve of them, always in the same places - you see the shape of one in the dark before you know what it is, its own lamp still faintly lit at the end that went in first. Cut through the plates and the hold still holds whatever that crew had dug. It asks you for nothing.
+
+The app icon is a real frame of the game now, rock and lamp and all, instead of a drawing.
