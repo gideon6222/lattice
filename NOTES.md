@@ -5044,3 +5044,77 @@ markdown file in this repo that matters.
 
 The lesson for me rather than for the config: batch. Nine separate pushes of
 work that was all one sweep is nine deploys of the same game.
+
+# The invariants audited by rung, 2026-09-18
+
+Bulletin `2026-09-17-your-own-claude-md-and-owed-lines` asks for this repo's
+own `CLAUDE.md` to go through `write-for-a-session`, and to report how many
+rules ended at rung 0, 1 or 2 rather than as prose. The ladder is in
+`gamedev-notes\techniques\instruction-design.md`: rung 0 is making the tool do
+it, rung 1 is delivering it at the trigger, rung 2 is a check that names the
+rule and the fix, rung 3 is prose - and rung 3 is the weakest channel measured
+in this studio, at 0 of 43.
+
+## The count
+
+**25 invariants. 11 at rung 0 or 2, 14 still prose.** Counted by reading each
+one for a named receipt rather than by trusting the file's own tone, which is
+uniformly confident whether or not anything checks the claim.
+
+| Rung | Count | Which |
+|---|---|---|
+| 0, the code cannot get it wrong | 3 | the upgrade display case (`station.ts` throws at boot), the tremor that reverts if the pad is unreachable, the audio graph published only when complete |
+| 2, a check names it | 8 | the frozen baseline, `GRANITE_TO_SCORIA === HEAT_DEPTH`, the `ORES` order, the `DEF` sweep, `chainCompile`, the uniform sweep, the shadow fan's continuity, the title screen the e2e crosses |
+| 3, prose only | 14 | the rest |
+
+**One moved this session**, and it is the one that had a rule written in the
+imperative with nothing behind it: *"Nothing new should read either of them"*
+about `g.planet` and `g.world`. That is a rule about a TREND, and a trend is
+precisely what prose cannot hold - there are 75 reads already, so every new
+one looks harmless beside them. `test/vestigial.test.mjs` freezes the count per
+file. Verified by reintroducing the bug both ways (rule 11): a read added to
+`mark.ts` fails two of the three tests naming `mark.ts`, and renaming the
+fields turns those two green while the third catches it.
+
+## What deliberately stays at rung 3, and why that is correct
+
+The ladder says **do not add a check to enforce a judgment**, and most of what
+is left is judgment. "There are TWO lights and they must not be fused" is four
+paragraphs of why, and the failure it prevents is a picture a person has to
+look at. Same for `Object3D.layers` drawing the world in two passes, the
+propagated light only darkening, `asMetal()` taking its colour from the
+environment, and the haze constant with five playtest rounds behind it. A test
+that asserted any of those would be asserting a number somebody would later
+retune, which is the failure `CLAUDE.md` already records twice: two tests
+written against the raw lighting field both failed the moment the seep was
+retuned to exactly what a playtest asked for.
+
+**Three of the fourteen are mechanical and are worth a check when somebody is
+next in that code**, listed so the next session does not have to re-derive
+them:
+
+- **Bedrock, the Anchor and the Vault core are unbreakable by ordnance**, and
+  sealed stone and the Vault seal are until the laser and the ninth Anchor.
+  That is five block ids and two conditions, all assertable with no renderer.
+- **Per-cell maps carry no planet in their keys**, so `dug`, `rubble`,
+  `damage` and `drops` must be cleared together. One call, four assertions.
+- **Rock is relaxed but never expanded by the solver**, which is what stops a
+  sealed pocket glowing before you have dug to it. Assertable on a built world.
+
+They are written here rather than done now because none of them is a fault
+today and this session had no mandate to open the lighting or the ordnance.
+
+## The honest finding underneath the count
+
+Eleven of 25 is not a bad ratio for a game this old, and the reason is that
+this repo writes its receipts as it goes - "There is a test that..." appears
+eight times in `CLAUDE.md` and every one of them resolves to a real file. What
+the audit actually exposed is not the fourteen, it is that **the receipts this
+repo does not own are the ones that failed**: `INDEX.md` rule 19 cites
+`Test-ControlBytes` in `doctor.ps1` as scanning "every repo in every commit
+gate", and it scans neither this repo (the per-repo loop is Godot games only,
+`doctor.ps1 -Repo lattice` answers "matched no game") nor this stack (the
+folder list is ps1, py, gd, md, yml, with no ts, mjs or js). Scanned by hand
+instead: 263 hand-written text files, no byte under 32 other than tab, LF or
+CR. Filed as a lesson against `WEB.md`; the fix is in a different repo, which
+rule 13c makes somebody else's.

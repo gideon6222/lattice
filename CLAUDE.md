@@ -155,6 +155,12 @@ planet now; they survive because they seed the generator and because the frozen 
 recorded against them, and `setWorld(p)` still exists for the tests that walk the old
 snapshots. **Nothing new should read either of them** - `regionAt(x, d)` is the question you
 actually want, and `traitAt` / `paletteAt` / `worldTrait()` all go through it.
+**Receipt: `test/vestigial.test.mjs`**, which freezes the count of reads per file (75 across
+eight files at v0.48.0) and fails naming the file that gained one. It is a census and not a
+ban because the generator and the save are legitimate readers; what it stops is the trend,
+which is the part prose cannot hold - every single addition looks harmless beside the
+seventy-five already there. It carries a third test asserting the census still FINDS the
+fields, so renaming them cannot turn the other two green by making them inspect nothing.
 
 **Unrest is PER REGION, and `tier` is derived from `lit`.** `g.ground.unrest` is twelve
 numbers; a single planet-wide figure would be a second fuel gauge - it rises, you cannot point
