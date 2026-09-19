@@ -3377,3 +3377,50 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
 
 **V0 through V3 are the round's first delivery** and they are the ones that
 answer asks 4 and 5. V4 and V5 answer ask 3. V6 through V9 answer ask 2.
+
+## Round thirteen: the icon
+
+His ask, 2026-09-19, in full: *"That looks good to me. One thing I would like to
+have updated is the app icon. Can you update it to something that matches the
+more realistic textures on the rock, and feel of the game?"* One ask, and it is
+a stand-in described as a preference - the icon was the planet-and-core
+objective that round eight removed, still shipping on the launcher, the tab, the
+shared link and the store listing five rounds later (rule 12, whose note names a
+replaced OBJECTIVE as the most expensive stand-in there is).
+
+- [x] **W1 The icon comes off the game.** Done 2026-09-19 as v0.53.1.
+
+      **Shot, not drawn.** `scripts/icon.mjs` drives the built game the way
+      `shot.mjs` does - serving `dist`, through `?debug`, advancing game time -
+      hides the HUD, and crops a square out of the frame. A hand drawing cannot
+      be checked against a picture it is not made of and drifts the moment the
+      art does, which is exactly how the old one got five rounds out of date.
+
+      **It renders at the PHONE's aspect and crops**, rather than rendering into
+      a square viewport, because `resize()` solves eighteen rows into a camera
+      distance from the viewport HEIGHT: a square viewport is a legal framing no
+      player ever sees, with eighteen columns in it. At deviceScaleFactor 2 and
+      downsampled, which is supersampling, and is what makes the rock grain
+      survive at 512 rather than alias into speckle.
+
+      **Judged at 48dp, not at 512.** Five candidates were rendered - the shaft
+      at four crops, a side gallery, and the Anchor hall - and each one was
+      written out at both sizes. The hall disqualified itself by firing the
+      Anchor card over the frame. `shaftmid`, a 640 px crop centred on the ship,
+      is the one that keeps a machine in it at launcher size instead of a glow.
+
+      **All four renderings move together or none of them do.** The 512 raster,
+      the flat `icon.svg` the browser may pick instead of it, Android's themed
+      alpha and the store's copy are four renderings of one picture, and the
+      failure they have is that one changes and nobody sees it, because whichever
+      you are looking at is the one that is showing. `test/icons.test.mjs` is the
+      receipt: the manifest's icons all exist, the rasters are 512 square and
+      32-bit, the themed one still HAS an alpha, and its alpha's bounding box
+      equals the `<rect>` in its own SVG, so editing the vector without running
+      `icon.mjs --mono` fails rather than ships. Verified by reintroducing both
+      bugs - moving the SVG rect 32 px fails with the two numbers and the command
+      to run, and flattening the themed PNG fails with "covers 100.0% and has
+      lost its transparency".
+
+      Not done here, and deliberately: the feature graphic, which is already a
+      real frame of the game and needs nothing.

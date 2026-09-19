@@ -2,32 +2,41 @@
   The themed (monochrome) launcher icon. Android takes ONLY the alpha of this and tints it
   itself, so everything here is white on transparent and no colour in this file survives.
 
-  Same geometry as icon.svg, reduced to what still reads at 48dp: the planet as a RING rather
-  than a disc (a disc would swallow the core), the lit core, and the probe going into it.
+  Same subject as icon.svg and public/icon-512.png - the ship in the shaft it cut - reduced
+  to the one thing that still reads at 48dp: the SHAFT as a filled slot, with the ship taken
+  out of it as a hole. The light is the shape here, which is the right way round, because in
+  the game the shaft is the only lit thing in the frame.
 
-  The `cut` mask punches a gap around the probe so it stays a separate shape where it crosses
-  the ring, instead of merging into one blob at small sizes.
+  Three things learned by rasterising it and looking, rather than by reasoning about it:
 
-  public/icon-monochrome.png is this shape rasterised at 512. If you change one, change both.
+  - The clearance stroke that the OLD monochrome icon needed is wrong here. There it kept a
+    probe from welding to a ring it crossed; here the hull sits 30 px clear of both walls
+    already, and a 16 px stroke merges hull, prow and drill teeth into one blob that reads
+    as a pen nib.
+  - The drill teeth have to stay SEPARATE holes above the hull. Joined to it they are a
+    pair of ears.
+  - The lamp cannot be a disc over the hull's top edge - it bites a notch out of the head
+    and turns the whole thing into a face. It is the ship's EYE instead, a white disc well
+    inside the hull, which is also the thing the render is most recognisable by.
+
+  public/icon-monochrome.png is this shape rasterised at 512, and `node scripts/icon.mjs
+  --mono` is what rasterises it. Change one and run that, or the launcher and the browser
+  show different icons and neither is wrong on its own.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <mask id="cut">
       <rect width="512" height="512" fill="#fff"/>
-      <g fill="#000" stroke="#000" stroke-width="20" stroke-linejoin="round">
-        <rect x="232" y="112" width="48" height="70" rx="10"/>
-        <path d="M232 182h48l-24 46z"/>
+      <!-- the ship: hull and prow as one solid, the two drill teeth clear of it -->
+      <g fill="#000">
+        <path d="M228 230h56a16 16 0 0 1 16 16v50h-88v-50a16 16 0 0 1 16-16z"/>
+        <path d="M212 296h88l-44 74z"/>
+        <path d="M234 186l12 38h-24zM278 186l12 38h-24z"/>
       </g>
+      <!-- the eye, punched back out of the hull so the machine is lit -->
+      <circle cx="256" cy="262" r="15" fill="#fff"/>
     </mask>
   </defs>
 
-  <g mask="url(#cut)">
-    <circle cx="256" cy="256" r="150" fill="none" stroke="#fff" stroke-width="18"/>
-    <circle cx="256" cy="256" r="50" fill="#fff"/>
-  </g>
-
-  <g fill="#fff">
-    <rect x="232" y="112" width="48" height="70" rx="10"/>
-    <path d="M232 182h48l-24 46z"/>
-  </g>
+  <rect x="182" y="26" width="148" height="460" rx="32" fill="#fff" mask="url(#cut)"/>
 </svg>

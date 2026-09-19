@@ -5669,3 +5669,69 @@ scenarios: `SCENES` moved out to `scripts/scenes.mjs`, because it was unreachabl
 inside filmstrip (importing that file starts a server and launches a browser at
 module scope) and two tools that disagree about what "the dig" means is how a
 shot stops being comparable to the sheet beside it.
+
+## W1: the app icon, and the stand-in that shipped for five rounds
+
+His ask, 2026-09-19: an icon that matches the rock textures and the feel of the
+game. What it actually found was a rule-12 stand-in. The icon was a flat vector
+planet with a lit core and a probe going into it - the objective from before
+round eight, which removed the core. It had been wrong since 0.40-ish and was
+still on the launcher, the browser tab, every shared link and the Play listing,
+because **an icon is the one picture in a project that nobody looks at while
+they work.** Ten sessions of this game read `CLAUDE.md`'s line about the core
+being gone and none of them opened `public/icon.svg`.
+
+**Shot out of the game rather than drawn.** `scripts/icon.mjs` drives the built
+game exactly as `shot.mjs` does, hides the HUD, and crops a square. Drawing a
+better one by hand would have bought the same failure again: a drawing cannot be
+checked against a picture it is not made of, and it goes stale the moment the
+art moves. Re-running one command is now what keeps the icon current.
+
+**Render tall and crop; do not render square.** `resize()` solves eighteen rows
+into a camera distance from the viewport HEIGHT, so a square viewport is a legal
+framing no player ever sees - eighteen columns of world, at a rock scale his
+thumb has never met. The script renders 1080x2340 at deviceScaleFactor 2 and
+crops a square around the ship's projected position, which is read off the lamp
+(`loop.ts` puts the lamp at the ship every frame) rather than assumed, because
+the camera leads the ship downward by a tuned margin.
+
+**The judgement is at 48dp.** Every candidate is written out at 512 and at 48,
+and the small one is the one to look at: at 512 all five candidates were
+handsome. The 640 px crop is the only one that still has a machine in it at
+launcher size rather than a bright smear. Two candidates died of things that
+reasoning would not have caught - the Anchor-hall framing fired the Anchor card
+over the frame, and the first flat SVG read as brown clouds either side of an
+orange stripe because its walls were gradients, when the game's rock is
+flat-shaded blocks whose silhouette IS the texture.
+
+**Two things learned by rasterising the themed icon and looking at it.** The
+clearance stroke the OLD monochrome icon needed (to keep a probe from welding to
+a ring it crossed) merges the hull, prow and drill teeth into one blob that
+reads as a pen nib, and a lamp disc over the hull's top edge bites a notch out
+of the head and turns the whole thing into a face. It is the ship's eye instead,
+well inside the hull.
+
+**Size is not a consideration and it was checked rather than assumed.** The new
+512 is 511 KB against the old 25 KB, and `vite.config.js`'s Workbox glob is
+`{js,css,html,svg,webmanifest,woff2,webp,glb}` - no `png` - so it is not
+precached and does not land on every player's mobile data. A palette-quantised
+copy is 152 KB and a WebP 48 KB, and both were rejected: Play asks for 32-bit
+PNG for the store icon, and this file is that icon.
+
+**The receipt is `test/icons.test.mjs`, and the part worth keeping is the fourth
+test.** The others are existence and headers. That one parses the `<rect>` out
+of `icon-monochrome.svg` and asserts the PNG's alpha bounding box equals it, so
+the "if you change one, change both" comment that has sat in that file since the
+day it was written is now a mechanism. Both faults were planted: moving the rect
+32 px fails naming the two numbers and the command to run, and flattening the
+PNG onto black fails with "covers 100.0% and has lost its transparency".
+
+## Open: the wrapper's icon lags the deploy by one step, by design
+
+`twa/twa-manifest.json` fetches `iconUrl` from
+`https://gideon6222.github.io/lattice/icon-512.png`, so `scripts/twa.ps1` has to
+run AFTER Pages is serving the new icon, never in the commit that changes it.
+Anyone changing the icon again owes the same second step, and a wrapper rebuilt
+too early carries the old picture while every other surface has the new one -
+which is the exact disagreement `test/icons.test.mjs` exists to stop, in the one
+place that test cannot see.

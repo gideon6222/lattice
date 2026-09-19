@@ -1,14 +1,81 @@
+<!--
+  The favicon, and the manifest's `any` icon at "sizes: any".
+
+  It is a flat redrawing of public/icon-512.png, which is a real frame of the
+  game shot by scripts/icon.mjs: the ship in its own lamp, in a shaft it cut.
+  The two must stay the same picture, because a browser chooses ONE of them and
+  which one is not ours to decide - the old pair disagreed about the whole game
+  (this file still had the planet-and-core objective that round eight removed)
+  and nobody could see it, because whichever you looked at was the one that was
+  showing.
+
+  Vector rather than a downscaled photograph because this is also the 16 px tab
+  icon, where the render turns to mud. The colours are SAMPLED out of the
+  render rather than picked - dark rock 2e2114, lit wall 976b41 and 6f4e2e,
+  shaft 3d2415 to d07b50, the lamp e5d9d3, the ship 4b4b43 with its 3ae8cc eye
+  - so the two agree on palette as well as on shape.
+
+  The walls are HARD-EDGED facets over a flat dark base, not a gradient running
+  out from the shaft. The first draft was the gradient, and it read as two brown
+  clouds either side of an orange stripe: the game's rock is flat-shaded blocks
+  whose silhouette is the whole texture, so a wall that fades has stopped being
+  rock. The facets are few and large on purpose - at 16 px what survives is the
+  dark walls, the warm slot between them and the light in it, which is exactly
+  what the render reduces to as well.
+-->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" fill="#05070d"/>
-  <circle cx="256" cy="256" r="150" fill="#1d2a3d"/>
-  <path d="M256 106a150 150 0 0 1 0 300z" fill="#16202f"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#2b3d58" stroke-width="8"/>
-  <circle cx="256" cy="256" r="46" fill="#ffb347"/>
-  <circle cx="256" cy="256" r="26" fill="#fff3c4"/>
-  <circle cx="256" cy="256" r="86" fill="none" stroke="#ff8c2b" stroke-width="5" opacity=".55"/>
+  <defs>
+    <linearGradient id="shaft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d2415"/>
+      <stop offset=".45" stop-color="#9a552f"/>
+      <stop offset="1" stop-color="#d07b50"/>
+    </linearGradient>
+    <radialGradient id="lamp">
+      <stop offset="0" stop-color="#e5d9d3" stop-opacity=".92"/>
+      <stop offset=".45" stop-color="#e09a5c" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#e09a5c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- the rock, and the shaft cut down through it.
+
+       The walls are SOLID before a facet is drawn on them. Without these two
+       the facets float on the background and the icon reads as loose tiles
+       beside a stripe, which is the second thing rasterising it caught. -->
+  <rect width="512" height="512" fill="#120c07"/>
+  <rect x="0" y="0" width="192" height="512" fill="#241a10"/>
+  <rect x="320" y="0" width="192" height="512" fill="#1f160d"/>
+  <rect x="192" y="0" width="128" height="512" fill="url(#shaft)"/>
+
+  <!-- the wall faces the lamp reaches, lit hardest nearest the shaft -->
+  <g fill="#976b41">
+    <path d="M192 96h-84l-10 92 66 14 28-38z"/>
+    <path d="M192 250h-62l-14 86 76 18z"/>
+    <path d="M192 402h-78l8 74h70z"/>
+  </g>
+  <g fill="#6f4e2e">
+    <path d="M320 60h74l14 84-66 22-22-40z"/>
+    <path d="M320 222h58l18 78-76 26z"/>
+    <path d="M320 376h72l-6 84h-66z"/>
+  </g>
+  <!-- the faces turned away from it -->
+  <g fill="#2e2114">
+    <path d="M108 96h-46l-12 92 48 8z"/>
+    <path d="M130 250H74l-10 86 52 0z"/>
+    <path d="M394 60h48l10 84-44 8z"/>
+    <path d="M378 222h52l16 78-50 4z"/>
+  </g>
+
+  <!-- the lamp, which is most of what the icon is at any size -->
+  <circle cx="256" cy="248" r="132" fill="url(#lamp)"/>
+
+  <!-- the ship: a dark machine, two drill teeth, one lit eye -->
   <g>
-    <rect x="232" y="112" width="48" height="70" rx="10" fill="#3fe0ff"/>
-    <circle cx="256" cy="140" r="13" fill="#0d131f"/>
-    <path d="M232 182h48l-24 46z" fill="#eef5ff"/>
+    <path d="M234 190l12 38h-24zM278 190l12 38h-24z" fill="#dfe8f0"/>
+    <path d="M212 298h88l-44 68z" fill="#1d2733"/>
+    <path d="M228 230h56a16 16 0 0 1 16 16v52h-88v-52a16 16 0 0 1 16-16z" fill="#4b4b43"/>
+    <path d="M228 230h56a16 16 0 0 1 16 16v6h-88v-6a16 16 0 0 1 16-16z" fill="#5d5c52"/>
+    <circle cx="256" cy="262" r="15" fill="#3ae8cc"/>
+    <rect x="236" y="288" width="40" height="10" rx="5" fill="#3ae8cc" opacity=".85"/>
   </g>
 </svg>

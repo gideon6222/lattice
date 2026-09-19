@@ -16,9 +16,16 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.53.0';
+export const VERSION = '0.53.1';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.53.1', date: '2026-09-19', title: 'The icon is the game now',
+    notes: [
+      'The icon on your home screen used to be a drawing of a planet with a lit core and a probe going into it. That was the game before the Anchors, and there has been no core to break for five rounds - so the first thing anyone saw of The Lattice was a picture of something it is not.',
+      'The new one is a real frame out of the game: the ship in its own lamp, in a shaft it cut, in the same rock you actually dig through.'
+    ]
+  },
   {
     version: '0.53.0', date: '2026-09-18', title: 'The ending shows you the world',
     notes: [
