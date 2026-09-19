@@ -16,9 +16,17 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.50.0';
+export const VERSION = '0.51.0';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.51.0', date: '2026-09-18', title: 'The planet in three acts',
+    notes: [
+      'The world now looks different depending on how far through you are. Before the fifth Anchor it is the dead place it always was. From the fifth on - when the ground starts moving on its own - the air and the far rock take on the same ember the deep heat has, so the planet reads as being against you.',
+      'Once the Vault is open and the center is behind you, it goes quiet: cooler, and with some of the color taken out. The ending says the ground is yours, and now the ground looks like it.',
+      'None of it changes how anything is lit, what anything costs or where anything is. It is the same game in a different mood.'
+    ]
+  },
   {
     version: '0.50.0', date: '2026-09-18', title: 'Rock that is holding something up',
     notes: [

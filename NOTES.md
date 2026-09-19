@@ -5486,6 +5486,62 @@ flagged so the loop can charge for it", and removing the `DEF` row fails "a lode
 has a DEF entry, because it reaches the hold" - which is the crash class this
 game has already shipped once.
 
+## V7: three acts, and a grade that at first could not be seen
+
+The story research's highest-value technique is the world visibly changing at
+thresholds - Hollow Knight's Infection over ground already walked clean, Shadow
+of the Colossus desaturating for its ending. This game has had the thresholds
+since round eight and had never spent one on the picture.
+
+**Driven off the campaign, not off Unrest, and that is the milestone's one real
+decision.** The brief said "a three-act grade on Unrest thresholds". Unrest is
+per-region and it rises and falls, so a grade on it flickers every time you
+cross a boundary: a world whose mood changes every twenty metres has no acts, it
+has weather. The campaign thresholds are monotonic and each one is something the
+player did, which is what an act actually is.
+
+- **Act one**, before the fifth Anchor: changes nothing at all. A first hour has
+  to be the picture every lighting value in `feel.ts` was calibrated against.
+- **Act two**, the wake: tinted toward the ember the heat line already uses, so
+  it deepens a colour the player has learned rather than adding a tenth one.
+  The only act where the planet is against you.
+- **Act three**, the Vault opened: quieter than act two and quieter than act
+  one. Desaturated toward the Anchors' own mint, because the thing that
+  quietened the planet is the thing the player lit.
+
+Act three is the one worth the work. The ending says *"the ground is yours"*, and
+the second month's own measurement is that the sentence is a promise the game
+does not keep. A grade cannot add content, but it can make the place look handed
+back, which is the cheapest honest half of it.
+
+### It shipped invisible the first time
+
+The first version graded the sky and the fog. Shot side by side at 19 m down,
+act one and act three were nearly identical - and obviously so, in hindsight: in
+a shaft you are looking at rock lit by your own lamp, and the sky is a strip at
+the top of the frame. A grade that only reads at the surface is one the player
+meets for ten seconds a run.
+
+The fix is that the haze COLOUR and the parallax tint take the act too, because
+those are what the deep actually looks like. The haze GAIN is untouched and must
+stay that way - it is the constant with five playtest rounds and four wrong
+fixes behind it, and the note is explicit that anything raising the floor under
+the air gets checked by hiding the quad rather than by reasoning. A hue shift at
+constant gain moves nothing that argument is about.
+
+**Ambient is deliberately left alone.** Pulling the ambient colour is how a
+grade stops being a world and becomes a filter, and `CLAUDE.md` is explicit that
+if the world needs to look different that is a change to the lights, not to the
+field. So the act moves what the place looks like and never how the rock is lit.
+
+Two receipts, because the unit test and the screen are different questions.
+`grade.test.mjs` pins the dramatic SHAPE - monotonic acts, act two loudest, act
+three quieter than act one and the only one that takes colour out, nothing over
+a quarter of the frame - while leaving every value free to be retuned. The e2e
+reads the sky gradient the game actually writes onto `#game` and asserts the
+three acts differ, which is the only thing that can say the grade reached a
+pixel. Flattening act two's tint fails it by name.
+
 ## A second shot tool, and one refactor that came with it
 
 `scripts/shot.mjs` is `filmstrip.mjs`'s single-frame sibling, at 1080x2340. The

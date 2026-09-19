@@ -4816,3 +4816,42 @@ test('the Survey map shows a calmed region differently from an uncalmed one', as
   expect(some!, `three regions calmed drew ${some} mint pixels against ${none} with none calmed`)
     .toBeGreaterThan(none! + 700);
 });
+
+/* Round twelve, V7: the world looks different in each act.
+
+   The story research's finding is that a near-wordless game tells its story by
+   the world visibly changing at thresholds. `src/sim/grade.ts` decides the act
+   and `loop.ts` paints it; `grade.test.mjs` asserts the dramatic shape. What
+   only a running game can answer is whether any of it reaches the screen.
+
+   Read off the sky gradient the game writes onto #game, because that is a real
+   pixel the player looks at rather than a value in a module. */
+test('each act paints the world differently', async ({ page }) => {
+  await enterGame(page);
+
+  const skyIn = async (lit: number[], won: boolean) => {
+    return await page.evaluate(({ litList, w }) => {
+      const cw = (window as unknown as { __cw: {
+        g: { ground: { lit: number[]; woke: boolean }; won: boolean; px: number; pd: number; dug: Set<string> };
+        advance: (s: number) => void } }).__cw;
+      const dug = new Set<string>();
+      for (let d = 0; d <= 40; d++) dug.add('6,' + d);
+      cw.g.dug = dug;
+      cw.g.px = 6; cw.g.pd = 18;
+      cw.g.ground.lit = litList;
+      cw.g.ground.woke = litList.length >= 5;
+      cw.g.won = w;
+      cw.advance(0.4);
+      return (document.getElementById('game') as HTMLElement).style.background;
+    }, { litList: lit, w: won });
+  };
+
+  const act1 = await skyIn([], false);
+  const act2 = await skyIn([0, 1, 2, 3, 4], false);
+  const act3 = await skyIn([0, 1, 2, 3, 4, 5, 6, 7, 8], true);
+
+  expect(act1, 'the game never wrote a sky, so this test is reading nothing').toContain('linear-gradient');
+  expect(act2, 'the wake does not change the sky at all, so act two is invisible').not.toBe(act1);
+  expect(act3, 'the ending does not change the sky at all, so act three is invisible').not.toBe(act1);
+  expect(act3, 'act two and act three paint the same sky, so they are not two acts').not.toBe(act2);
+});

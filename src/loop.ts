@@ -8,6 +8,7 @@ import { clamp, key, mixHex } from './sim/util';
 import { g, S, save, coreM, valueM, worldTrait, cutGround, padFuel, markSeen, docked,
          groundTick, hereUnrest, lightHere, vaultHere, checkpoint } from './sim/state';
 import { unrestBand, tremorScale } from './sim/unrest';
+import { gradeFor } from './sim/grade';
 import { landCollapse, closeGround } from './collapse';
 import { blockAt, findHere, climbCells } from './sim/world';
 import { tilesSeen } from './sim/region';
@@ -987,6 +988,10 @@ export function tick(raw: number, draw = true) {
   /* Below the heat line the whole world turns ember: sky, fog and the drifting
      dust all warm together. Three coordinated signals so the boundary reads at
      a glance instead of having to be noticed in the HUD. */
+  /* Which of the three acts the campaign is in, asked once and spent on the
+     sky, the fog, the air and the distant rock below. `src/sim/grade.ts` owns
+     what each act means; this file only paints it. */
+  const act = gradeFor(g.ground.lit.length, g.won);
   const hot = heatT(g.pd, heatDepth(g.planet, worldTrait()),
                     (coreM() - heatDepth(g.planet, worldTrait())) * 0.55);
   /* The sky at night is the sky at the bottom of the world: the same two
@@ -1011,11 +1016,64 @@ export function tick(raw: number, draw = true) {
   /* And cold, while the way in has the eye and there is no ship: the glow in
      the air is the lamp's, and there is no lamp yet. The haze is most of what
      a lit hall looks like - the point light alone is the walls. */
-  setHazeColor(R.shipShown ? mixHex(pal.haze, 0xff6a28, hot * 0.8) : mixHex(pal.haze, EYE_LAMP_COLOR, 0.85));
+  /* The act tints the AIR and the distant rock too, not only the sky.
+
+     Round twelve, V7, and this was the correction that made the milestone
+     actually land: the first version graded the sky and the fog only, and a
+     side-by-side of act one against act three at 19 m down showed almost no
+     difference at all. Of course it did - in a shaft you are looking at rock
+     lit by your own lamp, and the sky is a strip at the top of the frame. A
+     grade that only reads at the surface is a grade the player meets for ten
+     seconds a run.
+
+     The haze COLOUR and the parallax tint are what the deep actually looks
+     like, so they take the act as well. The haze GAIN is untouched and must
+     stay that way: CLAUDE.md has five playtest rounds behind LM_AIR_AMBIENT and
+     the note is explicit that anything raising the floor under the air has to
+     be checked by hiding the quad rather than by reasoning about it. A hue
+     shift at constant gain moves nothing that argument is about. */
+  const actHaze = R.shipShown ? mixHex(pal.haze, 0xff6a28, hot * 0.8)
+                              : mixHex(pal.haze, EYE_LAMP_COLOR, 0.85);
+  setHazeColor(act.tint > 0 ? mixHex(actHaze, act.color, act.tint) : actHaze);
   setHazeGain(R.lampLevel);
-  setParallaxTint(pal.para);
+  setParallaxTint(act.tint > 0 ? mixHex(pal.para, act.color, act.tint) : pal.para);
   /* ambient warms too, so the rock itself is lit hot rather than just fogged */
   amb.color.setHex(0xffffff).lerp(new THREE.Color(0xff8a52), hot * 0.6);
+
+  /* ---------- the act, over the top of all of it ----------
+
+     Round twelve, V7. `src/sim/grade.ts` decides which of three acts the
+     campaign is in and how hard to pull the frame; this is the only place that
+     turns that into renderer state.
+
+     Applied AFTER heat and never before it. The heat line has to read the same
+     on every world and in every act or it stops being a threshold the player
+     can learn - the note four lines up says so about the palette, and it is
+     more true of a grade that follows the campaign than of one that follows
+     the world. Act two's tint is the same ember heat already uses, so at the
+     bottom of the world in act two the two agree rather than fight.
+
+     Ambient is left alone on purpose. Pulling the ambient colour is how a grade
+     becomes a filter: every lighting value in feel.ts was calibrated against a
+     white ambient, and CLAUDE.md is explicit that if the world needs to look
+     different that is a change to the lights and not to the field. So the act
+     moves the SKY and the FOG - what the place looks like - and never how the
+     rock is lit. */
+  if (act.tint > 0 || act.desat > 0) {
+    const tc = new THREE.Color(act.color);
+    hi.lerp(tc, act.tint);
+    lo.lerp(tc, act.tint);
+    fog.color.lerp(tc, act.tint);
+    if (act.desat > 0) {
+      /* Toward the colour's own luminance rather than toward grey: a frame
+         pulled to grey reads as a dead monitor, and Shadow of the Colossus'
+         ending desaturates the WORLD, which keeps its light. */
+      for (const c of [hi, lo, fog.color]) {
+        const l = c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722;
+        c.lerp(new THREE.Color(l, l, l), act.desat);
+      }
+    }
+  }
 /* The mote field. World-anchored and wrapped around the ship rather than
      parented to it - see dust.ts for why that is the whole difference between
      dust and a texture on the camera. */

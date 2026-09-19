@@ -21,3 +21,4 @@ export * from '../src/sim/ambience';
 export * from '../src/sim/intro';
 export * from '../src/sim/call';
 export * from '../src/sim/encounter';
+export * from '../src/sim/grade';

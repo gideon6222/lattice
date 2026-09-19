@@ -272,5 +272,48 @@ export const SCENES = {
       __cw.R.held = 'down';
       __cw.advance(SECS);
     `
+  },
+
+  /* THE THREE ACTS. Round twelve, V7.
+
+     Same shaft, same depth, same time of day - the only thing that differs is
+     where the campaign is. Shot side by side that is the only way to judge a
+     grade, because "does the world feel different" is a comparison and a single
+     frame cannot answer it.
+
+     Act one is the `dig` scene itself, so it is not repeated here. */
+  act2: {
+    secs: 0.4,
+    frames: 4,
+    enter: true,
+    setup: `
+      const dug = [];
+      for (let d = 0; d <= 40; d++) dug.push('6,' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = 6; __cw.g.pd = 18;
+      /* The wake: five Anchors lit is where act two begins. */
+      __cw.g.ground.lit = [0, 1, 2, 3, 4];
+      __cw.g.ground.woke = true;
+      __cw.advance(0.3);
+    `,
+    step: `__cw.R.held = 'down'; __cw.advance(SECS);`
+  },
+
+  act3: {
+    secs: 0.4,
+    frames: 4,
+    enter: true,
+    setup: `
+      const dug = [];
+      for (let d = 0; d <= 40; d++) dug.push('6,' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = 6; __cw.g.pd = 18;
+      __cw.g.ground.lit = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+      __cw.g.ground.woke = true;
+      /* The Vault has been opened and the card read. The planet is quiet now. */
+      __cw.g.won = true;
+      __cw.advance(0.3);
+    `,
+    step: `__cw.R.held = 'down'; __cw.advance(SECS);`
   }
 };

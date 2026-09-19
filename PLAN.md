@@ -3275,8 +3275,39 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       change. It reuses `collapse.ts` and the stamper, needs no text, and
       survives a muted phone.
 
-- [ ] **V7 The three-act grade.** A palette and lighting grade driven off the
-      existing Unrest thresholds, so the planet visibly darkens as it wakes.
+- [x] **V7 The three-act grade.** Done 2026-09-18 as v0.51.0, and driven off the
+      CAMPAIGN rather than off the Unrest meter the box asked for.
+
+      **That swap is the milestone's one real decision.** Unrest is per-region
+      and it rises and falls, so a grade on it would flicker every time you
+      crossed a boundary - a world whose mood changes every twenty metres has no
+      acts, it has weather. The campaign thresholds are monotonic and every one
+      of them is something the player did, which is what an act is.
+
+      Act one is the dead planet and changes nothing, so a first hour is the
+      calibrated picture every lighting note was tuned against. Act two is the
+      wake, tinted toward the ember the heat line already uses, because it is
+      the only act where the planet is against you. Act three is the Vault
+      opened: quieter than act two AND quieter than act one, desaturated toward
+      the Anchors' own mint. That last one is the point - the ending says *"the
+      ground is yours"* and the second month's own measurement is that the
+      sentence is a promise the game does not keep. A grade cannot add content,
+      but it can make the place LOOK handed back.
+
+      **The first version graded only the sky and the fog, and at 19 m down a
+      side-by-side of act one against act three showed almost nothing.** Of
+      course it did: in a shaft you are looking at rock lit by your own lamp and
+      the sky is a strip at the top of the frame. The haze colour and the
+      parallax tint carry it now, which is what the deep actually looks like.
+      The haze GAIN is untouched, because that is the constant with five
+      playtest rounds behind it.
+
+      Ambient is left alone on purpose - pulling it is how a grade becomes a
+      filter, and `CLAUDE.md` is explicit that a world needing to look different
+      is a change to the lights and not to the field. Seven unit tests on the
+      dramatic shape and an e2e that reads the sky the game actually paints.
+      Verified by reintroducing the bug: flattening act two's tint fails the e2e
+      with "the wake does not change the sky at all, so act two is invisible".
 
 - [x] **V8 The first ten seconds show a ruin.** The story brief's first-minute
       finding: worked geometry in view before it is reachable, no text.
