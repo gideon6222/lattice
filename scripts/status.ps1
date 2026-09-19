@@ -83,6 +83,17 @@ try {
   try { $branch = (& git -C $repoFull rev-parse --abbrev-ref HEAD 2>$null | Out-String).Trim() } catch { }
   try { $head = (& git -C $repoFull rev-parse --short=7 HEAD 2>$null | Out-String).Trim() } catch { }
 
+  # Which chat wrote this. Claude Code puts its own ids in the environment of every shell
+  # it runs: CLAUDE_CODE_SESSION_ID is the CLI conversation (what `claude --resume` and the
+  # dashboard's wake lane take) and CLAUDE_CODE_HOST_SESSION_ID is the desktop app's own id
+  # for the same chat (local_<uuid>, the key of its record). Writing both here is what lets
+  # the dashboard show "this game's chat" and wake it, with no one telling it which is
+  # which. Empty when a person runs this from a plain terminal, which is fine.
+  $chat = [ordered]@{
+    cli  = [string]$env:CLAUDE_CODE_SESSION_ID
+    host = [string]$env:CLAUDE_CODE_HOST_SESSION_ID
+  }
+
   $record = [ordered]@{
     slug    = Split-Path $repoFull -Leaf
     utc     = [datetimeoffset]::UtcNow.ToString('o')
@@ -92,6 +103,7 @@ try {
     blocked = $Blocked
     branch  = $branch
     head    = $head
+    chat    = $chat
   }
 
   New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
