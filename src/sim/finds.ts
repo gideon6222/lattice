@@ -75,6 +75,20 @@ export const FINDS: Find[] = [
     blurb: 'Pulls loose ore toward the ship instead of making you fetch it.' },
   { key: 'bomb',    below: 40,
     blurb: 'Breaks a pocket of cells at once. Runs on the power meter.' },
+  /* 48 m, between the bomb and the Deep Survey.
+
+     FINDS is ordered shallowest-first and `finds.test.mjs` asserts a player
+     MEETS them in that order, so the position here is not cosmetic - it is the
+     same fact as `below` and the test catches the two disagreeing.
+
+     The depth itself: shallow enough that a player has the Receiver well before
+     the fifth Anchor wakes the planet, because it is the device that makes the
+     campaign findable rather than stumbled into, and arriving after that would
+     be arriving after the problem it solves has been suffered through. Deep
+     enough that the FIRST descent is still unguided, which is the one descent
+     that should be. */
+  { key: 'receiver', below: 48,
+    blurb: 'Hears an unlit Anchor through rock. How near, never which way.' },
   { key: 'survey',  below: 62,
     blurb: 'Reads ore through solid rock, so you can dig at something.' },
   { key: 'reactor', below: 70,

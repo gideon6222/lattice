@@ -812,6 +812,31 @@ export const SUPPLIES: Supply[] = [
 export const SUPPLY_OF: Record<string, Supply> = {};
 for (const sup of SUPPLIES) SUPPLY_OF[sup.key] = sup;
 
+/* How far the Lattice Receiver hears, in cells, by its level.
+
+   Here rather than in `src/sim/call.ts` because the shop's own effect string
+   has to print this number and `config.ts` imports nothing, so the instrument
+   can read the tuning file but the tuning file can never read the instrument.
+   The import direction in CLAUDE.md is one-way and load-bearing.
+
+   One function and not two numbers, because the shop line and the sim MUST
+   agree - INDEX.md rule 10b: derive one from the other, and where you cannot,
+   assert the derived quantity in a test rather than writing a second literal.
+   `test/call.test.mjs` asserts the printed string against this function, so a
+   retune that touches only one of them fails rather than lies to the player.
+
+   40 at level 1 is chosen against the region grid: a region is 113 m deep and
+   20 columns wide, so 40 lights up when you are roughly inside the right region
+   and says nothing about where in it. Each level adds 14, reaching 96 at 5 -
+   still under the 113 m band height, so even a maxed receiver never covers two
+   region rows at once. That ceiling is the point: the instrument must stay a
+   reason to go and look. */
+export const CALL_REACH_BASE = 40;
+export const CALL_REACH_STEP = 14;
+export function callReach(level: number): number {
+  return level <= 0 ? 0 : CALL_REACH_BASE + (level - 1) * CALL_REACH_STEP;
+}
+
 export const UPGRADES: Upgrade[] = [
   { key: 'drill',  name: 'Drill Bit',     base: 340, mul: 1.55, max: 9, mat: 'iron', group: 'rig', unlock: 0,
     tiers: ['Steel', 'Tungsten', 'Carbide', 'Diamond', 'Ionized', 'Plasma', 'Graviton', 'Singularity', 'Starbreaker', 'Godcore'],
@@ -904,6 +929,41 @@ export const UPGRADES: Upgrade[] = [
      goal made of patience. */
   { key: 'survey', name: 'Deep Survey',    base: 3600, mul: 1.55, max: 5, mat: 'gold', group: 'instruments', unlock: 62,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Reads ore ' + (2 + l * 1.6).toFixed(1) + ' m through rock') },
+
+  /* LATTICE RECEIVER. The other instrument, and the one that answers a question
+     the Deep Survey cannot: the Survey reads ORE through rock, which is about
+     making money, and this reads the ANCHORS, which is about the campaign. A
+     player with both has an answer to "where is the value" and "where is the
+     point", and they are genuinely different questions - the richest seam on
+     the planet is not where the game is going.
+
+     Levels buy REACH and nothing else, because the one thing it must never
+     become is a bearing (src/sim/call.ts). A louder instrument that still only
+     says "near" stays a reason to explore; an instrument that starts saying
+     "that way" turns a mining game into a following game, and no amount of
+     tuning gets that back.
+
+     Priced against the Deep Survey and one rung under it: they are the two
+     instruments, and this is the cheaper because it does less.
+
+     **3500 is not chosen, it is the only number that fits.** `econ.test.mjs`
+     asserts a row unlocking deeper costs more to start, and at 48 m the
+     receiver sits between Hull Plating (45 m, 3400) and the Deep Survey (62 m,
+     3600). The first two attempts were 2600, which undercut both, and the test
+     named each neighbour in turn. The ladder is the price, and the only freedom
+     left was where on it this row belongs.
+
+     **`unlock` is 48 and that is the same number as its `below` in finds.ts,
+     not a coincidence.** The first version said `unlock: 0`, reasoning that a
+     found device is gated by the crate and a second gate would be the
+     two-gates mistake the Fuel Tank's note records. That was wrong in a way the
+     econ test caught immediately: `unlock` is also the ORDERING key the price
+     ladder is checked against, so a row unlocking at 0 for 2600 undercut the
+     Magnet at 20 for 1200. The depth a device is buried at and the depth its
+     row opens at are one fact (INDEX.md rule 10b), and the other six devices
+     already agree that way. */
+  { key: 'receiver', name: 'Lattice Receiver', base: 3500, mul: 1.5, max: 5, mat: 'gold', group: 'instruments', unlock: 48,
+    effect: (l: number) => (l === 0 ? 'Not installed' : 'Hears an unlit Anchor ' + callReach(l) + ' m off') },
 
   /* REPAIR DRONE. Turns a bad run into a long one instead of a tow. Slow on
      purpose - it must never make heat survivable, only recoverable, so it is

@@ -52,7 +52,12 @@ test('the one world buries four crates at a time, shallowest first, and every de
   const core = H.coreDepth(0);
   const on = H.findsOn(0, core, []);
   assert.equal(on.length, 4, 'an empty hand sees ' + on.length + ' crates, not 4');
-  assert.deepEqual(on.map((f) => f.key), ['magnet', 'bomb', 'survey', 'reactor']);
+  /* The Lattice Receiver joined at 48 m on 2026-09-18 and sits third, between
+     the bomb and the Deep Survey. The cap did NOT move with it: four crates is
+     a deliberate constant with its own literal-valued test below, and widening
+     it because a device was added is exactly the casual change that test exists
+     to stop. What moves instead is which four are showing. */
+  assert.deepEqual(on.map((f) => f.key), ['magnet', 'bomb', 'receiver', 'survey']);
   for (const f of on) {
     assert.ok(f.below < core,
       f.key + ' is buried at ' + f.below + ' m on a world whose core is at ' + core);
@@ -170,8 +175,18 @@ test('a player who digs up what is offered meets every device shallowest first, 
      that is the cap, not a gate - and it IS on the world once they are. */
   const before = H.findsOn(0, core, []);
   assert.ok(!before.some((f) => f.key === 'laser'), 'the laser is buried for a player who has found nothing');
-  const after = H.findsOn(0, core, held.slice(0, 3));
-  assert.ok(after.some((f) => f.key === 'laser'), 'three devices in hand and the laser is still not buried');
+  /* FOUR in hand, not three, since 2026-09-18.
+
+     This number is `FINDS.length - FINDS_PER_WORLD` and it moved because the
+     eighth device landed, not because the cap did. Written as a literal on
+     purpose, the same way the cap's own test is: deriving it from the two
+     constants would make it assert that the code equals itself, and the thing
+     worth knowing here is the CONCRETE answer to "how much digging before the
+     key to three Anchors is in the ground" - which is four devices, all of them
+     shallower than 62 m. If that ever reaches six, the laser has drifted out of
+     reach and this line is where it gets noticed. */
+  const after = H.findsOn(0, core, held.slice(0, 4));
+  assert.ok(after.some((f) => f.key === 'laser'), 'four devices in hand and the laser is still not buried');
 });
 
 /* The cap, against a LITERAL rather than against the constant.

@@ -3035,7 +3035,11 @@ about it.
 
 Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
 
-- [ ] **V0 The Play store, this version.** Ask 1, and it runs beside the rest
+- [ ] **V0 The Play store, this version.** *(HELD BY HIM, 2026-09-18: "I will
+      hold off on adding anything to the play store for now." The box stays open
+      and unticked because the work is not done, not because it is blocked - and
+      nothing here should be pushed to Play until he says otherwise.)*
+      Ask 1, and it runs beside the rest
       rather than after it. The machine side is done: listing text, four
       screenshots, feature graphic, 512 icon, release notes, the TWA, and
       assetlinks. A current bundle was built 2026-09-18 and is 1.29 MB.
@@ -3076,16 +3080,31 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       **Done 2026-09-18, v0.49.0.** Verified by reintroducing the bug: opening
       the Vault pip one Anchor early fails the e2e naming it.
 
-- [ ] **V2b The resonance needle.** V1's reading drawn in the instrument
+- [x] **V2b The resonance needle, which became a lamp.** V1's reading drawn in the instrument
       cluster, and the receiver that carries it added to `FINDS` so it arrives
       as a discovery rather than as a UI feature. Split out of V2 on 2026-09-18
       rather than left as a half-ticked box (rule 3b): the tally needed no new
       device and shipped the same day, and the needle needs an upgrade key, a
       display case in `station.ts` - which throws at boot without one - and the
       e2e that counts cases against `UPGRADES.length`.
-      **Both carry visually, and the audio ping is an addition to the needle and
-      never the only carrier** - the muted-phone rule. Judged by eye at 375x812
-      and on the phone, so it stays with a session rather than a builder.
+
+      **Done 2026-09-18, and it is a LAMP rather than a needle.** `index.html`
+      already carried the argument: a drill-load tachometer used to sweep around
+      the fuel dial and was cut on a playtest because *"a gauge earns its
+      movement by being read; this one was moving for decoration"*. Resonance
+      changes with every metre flown, so a needle for it is that mistake with a
+      different label. The lamp is dark most of the time and brightens when
+      there is something to say. It carries visually, so any audio ping stays an
+      addition and never the only carrier - the muted-phone rule.
+
+      **The eighth device found a latent world bug**, which is the part worth
+      remembering: a find crate is answered BEFORE the authored rooms, so one
+      that hashed onto an Anchor hall's wall replaced it, and the eviction
+      guarding against that only covered the three SEALED halls. `NOTES.md` has
+      the two wrong fixes and why it needs both a footprint and the stamp. Three
+      of the round's numbers also turned out to be derived rather than chosen -
+      the price (3500 is the only value that fits the ladder at 48 m), the
+      unlock depth, and the entry's position in `FINDS`.
 
 - [ ] **V3 The Survey map separates lit from unlit at a glance.** Ask 5's other
       half. The map already knows; it does not currently say.

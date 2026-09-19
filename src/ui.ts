@@ -8,6 +8,7 @@ import type { Upgrade, Supply } from './types';
 import { VERSION, CHANGELOG } from './changelog';
 import { haulValue } from './sim/world';
 import { ANCHOR_COUNT, vaultOpen } from './sim/vaults';
+import { resonance } from './sim/call';
 import { lamp } from './scene';
 import { setDrillTier, setUpgradeHardware } from './ship';
 import { sfx, audioState, audioVolume } from './audio';
@@ -32,7 +33,7 @@ export const mustEl = (id: string): HTMLElement => {
 };
 export const ui = {
   planet: mustEl('planet'), credits: mustEl('credits'), haul: mustEl('haul'), depth: mustEl('depth'),
-  anchors: mustEl('anchors'),
+  anchors: mustEl('anchors'), callLamp: mustEl('callLamp'),
   cargoTxt: mustEl('cargoTxt'), fuelTxt: mustEl('fuelTxt'),
   toast: mustEl('toast'), shop: mustEl('shop'), shopCredits: mustEl('shopCredits'),
   shopCard: mustEl('shopCard'), shopHint: mustEl('shopHint'),
@@ -219,13 +220,42 @@ function buildAnchorPips() {
    one", which is a location, and this game's whole direction design is that the
    instrument says near and never says where (src/sim/call.ts). The row answers
    "how far through", and the Survey map answers "which". */
+let paintedLit = -1;
 function paintAnchorPips() {
   buildAnchorPips();
   const lit = g.ground.lit.length;
+  /* updateHUD runs every frame, and lighting an Anchor happens nine times in a
+     campaign. Ten idempotent classList.toggle calls a frame are cheap but they
+     are not free, and this file is under the thumb. */
+  if (lit === paintedLit) return;
+  paintedLit = lit;
   for (let i = 0; i < anchorPips.length; i++) {
     anchorPips[i].classList.toggle('lit', i < lit);
   }
   if (vaultPip) vaultPip.classList.toggle('open', vaultOpen(lit));
+}
+
+/* The Lattice Receiver's telltale.
+
+   The reading goes out as a CSS custom property and the stylesheet does the
+   rest, so nothing here animates per frame - the 140ms transition on the lamp
+   is what smooths it, which is the same trick the sky gradient uses.
+
+   Rounded to hundredths before it is written. The raw value changes on every
+   frame you are moving, and setting a custom property to a fresh 17-digit
+   string sixty times a second is a style recalculation per frame for a
+   difference no eye can see. */
+let paintedCall = -1;
+function paintCallLamp() {
+  const level = g.up.receiver ?? 0;
+  const aboard = level > 0;
+  ui.callLamp.classList.toggle('hidden', !aboard);
+  if (!aboard) return;
+  const v = Math.round(
+    resonance(Math.round(g.px), Math.max(0, Math.round(g.pd)), g.ground.lit, level) * 100) / 100;
+  if (v === paintedCall) return;
+  paintedCall = v;
+  ui.callLamp.style.setProperty('--call', String(v));
 }
 
 export function updateHUD() {
@@ -255,6 +285,7 @@ export function updateHUD() {
      there points the player at an objective that is no longer the objective. */
   ui.depth.textContent = 'DEPTH ' + Math.max(0, Math.round(g.pd)) + ' m   /   ' + coreM() + ' m DEEP';
   paintAnchorPips();
+  paintCallLamp();
   /* The dials take fractions and do their own smoothing - see gauges.ts. The
      two numbers under them are the exact reading a needle cannot give you, and
      fuel is the one that decides whether to turn round. Rounded UP, so a gauge

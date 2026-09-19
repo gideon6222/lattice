@@ -83,7 +83,8 @@ export interface Block {
 
 export type UpgradeKey =
   | 'drill' | 'cargo' | 'thrust' | 'tank' | 'cool' | 'scan' | 'scrub' | 'auto'
-  | 'bomb' | 'laser' | 'hull' | 'magnet' | 'survey' | 'drone' | 'reactor';
+  | 'bomb' | 'laser' | 'hull' | 'magnet' | 'survey' | 'drone' | 'reactor'
+  | 'receiver';
 
 export type SupplyKey = 'coolant' | 'patch' | 'cell' | 'overdrive' | 'bulwark' | 'pulse';
 

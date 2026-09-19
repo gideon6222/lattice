@@ -678,6 +678,44 @@
     ],
     "matTotal": 5
   },
+  "receiver": {
+    "name": "Lattice Receiver",
+    "base": 3500,
+    "mul": 1.5,
+    "max": 5,
+    "tiers": null,
+    "costs": [
+      3500,
+      5250,
+      7875,
+      11813,
+      17719,
+      26578
+    ],
+    "effects": [
+      "Not installed",
+      "Hears an unlit Anchor 40 m off",
+      "Hears an unlit Anchor 54 m off",
+      "Hears an unlit Anchor 68 m off",
+      "Hears an unlit Anchor 82 m off",
+      "Hears an unlit Anchor 96 m off"
+    ],
+    "mat": "gold",
+    "mats": [
+      null,
+      null,
+      null,
+      {
+        "id": "gold",
+        "need": 2
+      },
+      {
+        "id": "gold",
+        "need": 3
+      }
+    ],
+    "matTotal": 5
+  },
   "drone": {
     "name": "Repair Drone",
     "base": 4400,

@@ -5,7 +5,7 @@ import { W, START_X, ORES, DEF, baseRock, coreDepth, hardMult, valueMult,
 import { key, mixHex, rnd } from './util';
 import { regionAt, REGION_COUNT } from './region';
 import { vaultCells, anchorHere, WORKED_HARD, SEALED_HARD,
-         vaultOpen, VAULT_WALL_HARD, ANCHOR_COUNT, anchorAt, anchorSealed, VAULT_W, VAULT_H } from './vaults';
+         vaultOpen, VAULT_WALL_HARD, ANCHOR_COUNT, anchorAt, VAULT_W, VAULT_H } from './vaults';
 import { isCollapsed, hardScale, isAwake, UNREST_BANDS } from './unrest';
 import { g , coreM, valueM, worldTrait} from './state';
 import { findMap, cacheSupply, FIND_COLOR, FIND_HOST, FIND_HARD, type Find } from './finds';
@@ -23,37 +23,67 @@ let fcMap: Map<string, Find> = new Map();
 export function findCells(): Map<string, Find> {
   const cd = coreM();
   const k = g.planet + '|' + cd + '|' + g.found.length;
-  if (k !== fcKey) { fcKey = k; fcMap = evictFromSealed(findMap(g.planet, cd, g.found), cd); }
+  if (k !== fcKey) { fcKey = k; fcMap = evictFromRooms(findMap(g.planet, cd, g.found), cd); }
   return fcMap;
 }
 
-/* A crate never sits inside a SEALED hall - not its stone and not its air.
-   The laser is the key to those halls, and a crate stamped inside one is a
-   save that cannot be finished; with all seven devices on the one world the
-   hash put one there on the first run of the test that checks (`the key is
-   never behind the door it opens`). Walked down out of the footprint, here
-   rather than in finds.ts, because this module already imports both sides
-   and finds.ts importing the vault geometry was a cycle that deleted the
-   Vault. Counted, so a test can say it is rare. */
+/* A crate never sits inside an ANCHOR HALL - not its stone and not its air.
+
+   This started as SEALED halls only. The laser is the key to those, and a crate
+   stamped inside one is a save that cannot be finished; with all seven devices
+   on the one world the hash put one there on the first run of the test that
+   checks (`the key is never behind the door it opens`).
+
+   **Widened to every hall on 2026-09-18, when the eighth device found the other
+   half of the same bug.** `blockAt` answers the crate BEFORE the authored
+   rooms, so a crate that hashes onto a hall's wall does not sit in the wall, it
+   REPLACES it - and an Anchor hall with a crate where a wall should be is a
+   hall you can walk into. `vaults.test.mjs` caught it as "schematic is cut
+   stone and is not flagged as spoil", which is that test doing exactly its job:
+   it swept the wall cells and one of them had stopped being a wall.
+
+   The rule it protects is the ritual: you BREAK IN to an Anchor hall. That is
+   true of all nine and was only ever enforced for the three sealed ones,
+   because until there were eight devices nothing had landed on the other six.
+
+   Walked down out of the footprint, here rather than in finds.ts, because this
+   module already imports both sides and finds.ts importing the vault geometry
+   was a cycle that deleted the Vault. Counted, so a test can say it is rare. */
 let evicted = 0;
 export function findEvictions() { return evicted; }
 
-function inSealedHall(x: number, d: number): boolean {
+/* **Both a footprint AND the stamp, because neither alone is the answer**, and
+   finding that out cost two wrong versions, each caught by a different test:
+
+   - The FOOTPRINT around each Anchor covers the hall's interior AIR as well as
+     its stone. `vaultMap()` holds only the cells the template marks, so an open
+     cell inside a hall is simply absent from it - and a crate in the air of a
+     sealed hall is the save-cannot-be-finished bug this whole function exists
+     for. The stamp-only version put one in Serrik's hall at 45,306 and the test
+     said so by name.
+   - The STAMP covers what the footprint cannot: the CENTRE Vault, which is a
+     room and is not at any Anchor, and any hall whose template is a different
+     size from the constants.
+
+   `vaultMap()` rather than `vaultCells()` directly, because the stamp is built
+   once and kept and rebuilding the whole authored geometry per candidate cell
+   would be its own mistake. */
+function inAuthoredRoom(x: number, d: number): boolean {
+  if (vaultMap().has(x + ',' + d)) return true;
   for (let r = 0; r < ANCHOR_COUNT; r++) {
-    if (!anchorSealed(r)) continue;
     const a = anchorAt(r);
     if (Math.abs(x - a.x) <= (VAULT_W - 1) / 2 && Math.abs(d - a.d) <= (VAULT_H - 1) / 2) return true;
   }
   return false;
 }
 
-function evictFromSealed(m: Map<string, Find>, coreDepthHere: number): Map<string, Find> {
+function evictFromRooms(m: Map<string, Find>, coreDepthHere: number): Map<string, Find> {
   const out = new Map<string, Find>();
   for (const [k, f] of m) {
     const i = k.indexOf(',');
     const x = +k.slice(0, i);
     let d = +k.slice(i + 1);
-    while ((inSealedHall(x, d) || out.has(x + ',' + d)) && d < coreDepthHere - 1) { d++; evicted++; }
+    while ((inAuthoredRoom(x, d) || out.has(x + ',' + d)) && d < coreDepthHere - 1) { d++; evicted++; }
     out.set(x + ',' + d, f);
   }
   return out;

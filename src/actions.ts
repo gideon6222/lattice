@@ -529,7 +529,7 @@ export function hardReset() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_KEY); } catch (e) { /* ignore */ }
   g.planet = 0; g.credits = 0;
   g.up = { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, scrub: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, reactor: 0 };
+    hull: 0, magnet: 0, survey: 0, drone: 0, reactor: 0, receiver: 0 };
   g.kit = { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 };
   g.stock = {};
   g.relics = []; g.relicsTaken = [];

@@ -47,20 +47,19 @@
    reads when they wire it up. */
 
 import { anchorAt, ANCHOR_COUNT } from './vaults';
+import { callReach } from './config';
 
-/* How far the call reaches, in cells.
+/* The reach is the RECEIVER'S, and it is read from the level rather than fixed.
 
-   Chosen against the region grid rather than by eye. A region is
-   WORLD_DEPTH / 4 = 113 m deep and W / 3 = 20 columns wide, and an Anchor sits
-   somewhere inside its own region. At 40 the instrument lights up when you are
-   roughly inside the right region and says nothing about where in it - which is
-   exactly the sentence it is supposed to say.
+   `callReach(level)` lives in `config.ts` because the shop's effect string has
+   to print the same number and the import direction only runs one way. Level 0
+   is no receiver at all and reaches nothing, which is what makes the first
+   descent unguided without a single branch anywhere else.
 
-   Too far and it is on everywhere, which reads as nothing and is the failure
-   mode a always-on instrument has. Too near and you only hear it once you are
-   already on top of the thing, which is a confirmation rather than a direction.
-   This is the number to move if the Call feels like either. */
-export const CALL_REACH = 40;
+   Too far and the instrument is on everywhere, which reads as nothing. Too near
+   and you only hear it once you are already on top of the thing, which is a
+   confirmation rather than a direction. `config.ts` carries the numbers and the
+   reasoning. */
 
 /* The falloff.
 
@@ -87,9 +86,13 @@ export function anchorDistance(x: number, d: number, r: number): number {
   return Math.sqrt(dx * dx + dd * dd);
 }
 
-/* One Anchor's contribution, 0 at CALL_REACH and beyond, 1 at its cell. */
-export function callFrom(x: number, d: number, r: number): number {
-  const t = anchorDistance(x, d, r) / CALL_REACH;
+/* One Anchor's contribution, 0 at the receiver's reach and beyond, 1 at its
+   cell. `level` is the Lattice Receiver's level; 0 means it is not aboard and
+   nothing is audible. */
+export function callFrom(x: number, d: number, r: number, level = 1): number {
+  const reach = callReach(level);
+  if (reach <= 0) return 0;
+  const t = anchorDistance(x, d, r) / reach;
   if (t >= 1) return 0;
   return Math.pow(1 - t, CALL_POW);
 }
@@ -123,11 +126,12 @@ export function nearestUnlit(x: number, d: number, lit: readonly number[]):
    and is asserted anyway: it is the state the whole instrument stops meaning
    anything in, and an instrument that keeps twitching after the campaign is over
    is worse than one that goes quiet. */
-export function resonance(x: number, d: number, lit: readonly number[]): number {
+export function resonance(x: number, d: number, lit: readonly number[], level = 1): number {
+  if (callReach(level) <= 0) return 0;
   let out = 0;
   for (let r = 0; r < ANCHOR_COUNT; r++) {
     if (lit.includes(r)) continue;
-    const c = callFrom(x, d, r);
+    const c = callFrom(x, d, r, level);
     if (c > out) out = c;
   }
   return out;

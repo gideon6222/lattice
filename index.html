@@ -329,6 +329,24 @@
     position:absolute; left:0; bottom:-2px; width:172px;
     display:flex; justify-content:space-between; gap:4px;
   }
+  /* The receiver's telltale: a brass bezel above the dials with one lamp in it,
+     matching the cluster's own instrument look rather than introducing a second
+     visual language into the corner of the screen. The glow is driven from
+     `--call` (0..1), set on the element by ui.ts, so the transition below is
+     what does the smoothing and no JavaScript animates anything per frame. */
+  #callLamp{
+    position:absolute; left:2px; top:-16px;
+    width:34px; height:13px; border-radius:7px;
+    border:1px solid rgba(220,192,132,.45); background:rgba(6,7,5,.8);
+    display:flex; align-items:center; justify-content:center;
+  }
+  #callLamp.hidden{display:none;}
+  #callLamp i{
+    width:7px; height:7px; border-radius:50%; display:block;
+    background:rgba(255,200,97,calc(.10 + var(--call, 0) * .90));
+    box-shadow:0 0 calc(var(--call, 0) * 9px) rgba(255,200,97,calc(var(--call, 0) * .95));
+    transition:background var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  }
   #clusterTxt s{
     text-decoration:none; font-size:9px; font-weight:700; letter-spacing:.06em;
     color:#d8cdb0; background:rgba(6,7,5,.78); padding:2px 5px; border-radius:2px;
@@ -1368,6 +1386,22 @@
     <circle cx="50" cy="50" r="49" fill="url(#glass)" pointer-events="none"/>
   </svg>
 
+  <!-- The Lattice Receiver's telltale. Round twelve, V2b.
+
+       NOT a second needle, and the reason is written further up this file: a
+       tachometer used to sweep around the fuel dial and was cut because "a
+       gauge earns its movement by being read; this one was moving for
+       decoration". Resonance changes with every metre you fly, so a needle for
+       it would be that same mistake with a different label - the one instrument
+       you check under pressure would sit beside something that never stops.
+
+       A lamp instead. Dark when nothing is in reach, which is most of the time,
+       and brightening as an unlit Anchor comes into range. It earns its
+       movement by only having any when there is something to say.
+
+       Hidden entirely until the receiver is aboard: an empty instrument is a
+       question the player cannot answer yet. -->
+  <div id="callLamp" class="hidden" aria-hidden="true"><i></i></div>
   <div id="clusterTxt"><s id="fuelTxt">100%</s><s id="cargoTxt">0 / 60 KG</s></div>
 </div>
 <div id="kit">

@@ -365,6 +365,25 @@
       "total": 5
     },
     {
+      "key": "receiver",
+      "mat": "gold",
+      "mineralDepth": 64,
+      "steps": [
+        null,
+        null,
+        null,
+        {
+          "id": "gold",
+          "need": 2
+        },
+        {
+          "id": "gold",
+          "need": 3
+        }
+      ],
+      "total": 5
+    },
+    {
       "key": "drone",
       "mat": "amethyst",
       "mineralDepth": 95,

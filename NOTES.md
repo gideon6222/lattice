@@ -5240,6 +5240,93 @@ Playwright runs against `dist` and the fault was only in `src`. A planted fault
 has to be built before it means anything, and a rule-11 check that skips the
 build is a rule-11 check that proves the opposite of what it claims.
 
+## V2b, the receiver: an eighth device, and the latent bug it found
+
+The Call needed something to carry it. `finds.ts` already buries seven devices
+in hashed cells, so the Lattice Receiver became the eighth - dug up rather than
+bought, which costs nothing extra, keeps the first descent unguided, and makes
+the direction system arrive as a discovery instead of as a UI feature.
+
+**Adding it broke nine tests, and only three of them were snapshots.** The other
+six were the suite telling me things I did not know.
+
+### A crate could replace an Anchor hall's wall, and nobody had noticed
+
+`vaults.test.mjs` failed with *"schematic is cut stone and is not flagged as
+spoil"*. `blockAt` answers the find crate BEFORE the authored rooms, so a crate
+that hashes onto a hall wall does not sit in the wall - it REPLACES it. An
+Anchor hall with a crate where a wall should be is a hall you can walk into,
+and the ritual the halls exist for is that **you break in**.
+
+The eviction that should have stopped it only covered SEALED halls, because
+that is the case that had bitten before: the laser is the key to those, so a
+crate inside one is a save that cannot be finished. Every other hall was
+unprotected, and with seven devices nothing had ever landed in one. The eighth
+device landed in one on its first run.
+
+**The fix took two wrong versions, each caught by a different test.** Widening
+the footprint check to all nine halls still failed, because the CENTRE Vault is
+a room too and is not at any Anchor. Switching to `vaultCells()` - the authored
+geometry itself - failed the other way, with *"a device crate is inside Serrik's
+sealed hall at 45,306"*: the stamp holds only the cells a template MARKS, so the
+open air inside a hall is simply absent from it, and a crate in the air of a
+sealed hall is the original bug again. It needs both, and it now has both.
+
+### Three numbers that turned out to be derived, not chosen
+
+- **The price.** `econ.test.mjs` asserts a row unlocking deeper costs more to
+  start. At 48 m the receiver sits between Hull Plating (45 m, 3400) and the
+  Deep Survey (62 m, 3600), so 3500 is not a judgement, it is the only number
+  that fits. Two earlier guesses of 2600 were rejected naming each neighbour.
+- **The unlock depth.** The first version was `unlock: 0`, reasoning that a
+  found device is gated by its crate and a second gate would be the two-gates
+  mistake the Fuel Tank's note records. Wrong: `unlock` is also the ORDERING key
+  the price ladder is checked against. The depth a device is buried at and the
+  depth its row opens at are one fact, and the other seven already agree that
+  way.
+- **Its position in `FINDS`.** The array is ordered shallowest-first and a test
+  asserts a player MEETS them in that order, so where the entry sits in the file
+  is the same fact as its `below`.
+
+### What did NOT move, deliberately
+
+`FINDS_PER_WORLD` is still four. The test guarding it is written against a
+literal four rather than against the constant, with a note saying why: written
+against the constant it was vacuous, because raising the cap moved the goalpost
+with it. Widening the cap because a device was added is exactly the casual
+change that literal exists to stop. What moved instead is the derived number
+beside it - the laser is now buried once FOUR devices are in hand rather than
+three, because there are eight devices and the cap is four. That number is also
+a literal, for the same reason, and it is the line that will notice if the laser
+ever drifts out of reach.
+
+### The goldens, read before they were re-recorded
+
+Three snapshots changed and all three were legal. `upgrades.json` and
+`materials-required.json` are purely additive - 38 and 19 insertions, zero
+deletions, so no existing price or requirement moved. `blocks.json` needed
+reading: crates moved, so basalt, granite and scoria shift by one or two, and
+**iron falls by one** because a crate now covers a cell that used to be iron.
+That is the legal shape - `blocks-frozen.json`'s own note lists `schematic` as
+an overwriter precisely because it consumes no roll, and the frozen test
+("pockets and caves only overwrite cells, never reshuffle the ore stream")
+passes, which is the authoritative check that the stream itself did not move.
+
+### The lamp, and why it is not a needle
+
+`PLAN.md` said "a resonance needle in the instrument cluster". It is a lamp
+instead, and `index.html` already contained the argument: a drill-load
+tachometer used to sweep around the fuel dial and was cut on a playtest, because
+*"a gauge earns its movement by being read; this one was moving for
+decoration"*. Resonance changes with every metre flown, so a needle for it is
+that same mistake with a different label - the one instrument checked under
+pressure would sit beside something that never stops.
+
+A lamp is dark most of the time and brightens when there is something to say.
+The reading goes out as a CSS custom property rounded to hundredths and the
+stylesheet's own transition does the smoothing, so nothing animates per frame
+and a fresh 17-digit string is not written sixty times a second.
+
 ## A second shot tool, and one refactor that came with it
 
 `scripts/shot.mjs` is `filmstrip.mjs`'s single-frame sibling, at 1080x2340. The
