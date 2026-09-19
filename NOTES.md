@@ -5928,6 +5928,49 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## X6: the Anchor had one knob for two different properties
+
+His ask was "make the anchor something physically located at that spot that you
+can't dig". The game already did that for an UNLIT Anchor - `hard: Infinity`,
+uncuttable by the drill, a charge or the laser - and deliberately undid it the
+moment the Anchor lit, because three Anchors share each of the three columns
+they sit in and an unbreakable one was a plug that made six of the nine
+unreachable by digging down their own column.
+
+**The old code had one knob, `hard`, for two properties that are not the same
+thing: can this be CUT, and is this IN THE WAY.** The plug was never about
+hardness. So a lit Anchor is `hard: Infinity` for ever now and carries a new
+`ghost` flag meaning drawn, never cuttable, and the ship passes through.
+
+**Three readers and exactly three**, because a ghost cell only some of them know
+about is a ship flying through a monument its own fuel estimate calls solid:
+`solidAt` (collision), `findRoute` (the fuel-to-climb estimate and the
+autopilot), and the occupancy grid in `lightmap.ts`. The dig trigger is NOT one
+- `startDig` already refuses on `hard === Infinity`, which is a stronger
+statement and covers the unlit case too - and `openNeighbours` is not either,
+because that is face shading rather than passability and this game's lighting is
+calibrated enough not to touch without a measurement.
+
+**The side effect is the whole visual win and it was not designed.** Shot
+before and after: with the cell solid, the hall was BLACK - the Anchor was
+occluding the light flood, so the brightest object in the game was standing in
+its own shadow. As air it lights its own room. That is a better answer to "I
+want it to glow or light up and show that it is powerful" than anything aimed at
+the glow number would have been, and it came out of fixing passability.
+
+**The old test asserted the MECHANISM and now asserts the PROPERTY.** It used to
+say "a lit Anchor is merely very hard"; it says "never mineable, never a plug",
+so whoever solves the plug a third way does not have to rewrite it. Verified by
+planting the plug - both tests fail, one naming the drill and one naming the
+route home.
+
+Two things cost a cycle each and are worth writing down. `blockAt` checks
+`g.dug` BEFORE the authored rooms, so a scene that digs a box around an Anchor
+erases the Anchor - the first shot came back as an empty hall full of haze. And
+`findRoute` returns `[x, d]` PAIRS rather than keys; the first version of the
+passability test compared them to a `"x,d"` string, matched nothing, and failed
+claiming the route had avoided the monument. The code was right both times.
+
 ## 2026-09-19: the listing is approved, and V0 is not
 
 Verbatim: *"The listing looks good. What is V0?"*

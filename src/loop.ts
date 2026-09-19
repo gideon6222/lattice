@@ -76,7 +76,8 @@ export function solidAt(cx: number, cy: number) {
   if (cx < 0 || cx >= W) return true;
   if (cy < -1) return true;
   if (cy > coreM()) return true;
-  return blockAt(cx, cy) !== null;
+  const b = blockAt(cx, cy);
+  return b !== null && !b.ghost;
 }
 
 /* Begin drilling a cell the ship has flown into. */

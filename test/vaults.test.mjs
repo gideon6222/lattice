@@ -113,16 +113,29 @@ test('every Anchor hall is shut, so getting in is always a decision', () => {
   }
 });
 
-test('an Anchor cannot be mined until it is lit, and can be moved after', () => {
-  /* Two halves, and the second one is a bug fix.
+test('an Anchor can never be mined, and a lit one is never in the way', () => {
+  /* Two halves, and the second one has now been solved twice.
 
      UNLIT it is uncuttable, and that is the ritual: you cannot mine your way
      to the objective, you fly to it. A block you can drill out is a pickup.
 
-     LIT it is merely very hard, because three Anchors share each of the three
-     columns they live in - and an unbreakable monument is a permanent plug in
-     that column. Six of the nine were unreachable by digging down their own
-     column, each one stopping a metre above the Anchor above it. */
+     LIT it must not be a PLUG, because three Anchors share each of the three
+     columns they live in. Six of the nine were once unreachable by digging down
+     their own column, each stopping a metre above the Anchor above it.
+
+     **The first fix made a lit Anchor cuttable, and his playtest of 2026-09-19
+     rejected it**: "make the anchor something physically located at that spot
+     that you can't dig". A monument you are allowed to mine is not a monument.
+
+     The property that fix was protecting was never HARDNESS, it was that the
+     column stays passable - two different things that the old code had one knob
+     for. So the Anchor is uncuttable for ever now and a lit one is `ghost`: the
+     ship flies through it, `findRoute` counts it as open, and the light field
+     stops treating the brightest object in the game as a wall.
+
+     This test asserts the PROPERTY (never mineable, never a plug) rather than
+     either mechanism, so the next person to solve the plug a third way does not
+     have to rewrite it. */
   H.setWorld(0);
   H.g.dug = new Set();
   H.g.ground = H.newGround();
@@ -130,15 +143,15 @@ test('an Anchor cannot be mined until it is lit, and can be moved after', () => 
   const before = H.blockAt(a.x, a.d);
   assert.equal(before.id, 'anchor');
   assert.equal(before.hard, Infinity, 'an unlit Anchor can be drilled out');
+  assert.ok(!before.ghost, 'an unlit Anchor can be flown through, so it is not an obstacle at all');
 
   H.lightAnchor(H.g.ground, 0);
   const after = H.blockAt(a.x, a.d);
   assert.equal(after.id, 'anchorlit', 'a lit Anchor looks exactly like an unlit one');
-  assert.ok(Number.isFinite(after.hard),
-    'a lit Anchor is still a permanent plug in its own column');
-  const band = H.baseRock(a.d, 0, a.x).hard;
-  assert.ok(after.hard > band * 2,
-    `a lit Anchor drills at ${after.hard.toFixed(1)} against a band of ${band} - moving a monument should be a decision`);
+  assert.equal(after.hard, Infinity,
+    'a lit Anchor can be drilled out, which is the thing he asked to stop');
+  assert.ok(after.ghost,
+    'a lit Anchor is uncuttable AND solid, which is the permanent plug all over again');
   assert.ok(after.glow > before.glow, 'lighting an Anchor does not change how it reads');
   /* And it never enters the hold, whichever state it is in - see the sweep in
      `cut stone never enters the hold`. */
@@ -470,4 +483,39 @@ test('cut stone never enters the hold', () => {
   assert.deepEqual([...bad], [],
     `these can be broken into the hold and have no DEF entry: ${[...bad].join(', ')}`);
   H.g.found = [];
+});
+
+test('a lit Anchor does not plug its own column, which is the bug the ghost flag exists for', () => {
+  /* The PROPERTY, asserted through the thing that would actually break: the
+     route finder. Six of the nine Anchors were once unreachable by digging down
+     their own column, and the reason was a lit monument the ship could not pass.
+
+     `findRoute` is the right instrument rather than a hand-written walk,
+     because it is what the fuel-to-climb estimate and the autopilot both use -
+     if it disagrees with collision about a cell, the game lies to the player
+     about whether they can get home. */
+  H.setWorld(0);
+  H.g.ground = H.newGround();
+  const a = H.anchorAt(0);
+
+  /* A shaft straight down the Anchor's own column, from the surface to one
+     metre BELOW it, with the Anchor's own cell left undug - it cannot be dug. */
+  const dug = [];
+  for (let d = -1; d <= a.d + 1; d++) if (d !== a.d) dug.push(a.x + ',' + d);
+  H.g.dug = new Set(dug);
+  H.g.px = a.x; H.g.pd = a.d + 1;
+
+  H.lightAnchor(H.g.ground, 0);
+  const route = H.findRoute();
+  assert.ok(route, 'no way home from under a lit Anchor: the monument is a plug again');
+
+  /* And the route really does pass through the Anchor's cell rather than
+     finding some way around, or this asserts nothing about the flag.
+
+     `findRoute` returns [x, d] PAIRS and not keys - the first version of this
+     compared them against a "x,d" string, matched nothing, and failed claiming
+     the route had avoided the Anchor. The code was right and the test was
+     reading the wrong shape. */
+  assert.ok(route.some((c) => c[0] === a.x && c[1] === a.d),
+    'the route home avoided the Anchor, so this test would pass with the flag removed');
 });

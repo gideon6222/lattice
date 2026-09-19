@@ -96,6 +96,30 @@ export interface Block {
      ship around. It is somebody else's haul, still crated, so it draws with the
      crate geometry the supply caches and the device crates already use. */
   salvage?: boolean;
+  /* Drawn, never cuttable, and the ship passes straight through it.
+     Round fourteen, X6, and it exists so that "you cannot dig this" and "this
+     is not in your way" can both be true of the same cell.
+
+     His ask was for an Anchor to be a physical thing at that spot that you
+     cannot dig. It already was, while unlit - and became cuttable the moment it
+     lit, because three Anchors share each of the three columns they sit in and
+     an unbreakable one was a plug that made six of the nine unreachable. That
+     is a TRAVERSAL problem wearing a digging problem's clothes, and this is the
+     answer to it: a lit Anchor is a light, not a wall.
+
+     Everything that asks "is this cell in the way" has to read this flag, and
+     there are exactly three: `solidAt` in loop.ts (collision), `findRoute` in
+     world.ts (the fuel-to-climb estimate and the autopilot), and the occupancy
+     grid in lightmap.ts. A ghost cell that only some of them know about is a
+     ship flying through a monument its own fuel estimate calls solid.
+
+     The dig trigger is deliberately NOT on that list: it is guarded by
+     `hard === Infinity` in `startDig`, which is a stronger statement and one
+     that holds for an unlit Anchor too. `openNeighbours` in blocks.ts is not on
+     it either - that is face shading rather than passability, an Anchor's hall
+     is open around it already, and the lighting in this game is calibrated
+     enough that it is not worth touching without a measurement. */
+  ghost?: boolean;
 }
 
 export type UpgradeKey =

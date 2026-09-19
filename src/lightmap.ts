@@ -160,7 +160,12 @@ function fillSolid() {
       /* Above the surface is open sky in every column, including the two
          border ones - otherwise the world edge grows walls into the air and
          the pad sits in a slot. Below it, out of bounds is rock. */
-      const v = d < 0 ? 0 : x < 0 || x >= W ? 1 : blockAt(x, d) ? 1 : 0;
+      /* A ghost cell is AIR to the light field. A lit Anchor is the brightest
+         object in the game and it was occluding the flood like a wall, which
+         put its own hall into its own shadow; and now the ship can fly through
+         it, a solid reading would darken the cell the ship is standing in. */
+      const gb = d < 0 || x < 0 || x >= W ? null : blockAt(x, d);
+      const v = d < 0 ? 0 : x < 0 || x >= W ? 1 : gb && !gb.ghost ? 1 : 0;
       solid[j * LM_COLS + i] = v;
       /* The same world at sub-cell resolution. Blocky by construction - the
          world IS cells - but it lets the flood put values BETWEEN cell

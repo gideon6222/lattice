@@ -356,6 +356,41 @@ export const SCENES = {
     step: `__cw.advance(SECS);`
   },
 
+  /* A LIT ANCHOR, with the ship sitting inside its cell. Round fourteen, X6.
+
+     `hallEye()` is Anchor 1's hall, which is the one the intro uses, so its
+     own geometry is already known-good. The ship is put ON the monument rather
+     than beside it, because the thing to judge is whether a cell you fly
+     THROUGH still reads as solid and powerful - a light rather than a hole.
+
+     The hall is dug out around it so the shot is the monument and not the wall
+     in front of it. */
+  anchorlit: {
+    secs: 0.4,
+    frames: 4,
+    enter: true,
+    setup: `
+      const hall = __cw.hallEye();
+      const AX = hall.px, AD = hall.pd + 2;
+      const dug = [];
+      /* Everything EXCEPT the Anchor's own cell. blockAt checks g.dug before
+         it checks the authored rooms, so putting the monument's cell in the dug
+         set erases it - which is exactly what the first run of this scene did,
+         and the shot came back as an empty hall full of haze. No backticks in
+         here: this whole setup IS a template literal. */
+      for (let d = AD - 7; d <= AD + 5; d++) for (let x = AX - 6; x <= AX + 6; x++) {
+        if (x === AX && d === AD) continue;
+        dug.push(x + ',' + d);
+      }
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.lit = [1];
+      __cw.g.px = AX; __cw.g.pd = AD;
+      __cw.resetBlocks();
+      __cw.advance(0.6);
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
   /* CUTTING INTO ONE, which is the beat nothing else here shows.
 
      The approach scene proves a wreck announces itself and the opened one

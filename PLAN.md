@@ -3544,3 +3544,150 @@ replaced OBJECTIVE as the most expensive stand-in there is).
       overwriter set), and two faults were planted and seen to fail. A third
       planted fault corrected a claim in `blocks.test.mjs` that was simply
       wrong - see the note there.
+
+## Round fourteen: rarity, usefulness, and what an Anchor gives you
+
+His brief, 2026-09-19, after the first real play of 0.54.0. Five asks, numbered
+here in his order, and the verbatim words are in
+`gamedev-notes\playtests\lattice.md`:
+
+1. **Make materials feel more rare** - "I want it to feel exciting when you find
+   resources."
+2. **Make them more useful** - "so they feel like you are searching for them."
+3. **Abilities on each Anchor.**
+4. **The first Anchor's ability is the map**, showing where minerals, secrets or
+   a higher concentration are, only in regions whose Anchor is lit.
+5. **The Anchor is a physical thing at that spot that you cannot dig**, glowing,
+   visibly powerful.
+
+Research: `C:\dev\plans\lattice\RARITY.md`.
+
+### The measurement that decides asks 1 and 2
+
+Taken before any design, on planet 0, by flood-filling every ore cell into
+deposits of the same id:
+
+    ore         deposits  cells  mean size   biggest
+    copper           292    307      1.05        3
+    iron             355    370      1.04        3
+    gold             213    219      1.03        2
+    ruby              82     83      1.01        2
+    magmite           40     40      1.00        1
+    coreite           23     23      1.00        1
+    umbrite           13     13      1.00        1
+    solmarrow          5      5      1.00        1
+
+**Every ore in this game is a single isolated cell.** There are no veins
+anywhere and never have been. Finding gold gets you one gold: the number goes up
+and you move on, which is exactly the "it does not feel exciting" he is
+reporting. And the deep ores are already savage - solmarrow is five separate
+single cells on the whole planet, about one in 980 below its own floor - so
+lowering a spawn rate would not make it exciting, it would make it absent.
+
+The research says the same thing from the other side and it is the one finding
+that governs this round: **lowering a rate alone is not shown anywhere to
+increase excitement.** The excitement lives in the reveal and in the material
+having a named use. Every game surveyed clusters its rarest resource -
+Minecraft generates ore as vein blobs rather than single blocks, Deep Rock's
+Nitra bulges out of cave walls in clumps that read from a distance.
+
+So "more rare" is the right instinct pointed at the wrong number. Clustering the
+SAME total supply into far fewer, richer veins makes a find rarer in the only
+sense that matters - the number of separate find-events - while making each one
+a place you stop and work. Total supply is unchanged by construction, so nothing
+else in the economy needs rebalancing.
+
+- [ ] **X1 Ore comes in veins.** The round's biggest change and the answer to
+      ask 1. Each ore's cells cluster into blobs around rolled vein sites
+      instead of rolling independently per cell. **Total cells per ore stay
+      within a few per cent of what they are now** - this is a change to WHERE
+      ore is, not how much, and the test asserts that rather than trusting it.
+
+      Rolled on its own seed offset like every other feature (the taken list is
+      in `world.ts`), and on a coarse lattice rather than by rejection sampling,
+      for the reason `wildSlot` gives: a lattice cannot fail to terminate and a
+      seeded world has to generate the same ground every time it is asked.
+
+      **This re-records `test/baseline/blocks-frozen.json`, which has happened
+      exactly once before** (round seven, a deliberate ore rebalance, diff read
+      first and written down). That is the bar: read the diff, write down what
+      moved, and only then re-record. The census golden moves with it.
+
+      Open question for the build, to be measured and not guessed: whether ALL
+      eleven ores cluster or only the deep ones. Clustering copper changes the
+      first ten minutes, which is the part of the game he has said he likes.
+
+- [ ] **X2 A rare find announces itself.** Ask 1's other half, and the research
+      ranks it first because it is cheap and carries most of the feeling:
+      Diablo III's Loot 2.0 gave each rarity tier its own light and particle so
+      a rare item reads as rare before you read its stats. Here that is a
+      stronger halo pulse and its own sound for the deep tiers, reusing the
+      halo and audio graph that already exist.
+
+      **Not to be confused with the first-of-its-kind banner**, which already
+      exists and fires once ever per material. This is every time.
+
+- [ ] **X3 One or two materials become keys rather than currency.** Ask 2.
+      Materials already gate upgrades through `matCost`, so the change is
+      narrowing: name an EXACT small count of a named deep material for one or
+      two specific things, the way Deep Rock's resupply costs exactly 80 Nitra
+      and Terraria's tiers are hard-gated by pickaxe power rather than by price.
+
+      **Very few, deliberately.** Dome Keeper's designer capped the whole game
+      at three resource types, arguing more "would add more information to
+      comprehend", and the research's stated risk is that doing this to many
+      ores collapses back into currency with extra steps.
+
+- [ ] **X4 The first Anchor's gift: the Survey map shows where the ground is
+      rich.** Asks 3 and 4. An aggregate richness read per REGION, rendered as
+      two or three heat tiers over that region's tiles, and shown only for
+      regions whose Anchor is lit - exactly the gate the map reveal already uses.
+
+      **REGION grain, never per-cell, and this is the fence.** The Lattice
+      Receiver gives proximity and never bearing because choosing a direction
+      and digging it is the decision this game is built on. The research's named
+      failure mode is No Man's Sky's Analysis Visor, which pins exact nodes and
+      whose own community describes it as reducing exploration to walking to
+      icons. Valheim's Wishbone is the precedent to copy: it tells you nearer
+      and never which way. A region is 15 columns by 113 metres - knowing one of
+      those is rich is a reason to go there and is not a map to anything.
+
+      It is a READOUT and not a traversal key, which is why it is a fine thing
+      for the first Anchor to grant: it opens no locks, so it creates no
+      backtracking debt.
+
+- [ ] **X5 The ability ladder, designed and not yet built.** Ask 3 in full. The
+      research's shape, from GMTK on Hollow Knight: early abilities deliberately
+      open only a few locks so there is no reason to backtrack; ONE middle
+      ability opens many locks at once across ground already walked, which is
+      what turns a guided sequence into a search space; the last two or three
+      each do double duty, advancing the ending AND giving a reason to revisit.
+
+      **Only the first is being built this round**, because it is the only one
+      he named. Eight abilities invented by a session and shipped unseen is the
+      opposite of "when he names a mechanism, build that mechanism" - the other
+      eight go in this plan as proposals for him to edit, and get built once he
+      has played the first.
+
+      **The tension to settle with him:** he has said more than seven collectible
+      things reads as a checklist, and there are nine Anchors. The research
+      flags it rather than resolving it and so does this: the ceiling plausibly
+      applies to optional pickups rather than to a mandatory chain, but that is
+      his call and not a session's.
+
+- [x] **X6 A lit Anchor stays a monument.** Done 2026-09-19. Ask 5, and the interesting one,
+      because the game already half does it. `blockAt` gives an unlit Anchor
+      `hard: Infinity` - it cannot be cut by the drill, a charge or the laser.
+      A LIT one is deliberately cuttable at three times the band, and the note
+      there says why: three Anchors share each of the three columns they sit in,
+      and while they stayed unbreakable the shallowest in a column was a plug
+      the ship could not pass. Six of the nine were unreachable.
+
+      So he is not asking for something the game refuses; he is reporting that
+      **the monument does not read as one**, and the half he has met is the half
+      he can drill through. **The fix must not revert that bug fix.** It is a
+      TRAVERSAL problem wearing a digging problem's clothes, and the answers are
+      to let the ship pass through a lit Anchor - it is a light now, not a wall -
+      or to have the hall open a way past when it lights. Whichever is chosen,
+      the Anchor is never cuttable again, and the regression test is the one
+      that found the plug: every Anchor lights by digging down its own column.

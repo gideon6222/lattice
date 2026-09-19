@@ -292,6 +292,7 @@
         "tone": 6,
         "ore": true,
         "spoil": true,
+        "ghost": false,
         "hard": "__Infinity__",
         "wt": 0,
         "value": 0
@@ -1675,6 +1676,7 @@
         "tone": 6,
         "ore": true,
         "spoil": true,
+        "ghost": false,
         "hard": "__Infinity__",
         "wt": 0,
         "value": 0
@@ -3057,6 +3059,7 @@
         "tone": 6,
         "ore": true,
         "spoil": true,
+        "ghost": false,
         "hard": "__Infinity__",
         "wt": 0,
         "value": 0
@@ -4439,6 +4442,7 @@
         "tone": 6,
         "ore": true,
         "spoil": true,
+        "ghost": false,
         "hard": "__Infinity__",
         "wt": 0,
         "value": 0
@@ -5808,6 +5812,7 @@
         "tone": 6,
         "ore": true,
         "spoil": true,
+        "ghost": false,
         "hard": "__Infinity__",
         "wt": 0,
         "value": 0
@@ -7201,6 +7206,7 @@
         "tone": 6,
         "ore": true,
         "spoil": true,
+        "ghost": false,
         "hard": "__Infinity__",
         "wt": 0,
         "value": 0

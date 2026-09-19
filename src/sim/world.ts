@@ -252,29 +252,39 @@ export function blockAt(x: number, d: number): Block | null {
 
          Safe, because the only thing `ore` otherwise does is decide what goes
          into the hold when a block breaks, and this block cannot break. */
-      /* UNCUTTABLE while it is unlit, and cuttable once it is.
+      /* UNCUTTABLE, ALWAYS, and passable once it is lit. Round fourteen, X6.
 
-         The first half is the ritual: you cannot mine your way to the
-         objective, you fly to it. The second half is a bug fix, and the test
-         that found it is `every Anchor lights by digging down its own column`.
+         You cannot mine your way to the objective, you fly to it. That is the
+         ritual and it was never in question. What changed twice is the other
+         half.
 
-         Three Anchors share each of the three columns they live in, and an
-         Anchor is a single cell in the middle of its own hall. Left
-         unbreakable after lighting, the shallowest one in a column became a
+         **It used to become cuttable when lit, and that was a bug fix, not a
+         design.** Three Anchors share each of the three columns they live in,
+         and an Anchor is a single cell in the middle of its own hall. Left
+         unbreakable after lighting, the shallowest in a column became a
          permanent plug: the ship dug down, stopped one metre above a monument
          it had already lit, and could not pass. Six of the nine were
-         unreachable that way, and every one of them reported the depth of the
-         Anchor above it.
+         unreachable that way. The test that found it is `every Anchor lights by
+         digging down its own column`, and it still guards this.
 
-         Cuttable afterwards costs the design nothing - the act of lighting is
-         over - and it is a better read anyway: a monument in your way is a
-         monument you are allowed to move. Hard, though. Three times the band,
-         so moving one is a decision. */
+         **His playtest, 2026-09-19: "make the anchor something physically
+         located at that spot that you can't dig."** He had met the half he
+         could drill through, and a monument you are allowed to mine is not a
+         monument. But reverting brings the plug straight back, so the answer is
+         not to make it hard again - the problem was never that it was HARD, it
+         was that it was IN THE WAY. Those are two different properties and the
+         old code only had one knob for both.
+
+         So: `hard: Infinity` for ever, and `ghost` once it is lit. A lit Anchor
+         is a light rather than a wall - the ship flies through it, the route
+         finder counts it as open ground, and the light field stops treating it
+         as rock, which it never should have: it is the brightest object in the
+         game and it was casting a shadow. Nothing can ever cut it again. */
       return { id: lit ? 'anchorlit' : 'anchor', name: lit ? 'Anchor · lit' : 'Anchor',
                color: lit ? 0x9effd4 : 0x2f6f5e, host: 0x16241f,
                glow: lit ? 1.0 : 0.30, shards: 10, tone: lit ? 10 : 6,
-               ore: true, spoil: true,
-               hard: lit ? baseRock(d, g.planet, x).hard * hm * 3 : Infinity,
+               ore: true, spoil: true, ghost: lit,
+               hard: Infinity,
                wt: 0, value: 0 };
     }
     if (vch === 'V') {
@@ -723,7 +733,13 @@ export function findRoute() {
         if (nx < 0 || nx >= W || nd < -3 || nd > coreM()) continue;
         const k = key(nx, nd);
         if (seen.has(k)) continue;
-        if (blockAt(nx, nd)) continue;
+        /* A ghost cell is open ground to the route finder, because the ship can
+           fly through it. Reading this the same way collision does is the whole
+           point of the flag: a route that called a lit Anchor solid would make
+           the fuel-to-climb estimate and the autopilot disagree with where the
+           ship can actually go. */
+        const nb = blockAt(nx, nd);
+        if (nb && !nb.ghost) continue;
         seen.add(k);
         prev.set(k, cell);
         if (k === goal) { found = true; break; }
