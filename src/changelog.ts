@@ -16,9 +16,16 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.51.0';
+export const VERSION = '0.52.0';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.52.0', date: '2026-09-18', title: 'The ground will not be as you left it',
+    notes: [
+      'When the fifth Anchor wakes the planet, it now takes some of your own tunnels back. The card has always said the ground will not be as you left it - until now that only meant things that would happen later, and none of it touched the digging you had already done.',
+      'It takes what you can spare. A player who drilled one straight hole down loses almost nothing; a player who spread out across the planet loses more. It will never close the last way back to the pad.'
+    ]
+  },
   {
     version: '0.51.0', date: '2026-09-18', title: 'The planet in three acts',
     notes: [

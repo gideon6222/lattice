@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { W, HULL_MAX, DEF, isOre, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf, LODE_COLLAPSE } from './sim/config';
+import { W, HULL_MAX, DEF, isOre, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf, LODE_COLLAPSE, WAKE_CLOSES, WAKE_TRIES } from './sim/config';
 import { clamp, key, stream } from './sim/util';
 import { FIND_OF } from './sim/finds';
 import { hap } from './haptics';
@@ -198,6 +198,53 @@ export function tremor(): number {
   }
   save();
   return taken.length;
+}
+
+/* The wake rewrites ground you already dug. Round twelve, V6.
+
+   The card the planet answers with has always said *"the ground will not be as
+   you left it any more"*, and until now that was a promise about the FUTURE:
+   collapses start firing, Blooms start growing. Nothing happened to the tunnels
+   the player had already cut, which is the half the sentence actually claims.
+
+   The story research ranks this first of everything it suggests, and Hollow
+   Knight is the reference: the Infection reads as a story beat rather than as
+   ambient decay precisely because it is a scripted threshold event applied to
+   ground the player already walked clean. Ground you dug yesterday being gone
+   today is a different feeling from ground that was always shut.
+
+   ---------- why several small bites and not one big one ----------
+
+   `planCollapse` is all-or-nothing: it applies, re-runs `findRoute`, and
+   reverts ENTIRELY if the ship can no longer reach the pad. That is the right
+   guarantee and it makes one large ask useless - a player whose whole campaign
+   is a single vertical shaft would have twelve cells taken out of it, the route
+   would break, the whole thing would revert, and the card would have promised a
+   change the player then could not find.
+
+   So the wake takes WAKE_CLOSES cells ONE AT A TIME, each checked
+   independently. Bites of three were tried first and closed nothing at all in a
+   shaft-and-gallery fixture, because any bite holding one load-bearing shaft
+   cell reverts whole and three cells almost always holds one. Singly, the
+   gallery cells land and the shaft cells revert - so the planet takes back the
+   digging you did not need, which is both what the ground can afford and the
+   better story. The guarantee is untouched: every attempt still refuses to
+   strand the ship.
+
+   Returns how many cells actually closed, so the caller can say something true
+   rather than something hopeful. */
+export function wakeCloses(): number {
+  let total = 0;
+  for (let tryN = 0; tryN < WAKE_TRIES && total < WAKE_CLOSES; tryN++) {
+    const taken = planCollapse(1, stream(R.lodeN + 100 + tryN, Math.round(g.pd), g.planet + 887));
+    total += taken.length;
+    for (const k of taken) {
+      const c = k.split(',');
+      spray(worldX(+c[0]), -(+c[1]), RUBBLE.color, 14, 4.2, 1.1);
+    }
+  }
+  if (total) { syncBlocks(true); save(); }
+  return total;
 }
 
 /* The lode's side of the bargain: the ground you dug comes down.
@@ -707,6 +754,12 @@ export function planetAnswers() {
       for (const k of Array.from(meshes.keys())) dropBlock(k);
       resetBlockCache();
       syncBlocks(true);
+      /* And the half of the card's promise that is about ground already dug.
+         Round twelve, V6: until now "the ground will not be as you left it"
+         was entirely about the future. After the rebuild, so the closed cells
+         are drawn in the same frame the player is handed back. */
+      const closed = wakeCloses();
+      if (closed) toast('The ground closes behind you · ' + closed + ' cells');
     });
   checkpoint();
 }

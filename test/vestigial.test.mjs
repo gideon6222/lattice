@@ -86,7 +86,11 @@ const FROZEN = {
      it seeds the generator - and it sits beside the tremor's own
      `g.planet + 211` two lines away. Not a read that `regionAt(x, d)` could
      answer: there is no cell being asked about, only a stream being started. */
-  'actions.ts': 4,
+  /* 4 -> 5 on the same day, round twelve V6: `wakeCloses` seeds its own
+     collapse stream on `g.planet + 887` beside `lodeCollapse`'s. Same
+     justification as the line below it and as the tremor's `g.planet + 211`
+     two functions away: a seed, not a question about a cell. */
+  'actions.ts': 5,
   'blocks.ts': 20,
   'growth.ts': 3,
   'loop.ts': 14,

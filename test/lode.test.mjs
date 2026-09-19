@@ -145,3 +145,62 @@ test('the lode collapse is not bigger than the worst tremor', () => {
   assert.ok(H.LODE_COLLAPSE <= worst,
     `a lode brings down ${H.LODE_COLLAPSE} cells and the worst tremor only ${worst}`);
 });
+
+/* ---------- V6: the wake takes back ground you already dug ---------- */
+
+test('the wake closes ground and still leaves a way to the pad', () => {
+  /* Round twelve, V6. The card the planet answers with has always said "the
+     ground will not be as you left it any more", and until now that was
+     entirely a promise about the FUTURE - collapses start firing, Blooms start
+     growing. Nothing happened to the tunnels already cut, which is the half the
+     sentence actually claims.
+
+     Asserted through planCollapse in bites, the way `wakeCloses` calls it,
+     because the guarantee that matters is per bite: each one independently
+     refuses to strand the ship. */
+  H.setWorld(0);
+  H.g.ground = H.newGround();
+  const dug = new Set();
+  /* A shaft with a side gallery, which is the shape a real descent has. A bare
+     vertical shaft is the worst case and is covered by the next test. */
+  for (let d = 0; d <= 120; d++) dug.add('30,' + d);
+  for (let x = 20; x <= 40; x++) dug.add(x + ',60');
+  H.g.dug = dug;
+  H.g.px = 30; H.g.pd = 120;
+  const before = H.g.dug.size;
+
+  let closed = 0;
+  for (let tryN = 0; tryN < H.WAKE_TRIES && closed < H.WAKE_CLOSES; tryN++) {
+    closed += H.planCollapse(1, H.stream(100 + tryN, 120, 887)).length;
+  }
+  assert.ok(closed > 0, 'the wake took nothing at all, so the card promises a change that never happens');
+  assert.ok(H.g.dug.size < before, 'cells were reported closed but the dug set did not shrink');
+  assert.ok(H.findRoute(), 'the wake closed the way to the pad');
+});
+
+test('the wake never strands a player whose campaign is one bare shaft', () => {
+  /* The worst case, and the reason the wake takes several small bites rather
+     than one large one. A single vertical shaft cannot spare twelve cells: one
+     ask for all of them breaks the route, planCollapse reverts WHOLE, and the
+     card would have promised something the player then cannot find. Three at a
+     time nearly always lands, and whatever lands, the route survives. */
+  H.setWorld(0);
+  H.g.ground = H.newGround();
+  const dug = new Set();
+  for (let d = 0; d <= 60; d++) dug.add('30,' + d);
+  H.g.dug = dug;
+  H.g.px = 30; H.g.pd = 60;
+
+  for (let tryN = 0; tryN < H.WAKE_TRIES; tryN++) {
+    H.planCollapse(1, H.stream(200 + tryN, 60, 887));
+    assert.ok(H.findRoute(), `attempt ${tryN} left no way to the pad from a bare shaft`);
+  }
+});
+
+test('the wake takes back more than the worst accident', () => {
+  /* It is the biggest event in the game and the card makes the largest claim.
+     A change smaller than a bad tremor would read as a bad tremor. */
+  assert.ok(H.WAKE_CLOSES > H.tremorCells(H.WORLD_DEPTH - 1, 0),
+    `the wake closes ${H.WAKE_CLOSES} and the worst tremor already takes ${H.tremorCells(H.WORLD_DEPTH - 1, 0)}`);
+  assert.ok(H.WAKE_CLOSES > H.LODE_COLLAPSE);
+});

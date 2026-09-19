@@ -5542,6 +5542,84 @@ reads the sky gradient the game actually writes onto `#game` and asserts the
 three acts differ, which is the only thing that can say the grade reached a
 pixel. Flattening act two's tint fails it by name.
 
+## V6: the wake takes back ground you already dug
+
+The card the planet answers with has said *"the ground will not be as you left
+it any more"* since round eight, and it was entirely a promise about the future.
+Collapses start firing, Blooms start growing, the Unrest steps on every region.
+Nothing at all happened to the tunnels the player had already cut, which is the
+half the sentence actually claims.
+
+The story research ranks this first of everything it suggests, and the reason is
+Hollow Knight: the Infection reads as a story beat rather than as ambient decay
+precisely because it is a scripted threshold event applied to ground the player
+already walked clean. Ground you dug yesterday being gone today is a different
+feeling from ground that was always shut.
+
+### Bites of three closed nothing at all
+
+`planCollapse` is all-or-nothing about the route home - it applies, re-runs
+`findRoute` and reverts ENTIRELY if the ship can no longer reach the pad. The
+first version asked for twelve cells in bites of three, and a fixture with a
+shaft and one side gallery closed zero. Obvious afterwards: a vertical shaft is
+the only way up, so a bite holding one load-bearing cell reverts whole, and
+three cells almost always holds one.
+
+One at a time, each checked independently, is what "what the ground can afford"
+actually means. The spare cells land, the load-bearing ones revert.
+
+**Measured on four shapes a real campaign has, route home surviving all four:**
+
+    one bare shaft ............  121 dug -> closed  3
+    shaft + one gallery .......  141 dug -> closed  9
+    shaft + three galleries ...  193 dug -> closed 12
+    a worked-over planet ......  592 dug -> closed 12
+
+That gradient turned out to be the best thing about the milestone and it was not
+designed, it fell out of the guarantee. **What you lose is what you dug and did
+not need.** A player who drilled one straight hole down loses almost nothing,
+because they have nothing spare to lose; a player who spread across the planet
+loses the full twelve. The planet takes back the digging that was not holding
+anything up, which is a better sentence than anything that was written for it.
+
+## The gate reported success while printing a failure, all session
+
+Worth writing down at length because it nearly put a red commit in, and because
+the reason it did not is luck rather than method.
+
+Every gate this session was run as `npm run check 2>&1 | tail -5`, and the
+harness's reported exit code was read to decide green or red. **In a shell
+pipeline the exit status is the LAST command's.** `tail` succeeds essentially
+always, so "exited with code 0" was a statement about `tail` and never about the
+gate. Demonstrated in the same shell rather than reasoned about:
+
+    (exit 7) | tail -1 ; echo $?      ->  0
+    set -o pipefail
+    (exit 7) | tail -1 ; echo $?      ->  7
+
+**Why it survived for hours, which is the part that makes it dangerous.** This
+repo's e2e prints `N passed (Xm)` on success, and that line is what was actually
+being read every previous time. Every earlier gate really was green, and the
+conclusion was right for a reason that had nothing to do with the number beside
+it. The habit only bit when a UNIT test failed - the chain stopped before the
+e2e, there was no `N passed` line to read, and the only signal left was the exit
+code, which was lying. The captured output ended with the AssertionError in
+plain sight.
+
+A check that is correct for the wrong reason for several hours is exactly the
+shape that fails at the worst possible moment, and this one picked the last
+milestone of the round.
+
+The fix is `set -o pipefail` before the pipeline and the gate's own code printed
+after it. Filed as a lesson against `TESTING.md`, because nothing about it is
+specific to this game: it applies to every gate, doctor run and long build whose
+output gets trimmed for readability, which is most of them.
+
+**And the thing it caught was real.** `wakeCloses` added a fifth `g.planet` read
+to `actions.ts` - a seed for its own collapse stream, legitimate and now
+recorded in FROZEN with its reason. That is the vestigial census earning its
+place for the second time in one day.
+
 ## A second shot tool, and one refactor that came with it
 
 `scripts/shot.mjs` is `filmstrip.mjs`'s single-frame sibling, at 1080x2340. The

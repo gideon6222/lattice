@@ -472,6 +472,49 @@ export const LODE: Ore = {
    which is the whole reason it asserts a relationship. */
 export const LODE_COLLAPSE = 5;
 
+/* ---------- what the wake takes back ----------
+
+   Round twelve, V6. How many already-dug cells the fifth Anchor closes, and in
+   what size of bite.
+
+   12 is deliberately the biggest number of this kind in the game - the worst
+   tremor is 5 and a lode is 5 - because the wake is the biggest event in it and
+   the card makes the largest claim: *"the ground will not be as you left it any
+   more."* A change smaller than a bad tremor would not read as the planet
+   answering, it would read as a bad tremor.
+
+   **The bite is ONE cell, and that was measured rather than assumed.** The
+   first version asked in bites of three and a test fixture with a shaft and a
+   side gallery closed NOTHING at all: `planCollapse` is all-or-nothing about
+   the route home, a vertical shaft is the only way up, so any bite containing a
+   single shaft cell reverts the whole bite. Three at a time almost always
+   contains one.
+
+   One at a time, each checked independently, is what "what the ground can
+   afford" actually means - the gallery cells land, the load-bearing shaft cells
+   revert, and the player loses the parts of their tunnels that were not holding
+   the route up. Which is also the better story: the planet takes back the
+   digging you did not need.
+
+   `WAKE_TRIES` is the attempt cap, at three times the target, so a campaign
+   that really is one bare shaft gives up quickly instead of running the route
+   search for ever.
+
+   **Measured on four shapes a real campaign has, and the route home survived
+   every one:**
+
+     one bare shaft ............  121 dug -> closed  3
+     shaft + one gallery .......  141 dug -> closed  9
+     shaft + three galleries ...  193 dug -> closed 12
+     a worked-over planet ......  592 dug -> closed 12
+
+   That gradient is the design working rather than a compromise: a player who
+   drilled one straight hole loses almost nothing, because they have nothing
+   spare to lose, and a player who spread out over the planet loses the full
+   twelve. What you lose is what you dug and did not need. */
+export const WAKE_CLOSES = 12;
+export const WAKE_TRIES = 36;
+
 /* ---------- relics ----------
 
    Exactly one per planet, buried below the halfway mark, in no particular

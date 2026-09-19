@@ -3270,10 +3270,31 @@ Phase T, and the boxes are `- [ ]` or `- [x]` and nothing else (rule 3b).
       round with half a tank. Recorded here so it is not picked up later as an
       easy win.
 
-- [ ] **V6 The wake rewrites what you dug.** The story brief's highest-ranked
+- [x] **V6 The wake rewrites what you dug.** The story brief's highest-ranked
       technique: at the fifth Anchor, tunnels the player already cut visibly
-      change. It reuses `collapse.ts` and the stamper, needs no text, and
-      survives a muted phone.
+      change. Done 2026-09-18 as v0.52.0.
+
+      **The card already promised it.** "The ground will not be as you left it
+      any more" has been on the wake's card for rounds, and it was entirely a
+      promise about the FUTURE - collapses begin, Blooms begin. Nothing touched
+      the tunnels already dug, which is the half the sentence actually claims.
+      Hollow Knight is the reference the research gives: the Infection reads as
+      a story beat rather than as decay precisely because it is applied to
+      ground the player already walked clean.
+
+      **It takes one cell at a time, and that was measured rather than
+      assumed.** The first version asked in bites of three and closed NOTHING on
+      a shaft-and-gallery fixture: `planCollapse` is all-or-nothing about the
+      route home, a vertical shaft is the only way up, and three cells almost
+      always contains one that is holding it. Singly, the spare cells land and
+      the load-bearing ones revert.
+
+      Measured on four shapes, route home surviving every one: a bare shaft
+      closes 3 of 12, shaft plus one gallery 9, shaft plus three galleries 12, a
+      worked-over planet 12. That gradient is the design rather than a
+      compromise - **what you lose is what you dug and did not need**, so a
+      player who drilled one straight hole loses almost nothing because they
+      have nothing spare.
 
 - [x] **V7 The three-act grade.** Done 2026-09-18 as v0.51.0, and driven off the
       CAMPAIGN rather than off the Unrest meter the box asked for.
