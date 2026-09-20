@@ -5928,6 +5928,39 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## X2: a rare find announces itself, and a test that inspected nothing
+
+Until now the game gave a solmarrow cut - 196,000 credits, five cells on the
+whole planet - exactly the spray, shake and hit-stop a copper cut got. Only the
+collect sound differed, because `tone` already scales. The banner fires once
+EVER per material; after that every find was the same find.
+
+The research ranks this first because it is cheap and carries most of the
+feeling: Diablo III's Loot 2.0 gave each rarity tier its own light and particle
+so a rare thing reads as rare before you read what it is worth.
+
+**Scaled off the ore's RANK in the ladder** (rule 10b). `ORES` is deepest-first
+and that order already IS the rarity, so a second list of which ores are
+exciting would be a thing to keep in step with the ladder for ever. Four tiers
+of eleven, because the research's stated risk is that a signal every find sends
+is not a signal.
+
+**And the first version of the test could not fail.** Rule 11 says verify by
+reintroducing the bug, so `REVEAL_TIERS` was widened from 4 to 11 - every ore
+announcing itself, precisely the failure the design guards against - and the
+file stayed green. Every assertion was phrased in terms of `REVEAL_TIERS`, so
+all of them held for any value of it: the test moved with the thing it was
+testing and therefore inspected nothing. It asserts absolutely now - most of the
+ladder must stay quiet, and copper in particular must never announce itself -
+and both tests fail with the fault planted.
+
+**That is the second time in one day.** `check-us-english.mjs` reported the repo
+clean with the two spellings it was written for planted back in, for the same
+reason: it had reproduced the pattern it was replacing. The shape to watch for
+is a test written in terms of the constant it guards, and the only thing that
+catches it is planting a fault in that constant rather than in the code around
+it.
+
 ## X1: ore comes in veins, and two wrong designs on the way there
 
 His ask was "make materials feel more rare". The measurement said the rate was

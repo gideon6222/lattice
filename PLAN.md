@@ -3617,7 +3617,7 @@ else in the economy needs rebalancing.
       eleven ores cluster or only the deep ones. Clustering copper changes the
       first ten minutes, which is the part of the game he has said he likes.
 
-- [ ] **X2 A rare find announces itself.** Ask 1's other half, and the research
+- [x] **X2 A rare find announces itself.** Done 2026-09-19. Ask 1's other half, and the research
       ranks it first because it is cheap and carries most of the feeling:
       Diablo III's Loot 2.0 gave each rarity tier its own light and particle so
       a rare item reads as rare before you read its stats. Here that is a

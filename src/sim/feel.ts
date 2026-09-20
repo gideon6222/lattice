@@ -24,6 +24,38 @@ export const FREEZE_ROCK = 0.035;  /* 35 ms, common rock */
 export const SHAKE_CRACK = 0.045;   /* a crack stage while drilling */
 export const SHAKE_ROCK = 0.09;     /* breaking common rock */
 export const SHAKE_ORE = 0.22;      /* breaking ore */
+
+/* ---------- how loudly a find announces itself ----------
+
+   Round fourteen, X2, and the research ranks it first because it is cheap and
+   carries most of the feeling: Diablo III's Loot 2.0 gave each rarity tier its
+   own light and particle so a rare item reads as rare BEFORE you read its
+   stats. Until now this game gave a solmarrow cut - 196,000 credits, five cells
+   on the whole planet - exactly the spray, shake and hit-stop a copper cut got.
+   Only the pitch of the collect sound differed, because `tone` already scales.
+
+   **Derived from the ore ladder's own order and not from a table** (rule 10b).
+   `ORES` is deepest-first and that order IS the rarity, so the rank is the
+   rarity; a second list of "which ores are exciting" would be a thing to keep
+   in step with the ladder for ever. Rank 0 is the deepest ore alive.
+
+   Four tiers because the research names four - magmite, coreite, umbrite and
+   solmarrow, the bottom of the ladder. Everything shallower gets exactly what
+   it got before, which is the point: if every find announces itself then none
+   of them does. */
+export const REVEAL_TIERS = 4;
+
+export function revealOf(rank: number): number {
+  if (rank < 0 || rank >= REVEAL_TIERS) return 0;
+  return (REVEAL_TIERS - rank) / REVEAL_TIERS;
+}
+
+/* What that loudness buys, as multipliers on the ordinary ore beat. Kept
+   modest on the hit-stop in particular: it pauses the SIMULATION, and
+   CLAUDE.md's range for what reads as weight rather than as a stutter is
+   narrow. At the deepest tier this is 75 ms becoming 131. */
+export const REVEAL_FREEZE = 0.75;
+export const REVEAL_SHAKE = 1.1;
 export const SHAKE_LANDING = 0.25;  /* autopilot touching down */
 export const SHAKE_TOW = 0.5;       /* the salvage rig grabbing you */
 export const SHAKE_BOOM = 1.4;      /* the planet core giving way */

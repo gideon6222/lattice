@@ -31,7 +31,8 @@ import {
   LANE_PULL, DIG_ALIGNED,
   depthT, heatT, easeInOut, approach, zoomForScan, digFuelForStep, heatDamagePerSecond, soakAfter,
   tremorTick, TREMOR_EVERY, TREMOR_JITTER, chargeAfter, fuelToClimb, fuelState, FUEL_IDLE,
-  endingBoost, ENDING_SECS
+  endingBoost, ENDING_SECS,
+  revealOf, REVEAL_FREEZE, REVEAL_SHAKE
 } from './sim/feel';
 import { scene, camera, renderer, gameEl, amb, sun, rim, lamp, LAMP_COLOR, fog, shipKey, renderWorld } from './scene';
 import { lerpHex, worldX, crackGeo, crackMat } from './materials';
@@ -561,6 +562,30 @@ export function tick(raw: number, draw = true) {
               'ore');
           } else if (b.value >= 400) {
             toast(b.name + '  +◈ ' + Math.round(b.value * valueM()).toLocaleString());
+          }
+          /* ---------- and every time, not just the first ----------
+
+             Round fourteen, X2. The banner above fires ONCE EVER per material;
+             after that a solmarrow cut used to be indistinguishable from a
+             copper one except for the pitch of the collect sound and the number
+             in the toast. The research's first-ranked mechanism is Diablo III's
+             Loot 2.0 - give each rarity tier its own light and particle so a
+             rare thing reads as rare before you read what it is worth.
+
+             Scaled off the ore's rank in the ladder, which IS the rarity, so
+             only the bottom four tiers get anything at all. If every find
+             announces itself then none of them does.
+
+             After the banner branch rather than inside it, so the first
+             solmarrow gets the card AND the weight. */
+          const rank = ORES.findIndex((o) => o.id === b.id);
+          const rv = rank >= 0 ? revealOf(rank) : 0;
+          if (rv > 0) {
+            freeze = Math.max(freeze, FREEZE_ORE * (1 + rv * REVEAL_FREEZE));
+            R.shake = Math.max(R.shake, SHAKE_ORE * (1 + rv * REVEAL_SHAKE));
+            spray(worldX(R.digging.x), -R.digging.d, b.color,
+                  Math.round(40 + rv * 90), 5 + rv * 4, 1.1 + rv * 0.9);
+            hap.boom();
           }
           /* ---------- the lode's price ----------
 

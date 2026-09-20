@@ -173,3 +173,59 @@ test('generation is still a pure function of the seed', () => {
     assert.deepEqual(a, b);
   }
 });
+
+/* ---------- X2: a rare find announces itself ---------- */
+
+test('only the deepest few ores announce themselves, and the deepest loudest', () => {
+  /* The research's first-ranked mechanism, and its stated risk: doing this to
+     everything collapses it back to nothing, because a signal every find sends
+     is not a signal. Four tiers, off the ladder's own order.
+
+     Asserted as the SHAPE - monotonic, bounded, silent outside the tiers - so
+     the numbers stay free to retune, which is the rule `grade.test.mjs`
+     already sets for anything that is a feel value. */
+  let prev = Infinity;
+  for (let rank = 0; rank < H.REVEAL_TIERS; rank++) {
+    const v = H.revealOf(rank);
+    assert.ok(v > 0, `rank ${rank} is inside the tiers and announces nothing`);
+    assert.ok(v <= 1, `rank ${rank} reveals at ${v}, over the ceiling`);
+    assert.ok(v < prev, `rank ${rank} is louder than the rarer ore above it`);
+    prev = v;
+  }
+  assert.equal(H.revealOf(H.REVEAL_TIERS), 0,
+    'the tiers have widened, so an ordinary find now announces itself too');
+  assert.equal(H.revealOf(-1), 0, 'a block that is not on the ore ladder at all');
+
+  /* **Absolutely, not relative to the constant.** Every assertion above is
+     phrased in terms of REVEAL_TIERS, so all of them pass for ANY value of it -
+     which was found by planting the obvious fault, widening the tiers to the
+     whole ladder, and watching the file stay green. A test that moves with the
+     thing it is testing inspects nothing.
+
+     The claim is that MOST ores stay quiet. The research is explicit that a
+     signal every find sends is not a signal, and names the bottom three or four
+     of eleven. */
+  assert.ok(H.REVEAL_TIERS * 2 < H.ORES.length,
+    `${H.REVEAL_TIERS} of ${H.ORES.length} ores announce themselves, which is most of them`);
+  assert.equal(H.revealOf(H.ORES.length - 1), 0, 'copper announces itself');
+});
+
+test('the loud ones are the deep ones, by the ladder and not by a list', () => {
+  /* `ORES` is deepest-first and that order IS the rarity, so rank is rarity.
+     A second list of "which ores are exciting" would be a thing to keep in
+     step with the ladder for ever, and this asserts the ladder still has the
+     property that makes reading rank off it legitimate. */
+  for (let i = 1; i < H.ORES.length; i++) {
+    assert.ok(H.ORES[i].min < H.ORES[i - 1].min,
+      `${H.ORES[i].id} is not shallower than ${H.ORES[i - 1].id} - ORES is no longer deepest-first`);
+  }
+  /* And the ones that announce themselves are genuinely the deep end. */
+  const loud = H.ORES.slice(0, H.REVEAL_TIERS).map((o) => o.id);
+  const quiet = H.ORES.slice(H.REVEAL_TIERS);
+  assert.ok(quiet.length >= H.ORES.length / 2,
+    `only ${quiet.length} of ${H.ORES.length} ores are quiet, so the signal has stopped being one`);
+  for (const o of quiet) {
+    assert.ok(o.min < Math.min(...H.ORES.slice(0, H.REVEAL_TIERS).map((z) => z.min)),
+      `${o.id} is quiet but lives deeper than ${loud.join(', ')}`);
+  }
+});
