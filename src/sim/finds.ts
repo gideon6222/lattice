@@ -142,13 +142,42 @@ export function findsOn(_leg: number, coreDepthHere: number, found: string[]): F
    position hashes; the device's index is folded in so `magnet` and `survey` on
    the same leg cannot collide by construction.
 
-   Depth is drawn from the band between the device's own `below` and three
-   metres clear of the core, so it is always inside the world and never inside
-   bedrock. */
+   Depth is drawn from the band between the device's own `below` and the floor
+   of the TIER that `below` sits in, so it is always inside the world, never
+   inside bedrock, and never behind a barrier.
+
+   ---------- that last clause is round fifteen, and it was a deadlock ----------
+
+   This used to draw from `below` to three metres clear of the core - anywhere
+   in the world. Harmless for eight rounds, and then Y1 cut the world into
+   tiers with barriers the drill cannot pass, and "anywhere" started to mean
+   "possibly behind a gate you need this device to open". Measured on planet 0:
+   the Cutting Laser came out at 434 m, behind all three barriers, and one of
+   the Anchors that opens the second barrier is sealed and needs it. The
+   Receiver - the device that helps you FIND Anchors - was at 443 m.
+
+   A device becomes available at `below`, so the tier that depth is in is the
+   deepest the player is known to be able to reach when it appears. Burying it
+   there is the whole fix, and it needs no new state.
+
+   `TIER_ROWS` is written out rather than imported from `region.ts`, because
+   this module is imported by `config.ts` and importing back through it is the
+   cycle that deleted the Vault once (see `findMap`). `finds.test.mjs` asserts
+   it equals `REGION_ROWS`, which is INDEX.md rule 10b: where you cannot
+   derive, assert the derived quantity. */
+export const TIER_ROWS = 4;
+
 export function findAt(f: Find, leg: number, coreDepthHere: number): { x: number; d: number } {
   const i = FINDS.indexOf(f) + 1;
   const lo = Math.max(1, f.below);
-  const span = Math.max(1, coreDepthHere - 3 - lo);
+  const band = coreDepthHere / TIER_ROWS;
+  const tier = Math.min(TIER_ROWS - 1, Math.floor(f.below / band));
+  /* The metre above this tier's own barrier, or three clear of the core for
+     the bottom tier, which has the floor of the world under it instead. */
+  const hi = tier < TIER_ROWS - 1
+    ? Math.min(coreDepthHere - 3, Math.round(band * (tier + 1)) - 1)
+    : coreDepthHere - 3;
+  const span = Math.max(1, hi - lo);
   const hx = Math.imul(leg * 31 + i + 257, 2654435761) >>> 0;
   const hd = Math.imul(leg * 17 + i * 101 + 257, 1597334677) >>> 0;
   return {

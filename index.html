@@ -579,6 +579,21 @@
   /* Not enough power: dim like an idle supply, but keep the count readable so
      you can see how close you are rather than only that you cannot. */
   .sup.ord.cold{opacity:.34;}
+  /* The cores' abilities. One row above the ordnance and visually apart from
+     it - violet, which is the colour every dark-energy thing in this game
+     wears, so the row says where it came from without a word. Held rather than
+     tapped, and `.on` is what being held looks like. */
+  #abil{
+    position:fixed; right:18px; z-index:9;
+    bottom:calc(var(--ctrl-b) + 190px + 8px + 44px + 5px);
+    display:flex; gap:5px;
+  }
+  .sup.ab{width:87px; height:44px; border-color:#5a3a9a;}
+  .sup.ab .g{top:14px; font-size:11px;}
+  .sup.ab.on{border-color:#a97cff; box-shadow:0 0 14px rgba(138,90,208,.55);}
+  .sup.ab.cold{opacity:.34;}
+  body.docked #abil{display:none;}
+  body.crossing #abil{display:none;}
   /* Worded, not pictured. The three glyphs that read best for these - a
      snowflake, a cross and a fuel pump - do not share a presentation: the pump
      is emoji by default and rendered in color next to two monochrome symbols,
@@ -794,6 +809,9 @@
     font-size:11px; font-weight:700; letter-spacing:.14em; color:var(--dim);
   }
   #btnShop{border-color:#2f6f52; color:var(--green);}
+  /* Violet, like everything else this round that came out of a core - the scar
+     it appears at is the same colour, so the button and the place agree. */
+  #btnSeal{border-color:#5a3a9a; color:#c4a6ff;}
   #btnAuto{border-color:#2a5570; color:var(--cyan);}
   #btnPause{color:var(--dim);}
 
@@ -1312,6 +1330,11 @@
   <button id="btnManifest">MANIFEST</button>
   <button id="btnMap">MAP</button>
   <button id="btnBallast" style="display:none">BALLAST</button>
+  <!-- Round fifteen, Y7. Appears only while the ship is standing in the scar
+       of an Anchor it broke, with something in the hold worth packing into it.
+       In the action row rather than beside the ordnance because it is a place
+       you are AT, like the shop and the Ballast, and not a thing you aim. -->
+  <button id="btnSeal" style="display:none">SEAL</button>
   <button id="btnShop">SHOP</button>
   <button id="btnAuto" style="display:none">AUTOPILOT</button>
 </div>
@@ -1419,6 +1442,16 @@
 <div id="ord">
   <button class="sup ord none" id="ordBomb"><span class="g">CHARGE</span><span class="n">2</span></button>
   <button class="sup ord none" id="ordLaser"><span class="g">LASER</span><span class="n">1</span></button>
+</div>
+
+<!-- What the dark cores handed over. Round fifteen, Y4. A row of its own above
+     the ordnance, because these are HELD rather than fired: an ordnance button
+     is a tap that spends a whole cell, and putting a hold-to-run control in the
+     same row as one is how a player discovers the difference by wasting a
+     charge. Same right-hand column as the ordnance, since both are aimed. -->
+<div id="abil">
+  <button class="sup ab none" id="abSee"><span class="g">SEE</span></button>
+  <button class="sup ab none" id="abSink"><span class="g">SINK</span></button>
 </div>
 
 <div id="ctrl">

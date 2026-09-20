@@ -344,12 +344,37 @@ export function anchorAt(r: number): { x: number; d: number } {
 
    A third of them, spread so that the first one you are likely to meet is not
    one of them: region 0 to 2 is the shallow row and the shallow row is where
-   the mechanic is learned. Fixed rather than seeded, because "how many locked
-   doors are open at once" is a pacing decision and the research's named
-   failure mode is too many unexplained hooks at the same time. */
-const SEALED_REGIONS = new Set([4, 6, 8]);
+   the mechanic is learned. "How many locked doors are open at once" is a
+   pacing decision and the research's named failure mode is too many
+   unexplained hooks at the same time.
 
-export const anchorSealed = (r: number) => SEALED_REGIONS.has(r);
+   ---------- round fifteen: it is DERIVED now, and this was a deadlock ----------
+
+   It used to be a hand-picked `new Set([4, 6, 8])`, and region 4 is Kryllon,
+   whose Anchor is at 135 m. Once Y1 put a barrier at 226 m that Kryllon opens,
+   the save became unfinishable: sealed stone needs the Cutting Laser, the
+   laser is a deep device, and the barrier that stands between the player and
+   it is the one Kryllon is supposed to open. A hand-picked set cannot know
+   that; it is a fact about where the KEY is.
+
+   So the rule is the fact: **an Anchor may be sealed only in a tier at or
+   below the tier its key is buried in.** Nothing shallower can be, whatever
+   anybody picks, and if the laser ever moves the sealed set moves with it.
+
+   `SEALED_MIN_TIER` is written out rather than imported from `finds.ts`,
+   because `config.ts` imports finds and finds imports config - see the note in
+   `findMap`, which lost the Vault to exactly that cycle once. `finishable.test.mjs`
+   asserts this equals `depthTier(FIND_OF.laser.below)`, which is INDEX.md
+   rule 10b: where you cannot derive, assert the derived quantity. */
+export const SEALED_MIN_TIER = 2;
+
+/* Local, for the same reason and with the same receipt: `gate.ts` would be a
+   cycle through config. Asserted against `depthTier` in the test. */
+const tierOfDepth = (d: number) =>
+  Math.min(REGION_ROWS - 1, Math.max(0, Math.floor(d / (WORLD_DEPTH / REGION_ROWS))));
+
+export const anchorSealed = (r: number) =>
+  r < ANCHOR_COUNT && tierOfDepth(anchorAt(r).d) >= SEALED_MIN_TIER;
 
 export const anchorVault = (r: number): Vault => anchorSealed(r) ? SEALED_HALL : ANCHOR_HALL;
 

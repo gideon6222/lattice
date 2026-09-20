@@ -469,6 +469,39 @@ export const SCENES = {
 
      The hall is dug out around it so the shot is the monument and not the wall
      in front of it. */
+  /* THE HOLLOW, which is the one thing round fifteen added that is invisible
+     in every other shot: a lens over rock nobody has dug. The fixture walks
+     down a column until the generator offers a real cave within reach, so the
+     shot is of something the world put there rather than a hole this script
+     made for it. No backticks in here: the whole setup IS a template literal. */
+  hollow: {
+    secs: 0.6,
+    frames: 6,
+    enter: true,
+    setup: `
+      __cw.g.ground = __cw.newGround();
+      __cw.g.ground.gates.push(0);
+      let px = 30, pd = 60, found = false;
+      for (let x = 6; x < __cw.W - 6 && !found; x++) {
+        for (let d = 34; d < 210; d++) {
+          if (__cw.blockAt(x, d) !== null) continue;
+          px = x; pd = Math.max(2, d - 4); found = true; break;
+        }
+      }
+      __cw.g.px = px; __cw.g.pd = pd;
+      /* One cell of air to sit in and a short shaft above it, so the ship is
+         somewhere a player could actually be rather than sealed in rock. */
+      const dug = [];
+      for (let d = pd - 5; d <= pd; d++) dug.push(px + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.charge = __cw.S.powerCap();
+      __cw.R.seeHeld = true;
+      __cw.resetBlocks();
+      __cw.advance(0.6);
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
   anchorbroken: {
     secs: 0.4,
     frames: 4,

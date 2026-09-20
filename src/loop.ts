@@ -54,6 +54,8 @@ import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBann
 import { stepGauges } from './gauges';
 import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken } from './actions';
 import { coreOpens, openGate } from './sim/gate';
+import { hasAbility, SINK_RATE, SINK_HULL, HOLLOW_DRAIN } from './sim/ability';
+import { drawHollow } from './hollow';
 import { sfx, setDepth, setMood, setDuck } from './audio';
 import { isDocked, stepStation, renderStation } from './station';
 import { introTick, eyeAt, titleEye, arriveTick, arriveEye, INTRO,
@@ -80,6 +82,33 @@ export function solidAt(cx: number, cy: number) {
   if (cy > coreM()) return true;
   const b = blockAt(cx, cy);
   return b !== null && !b.ghost;
+}
+
+/* The same question while the ship is SINKING. Round fifteen, Y4.
+
+   Only the things nothing can cut are still solid: the world's own edges, the
+   bedrock, a barrier, an Anchor, the Vault. They share exactly one property -
+   `hard: Infinity` - and sinking has to respect it, or the ladder his whole
+   brief is about has a way round it and there is no reason to find an Anchor.
+
+   Ordinary rock is not solid here, which is the ability: you go through it
+   rather than past it, and you pay in hull. */
+export function solidWhileSinking(cx: number, cy: number) {
+  if (cx < 0 || cx >= W) return true;
+  if (cy < -1) return true;
+  if (cy > coreM()) return true;
+  const b = blockAt(cx, cy);
+  return b !== null && !b.ghost && b.hard === Infinity;
+}
+
+/* Whether the ship is currently INSIDE rock, which is the state that has to
+   keep the sinking rules on whatever the thumb is doing. Letting go halfway
+   through a wall would otherwise seal the ship in: every direction it could
+   move is a solid cell under the ordinary rules, and `moveAndCollide` would
+   refuse all four. */
+export function embedded() {
+  const b = blockAt(Math.round(g.px), Math.round(g.pd));
+  return b !== null && !b.ghost && b.hard !== Infinity;
 }
 
 /* Begin drilling a cell the ship has flown into. */
@@ -675,8 +704,38 @@ export function tick(raw: number, draw = true) {
       if (v[0] !== 0)      R.vy = laneVel(g.pd, LANE_PULL, raw);
       else if (v[1] !== 0) R.vx = laneVel(g.px, LANE_PULL, raw);
 
+      /* ---------- Sink. Round fifteen, Y4 ----------
+
+         Held, or still inside rock from a moment ago. The second half is what
+         stops a release halfway through a wall from sealing the ship in, and
+         it is also the stake: once you are in, you are going through, and the
+         hull is paying by the metre while you do.
+
+         `stopDigging` first, because sinking and drilling are two answers to
+         the same wall and the drill's half-cut cell would otherwise be kept
+         and charged for twice. */
+      const canSink = hasAbility(g.ground.gates, 'sink') && !docked();
+      /* A LATCH, not a reading. The button starts it; reaching air ends it;
+         nothing else does either. Asking `embedded()` on its own was the first
+         version and it meant a ship inside rock for any other reason started
+         sinking by itself - which is not a verb the player has, and which the
+         tier 2 core e2e caught as "cut the core and the gate stayed shut": the
+         ship sank straight past the core instead of drilling it. */
+      if (!canSink) R.sinking = false;
+      else if (R.sinkHeld) R.sinking = true;
+      else if (!embedded()) R.sinking = false;
+      const sinking = R.sinking;
+      if (sinking) {
+        stopDigging();
+        R.vy = SINK_RATE;
+        /* Steering is allowed sideways at the same rate, so a player who let
+           go inside a wall can pick which way out rather than only down. */
+        R.vx = R.held === 'left' ? -SINK_RATE : R.held === 'right' ? SINK_RATE : 0;
+      }
+
       const beforeX = g.px, beforeY = g.pd;
-      const hit = moveAndCollide(g.px, g.pd, R.vx, R.vy, raw, SHIP_R, solidAt);
+      const hit = moveAndCollide(g.px, g.pd, R.vx, R.vy, raw, SHIP_R,
+                                 sinking ? solidWhileSinking : solidAt);
       g.px = hit.x; g.pd = hit.y;
       R.vx = hit.vx; R.vy = hit.vy;
 
@@ -684,6 +743,35 @@ export function tick(raw: number, draw = true) {
          returned rather than from the velocity, so a frame spent pressed
          against rock counts as the nothing it was. */
       R.run.metres += Math.abs(hit.x - beforeX) + Math.abs(hit.y - beforeY);
+
+      /* And what sinking costs, charged by the metre actually covered rather
+         than by the second, so a ship pressed against bedrock pays nothing.
+         Out of the same pool heat and gas take from, which is what makes
+         sinking deep a bet against the climb home. */
+      if (sinking) {
+        const moved = Math.abs(hit.x - beforeX) + Math.abs(hit.y - beforeY);
+        /* Stuck and nobody holding it: let go of the latch.
+
+           Without this, a ship that sinks onto a barrier or the bedrock is
+           latched for ever - it cannot move, and sinking suppresses the drill
+           every frame, so there is no way out of the cell it is in. That is a
+           soft-lock, and it was found by the assertion two lines below this
+           one in the e2e rather than by looking. While the button is still
+           down it stays latched, because pressing against bedrock is a thing
+           the player is choosing to do and letting go ends it. */
+        if (moved <= 0 && !R.sinkHeld) R.sinking = false;
+        if (moved > 0) {
+          const dmg = absorb(moved * SINK_HULL);
+          g.hull -= dmg;
+          R.run.hullGas += dmg;
+          R.hullCause = 'sink';
+          R.shake = Math.max(R.shake, 0.35);
+          if (Math.random() < moved * 1.4) {
+            const b = blockAt(Math.round(g.px), Math.round(g.pd));
+            spray(worldX(g.px), -g.pd, b ? b.color : 0x8a5ad0, 5, 2.6, 0.5);
+          }
+        }
+      }
 
       if (R.held) {
         g.face = R.held;
@@ -754,6 +842,24 @@ export function tick(raw: number, draw = true) {
        chargeAfter in feel.ts for why it is both. */
     g.charge = chargeAfter(g.charge, dt, docked(), S.powerCap() + S.powerExtra(),
                            S.rechargeMult());
+
+    /* ---------- The Hollow. Round fifteen, Y4 ----------
+
+       Charged by the SECOND rather than by the press, so leaving it on is the
+       expensive way to use it and a glance is nearly free. That is what keeps
+       a lens from becoming a permanent overlay, which is what it would be if
+       it cost one cell and stayed on.
+
+       It runs on `raw` for the drawing and `dt` for the cost, the same split
+       every other pair in this loop uses: the breath in the quads must not
+       stop during hit-stop, and a frozen frame must not be billed for. */
+    const seeing = R.seeHeld && hasAbility(g.ground.gates, 'hollow') &&
+                   !docked() && g.charge > 0;
+    if (seeing) {
+      g.charge = Math.max(0, g.charge - HOLLOW_DRAIN * dt);
+      R.run.powerSpent += HOLLOW_DRAIN * dt;
+    }
+    drawHollow(seeing, R.worldT);
 
     /* soak builds while deep and bleeds off above, so staying is the gamble */
     R.worldT += dt;
@@ -897,7 +1003,7 @@ export function tick(raw: number, draw = true) {
     }
 
     if (g.fuel <= 0) { g.fuel = 0; die('fuel'); }
-    else if (g.hull <= 0) { g.hull = 0; die(R.hullCause === 'gas' ? 'gas' : 'heat'); }
+    else if (g.hull <= 0) { g.hull = 0; die(R.hullCause); }
   }
 
   stepParticles(dt);

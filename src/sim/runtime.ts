@@ -69,6 +69,25 @@ export const R = {
   transit: null as Transit | null,
   /* input -> loop */
   held: null as Dir | null,
+  /* Round fifteen, Y4. Whether the Sink button is DOWN, which is not the same
+     question as whether the ship is sinking: a ship already inside rock keeps
+     going until it reaches air whatever the thumb is doing, or letting go
+     halfway through a wall would seal it in. */
+  sinkHeld: false,
+  /* And whether the ship IS sinking, which is a latch rather than a reading.
+
+     It is set by the button and cleared when the ship reaches air, so letting
+     go halfway through a wall does not seal you in - but it never starts on
+     its own. The first version had no latch and asked `embedded()` directly,
+     which meant a ship that was inside rock for ANY reason began sinking the
+     moment it had the ability: the e2e that drills tier 2's core put the ship
+     in solid ground the way a fixture does, and it sank straight past the core
+     without cutting it and reported "the gate stayed shut". A ship sinking
+     because of where it happens to be is not a verb the player has. */
+  sinking: false,
+  /* Whether The Hollow is being held. A lens costs charge by the second, so
+     this is the only ability the loop has to keep asking about. */
+  seeHeld: false,
 
   /* actions <-> loop */
   /* Velocity, in cells per second. Replaced the cell-to-cell `moving` lerp:
@@ -89,7 +108,7 @@ export const R = {
   /* actions -> loop: what is currently eating the hull, so the tow screen
      names the right cause. Heat is the default because it is the only
      continuous drain; a gas pocket overwrites it on the frame it fires. */
-  hullCause: 'heat' as 'heat' | 'gas',
+  hullCause: 'heat' as 'heat' | 'gas' | 'sink',
 
   /* Whether the last frame was inside the heat zone, so crossing in can
      announce itself once instead of every frame. */

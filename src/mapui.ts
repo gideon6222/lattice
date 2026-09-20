@@ -42,6 +42,8 @@ import { el, mustEl } from './ui';
 import { sfx } from './audio';
 import { isCollapsed, unrestBand, UNREST_BANDS, isLit } from './sim/unrest';
 import { richnessOf, surveyKnown } from './sim/survey';
+import { hasAbility } from './sim/ability';
+import { secretsHeard } from './sim/secrets';
 import { ANCHOR_COUNT, anchorAt, anchorSealed,
          vaultOpen, VAULT_CORE_X, VAULT_CORE_D } from './sim/vaults';
 
@@ -349,6 +351,29 @@ export function draw() {
     else dot(x, +p[1] * s, py(md), '#ff8fd8', 3);
   }
 
+  /* ---------- The Call ----------
+
+     Round fifteen, Y4. Tier 2's core hands this over, and it is the map's last
+     answer: everything still buried in a region whose Anchor you broke.
+
+     Drawn UNDER the Anchors and the marks, on purpose. A player who has this
+     has been everywhere, so the screen is busy, and the two things that have
+     always been on it must stay the things you see first - the objective and
+     where you have already been. This is the layer underneath them.
+
+     Violet, like everything the cores gave, and hollow rather than filled: it
+     is something heard rather than something seen, and the map has used filled
+     for "you have been there" since round eight. */
+  if (hasAbility(g.ground.gates, 'call')) {
+    for (const sc of secretsHeard()) {
+      if (sc.d < d0 || sc.d > d1) continue;
+      const px = sc.x * s, pd = py(sc.d);
+      if (sc.kind === 'find') diamondOutline(x, px, pd, 'rgba(169,124,255,.85)', 5);
+      else if (sc.kind === 'relic') diamondOutline(x, px, pd, 'rgba(232,198,255,.95)', 6.5);
+      else dotOutline(x, px, pd, 'rgba(169,124,255,.72)', sc.kind === 'wreck' ? 4 : 3);
+    }
+  }
+
   /* ---------- the Anchors ----------
 
      The hunt, on the one screen that can show it. Three states, and which one
@@ -504,6 +529,31 @@ function diamond(x: CanvasRenderingContext2D, px: number, py: number, col: strin
   x.strokeStyle = 'rgba(0,0,0,.7)';
   x.strokeRect(-r * 0.7, -r * 0.7, r * 1.4, r * 1.4);
   x.restore();
+}
+
+/* The Call's two shapes. Round fifteen, Y4.
+
+   They are the OUTLINES of the map's existing marks rather than new symbols,
+   which is the whole of how a player reads them without being told: a hollow
+   diamond is a device you have not dug up, next to the filled diamonds of the
+   ones you have. Adding a third vocabulary to a screen that already has rings,
+   diamonds and dots would make the busiest state of the map unreadable. */
+function diamondOutline(x: CanvasRenderingContext2D, px: number, py: number, col: string, r: number) {
+  x.save();
+  x.translate(px, py);
+  x.rotate(Math.PI / 4);
+  x.lineWidth = 1.6;
+  x.strokeStyle = col;
+  x.strokeRect(-r * 0.7, -r * 0.7, r * 1.4, r * 1.4);
+  x.restore();
+}
+
+function dotOutline(x: CanvasRenderingContext2D, px: number, py: number, col: string, r: number) {
+  x.beginPath();
+  x.arc(px, py, r, 0, Math.PI * 2);
+  x.lineWidth = 1.6;
+  x.strokeStyle = col;
+  x.stroke();
 }
 
 /* ---------- dragging ----------

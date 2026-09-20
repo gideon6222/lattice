@@ -18,6 +18,8 @@ import { R } from './sim/runtime';
 import { feedValue, ballastDrain, unrestBand, UNREST_BANDS, ballastStarted,
          BALLAST_SAFE, BALLAST_SHORE_COST, BALLAST_LOW } from './sim/unrest';
 import { regionName, regionAt } from './sim/region';
+import { hasAbility } from './sim/ability';
+import { scarHere, repairable, repairRoom, repairValue } from './sim/repair';
 import { hap, haptics, setHaptics } from './haptics';
 import { selectedBay, refreshBays, refreshKit, paintAisleBar, reframeIfNeeded } from './station';
 
@@ -50,6 +52,7 @@ export const ui = {
   flash: mustEl('flash'), btnShop: mustEl('btnShop'), btnAuto: mustEl('btnAuto'),
   kit: mustEl('kit'),
   ordBomb: mustEl('ordBomb'), ordLaser: mustEl('ordLaser'),
+  abSee: mustEl('abSee'), abSink: mustEl('abSink'),
   power: mustEl('power'), powerChip: mustEl('powerChip'),
   shopPlanet: mustEl('shopPlanet'),
   verNum: mustEl('verNum'), notes: mustEl('notes'), btnNotes: mustEl('btnNotes'),
@@ -312,6 +315,19 @@ export function updateHUD() {
     bal.textContent = 'BALLAST  ' + Math.round(g.ground.ballast * 100) + '%';
     bal.classList.toggle('armed', low);
   }
+  /* Round fifteen, Y7. The scar is a PLACE, so the button is only there while
+     you are standing in one - and only when there is something in the hold it
+     would take, because a control that can do nothing is a control that
+     teaches the player to ignore the row it is in. */
+  const seal = el('btnSeal');
+  if (seal) {
+    const at = !isDocked && g.mode === 'play' &&
+               scarHere(Math.round(g.px), Math.round(g.pd), g.ground.lit) >= 0;
+    seal.style.display = at && repairable(g.cargo) ? '' : 'none';
+    seal.textContent = 'SEAL  +' + Math.round(
+      Math.min(repairRoom(g.ground), repairValue(g.cargo)) * 100) + '%';
+  }
+
   if (g.up.auto > 0 && !atSurface() && g.mode === 'play') {
     ui.btnAuto.style.display = '';
     ui.btnAuto.textContent = 'AUTOPILOT  ' + Math.ceil(g.pd * S.autoRate()) + ' FUEL';
@@ -387,6 +403,21 @@ export function updateOrd() {
     el.classList.toggle('cold', g.charge < cost);
     const n = el.querySelector('.n');
     if (n) n.textContent = String(cost);
+  }
+
+  /* And what the cores handed over. Round fifteen, Y4. A button exists only
+     once its core is broken, off `g.ground.gates` like everything else this
+     round - no second list, and no flag that could disagree with the save. */
+  for (const [el, key] of [
+    [ui.abSee, 'hollow'] as const,
+    [ui.abSink, 'sink'] as const
+  ]) {
+    const has = hasAbility(g.ground.gates, key);
+    el.classList.toggle('none', !has || hidden);
+    /* The Hollow is the only one that runs off power; sinking is paid in hull
+       and is therefore never cold, only expensive. */
+    el.classList.toggle('cold', key === 'hollow' && g.charge <= 0);
+    el.classList.toggle('on', has && (key === 'hollow' ? R.seeHeld : R.sinkHeld));
   }
 }
 
@@ -751,40 +782,27 @@ export function buildBallast() {
     }
   }
 
-  /* ---- what you can feed it ---- */
+  /* ---- where repair happens ----
+
+     Round fifteen, Y7, and this used to be a list of FEED buttons: every ore
+     you had banked, with a donate control beside it. That is the thing his
+     brief names - *"I want repairing the planet to have an actual mechanic
+     rather than just feeding it materials"* - and rule 12 says the stand-in
+     goes in the same commit as the real thing rather than sitting beside it.
+
+     What is left is a readout and one sentence saying where the work is. The
+     panel still has a job: it is where you find out how much is left in the
+     tank and which ground has come down, and both of those are things you
+     check before you decide what to put in the hold. */
   const rows = el('balRows');
   if (!rows) return;
   rows.innerHTML = '';
-  const held = ORES.filter((o) => (g.stock[o.id] || 0) > 0);
-  if (!held.length) {
-    rows.innerHTML = '<div class="upeff" style="padding:10px 0">Nothing banked. ' +
-      'Ore is kept when you sell, and this is the other thing it is for.</div>';
-    return;
-  }
-  const room = 1 - s.ballast;
-  for (const o of held) {
-    const have = g.stock[o.id] || 0;
-    const each = feedValue(o.id);
-    /* How many it would actually take, rather than everything you hold.
-
-       A button that empties your Solmarrow into a tank with room for one unit
-       is a button that has to be undone, and there is no undo. `CRAFT.md`: the
-       expensive irreversible action is the one that must be hardest to do by
-       accident - so the count is on the face of the button. */
-    const n = Math.min(have, Math.max(1, Math.ceil(room / each)));
-    const full = room <= 0.001;
-    const row = document.createElement('div');
-    row.className = 'up';
-    row.innerHTML =
-      '<span class="dot" style="background:#' + o.color.toString(16).padStart(6, '0') + '"></span>' +
-      '<div class="upinfo"><div class="upname">' + o.name + ' <span class="mult">x' + have + '</span></div>' +
-      /* What it is worth to the tank, and where it came from - not what it
-         sold for. The credits were paid the moment you touched the pad, so a
-         price here reads as a second cost that is not being charged, and the
-         actual cost of feeding is the upgrade you do not buy. */
-      '<div class="upeff">' + Math.round(each * 100) + '% each · from ' + o.min + ' m</div></div>' +
-      '<button class="buy" data-feed="' + o.id + '" data-n="' + n + '"' +
-        (full ? ' disabled' : '') + '>FEED ' + n + '</button>';
-    rows.appendChild(row);
-  }
+  const broken = s.lit.length;
+  rows.innerHTML = broken === 0
+    ? '<div class="upeff" style="padding:10px 0">Nothing to pack it with yet. ' +
+      'The Ballast is filled at the Anchors, and you have not broken one.</div>'
+    : '<div class="upeff" style="padding:10px 0">Fill it at a scar. Carry ore ' +
+      'down to an Anchor you broke and pack it into the hole - it is worth ' +
+      'three times what tipping it in here ever was, and it settles the ground ' +
+      'around it. ' + broken + ' of them are open to you.</div>';
 }

@@ -5928,6 +5928,223 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## The game could not be finished, and the test that knew was narrowed until it could not say so
+
+**This is the most expensive mistake of the round and the whole of it is mine.**
+
+Y1 put three barriers across the world. A new guard went in beside it - `every
+Anchor is reachable without passing the gate it opens` - and it FAILED, on
+Kryllon. My reasoning at the time is in the commit: it was "asking the gate
+question and the laser question at once", so I gave it `g.found = ['laser']`
+and it went green.
+
+Every clause of that reasoning is defensible. The conclusion was false.
+
+| the chain | |
+|---|---|
+| the barrier at 226 m | needs all three of tier 1's Anchors |
+| Kryllon, one of them | is at 135 m and is SEALED |
+| sealed stone | needs the Cutting Laser |
+| the laser's crate | was at **434 m**, behind the barriers at 226 and 339 |
+
+Two deadlocks, either one fatal. **Handing a test the very key whose absence is
+the bug is how a check stops inspecting anything**, and it is exactly the shape
+INDEX.md rule 11 is about. The test was right and I overrode it.
+
+**The root cause is wider than Kryllon.** `findAt` drew a crate's depth from
+anywhere between its own `below` and the floor of the world. Harmless for eight
+rounds. Then the world grew barriers, and "anywhere" started to mean "possibly
+behind a gate you need this device to open" - the Receiver, the device that
+helps you FIND Anchors, was at 443 m.
+
+### The two fixes, both derived
+
+**A crate is buried inside the tier its own `below` sits in.** A device becomes
+available at that depth, so that tier is the deepest the player is known to be
+able to reach when it appears. Measured after:
+
+| device | below | was | now |
+|---|---|---|---|
+| magnet | 20 | 326 | 38 |
+| receiver | 48 | 443 | 96 |
+| auto | 190 | - | 205 |
+| laser | 260 | 434 | 281 |
+
+**An Anchor may be sealed only in a tier at or below the tier its key is buried
+in.** `SEALED_REGIONS` was a hand-picked `new Set([4, 6, 8])`, and a hand-picked
+set cannot know where the key is. It is derived now, which makes the sealed set
+the bottom Anchor row - Obrinth 284, Palewell 255, Serrik 306, all tier 2, with
+the laser at 281 sitting between two of them. **The "locked door you see before
+you have the key" device survives**: Palewell at 255 is met before the laser at
+281.
+
+**Two constants are written out rather than imported**, because `finds.ts` and
+`vaults.ts` cannot reach `gate.ts` or `region.ts` without going back through
+`config.ts` - the cycle that deleted the Vault once. `TIER_ROWS` and
+`SEALED_MIN_TIER` each have an assertion against the real thing in
+`finishable.test.mjs`, which is rule 10b's "where you cannot derive, assert the
+derived quantity".
+
+### The guard it should have had
+
+`test/finishable.test.mjs` plays the campaign forward from nothing found, no
+gates open, no Anchors broken: at each step it takes everything reachable and
+stops when nothing new can be had. It prints what a perfect player could do, in
+order, which is what made the diagnosis immediate:
+
+```
+broke Verdax at 95 m / Rustmoor at 43 / Cryon at 48
+found bomb at 157 m
+broke Ashvault at 188 m / Tessivar at 192 m
+opened gate 0 at 113 m
+Anchors broken: 5 of 9. Gates open: 0. Devices: bomb
+```
+
+**A narrow test is only safe beside a wide one.** The old note on the scoped
+test has been replaced with that sentence rather than deleted, because the
+reasoning that produced it will look just as reasonable next time.
+
+The frozen baseline did NOT need re-recording, which is the other half of the
+receipt: a crate is an overwriter, and an overwriter leaving a cell is as legal
+as one arriving. The census moved by a handful of rock cells per planet and not
+one ore count changed except under a crate. The ore stream never moved.
+
+## Y7: repair is a trip to the hole you made
+
+His brief: *"From there, you can start repairing it. I want repairing the planet
+to have an actual mechanic rather than just feeding it materials."*
+
+**There was already a repair and it is exactly what he is describing.** The
+Ballast panel listed every ore you had banked with a FEED button beside each
+row. No decision in it: you are on the pad, nothing is at stake, the ore is
+already banked, and the only question is whether you would like the number to
+go up.
+
+**Repair now happens at the scar of an Anchor you broke**, and every property
+the milestone needs falls out of that one choice rather than being designed in:
+
+| the receipt | why it holds |
+|---|---|
+| not from the pad | the shallowest scar is 94 m down |
+| costs materials, not credits | it takes the HOLD, which has weight |
+| it is an activity | you decided what to carry before you left the surface |
+
+The fourth one is not in the plan and is the reason for this shape rather than
+any other: **it gives Y13's remnants a use.** A scar that is only looked at is
+decoration. And under the reveal it is the most honest thing in the game - the
+player spends the middle of the campaign carefully patching a planet they are
+themselves taking apart.
+
+**It takes the whole hold or nothing**, which is deliberate. A per-ore picker
+IS the pad panel, and the pad panel is the thing being replaced. The decision
+belongs before the dive - what is in the hold when you get there - not at the
+scar with a list in front of you.
+
+**The rate is derived from a measurement, and the test asserts the derived
+quantity.** `REPAIR_MULT` is 3, which is what a unit is worth carried down
+against tipped in at the pad. Against a starting 45 kg hold:
+
+| ore | units in 45 kg | at the pad rate | carried down |
+|---|---|---|---|
+| copper | 12 | 0.10 | 0.29 |
+| amethyst | 6 | 0.24 | 0.72 |
+| umbrite | 2 | 0.16 | 0.48 |
+
+At x1 a full hold of the best ore in the game moves the meter a sixth and
+filling it is five dives of doing nothing else, which is the grind round seven
+already recorded happening to the upgrade tree. **And it is nearly flat above
+iron**, which is the property worth protecting and has its own test: a hold of
+the best repair ore must be worth under twice a hold of the worst, or there is
+one correct repair ore and the hunt for it replaces the decision.
+
+**Rule 12: the FEED rows went in the same commit.** Two repairs in one game is
+worse than either - the player feeds the cheap one and never makes the trip.
+The panel keeps its readout and SHORE UP, which spends the Ballast rather than
+filling it. An e2e asserts `#ballast [data-feed]` is empty, on the panel rather
+than in the source, because what matters is that nobody can press one.
+
+**Two tests described a state nobody repairs in.** `newGround()` starts the
+Ballast full, so the first versions packed into a tank with no room and
+correctly got nothing back. Fixed by giving them a Ballast that has fallen,
+which is the only state a repair ever happens in.
+
+## Y4: three cores, three abilities, and the thing that made the ladder buildable
+
+His brief: *"It should also give you a new ability or mechanic."*
+
+**Round fourteen's X5 designed this ladder and then refused to build it**, and
+the refusal was right at the time: nine Anchors meant nine abilities invented
+by a session and shipped unseen, which is the opposite of rule 9. His own brief
+is what unblocked it. **Three dark cores means three**, and the three jobs the
+research names - `PLAN.md` X5, from GMTK on Hollow Knight - map onto them one
+for one:
+
+| tier | job | what it is |
+|---|---|---|
+| 0 | opens a FEW locks, no reason to backtrack yet | **The Hollow**, a lens |
+| 1 | opens MANY at once, across ground already dug | **Sink**, a verb |
+| 2 | double duty: the ending, and a reason to revisit | **The Call**, a lens |
+
+**None of them is a number**, which is the plan's rule and now a test: the
+blurbs are scanned for percentages, "more", "faster", "bigger". The shop sells
+numbers; the cores hand over verbs and lenses. That test cannot read intent,
+but an upgrade that wandered into this table would have to be described without
+any of those words to get past it.
+
+**All three derive from `g.ground.gates`.** Fourth use of the same rule this
+round - the scar, the Ballast's clock, the HUD button and now the abilities are
+all facts about that one list rather than copies of it.
+
+**The Hollow shows space and never contents.** That is the Receiver's fence,
+which has held since round eight: proximity and never bearing, because choosing
+a direction and digging it is the decision this game is built on. It skips
+cells you have already dug, so standing in your own shaft it shows nothing,
+which is the correct answer. A disc rather than a square, because a square has
+corners and a corner is a direction. Charged by the second rather than by the
+press, or a lens that cost one cell would be a permanent overlay.
+
+Drawn as flat additive quads with `depthTest` off, not as boxes: the thing
+being drawn is a hole, and a hole has no surface. An instanced box with a
+material on it reads as a block sitting inside the rock - the opposite of the
+information.
+
+**Sink is paid in hull, and the interesting part is what happens when you let
+go.** A ship that stopped mid-wall would be sealed in: every direction it could
+move is solid under the ordinary rules and `moveAndCollide` refuses all four.
+So `embedded()` keeps the sinking rules on until the ship reaches air, whatever
+the thumb is doing, and sideways steering is allowed so a player can pick which
+way out. That turns a soft-lock into the stake: once you are in, you are going
+through, and the hull is paying by the metre.
+
+It stops at `hard: Infinity`, which is the one property a barrier, the bedrock,
+an Anchor and the Vault share. A player who can sink through a forcefield has
+no reason to find an Anchor, and the whole ladder has a way round it.
+
+**And the Sink e2e passed with that bug in.** The loop broke as soon as the
+ship reached the gate's depth, so it never once tried to pass one. Rule 11
+found it, not review: with `solidWhileSinking` stripped of its Infinity check
+the test went green. It now sinks four metres PAST the barrier's depth and
+asserts where the ship ended up, and with the bug back it reports *"the ship
+sank THROUGH the barrier at 113 m"* at 121.8 m.
+
+**The Call sweeps rather than stores**, because a cache is decided by the
+generator and not by a list. One pass of the world per map open, cached against
+everything it is a function of - `lit`, `dug.size`, `found`, `relics`,
+`collapsed` and `woke`. Only regions whose Anchor is broken answer, which is
+X4's fence and the reason both are worth the trip.
+
+Its first test asked `isOre` and was wrong in a way worth keeping: `isOre` is
+`'min' in m`, and a supply cache carries a depth gate too, so it answered true
+for the very thing The Call is for. The question is the ore TABLE, plus a
+magnitude check that the list stays far shorter than the ground - a lens that
+named every seam would be a checklist, which is what this whole round has been
+stopping the Anchors from being.
+
+**One dead line was found and removed rather than kept.** `secretsHeard` had an
+explicit `g.dug.has` skip that read as the rule; disabling it changed nothing,
+because `blockAt` answers `g.dug` before anything else. The rule is `blockAt`,
+and that is worth one comment rather than a second copy of it.
+
 ## Y5 and Y6: the planet does not start falling apart until you let it out
 
 His brief: *"the structure integrity of the planet feels more like a status bar

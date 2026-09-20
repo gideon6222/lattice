@@ -171,7 +171,10 @@ test('sealed stone is shut without the laser and cuts with it', () => {
   H.setWorld(0);
   H.g.dug = new Set();
   H.g.ground = H.newGround();
-  const sealedRegion = [4, 6, 8].find((r) => H.anchorSealed(r));
+  /* Whichever regions are sealed, asked rather than listed: the set used to be
+     a hand-picked [4, 6, 8] and round fifteen made it derived from where the
+     laser is buried, so a literal here would have gone quietly stale. */
+  const sealedRegion = [...Array(H.ANCHOR_COUNT).keys()].find((r) => H.anchorSealed(r));
   const a = H.anchorAt(sealedRegion);
   /* The top-left corner of the ring, which the template makes '=' . */
   let cell = null;
@@ -552,13 +555,24 @@ test('every Anchor is reachable without passing the gate it opens', () => {
     H.g.dug = new Set();
     H.g.ground = H.newGround();
     for (let k = 0; k < t; k++) H.g.ground.gates.push(k);
-    /* WITH the laser, deliberately. Three halls are sealed by design and the
-       laser is their key; whether that key can be reached before it is needed
-       is a different claim with its own test two above this one ("the key is
-       never behind the door it opens"). Asking both questions in one flood made
-       this fail on Kryllon, whose hall is sealed - which was this test
-       over-reaching rather than a gate being wrong. The question here is only
-       about GATES. */
+    /* WITH the laser, and the note that used to be here was WRONG in a way
+       worth keeping on the record.
+
+       It said: three halls are sealed by design, the laser is their key,
+       whether the key can be reached in time is a different claim with its own
+       test, and this failing on Kryllon was "this test over-reaching rather
+       than a gate being wrong". Every clause of that is defensible and the
+       conclusion was false. Kryllon's Anchor was sealed AND in tier 1, and the
+       laser is a tier 2 device - so the barrier at 226 could never be opened
+       and the game could not be finished. The test was right and handing it
+       the key is what stopped it saying so.
+
+       The laser stays, because the question HERE genuinely is only about
+       gates. What changed is that there is now a test whose question is the
+       whole thing at once - `test/finishable.test.mjs`, which plays the
+       campaign forward from nothing found and no gates open - so this one is
+       allowed to be narrow because something else is not. A narrow test is
+       only safe beside a wide one. */
     const held = H.g.found.slice();
     H.g.found = ['laser'];
 

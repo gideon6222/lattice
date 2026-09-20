@@ -3656,7 +3656,14 @@ else in the economy needs rebalancing.
       for the first Anchor to grant: it opens no locks, so it creates no
       backtracking debt.
 
-- [ ] **X5 The ability ladder, designed and not yet built.** Ask 3 in full. The
+- [x] **X5 The ability ladder, designed and not yet built.** Built 2026-09-19 as
+      round fifteen's Y4, and the thing that made it buildable was his own
+      brief: nine Anchors would have meant nine invented abilities, which is
+      what the caution below is about. THREE dark cores means three, and the
+      three jobs the research names map onto them one for one. The tension
+      flagged at the bottom went with the nine.
+
+      The research's shape, from GMTK on Hollow Knight: The
       research's shape, from GMTK on Hollow Knight: early abilities deliberately
       open only a few locks so there is no reason to backtrack; ONE middle
       ability opens many locks at once across ground already walked, which is
@@ -3727,7 +3734,12 @@ Receipt: a test that the core is absent at N-1 and present at N.
 tier, for ever - it does not come back. Reason: a gate that can re-lock is a
 chore. Receipt: the Y1 test, run after breaking each core in turn.
 
-- [ ] **Y4, when the core is destroyed: the player gains one new ability.** One per
+- [x] **Y4, when the core is destroyed: the player gains one new ability.** Done
+2026-09-19. THE HOLLOW (see open space through rock, close by), SINK (fall
+through solid rock, paying hull) and THE CALL (whatever is still buried in the
+regions you have broken answers you) - which are X5's three jobs in order: a
+few locks, then many at once across ground already dug, then double duty with
+the ending. One per
 tier and never a number - a verb or a lens, not a bigger tank. Reason: the
 research's rule from Hollow Knight is that each key opens a few locks, and a
 numeric upgrade opens none. Receipt: a test that every tier grants exactly one,
@@ -3748,7 +3760,12 @@ brief's whole source of escalation, and it costs no new content. Receipt: a test
 that the decay rate after k cores is strictly greater than after k-1, and that
 it is bounded.
 
-- [ ] **Y7, when the player repairs the planet: it is an activity, not a payment.**
+- [x] **Y7, when the player repairs the planet: it is an activity, not a payment.**
+Done 2026-09-19. Repair happens at the SCAR of an Anchor you broke: carry ore
+down in the hold and pack it into the hole. Cannot be done from the pad because
+the shallowest scar is ninety metres down; costs materials because it takes the
+hold, which has weight; and it gives Y13's remnants a use. The pad's FEED rows
+went in the same commit (rule 12).
 Feeding materials to a bar is named in the brief as the thing to avoid. Reason:
 a donation has no decision in it, and this game's whole shape is decisions about
 where to spend a descent. Receipt: a test that repair cannot be completed from

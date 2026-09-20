@@ -30,6 +30,9 @@ import { openMap, closeMap, mapView, mapPan, mapSetView, draw as mapDraw } from 
 import { landCollapse, closeGround, shoreUp } from './collapse';
 import { collapseTarget, lightAnchor, wake, WAKE_AT, isAwake, feed, feedValue, MAX_COLLAPSED, newGround } from './sim/unrest';
 import { depthTier, gateDepth, gateAnchors, gateReady, GATE_COUNT, coreColumn } from './sim/gate';
+import { ABILITIES, abilityFor, hasAbility } from './sim/ability';
+import { secretsHeard } from './sim/secrets';
+import { hollowCount } from './hollow';
 import { anchorAt, anchorSealed, anchorCells, ANCHOR_COUNT, vaultCells,
          vaultOpen, VAULT_CORE_X, VAULT_CORE_D } from './sim/vaults';
 import { setStartHandler, wireTitle, showTitle, showIntro, startIntro } from './titleui';
@@ -276,6 +279,9 @@ if (new URLSearchParams(location.search).has('debug')) {
        digs down to every Anchor stops at the first barrier, which is the gates
        working rather than the Anchors being unreachable. */
     depthTier, gateDepth, gateAnchors, gateReady, GATE_COUNT, coreColumn,
+    /* Round fifteen's abilities, so a spec can check what a core handed over
+       and whether the lens is actually drawing anything. */
+    ABILITIES, abilityFor, hasAbility, hollowCount, secretsHeard,
     vaultOpen, VAULT_CORE_X, VAULT_CORE_D
   };
 }

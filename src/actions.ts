@@ -7,6 +7,8 @@ import { regionName } from './sim/region';
 import { anchorAt } from './sim/vaults';
 import { wake } from './sim/unrest';
 import { coreColumn, gateDepth } from './sim/gate';
+import { abilityFor } from './sim/ability';
+import { scarHere, repairable, repairRoom, packScar } from './sim/repair';
 import { vaultOpen } from './sim/vaults';
 import { g, S, save, checkpoint, coreM, worldTrait, resetGround, cutGround, padFuel, salePayout, addMark, resetSeen, revealVault, docked } from './sim/state';
 import { blockAt, haulValue, findRoute, planCollapse, cachePrize, findHere } from './sim/world';
@@ -529,7 +531,7 @@ export function autopilot() {
    no tow it is the thing that saves your life, and it is something you have to
    find before you can buy one. An existing mechanic stopped being decoration
    without a line of code. */
-export function die(cause: 'fuel' | 'heat' | 'gas', after: () => void = () => {}) {
+export function die(cause: 'fuel' | 'heat' | 'gas' | 'sink', after: () => void = () => {}) {
   /* Counted before anything is cleared, and it is still the number that says
      most about whether the game is priced right. */
   R.run.towed++;
@@ -555,7 +557,12 @@ export function die(cause: 'fuel' | 'heat' | 'gas', after: () => void = () => {}
     ? 'The tank ran dry at ' + at + ' m and the ship went down with everything in the hold.'
     : cause === 'gas'
       ? 'A gas pocket opened the hull at ' + at + ' m and the ship went down with everything in the hold.'
-      : 'The heat took the hull at ' + at + ' m and the ship went down with everything in the hold.';
+      /* Round fifteen, Y4. The one death the player chose every metre of, so it
+         says so - they were inside the rock when it gave out, and there is no
+         version of that sentence in which the ship was unlucky. */
+      : cause === 'sink'
+        ? 'The rock closed on the hull at ' + at + ' m, with the ship still inside it, and took everything in the hold.'
+        : 'The heat took the hull at ' + at + ' m and the ship went down with everything in the hold.';
   showEvent('THE SHIP IS LOST',
     why + (lost > 0 ? ' That was ◈ ' + lost.toLocaleString() + ' of ore.' : '') +
     '  Everything you had already banked is still yours - the credits, the rig, '
@@ -800,16 +807,68 @@ export function coreBroken(tier: number) {
      down, the same order `anchorBreaks` uses: you opened the way, and THEN the
      planet reacted to it. Both at once is two modals stacked. */
   const first = g.ground.gates.length === 1;
+  /* Round fifteen, Y4: and what it hands over. Named in the card rather than
+     in a toast that runs itself out, because this is the one thing the player
+     gets from a core that is theirs to USE - the barrier coming down is the
+     world changing, and this is the ship changing. */
+  const gift = abilityFor(tier);
   showEvent('THE WAY OPENS',
     'The core gives, and the barrier goes with it. Whatever was held here is ' +
-    'held no longer, and the ground below is yours.',
+    'held no longer, and the ground below is yours.' +
+    (gift ? '  Something of it is in the ship now: ' + gift.name.toUpperCase() +
+            '. ' + gift.blurb : ''),
     'DESCEND',
     () => {
       updateHUD();
+      updateKit();
       if (first) groundStartsToGo();
     });
   /* The way down is permanent and the state now says so. Quit here and
      CONTINUE comes back through an open gate. */
+  checkpoint();
+}
+
+
+/* ---------- packing a scar ----------
+
+   Round fifteen, Y7. His brief: *"I want repairing the planet to have an
+   actual mechanic rather than just feeding it materials."*
+
+   The rules are in `sim/repair.ts` and the reasoning with them; this is the
+   half the player experiences. Two things it does that the pad panel it
+   replaces could not:
+
+   **It takes the HOLD**, which has weight. Every kilo of repair ore is a kilo
+   of ore you are not bringing back, and you decided that before you left the
+   surface rather than at a list of buttons with nothing at stake.
+
+   **It refuses when the Ballast has no room for it**, loudly, and before
+   anything is spent. There is no undo, the hold is most of a dive, and
+   `CRAFT.md` is explicit that the expensive irreversible action is the one
+   that has to be hardest to do by accident. */
+export function packHere() {
+  if (g.mode !== 'play' || docked()) return;
+  const region = scarHere(Math.round(g.px), Math.round(g.pd), g.ground.lit);
+  if (region < 0) return;
+  if (!repairable(g.cargo)) { toast('Nothing in the hold the ground will take'); return; }
+  if (repairRoom(g.ground) <= 0.001) { toast('The Ballast is full'); return; }
+
+  const out = packScar(g.ground, region, g.cargo);
+  if (out.units <= 0) return;
+  for (const id of Object.keys(out.used)) delete g.cargo[id];
+  g.weight = 0;
+
+  const x = worldX(g.px), y = -g.pd;
+  spray(x, y, 0x8a5ad0, 200, 10, 2.0);
+  spray(x, y, 0x9effd4, 120, 8, 1.4);
+  flash('rgba(138,90,208,.22)', 420);
+  R.shake = Math.max(R.shake, 0.7);
+  sfx.supply();
+  hap.ore();
+  toast(out.units + ' units into the scar · Ballast +' + Math.round(out.gain * 100) + '%');
+  updateHUD();
+  /* A large event: written where the ship stands, with the hold as it now is,
+     so quitting on the way back up does not cost the trip. */
   checkpoint();
 }
 

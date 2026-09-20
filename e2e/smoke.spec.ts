@@ -2982,7 +2982,7 @@ test('the map records the descent and draws it', async ({ page }) => {
    other part of this can fail visibly; a collapse that draws grey on the map
    and still lets you fly through it is a collapse that looks right in a
    screenshot and is not a stake at all. */
-test('the Ballast is fed at the pad, and an empty one takes a region', async ({ page }) => {
+test('the Ballast panel reads but does not take, and an empty one takes a region', async ({ page }) => {
   await page.goto('/?debug');
   await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
   await enterGame(page);
@@ -3055,33 +3055,25 @@ test('the Ballast is fed at the pad, and an empty one takes a region', async ({ 
   expect(await page.evaluate(() => (window as any).__cw.g.credits),
     'docking did not sell the hold').toBeGreaterThan(0);
 
-  /* ---- feeding ---- */
+  /* ---- the panel, which no longer takes a donation ----
+
+     This half of the test used to feed banked ore at the pad, and round
+     fifteen's Y7 deleted that: repair is a trip to the scar of an Anchor you
+     broke, and two repairs in one game is worse than either. The run above is
+     the expensive part of this test and it is still worth having, so what was
+     the feeding section is now the assertion that the panel opens, reads, and
+     offers nothing to press. Packing a scar has its own spec. */
   await page.locator('#btnBallast').dispatchEvent('click');
   await expect(page.locator('#ballast')).not.toHaveClass(/hidden/);
-  /* Room to feed into, or every FEED button is correctly disabled and this
-     tests nothing. Half empty is a state several runs of play reach. */
   await page.evaluate(() => {
     (window as any).__cw.g.ground.ballast = 0.5;
     (window as any).__cw.buildBallast();
   });
-
-  const before = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    const btn = document.querySelector('#balRows button[data-feed]') as HTMLButtonElement;
-    return btn ? { id: btn.dataset.feed!, n: Number(btn.dataset.n),
-                   held: w.g.stock[btn.dataset.feed!], ballast: w.g.ground.ballast } : null;
-  });
-  expect(before, 'the panel offered nothing to feed after a sale').not.toBeNull();
-  await page.locator('#balRows button[data-feed]').first().dispatchEvent('click');
-
-  const after = await page.evaluate((id: string) => {
-    const w = (window as any).__cw;
-    return { held: w.g.stock[id] || 0, ballast: w.g.ground.ballast };
-  }, before!.id);
-  expect(after.ballast, 'feeding did not raise the Ballast').toBeGreaterThan(before!.ballast);
-  expect(after.held, 'feeding did not cost any banked ore')
-    .toBe(before!.held - before!.n);
-  expect(after.ballast, 'the Ballast went over full').toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.querySelectorAll('#balRows button[data-feed]').length),
+    'the pad still donates banked ore into the Ballast, so the trip to a scar is optional')
+    .toBe(0);
+  expect(await page.evaluate(() => (document.getElementById('balPct') || { textContent: '' }).textContent),
+    'the panel stopped reading out how full it is').toBeTruthy();
 
   await page.locator('#ballastClose').dispatchEvent('click');
   await expect(page.locator('#ballast')).toHaveClass(/hidden/);
@@ -3764,6 +3756,14 @@ test('cutting a dark core brings its barrier down, on the real input path', asyn
       /* Directly above the core, so the only thing under the drill is the
          thing under test. */
       w.g.px = cx; w.g.pd = cd - 1;
+      /* In AIR, not in rock. A fixture that drops the ship inside solid ground
+         is not a state a player can be in, and once Sink existed it became a
+         state with its own behaviour - tier 2's run grants Sink, and the ship
+         sank past the core instead of drilling it. A shaft down to the cell
+         above the barrier is how anybody actually arrives here. */
+      const dug = [];
+      for (let d = cd - 6; d <= cd - 1; d++) dug.push(cx + ',' + d);
+      w.g.dug = new Set(dug);
       w.resetBlocks();
       w.advance(0.2);
 
@@ -3802,6 +3802,289 @@ test('cutting a dark core brings its barrier down, on the real input path', asyn
     'breaking a dark core is the only way past a barrier, so this failing means ' +
     'the game cannot be finished however well anybody plays')
     .toBe('');
+});
+
+test('the cores hand over abilities, and each one appears with its own core', async ({ page }) => {
+  /* Round fifteen, Y4. `test/ability.test.mjs` proves the TABLE; this proves
+     the buttons exist, appear when their core is broken and not before, and
+     are gone again on a save that has not broken one - which is the half that
+     lives entirely in `ui.ts` and cannot be reached from the sim. */
+  await page.goto('/?debug');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+
+  const state = async (gates: number[]) => page.evaluate((gs: number[]) => {
+    const w = (window as any).__cw;
+    w.g.ground = w.newGround();
+    for (const t of gs) w.g.ground.gates.push(t);
+    /* Off the pad, or every in-flight control is hidden by `atSurface`. */
+    w.g.px = 30; w.g.pd = 40;
+    w.g.dug = new Set(['30,40']);
+    w.resetBlocks();
+    /* Several frames rather than one call into the HUD: the buttons are
+       refreshed on the loop's own cadence, and driving that is the point -
+       a button that only updates when a test asks it to is not a button. */
+    for (let i = 0; i < 12; i++) w.advance(0.2);
+    const vis = (id: string) => {
+      const el = document.getElementById(id)!;
+      return !el.classList.contains('none');
+    };
+    return { see: vis('abSee'), sink: vis('abSink') };
+  }, gates);
+
+  expect(await state([]), 'an ability is aboard before any core is broken').toEqual({ see: false, sink: false });
+  expect(await state([0]), 'the first core did not hand over The Hollow').toEqual({ see: true, sink: false });
+  expect(await state([0, 1]), 'the second core did not hand over Sink').toEqual({ see: true, sink: true });
+});
+
+test('Sink carries the ship through rock, and never through a barrier', async ({ page }) => {
+  /* The whole of Sink is in `loop.ts`, on the flight step, and a branch
+     nothing enters is a feature nobody has - which is the lesson Y3 paid for.
+     So this holds the real button down and reads where the ship ends up.
+
+     The second half is the one that matters more: a player who can sink
+     through a forcefield has no reason to find an Anchor, and the entire
+     ladder his brief is about would have a way round it. */
+  test.setTimeout(120_000);
+  await page.goto('/?debug');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+
+  const run = await page.evaluate(async () => {
+    const w = (window as any).__cw;
+    const gate = w.gateDepth(0);
+    w.g.ground = w.newGround();
+    /* Both cores of the tiers above, so Sink is aboard - and tier 0's gate
+       deliberately left SHUT, which is the wall this is trying to get past. */
+    w.g.ground.gates.push(1);
+    w.g.dug = new Set();
+    w.g.rubble = new Set();
+    w.g.damage = {};
+    w.g.up.tank = 9; w.g.up.cool = 9; w.g.up.hull = 9;
+    /* Well above the barrier, in solid ground, with a clear column of rock
+       under the ship and nothing dug. */
+    w.g.px = 30; w.g.pd = gate - 12;
+    w.resetBlocks();
+    w.advance(0.2);
+
+    const from = w.g.pd, hull0 = w.g.hull;
+    const btn = document.getElementById('abSink')!;
+    btn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    /* It keeps going PAST the barrier's depth on purpose. The first version
+       stopped the loop as soon as the ship reached the gate, which meant it
+       never once tried to pass one - and it went on passing with
+       `solidWhileSinking` stripped of its Infinity check, which is the exact
+       bug it exists to catch. Rule 11 found that, not review.
+
+       Hull is topped up here and only here, because this half of the test is
+       about the barrier and a ship that dies of hull on the way down proves
+       nothing about it. The hull COST is measured over the same run from the
+       reading taken before the loop. */
+    let cost = 0;
+    for (let i = 0; i < 600; i++) {
+      w.g.fuel = w.S.fuelCap();
+      const h = w.g.hull;
+      w.advance(0.1);
+      if (w.g.hull < h) cost += h - w.g.hull;
+      w.g.hull = w.S.hullCap();
+      if (w.g.mode !== 'play') { const b = document.getElementById('evBtn'); if (b) b.click(); }
+      if (w.g.pd >= gate + 4) break;
+    }
+    btn.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    /* And let it settle, so a ship still embedded finishes coming out. */
+    for (let i = 0; i < 80; i++) { w.g.hull = w.S.hullCap(); w.advance(0.1); }
+    const to = w.g.pd;
+
+    /* And the latch: a ship sitting inside rock with Sink aboard and nobody
+       touching the button must not move. Sinking is a verb the player has,
+       never something the ship does because of where it is. */
+    w.g.pd = gate - 20; w.g.px = 30;
+    w.g.hull = w.S.hullCap();
+    w.resetBlocks();
+    for (let i = 0; i < 40; i++) { w.g.fuel = w.S.fuelCap(); w.advance(0.1); }
+    const idle = Math.abs(w.g.pd - (gate - 20));
+
+    return { from, to, gate, hull0, cost, dug: w.g.dug.size, idle };
+  });
+
+  expect(run.to, `the ship did not sink at all - it went from ${run.from} m to ${run.to} m`)
+    .toBeGreaterThan(run.from + 4);
+  expect(run.cost, 'sinking cost no hull, so there is no decision in it')
+    .toBeGreaterThan(0);
+  expect(run.dug, 'sinking dug the rock out, so it is a free drill rather than a way past')
+    .toBe(0);
+  expect(run.to, `the ship sank THROUGH the barrier at ${run.gate} m, so the Anchors are optional`)
+    .toBeLessThan(run.gate);
+  expect(run.idle, `a ship inside rock drifted ${run.idle.toFixed(1)} m with nobody holding SINK - ` +
+    'it is sinking because of where it is rather than because the player chose to')
+    .toBeLessThan(0.5);
+});
+
+test('The Hollow draws what is buried and costs power to hold', async ({ page }) => {
+  /* A lens that draws nothing is a button, and a lens that is free to leave on
+     is a permanent overlay. Both are the failure, and neither is visible from
+     the sim - the reach and the drain are constants there, and the drawing and
+     the charging are both in `loop.ts`.
+
+     The fixture sweeps the generator for a REAL cave rather than digging one,
+     and that is most of its cost: it measured 46 s on its own and then timed
+     out at the default 60 s inside a full run. That is the sort of failure
+     that reads as a flake and is not one, so the budget is stated here rather
+     than the sweep being made cheaper - looking at a hole the test dug for
+     itself would prove nothing about the lens. */
+  test.setTimeout(150_000);
+  await page.goto('/?debug');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+
+  const run = await page.evaluate(async () => {
+    const w = (window as any).__cw;
+    w.g.ground = w.newGround();
+    w.g.ground.gates.push(0);
+    w.g.dug = new Set();
+    /* A cell of air to sit in, and a cave to look at: walk down a column until
+       the world offers a natural void within reach, so the lens has something
+       real to find rather than a hole this test dug for it. */
+    let px = 30, pd = 30, found = false;
+    outer:
+    for (let x = 4; x < w.W - 4 && !found; x++) {
+      for (let d = 26; d < 200; d++) {
+        if (w.blockAt(x, d) !== null) continue;
+        px = x; pd = Math.max(1, d - 5);
+        found = true;
+        break outer;
+      }
+    }
+    w.g.px = px; w.g.pd = pd;
+    w.g.dug = new Set([px + ',' + pd]);
+    w.g.charge = w.S.powerCap();
+    w.resetBlocks();
+    w.advance(0.2);
+
+    const charge0 = w.g.charge;
+    const btn = document.getElementById('abSee')!;
+    btn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    for (let i = 0; i < 20; i++) w.advance(0.1);
+    const drawn = w.hollowCount();
+    const charge = w.g.charge;
+    btn.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    w.advance(0.1);
+    const after = w.hollowCount();
+    return { found, drawn, after, charge0, charge };
+  });
+
+  expect(run.found, 'the fixture never found a natural void to look at').toBe(true);
+  expect(run.drawn, 'The Hollow lit nothing while held, with a cave five cells away')
+    .toBeGreaterThan(0);
+  expect(run.charge, 'The Hollow is free to leave on, so it is never off')
+    .toBeLessThan(run.charge0);
+  expect(run.after, 'The Hollow kept drawing after the thumb came off it').toBe(0);
+});
+
+test('the planet is repaired at a scar, on the button, and never from the pad', async ({ page }) => {
+  /* Round fifteen, Y7. `test/repair.test.mjs` proves the rules; this proves
+     the control exists, appears only where the work is, and actually moves the
+     hold into the ground when pressed - which is the half that lives in
+     `ui.ts` and `actions.ts` and cannot be reached from the sim.
+
+     The Y3 lesson: the whole of a milestone can be four lines on a branch, and
+     a branch nothing enters is a feature nobody has. */
+  await page.goto('/?debug');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+
+  const run = await page.evaluate(async () => {
+    const w = (window as any).__cw;
+    const vis = () => {
+      const el = document.getElementById('btnSeal')!;
+      return el.style.display !== 'none';
+    };
+    const settle = () => { for (let i = 0; i < 10; i++) w.advance(0.2); };
+
+    w.g.ground = w.newGround();
+    w.g.ground.lit = [0];
+    w.g.ground.ballast = 0.4;
+    w.g.ground.unrest[0] = 0.9;
+    w.g.cargo = { amethyst: 6 };
+    w.g.dug = new Set();
+
+    /* On the pad, with a hold full of repair ore and a scar open somewhere in
+       the world. The button must not be there. */
+    w.g.px = w.START_X; w.g.pd = 0;
+    w.resetBlocks();
+    settle();
+    const atPad = vis();
+
+    /* In the scar, same hold. */
+    const a = w.anchorAt(0);
+    w.g.px = a.x; w.g.pd = a.d;
+    w.g.dug = new Set([a.x + ',' + a.d]);
+    w.resetBlocks();
+    settle();
+    const atScar = vis();
+
+    /* And with an empty hold, standing in the same place: a control that can
+       do nothing teaches the player to ignore the row it is in. */
+    const held = w.g.cargo;
+    w.g.cargo = {};
+    settle();
+    const empty = vis();
+    w.g.cargo = held;
+    settle();
+
+    const ballast0 = w.g.ground.ballast, unrest0 = w.g.ground.unrest[0];
+    document.getElementById('btnSeal')!.click();
+    settle();
+
+    return {
+      atPad, atScar, empty,
+      ballast0, ballast: w.g.ground.ballast,
+      unrest0, unrest: w.g.ground.unrest[0],
+      cargo: Object.keys(w.g.cargo).length,
+      credits0: w.g.credits, credits: w.g.credits,
+      after: vis()
+    };
+  });
+
+  expect(run.atPad, 'the planet can be repaired from the pad, which is the thing this replaces').toBe(false);
+  expect(run.atScar, 'standing in a scar with a hold of ore offers nothing to do with it').toBe(true);
+  expect(run.empty, 'the seal button is offered with an empty hold').toBe(false);
+  expect(run.ballast, 'pressing it did not fill the Ballast').toBeGreaterThan(run.ballast0);
+  expect(run.unrest, 'pressing it did not settle the ground it was in').toBeLessThan(run.unrest0);
+  expect(run.cargo, 'the ore is still in the hold, so the repair was free').toBe(0);
+  expect(run.credits, 'repair charged credits').toBe(run.credits0);
+  expect(run.after, 'the button is still there with nothing left to pack').toBe(false);
+});
+
+test('the pad has no donate buttons left on it', async ({ page }) => {
+  /* Rule 12: the stand-in goes in the same commit as the real thing. His brief
+     names feeding materials at a panel as the thing to replace, and two
+     repairs in one game is worse than either - the player feeds the cheap one
+     and never makes the trip.
+
+     Asserted on the panel rather than on the source, because what matters is
+     that nobody can press one. */
+  await page.goto('/?debug');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+
+  const feeds = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.ground = w.newGround();
+    w.g.ground.lit = [0, 1, 2];
+    w.g.ground.ballast = 0.3;
+    w.g.stock = { copper: 40, iron: 30, amethyst: 12, solmarrow: 4 };
+    w.buildBallast();
+    return document.querySelectorAll('#ballast [data-feed]').length;
+  });
+
+  expect(feeds, 'the Ballast panel still donates banked ore, so the trip to a scar is optional')
+    .toBe(0);
 });
 
 /* ---------- the options, and the room without a thumb ----------

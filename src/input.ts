@@ -22,7 +22,7 @@ import { mustEl, ui, atSurface, buildShop, buildCard, buildManifest, audioLabels
 import { dockShip, undockShip, pickBay, selectBay, selectedBay, resizeStation,
          stepAisle, stepBay, paintAisleBar, markSeen } from './station';
 import type { Dir } from './types';
-import { autopilot, hardReset, useSupply, fireBomb, fireLaser } from './actions';
+import { autopilot, hardReset, useSupply, fireBomb, fireLaser, packHere } from './actions';
 import { sfx, audioInit, setAudio, setVolume, audioFocus, audioState } from './audio';
 import { setTier, tier, type Tier } from './visuals';
 import { applyVisuals } from './visualsapply';
@@ -121,6 +121,24 @@ for (const sup of SUPPLIES) {
    there is not enough power. */
 mustEl('ordBomb').addEventListener('pointerdown', (e) => { e.preventDefault(); fireBomb(); });
 mustEl('ordLaser').addEventListener('pointerdown', (e) => { e.preventDefault(); fireLaser(); });
+
+/* The cores' abilities. Round fifteen, Y4, and they are HELD rather than
+   tapped, which is why they are wired like the d-pad rather than like the
+   ordnance above.
+
+   `pointercancel` and `pointerleave` as well as `pointerup`, for the reason the
+   d-pad already learned: a thumb that slides off a button on a phone never
+   sends `pointerup` to it, and a held ability that nothing turns off is a
+   power drain the player cannot stop or a ship that sinks for ever. */
+function hold(id: string, set: (on: boolean) => void) {
+  const el = mustEl(id);
+  el.addEventListener('pointerdown', (e) => { e.preventDefault(); set(true); });
+  for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) {
+    el.addEventListener(ev, (e) => { e.preventDefault(); set(false); });
+  }
+}
+hold('abSee', (on) => { R.seeHeld = on; });
+hold('abSink', (on) => { R.sinkHeld = on; });
 
 ui.btnAuto.onclick = autopilot;
 ui.btnShop.onclick = () => {
@@ -283,6 +301,7 @@ function openBallast() {
   ballastSheet.classList.remove('hidden');
 }
 mustEl('btnBallast').onclick = openBallast;
+mustEl('btnSeal').onclick = () => { sfx.ui(); packHere(); };
 mustEl('ballastClose').onclick = () => {
   sfx.ui();
   ballastSheet.classList.add('hidden');
@@ -295,24 +314,12 @@ mustEl('ballastClose').onclick = () => {
 ballastSheet.onclick = (e) => {
   const btn = (e.target as HTMLElement).closest('button') as HTMLButtonElement | null;
   if (!btn || btn.disabled) return;
-  if (btn.dataset.shore) {
-    if (shoreUp() >= 0) buildBallast();
-    return;
-  }
-  const id = btn.dataset.feed;
-  if (!id) return;
-  const n = Math.min(g.stock[id] || 0, Number(btn.dataset.n) || 0);
-  if (n <= 0) return;
-  /* The ore leaves the vault whether or not the tank had room for all of it -
-     which is why the button's count is computed to fit rather than to empty
-     your pockets. See buildBallast. */
-  feed(g.ground, id, n);
-  g.stock[id] -= n;
-  if (g.stock[id] <= 0) delete g.stock[id];
-  sfx.buy();
-  hap.buy();
-  buildBallast();
-  save();
+  /* Shoring is the only thing this panel still DOES. Round fifteen, Y7 took
+     the FEED rows out: filling the Ballast is a trip to a scar now, not a list
+     of donate buttons you stand on the pad and press. Shoring stays here
+     because it spends the Ballast rather than filling it, and because the
+     thing it buys back - a fallen region - is read off this same panel. */
+  if (btn.dataset.shore && shoreUp() >= 0) buildBallast();
 };
 
 ui.btnMusic.onclick = () => { audioInit(); setAudio('music', !audioState.music); audioLabels(); };
