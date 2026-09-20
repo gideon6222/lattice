@@ -1,4 +1,4 @@
-import { HULL_MAX, DEF, isOre, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, TRAIT_OF, heatDepth } from './sim/config';
+import { HULL_MAX, DEF, isOre, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
 import { setGauges, setFuelReserve } from './gauges';
 import { clamp } from './sim/util';
 import { flashScale } from './motion';
@@ -604,6 +604,16 @@ function buildUpgradeRow(u: Upgrade) {
     return;
   }
 
+  /* Round fifteen, Y9: the level cap, which steps with the barriers.
+
+     `capped` is not `maxed`. A maxed row is finished and says MAX; a capped
+     row is a row the player can afford and the shop will not sell, which has
+     to say WHY or it reads as a bug. The next step's depth is the answer, and
+     it is the same sentence the sealed rows above use - "come back deeper" -
+     which is the shop's one idea said twice rather than two ideas. */
+  const cap = levelCap(u, g.best.depth);
+  const capped = lvl >= cap && lvl < u.max;
+  const nextStep = TIER_DEPTHS.find((d) => d > g.best.depth);
   const maxed = lvl >= u.max;
   const c = costOf(u, lvl);
   const mat = maxed ? null : matCost(u, lvl);
@@ -625,13 +635,19 @@ function buildUpgradeRow(u: Upgrade) {
   row.innerHTML =
     '<div class="upinfo"><div class="upname">' + label + '</div>' +
     '<div class="upeff">Lv ' + lvl + '/' + u.max + ' · ' + u.effect(lvl) + (maxed ? '' : ' → ' + u.effect(lvl + 1)) + '</div>' +
+    (capped
+      ? '<div class="upmat short">The rig will not take another at this depth' +
+        (nextStep ? ' · past ' + nextStep + ' m it will' : '') + '</div>'
+      : '') +
     matLine + '</div>';
   const btn = document.createElement('button');
   btn.className = 'buy';
-  btn.textContent = maxed ? 'MAX' : '◈ ' + c.toLocaleString();
-  btn.disabled = maxed || g.credits < c || short;
+  btn.textContent = maxed ? 'MAX'
+    : capped ? (nextStep ? nextStep + ' m' : 'HELD')
+    : '◈ ' + c.toLocaleString();
+  btn.disabled = maxed || capped || g.credits < c || short;
   btn.onclick = () => {
-    if (g.credits < c || maxed || short) return;
+    if (g.credits < c || maxed || capped || short) return;
     g.credits -= c;
     if (mat) g.stock[mat.id] = have - mat.need;
     g.up[u.key]++;

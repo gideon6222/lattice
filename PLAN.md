@@ -3776,13 +3776,23 @@ place to stop. Reason: a gate is already the one cell every player in that tier
 passes through, so it is where a service costs no new world. Receipt: a test
 that each tier has exactly one, at its own gate.
 
-- [ ] **Y9, buying at the first shop: a cap on what it will sell.** The starting shop
+- [x] **Y9, buying at the first shop: a cap on what it will sell.** Done
+2026-09-19. Rows AND levels: the shelf steps at the barrier depths, and
+`levelCap` steps the max level with it - a nine-level row caps at 3, then 6,
+then 9. Measured: 2% of the whole tree's cost is buyable at the surface,
+against 54% with rows capped alone. The starting shop
 holds few upgrades and stops. Reason, his: "to make sure everything stays
 balanced" - an early game that can buy late-game power has no late game.
 Receipt: a test that the sum of what tier one can sell is under a measured
 ceiling.
 
-- [ ] **Y10, buying at a deeper shop: more, and abilities as well as numbers.**
+- [x] **Y10, buying at a deeper shop: more, and abilities as well as numbers.**
+Done 2026-09-19, and it needed no new gate: a depth past 113 m can only have
+been reached by breaking the first core, so putting each row's `unlock` on a
+barrier depth turns the gate that already existed into a core gate, with one
+source of truth. The abilities half is Y4 - the cores hand those over, and the
+shop sells numbers. Three shelves and not four, because the last gate is the
+Vault's door and a shop behind the ending is not a shop.
 Reason: the shop ladder is the progression, so a deeper shop has to be visibly
 worth reaching. Receipt: a test that each tier's catalogue strictly contains the
 one above it.

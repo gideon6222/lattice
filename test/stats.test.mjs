@@ -276,7 +276,23 @@ test('the Cooling Rig is gated behind a mineral inside the heat zone', () => {
      world became one 452-metre planet, and gold at 64 and amethyst at 95 are
      both comfortably above it now. Deep Survey, the Repair Drone and the
      Reactor Core pass the plain rule, so they are held to it. */
-  const deepOnly = new Set(['cool', 'auto', 'laser']);
+  /* Round fifteen, Y9/Y10: AUTOPILOT left this set, and it is a design change
+     rather than a test being edged out of the way.
+
+     The set means "you buy this because you go deep", and the shop is cut by
+     the barriers now. Three rows wanted to be deep-game and the ore ladder
+     cannot carry three: magmite, coreite and umbrite are rare enough that the
+     "maxing everything" ceiling of twelve hundred-cell runs allows one row
+     each, and umbrite allows three units against the Cutting Laser's four. So
+     one of the three had to come up, and the Autopilot is the one that was
+     never really about depth - it is a convenience on the climb home, it is
+     found at 205 m rather than bought, and at tier 1 with ruby it is priced
+     against ground the player has already been over.
+
+     `cool` and `laser` stay: a heat shield you can buy before meeting heat and
+     a laser you can buy before the sealed halls are both the failure this set
+     exists to name. */
+  const deepOnly = new Set(['cool', 'laser']);
   for (const u of H.UPGRADES) {
     if (deepOnly.has(u.key)) continue;
     assert.ok(H.DEF[u.mat].min < H.heatDepth(0),

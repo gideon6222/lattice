@@ -1105,7 +1105,7 @@ export const UPGRADES: Upgrade[] = [
      a rig that could not be paid for - two gates on one thing, and one of them
      pointing at nothing. The design it protects is unchanged: you still have to
      survive inside the heat to buy the thing that answers it. */
-  { key: 'cool',   name: 'Cooling Rig',   base: 6000, mul: 1.5, max: 7, mat: 'magmite', group: 'survival', unlock: 212,
+  { key: 'cool',   name: 'Cooling Rig',   base: 6000, mul: 1.5, max: 7, mat: 'magmite', group: 'survival', unlock: 226,
     effect: (l: number) => Math.round(Math.min(0.72, l * 0.09) * 100) + '% heat shield' },
   /* The effect line names the framing as well as the lamp, because the
      framing is now the part the player actually feels. */
@@ -1122,9 +1122,9 @@ export const UPGRADES: Upgrade[] = [
      cheaper - so this is it, and it is the only thing that does it. Capped at
      0.4 so the deepest rock never becomes free: a ladder that ends the
      constraint is the fault this round exists to fix. */
-  { key: 'scrub',  name: 'Scrubber',      base: 1500, mul: 1.5, max: 8, mat: 'iron', group: 'survival', unlock: 25,
+  { key: 'scrub',  name: 'Scrubber',      base: 4400, mul: 1.5, max: 8, mat: 'emerald', group: 'survival', unlock: 113,
     effect: (l: number) => Math.round(scrubSave(l) * 100) + '% less fuel per cell cut' },
-  { key: 'auto',   name: 'Autopilot',     base: 4900, mul: 1.55, max: 6, mat: 'ruby', group: 'instruments', unlock: 190,
+  { key: 'auto',   name: 'Autopilot',     base: 4900, mul: 1.55, max: 6, mat: 'ruby', group: 'instruments', unlock: 113,
     effect: (l: number) => (l === 0 ? 'Not installed' : (0.55 - (l - 1) * 0.075).toFixed(2) + ' fuel per meter') },
 
   /* ---------- ordnance ----------
@@ -1137,13 +1137,13 @@ export const UPGRADES: Upgrade[] = [
      Gated so neither arrives before the player has felt the problem it solves.
      The charge at 40 m, about where hard rock starts costing real time; the
      laser at 90 m, where a shaft is long enough that cutting one is a job. */
-  { key: 'bomb',   name: 'Seismic Charge', base: 3000, mul: 1.6, max: 3, mat: 'iron', group: 'ordnance', unlock: 40,
+  { key: 'bomb',   name: 'Seismic Charge', base: 3000, mul: 1.6, max: 3, mat: 'iron', group: 'ordnance', unlock: 0,
     effect: (l) => (l === 0 ? 'Not installed' : bombCells(l) + ' cells around the target') },
   /* Ruby, not silver. Silver starts at 22 m and the laser unseals at 90, so
      the mineral gate was doing nothing at all behind the depth gate - one of
      the two was decoration. Ruby lives at 105 m, which puts both gates in the
      same neighbourhood, and a ruby laser is the better fiction anyway. */
-  { key: 'laser',  name: 'Cutting Laser',  base: 12500, mul: 1.6, max: 5, mat: 'coreite', group: 'ordnance', unlock: 260,
+  { key: 'laser',  name: 'Cutting Laser',  base: 12500, mul: 1.6, max: 5, mat: 'coreite', group: 'ordnance', unlock: 226,
     effect: (l) => (l === 0 ? 'Not installed' : laserRange(l) + ' cells straight ahead') },
 
   /* ---------- the second wave ----------
@@ -1157,13 +1157,13 @@ export const UPGRADES: Upgrade[] = [
      "the deep is chewing me up" was always a consumable, never a rig. Gated at
      45 m and on iron, both cheap, because this is the one that makes the
      middle of the game survivable rather than the end of it. */
-  { key: 'hull',   name: 'Hull Plating',   base: 3400, mul: 1.5, max: 9, mat: 'iron', group: 'survival', unlock: 45,
+  { key: 'hull',   name: 'Hull Plating',   base: 3700, mul: 1.5, max: 9, mat: 'amethyst', group: 'survival', unlock: 113,
     effect: (l: number) => (100 + l * 25) + ' hull' },
 
   /* SALVAGE MAGNET. Ore dropped when the hold filled has to be re-approached
      one cell at a time, which is the least interesting minute in the game.
      Radius, not automation: you still have to go back for it. */
-  { key: 'magnet', name: 'Salvage Magnet', base: 1200, mul: 1.5, max: 6, mat: 'copper', group: 'rig', unlock: 20,
+  { key: 'magnet', name: 'Salvage Magnet', base: 1200, mul: 1.5, max: 6, mat: 'copper', group: 'rig', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Pulls drops from ' + (0.8 + l * 0.55).toFixed(1) + ' cells') },
 
   /* DEEP SURVEY. Distinct from the Scanner, which is light and framing: this
@@ -1171,7 +1171,7 @@ export const UPGRADES: Upgrade[] = [
      buried Jump Drive component, which is the thing the goal most needs a way
      to find - a component you can only locate by digging the whole world is a
      goal made of patience. */
-  { key: 'survey', name: 'Deep Survey',    base: 3600, mul: 1.55, max: 5, mat: 'gold', group: 'instruments', unlock: 62,
+  { key: 'survey', name: 'Deep Survey',    base: 3600, mul: 1.55, max: 5, mat: 'gold', group: 'instruments', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Reads ore ' + (2 + l * 1.6).toFixed(1) + ' m through rock') },
 
   /* LATTICE RECEIVER. The other instrument, and the one that answers a question
@@ -1206,19 +1206,19 @@ export const UPGRADES: Upgrade[] = [
      Magnet at 20 for 1200. The depth a device is buried at and the depth its
      row opens at are one fact (INDEX.md rule 10b), and the other six devices
      already agree that way. */
-  { key: 'receiver', name: 'Lattice Receiver', base: 3500, mul: 1.5, max: 5, mat: 'gold', group: 'instruments', unlock: 48,
+  { key: 'receiver', name: 'Lattice Receiver', base: 3500, mul: 1.5, max: 5, mat: 'gold', group: 'instruments', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Hears an intact Anchor ' + callReach(l) + ' m off') },
 
   /* REPAIR DRONE. Turns a bad run into a long one instead of a tow. Slow on
      purpose - it must never make heat survivable, only recoverable, so it is
      an order of magnitude under what soak takes at depth. */
-  { key: 'drone',  name: 'Repair Drone',   base: 4400, mul: 1.5, max: 5, mat: 'amethyst', group: 'survival', unlock: 78,
+  { key: 'drone',  name: 'Repair Drone',   base: 4400, mul: 1.5, max: 5, mat: 'amethyst', group: 'survival', unlock: 113,
     effect: (l: number) => (l === 0 ? 'Not installed' : '+' + (l * 0.55).toFixed(2) + ' hull/s underground') },
 
   /* REACTOR. Ordnance had two rungs and no ladder of its own: both weapons ran
      off a meter nothing could improve, so the answer to "I want to use these
      more" was to stop using them. */
-  { key: 'reactor', name: 'Reactor Core',  base: 4000, mul: 1.5, max: 5, mat: 'gold', group: 'ordnance', unlock: 70,
+  { key: 'reactor', name: 'Reactor Core',  base: 4000, mul: 1.5, max: 5, mat: 'gold', group: 'ordnance', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : '+' + l + ' power · ' + (1 + l * 0.35).toFixed(2) + 'x recharge') }
 ];
 /* What the Scrubber saves, as a fraction of a cell's fuel cost. Named rather
@@ -1320,6 +1320,63 @@ export function shelfState(
    Returned in shelf order rather than filtered at the call site, because the
    room lays itself out from this list and two places deciding what is on the
    shelf is two places to disagree. */
+/* ---------- the shelf is cut by the BARRIERS now. Round fifteen, Y9 and Y10 ----------
+
+   His brief: *"I want the upgrades and skills to be reworked to follow this
+   new structure. The starting shop will have limited upgrades and have a cap
+   to what you can buy to make sure everything stays balanced. As you get
+   further down and unlock deeper shops, more advanced upgrades and new skills
+   will be available."*
+
+   **And the rework needed no new gate at all**, which is the part worth
+   writing down. Every row already opens at a DEPTH, and the barriers mean a
+   depth past 113 m can only have been reached by breaking the first core -
+   there is no other way through. So putting each row's `unlock` on a gate
+   depth turns the existing gate into a core gate exactly, with one source of
+   truth rather than two. `UPGRADE_TIERS` below is the reading of that, and a
+   test asserts the unlocks are all gate depths rather than arbitrary numbers.
+
+   Y10's "each tier's catalogue strictly contains the one above it" is then
+   true by construction: the filter is `bestDepth >= unlock` and the unlocks
+   are nested. There is nothing to enforce, which is the right shape for a
+   claim like that. */
+/* The depths the shelf steps at, read off the table rather than written down.
+
+   Deriving it from the unlocks that are already there is what stops this being
+   a second copy of the ladder: add a row at a new depth and it appears here by
+   itself, and `finishable.test.mjs` asserts the set is exactly the surface plus
+   the three barrier depths. */
+export const TIER_DEPTHS: number[] =
+  [...new Set(UPGRADES.map((u) => u.unlock))].sort((a, b) => a - b);
+
+/* How many steps of the shelf a player has earned, 0 at the surface. */
+export function shelfTier(bestDepth: number): number {
+  return Math.max(0, TIER_DEPTHS.filter((d) => bestDepth >= d).length - 1);
+}
+
+/* ---------- and the CAP, which is Y9 ----------
+
+   His words: *"The starting shop will have limited upgrades and have a cap to
+   what you can buy to make sure everything stays balanced."*
+
+   **Rows alone are not a cap**, and that was the first version of this. Seven
+   rows on the surface shelf sounds limited until you notice they are the
+   seven that matter - drill, hold, thrusters, tank, scanner, hull, magnet -
+   and that maxing the drill to Godcore before the first barrier is exactly
+   "an early game that can buy late-game power has no late game". Measured:
+   the surface shelf at full levels came to 727,000 credits against 1,337,000
+   for the whole tree, which is 54% of the game available before any core is
+   broken.
+
+   So the LEVELS step with the shelf, and the step is derived from the number
+   of steps rather than chosen: a nine-level row caps at 3, then 5, then 7,
+   then 9. `Math.ceil` so a short row is never capped out of existence - a
+   three-level row still offers one at the surface. */
+export function levelCap(u: Upgrade, bestDepth: number): number {
+  const steps = TIER_DEPTHS.length;
+  return Math.min(u.max, Math.ceil((u.max * (shelfTier(bestDepth) + 1)) / steps));
+}
+
 export function shelfStock(bestDepth: number, found: string[] = []): Upgrade[] {
   /* The devices come off the shelf entirely until they are dug up.
 

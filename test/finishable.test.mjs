@@ -145,6 +145,90 @@ test('the campaign can be played from nothing to the Vault', () => {
   assert.equal(H.g.ground.gates.length, H.GATE_COUNT, 'some gate cannot be opened');
 });
 
+/* ---------- Y9 and Y10: the shelf is cut by the barriers ---------- */
+
+test('the shelf steps exactly where the barriers are', () => {
+  /* `TIER_DEPTHS` is read off the upgrade table rather than written down, so
+     this is what pins it to the world: every step of the shelf is a depth you
+     can only be past by having broken a core, and there are no other steps.
+
+     The last gate is the Vault's own door, so there is no shop behind it - a
+     shop after the ending is not a shop. Three steps, three shelves. */
+  const want = [0];
+  for (let t = 0; t < H.GATE_COUNT - 1; t++) want.push(H.gateDepth(t));
+  assert.deepEqual(H.TIER_DEPTHS, want,
+    'the shelf steps at ' + H.TIER_DEPTHS.join(', ') + ' but the barriers are at ' +
+    want.slice(1).join(', ') + ' - a row unlocking anywhere else is a second ladder');
+});
+
+test('each shelf strictly contains the one above it', () => {
+  /* Y10, and it is true by construction - the filter is `bestDepth >= unlock`
+     and the unlocks are nested - which is the right shape for a claim like
+     this. What the test is really defending is that nobody adds a row whose
+     gate is not a depth. */
+  const all = ['magnet', 'bomb', 'receiver', 'survey', 'reactor', 'drone', 'auto', 'laser'];
+  let prev = null;
+  for (const d of H.TIER_DEPTHS) {
+    const keys = new Set(H.shelfStock(d, all).filter((u) => d >= u.unlock).map((u) => u.key));
+    if (prev) {
+      for (const k of prev) assert.ok(keys.has(k), `${k} was on the shelf above and is gone at ${d} m`);
+      assert.ok(keys.size > prev.size, `the shelf at ${d} m adds nothing, so the barrier bought nothing`);
+    }
+    prev = keys;
+  }
+});
+
+test('the first shop cannot buy the late game', () => {
+  /* Y9: *"The starting shop will have limited upgrades and have a cap to what
+     you can buy to make sure everything stays balanced."*
+
+     **Rows alone were not a cap**, and that was the first version. Seven rows
+     sounds limited until you notice they are the seven that matter and that
+     maxing the drill to Godcore before the first barrier is exactly the thing
+     his sentence is about. Measured then: 54% of the whole tree's cost was
+     buyable at the surface. With the level cap it is 2%.
+
+     Asserted as a SHARE of the whole tree rather than as a credit figure,
+     because every price in the game is a tuned number and the claim is about
+     proportion. */
+  const all = ['magnet', 'bomb', 'receiver', 'survey', 'reactor', 'drone', 'auto', 'laser'];
+  const spend = (d) => H.shelfStock(d, all)
+    .filter((u) => d >= u.unlock)
+    .reduce((t, u) => {
+      let c = 0;
+      for (let l = 0; l < H.levelCap(u, d); l++) c += H.costOf(u, l);
+      return t + c;
+    }, 0);
+
+  const whole = spend(H.TIER_DEPTHS[H.TIER_DEPTHS.length - 1]);
+  const first = spend(0);
+  assert.ok(first / whole < 0.15,
+    `the surface shelf can buy ${Math.round((first / whole) * 100)}% of the whole tree before a ` +
+    'single core is broken, which is an early game that can buy the late game');
+
+  /* And it has to be a LADDER, not a wall: every step must open more than the
+     one before it, or a barrier bought nothing. */
+  let last = 0;
+  for (const d of H.TIER_DEPTHS) {
+    const s = spend(d);
+    assert.ok(s > last, `the shelf at ${d} m opens no more spending than the one above it`);
+    last = s;
+  }
+  assert.equal(last, whole, 'the deepest shelf still holds something back');
+});
+
+test('no upgrade can be maxed before its own barrier', () => {
+  /* The other half of the cap, and the one a share-of-the-tree assertion
+     cannot see: a single row maxed early is a single mechanic solved early. */
+  for (const u of H.UPGRADES) {
+    if (u.max <= 1) continue;
+    assert.ok(H.levelCap(u, 0) < u.max,
+      `${u.key} can be taken to its last level (${u.max}) at the surface`);
+    assert.equal(H.levelCap(u, H.TIER_DEPTHS[H.TIER_DEPTHS.length - 1]), u.max,
+      `${u.key} can never be maxed, even at the deepest shop`);
+  }
+});
+
 test('no device is buried behind a barrier it is needed to open', () => {
   /* The general rule, and the root cause. A crate used to be drawn from
      anywhere between its own depth and the floor of the world, which was

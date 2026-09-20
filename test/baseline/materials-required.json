@@ -205,30 +205,30 @@
     },
     {
       "key": "scrub",
-      "mat": "iron",
-      "mineralDepth": 16,
+      "mat": "emerald",
+      "mineralDepth": 130,
       "steps": [
         null,
         null,
         null,
         {
-          "id": "iron",
+          "id": "emerald",
           "need": 2
         },
         {
-          "id": "iron",
+          "id": "emerald",
           "need": 3
         },
         {
-          "id": "iron",
+          "id": "emerald",
           "need": 4
         },
         {
-          "id": "iron",
+          "id": "emerald",
           "need": 4
         },
         {
-          "id": "iron",
+          "id": "emerald",
           "need": 4
         }
       ],
@@ -289,34 +289,34 @@
     },
     {
       "key": "hull",
-      "mat": "iron",
-      "mineralDepth": 16,
+      "mat": "amethyst",
+      "mineralDepth": 95,
       "steps": [
         null,
         null,
         null,
         {
-          "id": "iron",
+          "id": "amethyst",
           "need": 2
         },
         {
-          "id": "iron",
+          "id": "amethyst",
           "need": 3
         },
         {
-          "id": "iron",
+          "id": "amethyst",
           "need": 4
         },
         {
-          "id": "iron",
+          "id": "amethyst",
           "need": 4
         },
         {
-          "id": "iron",
+          "id": "amethyst",
           "need": 4
         },
         {
-          "id": "iron",
+          "id": "amethyst",
           "need": 4
         }
       ],

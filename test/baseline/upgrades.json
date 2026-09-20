@@ -372,20 +372,20 @@
   },
   "scrub": {
     "name": "Scrubber",
-    "base": 1500,
+    "base": 4400,
     "mul": 1.5,
     "max": 8,
     "tiers": null,
     "costs": [
-      1500,
-      2250,
-      3375,
-      5063,
-      7594,
-      11391,
-      17086,
-      25629,
-      38443
+      4400,
+      6600,
+      9900,
+      14850,
+      22275,
+      33413,
+      50119,
+      75178,
+      112767
     ],
     "effects": [
       "0% less fuel per cell cut",
@@ -398,29 +398,29 @@
       "35% less fuel per cell cut",
       "40% less fuel per cell cut"
     ],
-    "mat": "iron",
+    "mat": "emerald",
     "mats": [
       null,
       null,
       null,
       {
-        "id": "iron",
+        "id": "emerald",
         "need": 2
       },
       {
-        "id": "iron",
+        "id": "emerald",
         "need": 3
       },
       {
-        "id": "iron",
+        "id": "emerald",
         "need": 4
       },
       {
-        "id": "iron",
+        "id": "emerald",
         "need": 4
       },
       {
-        "id": "iron",
+        "id": "emerald",
         "need": 4
       }
     ],
@@ -536,21 +536,21 @@
   },
   "hull": {
     "name": "Hull Plating",
-    "base": 3400,
+    "base": 3700,
     "mul": 1.5,
     "max": 9,
     "tiers": null,
     "costs": [
-      3400,
-      5100,
-      7650,
-      11475,
-      17213,
-      25819,
-      38728,
-      58092,
-      87138,
-      130707
+      3700,
+      5550,
+      8325,
+      12488,
+      18731,
+      28097,
+      42145,
+      63218,
+      94827,
+      142240
     ],
     "effects": [
       "100 hull",
@@ -564,33 +564,33 @@
       "300 hull",
       "325 hull"
     ],
-    "mat": "iron",
+    "mat": "amethyst",
     "mats": [
       null,
       null,
       null,
       {
-        "id": "iron",
+        "id": "amethyst",
         "need": 2
       },
       {
-        "id": "iron",
+        "id": "amethyst",
         "need": 3
       },
       {
-        "id": "iron",
+        "id": "amethyst",
         "need": 4
       },
       {
-        "id": "iron",
+        "id": "amethyst",
         "need": 4
       },
       {
-        "id": "iron",
+        "id": "amethyst",
         "need": 4
       },
       {
-        "id": "iron",
+        "id": "amethyst",
         "need": 4
       }
     ],

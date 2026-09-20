@@ -5928,6 +5928,123 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## Open: where round fifteen stands, for whoever picks it up
+
+Written 2026-09-19 at a handover. Everything below the line in this file is
+history; this is the state.
+
+**Built and green: Y1, Y2, Y3, Y4, Y5, Y6, Y7, Y9, Y10, Y13, Y14**, plus the
+unfinishable-save fix. `progress.ps1` reads 96 of 103.
+
+**Left, in the order I would take them:**
+
+- **Y8, a shop and a save point at every gate.** The only one with real design
+  left in it, and the research is already done and sitting in
+  `C:\dev\plans\lattice\DESCENT.md` Part 2 Q1. Its conclusions, which I would
+  not re-litigate: make the SPENT CORE the checkpoint rather than a new object;
+  the one new thing it does is move where a TOW drops you, from the pad to your
+  deepest broken core; **no fast travel in either direction** and **no free
+  restock**, because the return climb is the decision the whole game is built
+  on. If restocking at all, model it on Deep Rock's resupply - partial and paid
+  for in ore already in the hold, not a free tank.
+
+  The shop half is mostly done by Y9/Y10: `shelfStock` and `levelCap` already
+  answer "what is on sale at this depth", so an outpost is a compact sheet over
+  the same catalogue rather than a second source of truth. Do NOT rebuild the
+  station room underground - Y11 is a redesign and two shop implementations is
+  the rule 12 trap.
+
+  `src/sim/repair.ts` has the shape to copy for "am I standing at a core":
+  `scarHere(px, pd, lit)` is the same question one cell over.
+
+- **Y11, the shop redesign.** One-thumb portrait, thumb-reach zones, locked
+  versus unaffordable distinguished. Note that Y9 just added a THIRD state to
+  every row - sealed, capped, affordable - and the capped one is new and
+  currently says its piece in the same grey as a missing mineral. That is the
+  first thing a redesign should fix.
+
+- **Y12, more secrets.** Deliberately last and deliberately unspecified. The
+  plan asks for a MEASUREMENT first - how often a descent meets anything at
+  all - before more is added. `src/sim/secrets.ts` already sweeps the world for
+  exactly that and would give the number in a few lines.
+
+- **Y15, the reveal.** The research is in `DESCENT.md` Q2: plant the first hint
+  inside the first Anchor break as something decorative and missable, escalate
+  in DENSITY and never in explicitness, and reserve one hard pivot for the last
+  core. Three things are already planted and waiting to be turned over: the
+  violet shared by the barrier, the scar and the spent core; the card wording
+  at every core, which congratulates; and The Call, whose name is the only
+  instrument in the game that implies something answering.
+
+- **Y0b** is answered in outline and its detail is Y8's.
+
+**Two things NOT to do.** Do not re-record `test/baseline/blocks-frozen.json` -
+it has survived this entire round and every change so far has been an
+overwriter, which is exactly what it is there to distinguish. And do not scope
+`test/finishable.test.mjs` to make something pass; it exists because I did that
+to its predecessor and shipped an unfinishable game for six commits.
+
+## Y9 and Y10: the shelf is cut by the barriers, and it needed no new gate
+
+His brief: *"I want the upgrades and skills to be reworked to follow this new
+structure. The starting shop will have limited upgrades and have a cap to what
+you can buy ... As you get further down and unlock deeper shops, more advanced
+upgrades and new skills will be available."*
+
+**The rework needed no new mechanism, which is the part worth keeping.** Every
+row already opened at a DEPTH, and with barriers in the world a depth past
+113 m can only have been reached by breaking the first core - there is no other
+way through. So putting each row's `unlock` on a barrier depth turns the gate
+that already existed into a core gate exactly, with one source of truth instead
+of two. `TIER_DEPTHS` is then read off the table rather than written down.
+
+Y10's "each tier's catalogue strictly contains the one above it" is true by
+construction after that, which is the right shape for a claim like it.
+
+**Rows alone are not a cap, and that was the first version.** Seven rows on the
+surface shelf sounds limited until you notice they are the seven that matter -
+drill, hold, thrusters, tank, scanner, hull, magnet - and that maxing the drill
+to Godcore before the first barrier is exactly "an early game that can buy the
+late game". Measured: 54% of the whole tree's cost was buyable at the surface.
+
+So the LEVELS step too, and the step is derived from the number of steps rather
+than chosen: `ceil(max * (tier + 1) / steps)`. A nine-level row caps at 3, then
+6, then 9. The ladder that produces:
+
+| shelf | rows | buyable | share of the whole tree |
+|---|---|---|---|
+| surface | 7 | 32,800 | 2% |
+| 113 m | 11 | 176,000 | 13% |
+| 226 m | 16 | 1,337,000 | 100% |
+
+The test asserts the SHARE and the monotonic step, not the credits, because
+every price here is a tuned number and the claim is about proportion.
+
+**Three shelves and not four.** The last gate is the Vault's own door, so a
+shop behind it is a shop after the ending.
+
+**The minerals had to move with the rows, and an existing invariant is what
+said so.** `every upgrade has a counter and a sensible unlock depth` requires
+`unlock <= mat.min + 30` - two gates on one thing means one of them is
+decoration. A Scrubber unlocking at 113 m while wanting iron from 16 m fails
+that, correctly. So scrub took emerald and hull took amethyst, which are
+tier-1 minerals. Only those two moved; the net material diff is two lines.
+
+**And the ore ladder settled an argument I could not.** Three rows wanted to be
+deep-game, and `maxing everything is a lot of digging but not a wall` caps
+demand at twelve hundred-cell runs: magmite allows nine units, coreite five,
+umbrite three. That is one deep row each, and the Cutting Laser alone wants
+four umbrite. So one of the three had to come up, and the Autopilot is the one
+that was never about depth - a convenience on the climb home, found at 205 m
+rather than bought. It left the `deepOnly` set with the reasoning written into
+the test, which is a design change rather than a test edged out of the way.
+
+**Four prices moved to keep two existing invariants true**, and both are worth
+naming because they are the sort of thing that looks like noise in a diff: a
+deeper row must cost more to start than a shallower one (Scrubber 1,500 ->
+4,400), and a consumable must stay dearer than the rung it stands in for, which
+put Hull Plating at 3,700 rather than 4,200 because the Hull Patch is 3,900.
+
 ## The game could not be finished, and the test that knew was narrowed until it could not say so
 
 **This is the most expensive mistake of the round and the whole of it is mine.**
