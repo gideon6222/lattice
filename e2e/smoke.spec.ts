@@ -2794,7 +2794,7 @@ test('the shallow world holds three materials, and the deep ones are a prize', a
      is `cachePrize(x, d)`, which has always handed over the deepest minerals a
      depth allows. It belongs here for the same reason `cache` does. */
   const notOre = new Set(['__cells', 'geode', 'gas', 'cache', 'schematic', 'relic', 'part',
-                          'anchor', 'anchorlit', 'salvage', 'derelictlamp']);
+                          'anchor', 'anchorbroken', 'anchorscar', 'salvage', 'derelictlamp']);
   const shallow = Object.keys(counts.shallow).filter((k) => !notOre.has(k));
   expect(shallow.sort().join(','), 'the top sixty metres holds more than the starter three')
     .toBe('copper,iron,silver');
@@ -3291,11 +3291,22 @@ test('an Anchor hall is shut until you cut it, and lights by standing there', as
     .toBe(revealed.total);
   expect(revealed.ballastTier, 'the Ballast gained no tier').toBe(1);
 
-  /* And the block itself now reads as lit, which is the only thing left in the
-     room to look at. */
-  const after = await page.evaluate((t: { x: number; d: number }) =>
-    (window as any).__cw.blockAt(t.x, t.d).id, target);
-  expect(after, 'the Anchor looks the same after being lit').toBe('anchorlit');
+  /* And the block itself now reads as broken, along with the plinth it stood
+     in - which is the remnant, and the only thing left in the room to look at.
+     Round fifteen, Y13. */
+  const after = await page.evaluate((t: { x: number; d: number }) => {
+    const w = (window as any).__cw;
+    let scars = 0;
+    for (let dx = -1; dx <= 1; dx++)
+      for (let dd = -1; dd <= 1; dd++) {
+        const b = w.blockAt(t.x + dx, t.d + dd);
+        if (b && b.id === 'anchorscar') scars++;
+      }
+    return { id: w.blockAt(t.x, t.d).id, scars };
+  }, target);
+  expect(after.id, 'the Anchor looks the same after being broken').toBe('anchorbroken');
+  expect(after.scars, 'the broken Anchor left no scar in the plinth around it')
+    .toBeGreaterThanOrEqual(5);
 });
 
 /* The planet answering.
@@ -3713,6 +3724,83 @@ test('every Anchor lights by digging down its own column', async ({ page }) => {
   expect(failed.join('; '),
     'these Anchors cannot be lit by digging down the column they are in, which ' +
     'means the objective is unreachable however well anybody plays')
+    .toBe('');
+});
+
+test('cutting a dark core brings its barrier down, on the real input path', async ({ page }) => {
+  /* Round fifteen, Y3. `test/gate.test.mjs` proves what the STATE does and
+     cannot prove that anything reaches it: the whole of Y3's wiring is four
+     lines in `loop.ts`, on the branch that runs when a dig completes, and a
+     branch nothing enters is a feature nobody has. So this drills the core
+     with the d-pad and asks the world afterwards.
+
+     The failure it is actually here for: `blockAt` answers `g.dug` before
+     anything else, so the ordinary completion path - which adds every cut cell
+     to that set - turns the spent core into a hole and Y14's monument never
+     draws again. That is invisible in a unit test of `gate.ts`, because
+     `gate.ts` is right. */
+  test.setTimeout(180_000);
+  await page.goto('/?debug');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+
+  const tiers = await page.evaluate(() => (window as any).__cw.GATE_COUNT);
+  const failed: string[] = [];
+
+  for (let t = 0; t < tiers; t++) {
+    const got = await page.evaluate(async (tier: number) => {
+      const w = (window as any).__cw;
+      const cx = w.coreColumn(tier), cd = w.gateDepth(tier);
+      w.g.ground = w.newGround();
+      /* Every gate above this one open, this tier's Anchors broken - which is
+         exactly the state a player standing in front of this core is in. */
+      for (let i = 0; i < tier; i++) w.g.ground.gates.push(i);
+      w.g.ground.lit = w.gateAnchors(tier).slice();
+      w.g.dug = new Set();
+      w.g.rubble = new Set();
+      w.g.damage = {};
+      w.g.up.drill = 9; w.g.up.thrust = 6; w.g.up.tank = 9; w.g.up.cool = 9;
+      /* Directly above the core, so the only thing under the drill is the
+         thing under test. */
+      w.g.px = cx; w.g.pd = cd - 1;
+      w.resetBlocks();
+      w.advance(0.2);
+
+      const before = w.blockAt(cx, cd);
+      const key = document.querySelector('#dpad .k[data-dir=down]') as HTMLElement;
+      key.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      for (let i = 0; i < 200 && !w.g.ground.gates.includes(tier); i++) {
+        w.g.fuel = w.S.fuelCap(); w.g.hull = w.S.hullCap();
+        w.advance(1);
+        if (w.g.mode !== 'play') {
+          const b = document.getElementById('evBtn');
+          if (b) b.click();
+        }
+      }
+      key.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+
+      const spent = w.blockAt(cx, cd);
+      /* A cell of the barrier that is NOT the core: it has to be gone. */
+      const beside = w.blockAt(cx === 0 ? 1 : cx - 1, cd);
+      return {
+        open: w.g.ground.gates.includes(tier),
+        was: before ? before.id : 'nothing',
+        now: spent ? spent.id : 'nothing',
+        ghost: !!(spent && spent.ghost),
+        besideId: beside ? beside.id : 'nothing'
+      };
+    }, t);
+
+    if (!got.open) failed.push(`tier ${t}: cut the core (it was ${got.was}) and the gate stayed shut`);
+    else if (got.now !== 'darkspent') failed.push(`tier ${t}: the cut core is now ${got.now}, not a spent core`);
+    else if (!got.ghost) failed.push(`tier ${t}: the spent core is solid and plugs its own doorway`);
+    else if (got.besideId === 'gate') failed.push(`tier ${t}: the core broke and the barrier beside it is still there`);
+  }
+
+  expect(failed.join('; '),
+    'breaking a dark core is the only way past a barrier, so this failing means ' +
+    'the game cannot be finished however well anybody plays')
     .toBe('');
 });
 
@@ -4878,24 +4966,31 @@ test('the Survey map shows a calmed region differently from an uncalmed one', as
   const none = await sample([]);
   const some = await sample([0, 1, 2]);
   expect(none, 'the map canvas was never found, so this test proves nothing').not.toBeNull();
-  /* +700, and the number is MEASURED rather than picked to pass.
+  /* +300, and the number is MEASURED rather than picked to pass.
 
-     Three lit Anchors put three filled mint RINGS on the map whatever the
-     region names do, so a small threshold passes on the rings alone and proves
-     nothing about this milestone. The three states, counted on this fixture at
-     375x812:
+     **Re-measured 2026-09-19 for round fifteen, Y13, and the re-measurement is
+     the interesting part.** A broken Anchor's ring on this map used to be the
+     Anchors' mint and is now violet, because the permanence moved to the dark
+     core and the map is where a player reads the history of what they broke.
+     That took the rings out of this count entirely, which is why the numbers
+     below all fell and why the threshold had to be re-derived rather than
+     nudged. The three states, counted on this fixture at 375x812:
 
-       nothing lit .......................  50 mint pixels
-       three lit, names NOT calmed ....... 539   (the rings by themselves)
-       three lit, names calmed ........... 1057
+       nothing lit .......................  51 mint pixels
+       three broken, names NOT calmed ....  49   (the violet rings count zero)
+       three broken, names calmed ........ 502
 
-     700 sits between the last two, so the rings cannot satisfy it and only the
-     names can. Verified by planting exactly that fault - the first version of
-     this assertion used +40 and passed with the calmed colour disabled, which
-     is the whole reason these numbers are written down. Re-measure them if the
-     font, the canvas size or the fixture changes. */
+     Before Y13 those were 50, 539 and 1057: the middle row was the rings by
+     themselves, and the old +700 existed precisely to sit above it. It no
+     longer has to, because a mint pixel on this map is now a region NAME and
+     nothing else - which makes the test stricter than it was, not looser.
+
+     Verified by planting exactly the fault it is for: the calmed name colour
+     set back to the ordinary one gives 49 against 51, and the assertion fails.
+     Re-measure if the font, the canvas size, the fixture or the ring colour
+     changes. */
   expect(some!, `three regions calmed drew ${some} mint pixels against ${none} with none calmed`)
-    .toBeGreaterThan(none! + 700);
+    .toBeGreaterThan(none! + 300);
 });
 
 /* Round twelve, V7: the world looks different in each act.

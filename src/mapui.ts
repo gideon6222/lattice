@@ -370,8 +370,13 @@ export function draw() {
     if (a.d < d0 || a.d > d1) continue;
     const lit = isLit(g.ground, r);
     if (!lit && !seen.has(mapKey(a.x, a.d))) continue;
+    /* Round fifteen, Y13: a broken Anchor is violet on the map as well as in
+       the ground, because the map is where the player reads the history of
+       what they have done - three violet scars per tier, and then the one gold
+       core. It used to be the Anchors' own mint, which said "done" where the
+       game now wants to say "gone". */
     ring(x, a.x * s, py(a.d),
-         lit ? '#8fffc8' : anchorSealed(r) ? '#5ad0e0' : '#d8d2c0', lit);
+         lit ? '#8a5ad0' : anchorSealed(r) ? '#5ad0e0' : '#d8d2c0', lit);
   }
 
   /* ---------- the centre ----------

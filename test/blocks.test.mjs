@@ -17,8 +17,12 @@ const ALL_IDS = [
   'bedrock', '(empty)', 'relic', 'schematic',
   /* The authored rooms. Four ids and not one: a wall you can cut, a wall you
      cannot, and the Anchor in two states are four different things to a player
-     and must be four different things to the snapshot. */
-  'worked', 'sealed', 'anchor', 'anchorlit',
+     and must be four different things to the snapshot.
+
+     Five since round fifteen, Y13: the plinth the Anchor stood in becomes a
+     permanent scar when it breaks, and a scar is a different thing to a player
+     from the worked stone it used to be. */
+  'worked', 'sealed', 'anchor', 'anchorbroken', 'anchorscar',
   /* W9's Vault: the seal in both states and the core in both states. Four ids
      and not two, for the reason the Anchor needed two - a wall you cannot cut
      and a wall you can are different things to a player. */
@@ -240,7 +244,7 @@ const OVERWRITERS = new Set([
      The rubble in the expedition room is the one that needs saying out loud:
      rubble was previously only ever placed by a tremor, so it appears in this
      list as a thing an authored room may leave behind. */
-  'worked', 'sealed', 'anchor', 'anchorlit',
+  'worked', 'sealed', 'anchor', 'anchorbroken', 'anchorscar',
   /* W9's Vault: the seal in both states and the core in both states. Four ids
      and not two, for the reason the Anchor needed two - a wall you cannot cut
      and a wall you can are different things to a player. */

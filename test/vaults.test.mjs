@@ -142,17 +142,23 @@ test('an Anchor can never be mined, and a lit one is never in the way', () => {
   const a = H.anchorAt(0);
   const before = H.blockAt(a.x, a.d);
   assert.equal(before.id, 'anchor');
-  assert.equal(before.hard, Infinity, 'an unlit Anchor can be drilled out');
-  assert.ok(!before.ghost, 'an unlit Anchor can be flown through, so it is not an obstacle at all');
+  assert.equal(before.hard, Infinity, 'an intact Anchor can be drilled out');
+  assert.ok(!before.ghost, 'an intact Anchor can be flown through, so it is not an obstacle at all');
 
   H.lightAnchor(H.g.ground, 0);
   const after = H.blockAt(a.x, a.d);
-  assert.equal(after.id, 'anchorlit', 'a lit Anchor looks exactly like an unlit one');
+  assert.equal(after.id, 'anchorbroken', 'a broken Anchor looks exactly like an intact one');
   assert.equal(after.hard, Infinity,
-    'a lit Anchor can be drilled out, which is the thing he asked to stop');
+    'a broken Anchor can be drilled out, which is the thing he asked to stop');
   assert.ok(after.ghost,
-    'a lit Anchor is uncuttable AND solid, which is the permanent plug all over again');
-  assert.ok(after.glow > before.glow, 'lighting an Anchor does not change how it reads');
+    'a broken Anchor is uncuttable AND solid, which is the permanent plug all over again');
+  /* Round fifteen, Y13 inverts the old assertion here, which was that breaking
+     an Anchor made it BRIGHTER. The permanence moved to the dark core at his
+     ask, and what is left at an Anchor is a dim violet remnant - so the one
+     thing that must still hold is that the two states do not look alike. */
+  assert.ok(after.glow < before.glow,
+    'a broken Anchor is still the brightest thing in the hall, which is the core\'s job now');
+  assert.notEqual(after.color, before.color, 'breaking an Anchor does not change how it reads');
   /* And it never enters the hold, whichever state it is in - see the sweep in
      `cut stone never enters the hold`. */
   assert.equal(after.spoil, true);
@@ -585,6 +591,142 @@ test('every Anchor is reachable without passing the gate it opens', () => {
       assert.ok(touching,
         `${H.regionName(r)}'s Anchor at ${a.x},${a.d} cannot be reached with only the gates above ` +
         `tier ${t} open - it is locked behind the gate it is supposed to open`);
+    }
+  }
+});
+
+/* ---------- Y13: the Anchor breaks and leaves a remnant ---------- */
+
+test('a broken Anchor leaves a scar that nothing can clear', () => {
+  /* His words: "Each anchor should be dramatic when it breaks and leave
+     remnants behind." The drama is `actions.ts`; this is the remnant.
+
+     One dim cell where the Anchor stood would be a monument a player flies
+     past without noticing, so the PLINTH goes with it - the five cells of
+     worked stone the Anchor was set into. Five is not a number anybody chose:
+     it is however many `#` the hall template puts around the `A`, which is
+     what `anchorPlinth` reads. */
+  H.setWorld(0);
+  for (let r = 0; r < H.ANCHOR_COUNT; r++) {
+    H.g.dug = new Set();
+    H.g.ground = H.newGround();
+    const a = H.anchorAt(r);
+
+    const plinth = [];
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dd = -1; dd <= 1; dd++) {
+        if (dx === 0 && dd === 0) continue;
+        const b = H.blockAt(a.x + dx, a.d + dd);
+        if (b && b.id === 'worked') plinth.push([a.x + dx, a.d + dd]);
+      }
+    }
+    assert.ok(plinth.length >= 5,
+      `${H.regionName(r)}'s Anchor sits in ${plinth.length} cells of worked stone, not the plinth's five`);
+
+    H.lightAnchor(H.g.ground, r);
+    for (const [x, d] of plinth) {
+      const b = H.blockAt(x, d);
+      /* Except the floor directly under it, which is not scarred but GONE -
+         it is where the Anchor went, and it is also the one cell of the
+         plinth that would otherwise plug the column. See the note in
+         `world.ts`; this is the third time that bug has been built. */
+      if (x === a.x && d === a.d + 1) {
+        assert.equal(b, null,
+          `${H.regionName(r)}: the floor under the Anchor is ${b && b.id}, so the recess has a lid on it`);
+        continue;
+      }
+      assert.equal(b.id, 'anchorscar',
+        `${H.regionName(r)}: the plinth at ${x},${d} is still ${b && b.id} after the Anchor broke`);
+      assert.equal(b.hard, Infinity,
+        'a scar can be drilled away, so the site can be tidied up and the evidence removed');
+      assert.equal(b.spoil, true, 'a scar goes in the hold');
+    }
+  }
+});
+
+test('a broken Anchor never plugs its own column, scar and all', () => {
+  /* The bug this game has now built three times, and the one the e2e catches
+     at fifteen minutes a run - so it is asked here too, in a second.
+
+     Three Anchors share each of the three columns they sit in, and the
+     shallowest of them is what the ship meets on the way to the other two. It
+     is uncuttable for ever by design, so the ONLY way past it is that nothing
+     it leaves behind is solid: the Anchor itself is `ghost` (X6) and the floor
+     of its recess is gone (Y13). Put either back and six of the nine Anchors
+     become unreachable however well anybody plays. */
+  H.setWorld(0);
+  for (let r = 0; r < H.ANCHOR_COUNT; r++) {
+    H.g.dug = new Set();
+    H.g.ground = H.newGround();
+    H.lightAnchor(H.g.ground, r);
+    const a = H.anchorAt(r);
+    for (let d = a.d - 1; d <= a.d + 2; d++) {
+      const b = H.blockAt(a.x, d);
+      /* `b && b.id` and not `b.id`: the message is an argument, so it is built
+         whether or not the assertion holds, and most of these cells are null. */
+      assert.ok(!b || b.ghost || Number.isFinite(b.hard),
+        `${H.regionName(r)}: ${a.x},${d} is a solid uncuttable ${b && b.id} under a broken Anchor - the column is plugged`);
+    }
+  }
+});
+
+test('the scar is a remnant and not a monument', () => {
+  /* Two permanent marks now exist and they must not look alike - the research
+     in `plans/lattice/DESCENT.md` Q4 calls it the two-tier signal, a body of
+     small private costs and one big public landmark. Three dim violet scars
+     per tier, and then the spent core at full glow.
+
+     The bug this catches: somebody retuning the scar upward until it reads
+     well on its own, at which point the world has twelve monuments and no
+     landmark. */
+  H.setWorld(0);
+  H.g.dug = new Set();
+  H.g.ground = H.newGround();
+  H.lightAnchor(H.g.ground, 0);
+  const a = H.anchorAt(0);
+  const broken = H.blockAt(a.x, a.d);
+
+  H.g.ground.gates = [0];
+  const core = H.blockAt(H.coreColumn(0), H.gateDepth(0));
+  assert.equal(core.id, 'darkspent');
+  assert.ok(core.glow > broken.glow * 2,
+    `a broken Anchor glows ${broken.glow} against the spent core's ${core.glow} - the scar is ` +
+    'competing with the landmark it is supposed to lead to');
+});
+
+test('the remnant survives a save and a load', () => {
+  /* It is derived from `g.ground.lit` and stored nowhere, which is why this
+     costs the save nothing - and is exactly why it needs asserting: a derived
+     mark is only as permanent as the field it derives from. */
+  H.setWorld(0);
+  H.g.dug = new Set();
+  H.g.ground = H.newGround();
+  H.lightAnchor(H.g.ground, 3);
+  const a = H.anchorAt(3);
+  const wasBroken = H.blockAt(a.x, a.d).id;
+  const wasScarred = H.blockAt(a.x - 1, a.d).id;
+
+  H.g.ground = H.loadGround(JSON.parse(JSON.stringify(H.g.ground)));
+  assert.equal(H.blockAt(a.x, a.d).id, wasBroken, 'the broken Anchor came back intact after a load');
+  assert.equal(H.blockAt(a.x - 1, a.d).id, wasScarred, 'the scar did not survive a load');
+  assert.equal(wasBroken, 'anchorbroken');
+  assert.equal(wasScarred, 'anchorscar');
+});
+
+test('an Anchor nobody has broken has no scar', () => {
+  /* The other half, and the one a derived mark gets wrong: a scar that appears
+     before the deed is the world spoiling its own reveal. */
+  H.setWorld(0);
+  H.g.dug = new Set();
+  H.g.ground = H.newGround();
+  for (let r = 0; r < H.ANCHOR_COUNT; r++) {
+    const a = H.anchorAt(r);
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dd = -1; dd <= 1; dd++) {
+        const b = H.blockAt(a.x + dx, a.d + dd);
+        assert.notEqual(b && b.id, 'anchorscar',
+          `${H.regionName(r)} is scarred before anybody has been there`);
+      }
     }
   }
 });

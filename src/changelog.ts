@@ -16,9 +16,20 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.54.0';
+export const VERSION = '0.55.0';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.55.0', date: '2026-09-19', title: 'The descent is a ladder now',
+    notes: [
+      'Ore comes in veins. The same amount is in the ground as before, but it is no longer scattered a cell at a time - it sits in pockets, so a wall of nothing is a real answer and finding one seam can be worth the whole trip. Anything genuinely rare now announces itself when you cut it.',
+      'The first Anchor you wake does something new: the Survey map starts marking where the ground is rich, but only in the regions you have already woken. It says richer or leaner, never what or exactly where.',
+      'A barrier now stops you at 113 meters, and again at 226 and 339. The drill cannot touch it and there is no way around - the world is the full width of it. Wake all three Anchors of that depth and one cell of the barrier opens up: a dark core, warm gold in a cold violet wall, directly in your path.',
+      'Cut it and the whole barrier goes with it. The core stays where it was, spent and still lit, and you fly straight through it on the way down. The last of the three is the Vault\'s own door.',
+      'The Ballast is gone from the surface until the first core breaks, and so is the drain behind it. The planet is not falling apart yet, so there is nothing to hold up and no clock running - the machine beside the pad just stands there full. The moment you release the first core, it starts to fall, and every core after that makes it fall faster.',
+      'The Anchors do not light any more. They break. Standing next to one still settles its region, still strengthens the Ballast, still draws the ground onto your map - but the thing itself comes apart, hard, and what is left is a dark scar in the plinth it was set into. Nothing can ever cut it away, so every place you have been stays marked.'
+    ]
+  },
   {
     version: '0.54.0', date: '2026-09-19', title: 'Somebody else got here first',
     notes: [

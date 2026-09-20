@@ -68,7 +68,7 @@ export function showTitle() {
   el('titleFine').textContent = has
     ? regionName(regionAt(Math.round(g.px), Math.max(0, Math.round(g.pd)))) + ' · ' +
       Math.max(0, Math.round(g.best.depth)) + ' m of ' + WORLD_DEPTH + ' · ' +
-      tierOf(g.ground) + ' of ' + ANCHOR_COUNT + ' Anchors lit'
+      tierOf(g.ground) + ' of ' + ANCHOR_COUNT + ' Anchors broken'
     : 'No saved run yet';
   el('title').classList.remove('hidden');
   /* `crossing` is the way-in flag: the HUD is hidden under it, and the smoke
@@ -184,7 +184,7 @@ export function wireTitle() {
     /* Confirmed, because it throws away everything. The pause menu's own reset
        has the same guard for the same reason - and this button sits directly
        under CONTINUE, which is the one place a mis-tap costs the most. */
-    if (hasSave() && !confirm('Start over? This wipes credits, upgrades, every Anchor you have lit and every relic you have found. It cannot be undone.')) return;
+    if (hasSave() && !confirm('Start over? This wipes credits, upgrades, every Anchor you have broken and every relic you have found. It cannot be undone.')) return;
     hardReset();
     hideTitle();
     showIntro();

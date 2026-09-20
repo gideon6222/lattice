@@ -190,11 +190,17 @@ test('a Bloom overwrites, and never moves the ore under it', () => {
     const now = b ? b.id : '(empty)';
     const was = before[i++];
     if (now === was) continue;
-    assert.equal(now, 'bloom',
+    /* Three legal answers, not one, since round fifteen Y13 - and the reason
+       is that this loop breaks five Anchors to reach the wake, which is now
+       two events rather than one. The Anchor's own cell becomes a remnant and
+       its plinth becomes a scar; that is what breaking an Anchor IS. What the
+       test is defending has not moved: nothing changes except the cells these
+       events are defined to change, and in particular no ore does. */
+    assert.ok(now === 'bloom' || now === 'anchorbroken' || now === 'anchorscar',
       `(${x},${d}) went from ${was} to ${now} when the planet woke - the ore stream moved`);
-    changed++;
+    if (now === 'bloom') changed++;
   }
-  assert.ok(changed > 0, 'nothing at all changed when the planet woke');
+  assert.ok(changed > 0, 'no Bloom appeared when the planet woke');
   fresh();
 });
 

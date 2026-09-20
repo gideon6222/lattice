@@ -5928,6 +5928,184 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## Y5 and Y6: the planet does not start falling apart until you let it out
+
+His brief: *"the structure integrity of the planet feels more like a status bar
+than something integral to the game ... it would feel more intentional if the
+integrity of the planet didn't show until you made it down further ... At that
+point, the planet integrity shows, and it is shown that the planet is slowly
+falling apart ... At each level where a dark energy block is destroyed, the
+integrity drops faster."*
+
+**"Planet integrity" in this game IS the Ballast**, so Y5 was never only about
+hiding a readout. Hiding it alone is the cosmetic half and the worse half: a
+clock nobody can see is still a clock, and losing a region to a meter the game
+never showed you is the least fair thing this game could do. So the DRAIN is
+what waits - `drainBallast` returns early until the first core - and the HUD
+button follows it off the same question, `ballastStarted(s)`, which is just
+`gates.length > 0`. Not a stored flag: two fields that must agree is one field
+with a bug in it.
+
+That also takes a silent timer out of the opening hour, where the player has
+enough to learn, and it means no region can fall before the first core either,
+because a collapse only ever follows an empty Ballast.
+
+**The bite was derived, not chosen, and it is squeezed between two existing
+numbers.** Every core costs three Anchors and every Anchor takes 0.25 off the
+drain, so a core has to beat 0.75 or breaking one makes the planet SAFER. At
+1.0 the measured campaign ran 16, 14, 13, 13 minutes to the first lost region:
+strictly rising, and nothing a player would ever feel. The ceiling is the
+fairness line in `a planet nobody feeds loses ground and then stops`, which
+predates this round - several runs of warning, a run being three minutes - and
+that caps the bite just under 1.8. **1.75 is where they meet.**
+
+Measured campaign at 1.75, minutes of digging to each lost region:
+
+| state | first | second | third |
+|---|---|---|---|
+| no core | never - the clock has not started | | |
+| 1 core, 3 Anchors | 11 | 19 | 30 |
+| 2 cores, 6 Anchors | 9 | 16 | 26 |
+| 3 cores, 9 Anchors | 9 | 16 | 25 |
+
+The big step is the first one, from no clock to a clock, and that is the step
+his sentence is actually about. The rest is a slope rather than a cliff,
+because the Anchors' own relief is still in the divisor - which is the
+DECEPTION working: breaking an Anchor makes the Ballast hold harder and the
+card says so, and then the core takes more than the three Anchors gave back.
+
+**The receipt is on the derived quantity, not the constant.** Three tests: each
+core is worse at a fixed Anchor count; the planet a PLAYER meets - counting the
+three Anchors each core cost - is worse at every gate; and the worst case is
+under 3x a fresh planet. The middle one is the one that matters, because it is
+the only one a bite of 1.0 fails. All three verified by planting the fault:
+0.5 gives "a player with 1 cores ... has an EASIER planet than one with 0", and
+4 gives "the first region falls after 5 minutes, which is under three runs".
+
+**One existing test had to be given a state that exists.** `a planet nobody
+feeds` set the gate but not the Anchors, which measured 8 minutes and failed -
+correctly, for a save no player can reach, because `gateReady` will not open a
+gate without its three Anchors.
+
+## Y13: the Anchor breaks, and the world now has two kinds of permanent mark
+
+His ask: *"I want the anchors to now imply that you are slowly allowing the
+world to break. Each anchor should be dramatic when it breaks and leave
+remnants behind."*
+
+**The state did not change and that was deliberate.** `g.ground.lit` is still
+the list, still means the same nine things, still loads every existing save.
+Renaming a saved field to match a story is how a save stops loading. What
+changed is every word the player reads and everything they see.
+
+**Two permanent marks now, and they must not look alike.** The research in
+`plans/lattice/DESCENT.md` Q4 calls this the two-tier signal and takes it from
+Shadow of the Colossus: a body of small private costs, and one big public
+landmark. So the broken Anchor went DOWN in brightness - glow 1.0 to 0.26,
+mint `0x9effd4` to violet `0x6a4aa0` - and the spent core is the only thing in
+the world left at full glow. A test asserts the core out-glows a broken Anchor
+by more than double, which is the one that catches somebody retuning the scar
+upward until it reads well on its own. Twelve monuments is no landmark.
+
+**The remnant is the PLINTH, not the cell.** One dim cell where the Anchor
+stood is a monument you fly past without noticing. The hall template sets its
+Anchor into five cells of worked stone - `#.#` above, `#A#` beside, `###`
+below - and those five become `anchorscar`: uncuttable, so the site can never
+be tidied away or dug over. Five is not a number anybody chose; `anchorPlinth`
+reads whatever the template puts there, and the test asserts at least five
+rather than exactly five so re-cutting the hall does not silently empty it.
+
+**Derived from `lit` and stored nowhere.** Costs the save nothing, cannot drift
+out of step with which Anchors are broken, and `blockAt` answers it before
+collapse or growth can refill the cell. Two tests hold the pair: the mark
+survives a save and load, and an Anchor nobody has been to has no scar - which
+is the half a derived mark gets wrong, because a scar that appears early is the
+world spoiling its own reveal.
+
+**The break sounds like a break.** `sfx.relic()` - a bright chime, the right
+sound for finding something - is out, replaced by `boom()` under `collapse()`.
+That is the first time in a campaign the player hears the planet's cave-in
+voice anywhere but a cave-in. The sprays are ordered as a sentence: the
+Anchor's own mint goes out of it, and then violet comes out of the hole. Same
+violet as the barrier and the spent core, three rounds before anything explains
+why.
+
+**And the column plug was built for a THIRD time.** The e2e caught it: *"3 at
+(10,188) - the ship got to 95 m"*, which is Verdax's Anchor at 94 m in the same
+column. Six of the nine went unreachable. The Anchor itself is `ghost` so the
+ship flies through it, and then lands on the uncuttable scar one metre below.
+
+The fix is the fiction rather than a flag: **the floor of the recess gives
+way.** The one plinth cell directly under the Anchor is gone rather than
+scarred, because that is where the Anchor went. Every time this bug has
+appeared the answer has been the same - keep the permanent mark, move the
+obstruction - and `hard: Infinity` has never once been the thing at fault. It
+now has a unit test beside the e2e, because fifteen minutes is a long time to
+find out.
+
+**The Survey map's threshold was re-measured, and it got stricter.** A broken
+Anchor's ring is violet now, so it counts zero mint pixels: the three states
+went from 50 / 539 / 1057 to 51 / 49 / 502. The old +700 existed to sit above
+the rings drawing mint by themselves; that row is now 49, so a mint pixel on
+that map is a region NAME and nothing else, and the threshold is +300. Verified
+by putting the calmed name colour back to the ordinary one: 49 against 51.
+
+**Two goldens were re-recorded and both were read first.** `blocks.json` moved
+only because the id legend re-sorted: counts identical on all six planets,
+checked id by id. `upgrades.json` moved because the Receiver now says "an
+intact Anchor". `blocks-frozen.json` did not move at all - a fresh world has
+nothing broken in it.
+
+**And `a Bloom overwrites, and never moves the ore under it` had to widen.** It
+breaks five Anchors to reach the wake, so it is now two events rather than one,
+and `anchorbroken` and `anchorscar` are legal answers beside `bloom`. Not a
+relaxation: the claim it defends is that nothing changes except what these
+events are defined to change, and no ore does.
+
+## Y3: the core breaks, and the one cell in the game that is cut without leaving a hole
+
+His brief: *"Once you destroy it, the forcefield releases and you can go
+further down."* Two halves, split at the sim wall - `openGate` writes the
+state, `coreBroken` is everything the player experiences - and one line in
+`loop.ts` that is neither and was the whole of the difficulty.
+
+**`blockAt` answers `g.dug` before it answers anything else**, and the ordinary
+dig-completion path adds every cut cell to that set. So the spent core - Y14's
+permanent lit monument, the thing he asked for by name - would have become a
+hole the instant it was made. `if (coreTier < 0) g.dug.add(k);` is the fix and
+it is one line, but nothing in `gate.ts` could have caught it, because
+`gate.ts` is right: it answers `darkspent` for that cell and always did. The
+cell simply never gets asked.
+
+That is the whole reason Y3 has an e2e as well as a unit test. The unit test
+proves what the state does; it cannot prove that anything reaches the state,
+and the reaching is four lines on a branch. **Verified by putting the bug back:
+all three tiers report "the cut core is now nothing, not a spent core."**
+
+**`coreOpens(x, d, lit, open)` rather than `gateAtDepth(d)` at the dig site.**
+The cell and the consequence come off one question. Asking the depth alone
+opens the tier for any cell on the barrier row - all 61 of which are
+`hard: Infinity` today, and every one of which becomes a key the day somebody
+adds a way through a wall. A test walks the row and fails on column 0.
+
+**Nothing can shut a gate again**, and there is no runtime state that could
+catch a re-lock because a re-lock would BE the state. So that one reads the
+source: `.gates` may be written by `openGate` and by the save filter, and by no
+other file in `src/`. Verified with `g.ground.gates.pop()` planted in
+`collapse.ts`, which is exactly where it would really appear - a collapse is
+the one thing in this game that already takes ground back, and it is safe only
+because it takes a region and never a rung.
+
+**The card congratulates, and that is deliberate.** "The core gives, and the
+barrier goes with it. Whatever was held here is held no longer." Nothing in it
+is untrue and nothing in it is the whole truth, which is his ask exactly: "I
+want it to look like you are doing a good thing by releasing the dark energy
+from it." Y15 can only turn over something that was first said straight.
+
+The spray is violet and not the core's gold: what leaves the world here is the
+BARRIER, and the barrier has been violet since the first moment the player met
+it.
+
 ## Y2: the dark-energy core, and why it is a cell OF the barrier
 
 His brief: once a tier's Anchors are released, "an unbreakable block will open

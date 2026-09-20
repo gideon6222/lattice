@@ -5,7 +5,7 @@ import { W, START_X, ORES, DEF, baseRock, coreDepth, hardMult, valueMult,
          VEIN_W, VEIN_H, VEIN_CELLS, VEIN_R, VEIN_WOBBLE_LO, VEIN_WOBBLE_HI, VEIN_REACH_MAX } from './config';
 import { key, mixHex, rnd } from './util';
 import { regionAt, REGION_COUNT } from './region';
-import { vaultCells, anchorHere, WORKED_HARD, SEALED_HARD, HULK_HARD,
+import { vaultCells, anchorHere, anchorPlinth, WORKED_HARD, SEALED_HARD, HULK_HARD,
          vaultOpen, VAULT_WALL_HARD, ANCHOR_COUNT, anchorAt, VAULT_W, VAULT_H } from './vaults';
 import { isCollapsed, hardScale, isAwake, UNREST_BANDS } from './unrest';
 import { gateCellAt } from './gate';
@@ -335,14 +335,37 @@ export function blockAt(x: number, d: number): Block | null {
          was that it was IN THE WAY. Those are two different properties and the
          old code only had one knob for both.
 
-         So: `hard: Infinity` for ever, and `ghost` once it is lit. A lit Anchor
-         is a light rather than a wall - the ship flies through it, the route
-         finder counts it as open ground, and the light field stops treating it
-         as rock, which it never should have: it is the brightest object in the
-         game and it was casting a shadow. Nothing can ever cut it again. */
-      return { id: lit ? 'anchorlit' : 'anchor', name: lit ? 'Anchor · lit' : 'Anchor',
-               color: lit ? 0x9effd4 : 0x2f6f5e, host: 0x16241f,
-               glow: lit ? 1.0 : 0.30, shards: 10, tone: lit ? 10 : 6,
+         So: `hard: Infinity` for ever, and `ghost` once it is broken. A broken
+         Anchor is a hollow rather than a wall - the ship flies through it, the
+         route finder counts it as open ground, and the light field stops
+         treating it as rock. Nothing can ever cut it again.
+
+         ---------- what it turns INTO. Round fifteen, Y13 ----------
+
+         **It used to become the brightest object in the game**, a mint monument
+         at full glow, because up to X6 the beat was called "lighting an
+         Anchor". His brief of 2026-09-19 turned that over: *"I want the anchors
+         to now imply that you are slowly allowing the world to break. Each
+         anchor should be dramatic when it breaks and leave remnants behind.
+         The dark ominous feeling thing that breaks the barrier should be the
+         thing that is permanent and stays lit."*
+
+         So there are TWO monuments now and they must not look alike, which is
+         the two-tier signal Shadow of the Colossus uses and the research in
+         `plans/lattice/DESCENT.md` Q4 recommends by name: a body of small
+         private costs, and one big public landmark. Three dim violet scars per
+         tier, and then the spent core - the only thing in the world still at
+         full glow.
+
+         The colour moves from the makers' mint to the dark energy's violet,
+         which is the same violet as the barrier and the spent core, so the
+         player's eye ties the three together long before anything says they
+         are tied. The unlit Anchor keeps its teal, because that is what the
+         thing WAS and it is the teal the ship's own seams carry. */
+      return { id: lit ? 'anchorbroken' : 'anchor',
+               name: lit ? 'Anchor · broken' : 'Anchor',
+               color: lit ? 0x6a4aa0 : 0x2f6f5e, host: lit ? 0x16101f : 0x16241f,
+               glow: lit ? 0.26 : 0.30, shards: 10, tone: lit ? 3 : 6,
                ore: true, spoil: true, ghost: lit,
                hard: Infinity,
                wt: 0, value: 0 };
@@ -384,6 +407,64 @@ export function blockAt(x: number, d: number): Block | null {
                wt: 0, value: 0, spoil: true };
     }
     if (vch === '#') {
+      /* Round fifteen, Y13: the plinth of a BROKEN Anchor is not worked stone
+         any more. His words: "Each anchor should be dramatic when it breaks
+         and leave remnants behind."
+
+         Uncuttable, so the site cannot be tidied away or dug over - the
+         research in `plans/lattice/DESCENT.md` Q4 is specific that the remnant
+         has to survive at the exact place the deed happened, because it is
+         read by flying past it again rather than by opening a screen. It is
+         also why this is not rubble: rubble is something you clear.
+
+         Derived from `g.ground.lit` and stored nowhere, so it costs the save
+         nothing and cannot drift out of step with which Anchors are broken. */
+      const scarred = anchorPlinth(x, d);
+      if (scarred >= 0 && g.ground.lit.includes(scarred)) {
+        /* ---------- the floor of the recess gives way ----------
+
+           The one cell of the plinth directly under the Anchor is GONE rather
+           than scarred, and it is not a special case bolted on: it is where
+           the Anchor went.
+
+           It is also the third time this game has met the same bug, and the
+           first two are written up in the Anchor's own branch above. Three
+           Anchors share each of the three columns they sit in. A broken Anchor
+           is `ghost`, so the ship flies through it - and then lands on the
+           uncuttable scar one metre below and cannot pass. Six of the nine
+           went unreachable exactly that way, again, and the e2e that has
+           caught it every time is `every Anchor lights by digging down its own
+           column`: "3 at (10,188) - the ship got to 95 m", which is Verdax's
+           Anchor at 94 in the same column.
+
+           `hard: Infinity` was never the problem here and is not now. What
+           must not happen is a permanent mark being IN THE WAY, and the answer
+           each time has been to keep the mark and move the obstruction. */
+        const a = anchorAt(scarred);
+        if (x === a.x && d === a.d + 1) return null;
+        /* SATURATED, not dark, and that took two wrong shots to establish.
+
+           The obvious reading is that a scar should be the darkest surface in
+           the game, so the first two versions were 0x3c2a5e and then 0x241a3a,
+           each darker than the last. Both rendered as ordinary pink granite.
+           The lamp is a point light at intensity 30 with decay 1.75 and the
+           rock carries a normal map and a per-instance brightness jitter: at
+           the range you actually look at a hall from, that lights a dark
+           albedo up to mid grey and the normal map's warm mottling does the
+           rest. Value cannot separate anything this close to the lamp.
+
+           What CAN is saturation, which the diagnostic settled rather than
+           argued: the same block at 0xff0000 came back unmistakably red. So
+           the scar is a strong violet held just under the barrier's own
+           0x7a4fd4 - the same family as the gate and the spent core, darker
+           because it is what is left rather than what is holding.
+
+           0.10 rather than 0, for worked stone's reason four rules up: at zero
+           it goes black with the rock at the edge of the lamp and the hall
+           reads as unfinished rather than as damaged. */
+        return { id: 'anchorscar', name: 'Scar', color: 0x5a20b8, host: 0x0c0814,
+                 glow: 0.10, hard: Infinity, wt: 0, value: 0, spoil: true };
+      }
       /* Off the LOCAL BAND, like the rubble below it and unlike the flat
          numbers the singletons use. A room at 300 m has to be harder than the
          same room at 40 m for the same reason everything else down there is -

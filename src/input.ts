@@ -369,7 +369,7 @@ mustEl('btnPause').onclick = () => {
     '<div class="up"><div class="upinfo"><div class="upname">The Lattice</div>' +
     '<div class="upeff">' + (g.ground.lit.length >= ANCHOR_COUNT
       ? (g.won ? 'All nine, and the center is behind you' : 'All nine. The center is open')
-      : 'Anchors lit, of nine') + '</div></div>' +
+      : 'Anchors broken, of nine') + '</div></div>' +
     '<div class="val">' + g.ground.lit.length + ' / ' + ANCHOR_COUNT + '</div></div>' +
     '<div class="up"><div class="upinfo"><div class="upname">Survey</div>' +
     '<div class="upeff">How much of the planet you have had a lamp on</div></div>' +

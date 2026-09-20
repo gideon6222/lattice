@@ -1207,7 +1207,7 @@ export const UPGRADES: Upgrade[] = [
      row opens at are one fact (INDEX.md rule 10b), and the other six devices
      already agree that way. */
   { key: 'receiver', name: 'Lattice Receiver', base: 3500, mul: 1.5, max: 5, mat: 'gold', group: 'instruments', unlock: 48,
-    effect: (l: number) => (l === 0 ? 'Not installed' : 'Hears an unlit Anchor ' + callReach(l) + ' m off') },
+    effect: (l: number) => (l === 0 ? 'Not installed' : 'Hears an intact Anchor ' + callReach(l) + ' m off') },
 
   /* REPAIR DRONE. Turns a bad run into a long one instead of a tow. Slow on
      purpose - it must never make heat survivable, only recoverable, so it is

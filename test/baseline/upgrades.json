@@ -694,11 +694,11 @@
     ],
     "effects": [
       "Not installed",
-      "Hears an unlit Anchor 40 m off",
-      "Hears an unlit Anchor 54 m off",
-      "Hears an unlit Anchor 68 m off",
-      "Hears an unlit Anchor 82 m off",
-      "Hears an unlit Anchor 96 m off"
+      "Hears an intact Anchor 40 m off",
+      "Hears an intact Anchor 54 m off",
+      "Hears an intact Anchor 68 m off",
+      "Hears an intact Anchor 82 m off",
+      "Hears an intact Anchor 96 m off"
     ],
     "mat": "gold",
     "mats": [

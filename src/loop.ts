@@ -52,7 +52,8 @@ import { aimRelic } from './relic';
 import { stepParallax, fadeParallax, setParallaxTint } from './parallax';
 import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner } from './ui';
 import { stepGauges } from './gauges';
-import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorLit, vaultReached } from './actions';
+import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken } from './actions';
+import { coreOpens, openGate } from './sim/gate';
 import { sfx, setDepth, setMood, setDuck } from './audio';
 import { isDocked, stepStation, renderStation } from './station';
 import { introTick, eyeAt, titleEye, arriveTick, arriveEye, INTRO,
@@ -395,7 +396,16 @@ export function tick(raw: number, draw = true) {
            the game's own existing line for "worth coming back for", which is the
            question this row is actually asking. */
         R.run.blocks++; if (b.value >= DROP_MIN_VALUE) R.run.oreBlocks++;
-        g.dug.add(k);
+        /* Round fifteen, Y3. Asked BEFORE anything is written, because every
+           term of the answer is about to change: the cell joins `g.dug`, and
+           `openGate` below moves this tier from 'core' to 'spent'. */
+        const coreTier = coreOpens(R.digging.x, R.digging.d, g.ground.lit, g.ground.gates);
+        /* The dark core is the one cell in the game that is cut and does not
+           become a hole. What it leaves is the SPENT core - drawn, uncuttable,
+           flown through, lit for ever - and `blockAt` answers `g.dug` before it
+           answers anything else, so a core in that set is a monument that never
+           draws again. */
+        if (coreTier < 0) g.dug.add(k);
         /* The planet feels every cell that leaves it. */
         cutGround(R.digging.x, R.digging.d);
         delete g.damage[k];
@@ -419,7 +429,15 @@ export function tick(raw: number, draw = true) {
         const fv = FACE_VEC[g.face];
         R.vx = fv[0] * S.speed();
         R.vy = fv[1] * S.speed();
-        if (b.hazard) {
+        if (coreTier >= 0 && openGate(g.ground.gates, coreTier)) {
+          /* The climax of a tier, and the first of its two halves: the state
+             says the way down is open, and `coreBroken` is everything the
+             player experiences. Both, or a barrier comes down with no moment
+             attached to it and the player is left to notice. */
+          R.digging = null;
+          coreBroken(coreTier);
+        }
+        else if (b.hazard) {
           /* A gas pocket pays nothing and costs you. It breaks faster than the
              rock around it, so you usually hit one by accident - which is the
              point: it is the surprise that makes a descent differ from the last
@@ -720,10 +738,10 @@ export function tick(raw: number, draw = true) {
       R.wasAtSurface = now;
     }
 
-    /* Standing next to an Anchor lights it. Five Map lookups, every frame -
+    /* Standing next to an Anchor breaks it. Five Map lookups, every frame -
        see lightHere() for why it cannot be on a timer. */
     const litNow = lightHere();
-    if (litNow >= 0) anchorLit(litNow);
+    if (litNow >= 0) anchorBreaks(litNow);
     /* And the same for the centre, which is the end of the game. */
     else if (vaultHere()) vaultReached();
 

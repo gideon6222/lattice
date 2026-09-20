@@ -469,7 +469,7 @@ export const SCENES = {
 
      The hall is dug out around it so the shot is the monument and not the wall
      in front of it. */
-  anchorlit: {
+  anchorbroken: {
     secs: 0.4,
     frames: 4,
     enter: true,
@@ -477,18 +477,27 @@ export const SCENES = {
       const hall = __cw.hallEye();
       const AX = hall.px, AD = hall.pd + 2;
       const dug = [];
-      /* Everything EXCEPT the Anchor's own cell. blockAt checks g.dug before
-         it checks the authored rooms, so putting the monument's cell in the dug
-         set erases it - which is exactly what the first run of this scene did,
-         and the shot came back as an empty hall full of haze. No backticks in
-         here: this whole setup IS a template literal. */
+      /* Everything EXCEPT the Anchor's own cell AND the plinth around it.
+         blockAt checks g.dug before it checks the authored rooms, so putting
+         the monument's cell in the dug set erases it - which is exactly what
+         the first run of this scene did, and the shot came back as an empty
+         hall full of haze. Round fifteen, Y13 widened the exclusion from one
+         cell to nine, because the remnant IS the plinth and a scene that digs
+         it out is a scene of the one thing this milestone did not change. No
+         backticks in here: this whole setup IS a template literal. */
       for (let d = AD - 7; d <= AD + 5; d++) for (let x = AX - 6; x <= AX + 6; x++) {
-        if (x === AX && d === AD) continue;
+        if (Math.abs(x - AX) <= 1 && Math.abs(d - AD) <= 1) continue;
         dug.push(x + ',' + d);
       }
       __cw.g.dug = new Set(dug);
       __cw.g.ground.lit = [1];
-      __cw.g.px = AX; __cw.g.pd = AD;
+      /* Three cells ABOVE the plinth, not on it. The old shot put the ship on
+         the Anchor's own cell, which was right while the Anchor was the
+         brightest thing in the game - you were judging whether a cell you fly
+         THROUGH still reads as solid. Round fifteen, Y13 made it the dimmest
+         thing in the hall, and a lamp at intensity 30 sitting on a scar washes
+         out the one surface the shot is of. */
+      __cw.g.px = AX; __cw.g.pd = AD - 3;
       __cw.resetBlocks();
       __cw.advance(0.6);
     `,

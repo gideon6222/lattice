@@ -15,7 +15,7 @@ import { sfx, audioState, audioVolume } from './audio';
 import CREDITS_MD from '../assets/CREDITS.md?raw';
 import { summarise, mergeLog, loadLog, type Row } from './sim/telemetry';
 import { R } from './sim/runtime';
-import { feedValue, ballastDrain, unrestBand, UNREST_BANDS,
+import { feedValue, ballastDrain, unrestBand, UNREST_BANDS, ballastStarted,
          BALLAST_SAFE, BALLAST_SHORE_COST, BALLAST_LOW } from './sim/unrest';
 import { regionName, regionAt } from './sim/region';
 import { hap, haptics, setHaptics } from './haptics';
@@ -303,7 +303,11 @@ export function updateHUD() {
      nobody reads. */
   const bal = el('btnBallast');
   if (bal) {
-    bal.style.display = isDocked ? '' : 'none';
+    /* Round fifteen, Y5: and not before the planet has started to go. The
+       readout is the LAST half of that milestone, not the first - `unrest.ts`
+       holds back the drain itself, and this holds back the only place it
+       reaches the HUD. Both off one question, `ballastStarted`. */
+    bal.style.display = isDocked && ballastStarted(g.ground) ? '' : 'none';
     const low = g.ground.ballast < BALLAST_LOW || g.ground.collapsed.length > 0;
     bal.textContent = 'BALLAST  ' + Math.round(g.ground.ballast * 100) + '%';
     bal.classList.toggle('armed', low);
@@ -690,11 +694,15 @@ export function buildBallast() {
        can act on, and it is the only place the drain is ever stated - the
        machine outside shows it as a vent and a needle and never as a number. */
     const tier = s.lit.length;
-    const secs = s.ballast > 0 ? s.ballast / ballastDrain(u, tier, s.collapsed.length) : 0;
+    /* The cores are in this now (Y6), or the panel quotes the player a number
+       the machine outside has stopped obeying - and it is the one place in the
+       game the drain is ever stated, so a stale one here is the game lying. */
+    const secs = s.ballast > 0
+      ? s.ballast / ballastDrain(u, tier, s.collapsed.length, s.gates.length) : 0;
     sub.textContent = s.ballast <= 0
       ? 'Empty. The ground is going to give somewhere.'
       : 'Holding for about ' + Math.max(1, Math.round(secs / 60)) + ' more minutes of digging'
-        + (tier > 0 ? ' · ' + tier + ' anchor' + (tier === 1 ? '' : 's') + ' lit' : '');
+        + (tier > 0 ? ' · ' + tier + ' anchor' + (tier === 1 ? '' : 's') + ' broken' : '');
   }
   const fill = el('balFill');
   if (fill) {

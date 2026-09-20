@@ -3723,7 +3723,7 @@ absent; it exists only once the tier's Anchors are lit. Reason: the Anchors stop
 being a checklist the moment lighting them visibly does something local.
 Receipt: a test that the core is absent at N-1 and present at N.
 
-- [ ] **Y3, when the core is destroyed: the forcefield below it drops.** One core, one
+- [x] **Y3, when the core is destroyed: the forcefield below it drops.** Done 2026-09-19. One core, one
 tier, for ever - it does not come back. Reason: a gate that can re-lock is a
 chore. Receipt: the Y1 test, run after breaking each core in turn.
 
@@ -3733,13 +3733,16 @@ research's rule from Hollow Knight is that each key opens a few locks, and a
 numeric upgrade opens none. Receipt: a test that every tier grants exactly one,
 and that no two tiers grant the same.
 
-- [ ] **Y5, when the first core is destroyed: planet integrity appears, and it is
-falling.** Before that it does not exist on screen at all. Reason, his: "the
+- [x] **Y5, when the first core is destroyed: planet integrity appears, and it is
+falling.** Done 2026-09-19, and it is the DRAIN that waits, not only the
+readout - a clock nobody can see is still a clock. Before that it does not exist on screen at all. Reason, his: "the
 structure integrity of the planet feels more like a status bar than something
 integral" - a readout shown before it can be acted on is furniture. Receipt: a
 test that the HUD carries no integrity element until the first core is broken.
 
-- [ ] **Y6, when each further core is destroyed: integrity falls faster.** The
+- [x] **Y6, when each further core is destroyed: integrity falls faster.** Done
+2026-09-19. `BALLAST_CORE_BITE` 1.75, squeezed between the Anchor relief it has
+to beat and the fairness line it must not break. The
 player's own progress is what is breaking the planet. Reason: this is the
 brief's whole source of escalation, and it costs no new content. Receipt: a test
 that the decay rate after k cores is strictly greater than after k-1, and that
@@ -3858,7 +3861,12 @@ a planet at all. With the reveal, all three answer at once.
   they escalate toward the Vault, which is what "building in intensity as you
   find more" has wanted all round.
 
-- [ ] **Y13 The Anchor breaks, dramatically, and leaves a remnant.** Replaces
+- [x] **Y13 The Anchor breaks, dramatically, and leaves a remnant.** Done
+      2026-09-19. The plinth goes with it - five cells of worked stone become a
+      permanent uncuttable scar, dim violet, derived from `g.ground.lit` so it
+      costs the save nothing. Every player-facing word changed with it: the
+      card is THE ANCHOR BREAKS, the HUD counts Anchors broken, the Receiver
+      hears an intact one, the intro says break all nine. Replaces
       the lighting moment. Receipt: a test that a broken Anchor's cell is
       permanently marked and that the mark survives a save and load.
 - [x] **Y14 The spent core stays lit for ever.** Done 2026-09-19, inside Y2 - the

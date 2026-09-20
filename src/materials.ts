@@ -150,7 +150,12 @@ export const ROCK_BUMP: Record<string, number> = {
      so it is very nearly flat, and at play scale that is the difference you
      notice first: a smooth face in a world with no smooth faces in it. No new
      texture, no new material, one number. */
-  worked: 0.03, sealed: 0.02, anchor: 0.05, anchorlit: 0.05, fallen: 0.36,
+  worked: 0.03, sealed: 0.02, anchor: 0.05, anchorbroken: 0.05, fallen: 0.36,
+  /* Round fifteen, Y13. A scar is the plinth AFTER it broke, so it is the one
+     made surface in the game that is rougher than the rock around it - cut
+     stone that has been shattered in place and never cleared. 0.44, above
+     rubble's 0.40, which makes it the roughest thing in the world. */
+  anchorscar: 0.44,
   /* And a hull plate is flatter than cut stone, which is the flattest thing
      above it. Round thirteen, W2, and it was found by looking rather than by
      reasoning: the first version left the wreck out of this table entirely, so

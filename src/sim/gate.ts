@@ -156,3 +156,42 @@ export function gateCellAt(
   if (isCore && gateReady(t, lit)) return 'core';
   return 'wall';
 }
+
+/* ---------- breaking the core ----------
+
+   Round fifteen, Y3. His brief: *"Once you destroy it, the forcefield releases
+   and you can go further down."*
+
+   **It never comes back.** A gate that can re-lock is a chore, and this game
+   already has one thing that takes ground back from you - a collapse - which
+   works precisely because it takes a REGION and never a rung of the ladder.
+   Nothing in the game removes a tier from this list, and the load filter is
+   the only other writer.
+
+   Pure, and separate from the moment in `actions.ts`, for the ordinary reason:
+   what opening a gate DOES to the state is a save question and has to be
+   testable with no renderer in the room. It answers whether it actually opened
+   anything, so the caller can tell a first break from a repeat and only the
+   first one gets the card.
+
+   Idempotent by checking rather than by sorting afterwards: the list is the
+   record of an irreversible event, so a second copy of tier 1 is not a
+   cosmetic duplicate, it is the state claiming something happened twice. */
+export function openGate(open: number[], tier: number): boolean {
+  if (tier < 0 || tier >= GATE_COUNT || open.includes(tier)) return false;
+  open.push(tier);
+  return true;
+}
+
+/* Which gate a core at this depth opens, or -1 if there is no core here.
+
+   The cell and the consequence come off ONE question, so a core the player can
+   cut is always a core that opens something. Asking `gateAtDepth` at the dig
+   site and trusting it would open a gate for any cell on the barrier row, and
+   every one of those is `hard: Infinity`, right up until somebody adds a way
+   through a wall and quietly gains a way through every gate in the game. */
+export function coreOpens(
+  x: number, d: number, lit: readonly number[], open: readonly number[]
+): number {
+  return gateCellAt(x, d, lit, open) === 'core' ? gateAtDepth(d) : -1;
+}

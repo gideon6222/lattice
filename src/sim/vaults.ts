@@ -591,6 +591,30 @@ export function anchorNear(x: number, d: number): number {
   return -1;
 }
 
+/* The PLINTH: the worked stone an Anchor is set into, which is the five `#`
+   cells of the recess around it - left, right, and the three underneath.
+
+   Round fifteen, Y13. When the Anchor breaks, these are what is left of the
+   place, and they are the remnant his brief asks for: *"Each anchor should be
+   dramatic when it breaks and leave remnants behind."* One dim cell where the
+   Anchor stood would be a monument you could fly past without noticing; the
+   plinth going with it is a scar the size of the thing that was there.
+
+   Chebyshev distance 1 and not the four neighbours, because three of the five
+   are the row underneath and two of those are diagonal. Excludes the Anchor's
+   own cell, which is a different block with a different answer. */
+export function anchorPlinth(x: number, d: number): number {
+  const m = anchorCells();
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dd = -1; dd <= 1; dd++) {
+      if (dx === 0 && dd === 0) continue;
+      const r = m.get((x + dx) + ',' + (d + dd));
+      if (r !== undefined) return r;
+    }
+  }
+  return -1;
+}
+
 /* And the region an Anchor belongs to, which is where its position was drawn
    from - stated as a function so the rest of the game never assumes the index
    and the region are the same number, in case the bottom row ever gets one. */

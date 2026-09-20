@@ -156,8 +156,42 @@ export const BALLAST_TIER_RELIEF = 0.25; /* each Anchor slows the drain by this 
    not a campaign pressure, it is a pile-up. */
 export const BALLAST_DOWN_RELIEF = 0.5;
 
-export function ballastDrain(planetUnrest: number, tier: number, down = 0): number {
-  return BALLAST_DRAIN * (0.35 + planetUnrest) /
+/* And what each released dark core adds. Round fifteen, Y6.
+
+   His brief: *"At each level where a dark energy block is destroyed, the
+   integrity drops faster."* Under the reveal that is not a difficulty ratchet,
+   it is the plot being shown honestly while the player still reads it as
+   progress - which is also the answer to the research's objection that
+   punishing success is a Risk of Rain trap. It is not punishing success. It is
+   the consequence.
+
+   **It is squeezed between two existing numbers rather than chosen, and both
+   bounds are worth writing down.**
+
+   The FLOOR is `BALLAST_TIER_RELIEF`. Every core costs three Anchors and every
+   Anchor takes 0.25 off the drain, so a core has to beat 0.75 or breaking one
+   makes the planet safer - the opposite of the sentence. It has to beat it by
+   a margin, not squeak past: at a bite of 1.0 the measured campaign ran 16, 14,
+   13, 13 minutes to the first lost region, which is strictly rising and which
+   no player would ever feel.
+
+   The CEILING is the fairness line in `a planet nobody feeds loses ground and
+   then stops`, which predates this round: the first region has to fall several
+   runs after the clock starts, and a run is three minutes. At tier 3 with one
+   core that is `16 * 1.75 / (1 + bite) > 10`, so the bite is under 1.8.
+
+   1.75 is where those meet, and the campaign it measures is no clock at all,
+   then 10, 9, 8 minutes. The receipt is a test on the DERIVED quantity - that
+   the drain rises at every gate counting the Anchors that gate cost - rather
+   than on this number, because both bounds are tuned values that will move.
+
+   Bounded by construction: there are `GATE_COUNT` cores in the world and the
+   list they come off can hold each only once (`openGate`), so the worst case
+   is a fixed multiple and not a curve that runs away. */
+export const BALLAST_CORE_BITE = 1.75;
+
+export function ballastDrain(planetUnrest: number, tier: number, down = 0, cores = 0): number {
+  return BALLAST_DRAIN * (0.35 + planetUnrest) * (1 + cores * BALLAST_CORE_BITE) /
          ((1 + tier * BALLAST_TIER_RELIEF) * (1 + down * BALLAST_DOWN_RELIEF));
 }
 
@@ -422,9 +456,36 @@ export function isCollapsed(s: GroundState, region: number): boolean {
    `emptied` is true only on the transition, so the caller can choose a region
    once rather than every frame for as long as the tank sits on the floor. */
 export function drainBallast(s: GroundState, dt: number): { emptied: boolean } {
+  /* Round fifteen, Y5. The planet is not falling apart yet, so the clock has
+     not started.
+
+     His brief: *"the structure integrity of the planet feels more like a
+     status bar than something integral to the game ... it would feel more
+     intentional if the integrity of the planet didn't show until you made it
+     down further ... At that point, the planet integrity shows, and it is
+     shown that the planet is slowly falling apart."*
+
+     Hiding the readout alone would have been the cosmetic half of that, and
+     the worse half: a clock nobody can see is still a clock, and a player
+     losing a region to a meter the game never showed them is the least fair
+     thing this game could do. So the drain itself starts at the first core -
+     which also takes a silent timer out of the opening hour, where the player
+     has enough to learn.
+
+     `ballastStarted` and not a stored flag: it is `gates.length > 0`, which is
+     already the save's record of the same event. Two fields that must agree is
+     one field with a bug in it. */
+  if (!ballastStarted(s)) return { emptied: false };
   if (s.ballast <= 0) return { emptied: false };
-  s.ballast = Math.max(0, s.ballast - ballastDrain(planetUnrest(s), tierOf(s), s.collapsed.length) * dt);
+  s.ballast = Math.max(0, s.ballast -
+    ballastDrain(planetUnrest(s), tierOf(s), s.collapsed.length, s.gates.length) * dt);
   return { emptied: s.ballast <= 0 };
+}
+
+/* Whether the planet has started to go, which is the one question the HUD, the
+   panel and the drain all have to answer the same way. */
+export function ballastStarted(s: GroundState): boolean {
+  return s.gates.length > 0;
 }
 
 /* Which region falls, given where the ship is.

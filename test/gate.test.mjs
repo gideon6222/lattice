@@ -17,9 +17,21 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadPure } from './harness.mjs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { loadPure, REPO } from './harness.mjs';
 
 const H = await loadPure();
+
+function walkSrc(dir = join(REPO, 'src')) {
+  const out = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, e.name);
+    if (e.isDirectory()) out.push(...walkSrc(p));
+    else if (e.name.endsWith('.ts')) out.push(p);
+  }
+  return out;
+}
 
 function fresh(gates = []) {
   H.setWorld(0);
@@ -228,4 +240,113 @@ test('breaking a tier\'s Anchors does not open anybody else\'s door', () => {
     assert.equal(H.blockAt(H.coreColumn(t), H.gateDepth(t)).id, 'gate',
       `breaking tier 0's Anchors opened tier ${t}'s door`);
   }
+});
+
+/* ---------- Y3: the core breaks and the forcefield drops ----------
+
+   His brief: *"Once you destroy it, the forcefield releases and you can go
+   further down."* The receipt the plan names for this is the Y1 test run again
+   after each core is broken, which is what the first test below is: the same
+   flood fill, driven by breaking cores rather than by handing it a list. */
+
+test('breaking each core in turn walks the world open, one tier at a time', () => {
+  /* The whole ladder, played in order, with nothing set by hand except the
+     Anchors. `deepestReach` re-seeds the world every call, so the gate list
+     has to be carried forward - which is the point: it is the SAVE that opens
+     the world, and `openGate` is the only thing that writes it. */
+  const open = [];
+  assert.equal(deepestReach(open), H.gateDepth(0) - 1, 'the world starts shut at the first gate');
+
+  for (let t = 0; t < H.GATE_COUNT; t++) {
+    const cx = H.coreColumn(t), cd = H.gateDepth(t);
+    const lit = H.gateAnchors(t);
+
+    assert.equal(H.coreOpens(cx, cd, [], open), -1,
+      `tier ${t}'s core answered before its Anchors were broken`);
+    assert.equal(H.coreOpens(cx, cd, lit, open), t,
+      `tier ${t}'s core does not open tier ${t}`);
+    assert.equal(H.openGate(open, t), true, `tier ${t}'s gate refused to open`);
+
+    const want = t + 1 < H.GATE_COUNT ? H.gateDepth(t + 1) - 1 : null;
+    const got = deepestReach(open);
+    if (want !== null) {
+      assert.equal(got, want,
+        `after breaking core ${t} the ship reaches ${got} m, not ${want}`);
+    } else {
+      assert.ok(got >= H.VAULT_CORE_D,
+        `after the last core the ship stops at ${got} m, short of the Vault at ${H.VAULT_CORE_D}`);
+    }
+  }
+  assert.deepEqual(open, [0, 1, 2]);
+});
+
+test('only the core opens a gate, and only while it is a core', () => {
+  /* The bug: asking `gateAtDepth` at the dig site instead of asking what the
+     CELL is. That version opens the tier for any cell on the barrier row -
+     every one of which is uncuttable today, and every one of which becomes a
+     key the day somebody adds a way through a wall. The cell and the
+     consequence come off one question so they cannot drift. */
+  for (let t = 0; t < H.GATE_COUNT; t++) {
+    const cx = H.coreColumn(t), cd = H.gateDepth(t);
+    const lit = H.gateAnchors(t);
+
+    for (let x = 0; x < H.W; x++) {
+      if (x === cx) continue;
+      assert.equal(H.coreOpens(x, cd, lit, []), -1,
+        `a plain barrier cell at column ${x} opens tier ${t}`);
+    }
+    assert.equal(H.coreOpens(cx, cd - 1, lit, []), -1, 'the cell above the barrier opens it');
+    assert.equal(H.coreOpens(cx, cd + 1, lit, []), -1, 'the cell below the barrier opens it');
+    /* And a core already spent is not a second key. */
+    assert.equal(H.coreOpens(cx, cd, lit, [t]), -1, `tier ${t}'s spent core opens the gate again`);
+  }
+});
+
+test('a gate opens once, for ever, and nothing else can be opened', () => {
+  /* Idempotent by CHECKING rather than by tidying up afterwards. This list is
+     the record of an irreversible event, so a second copy of tier 1 in it is
+     not a cosmetic duplicate - it is the save claiming the thing happened
+     twice, which is what the ability grant in Y4 will be counting. */
+  const open = [];
+  assert.equal(H.openGate(open, 1), true);
+  assert.equal(H.openGate(open, 1), false, 'the same gate opened twice');
+  assert.deepEqual(open, [1]);
+
+  assert.equal(H.openGate(open, -1), false);
+  assert.equal(H.openGate(open, H.GATE_COUNT), false, 'a gate below the bottom row opened');
+  assert.deepEqual(open, [1], 'a refused open still wrote to the save');
+});
+
+test('nothing in the game can shut a gate that is open', () => {
+  /* His brief asks for one direction only, and the one thing in this game that
+     already takes ground back - a collapse - is safe precisely because it takes
+     a REGION and never a rung of the ladder. There is no runtime state that
+     could catch a re-lock, because a re-lock would BE the state, so this reads
+     the source: `gates` may be written by the three writers named below and by
+     nothing else.
+
+     Rule 11: put `g.ground.gates.pop()` anywhere in src and it fails naming the
+     file. */
+  const ALLOWED = new Set(['sim/gate.ts', 'sim/unrest.ts']);
+  const bad = [];
+  for (const file of walkSrc()) {
+    const rel = relative(join(REPO, 'src'), file).replace(/\\/g, '/');
+    if (ALLOWED.has(rel)) continue;
+    const txt = readFileSync(file, 'utf8');
+    /* Any mutation of the list, not just the removing ones. Writing to it at
+       all outside the two owners is the trend worth stopping - the removal is
+       only the worst way it goes wrong.
+
+       READS are fine and there are several: `gates.length` is how the HUD and
+       the Ballast's own clock ask whether the planet has started to go. The
+       first version of this pattern had a bare `length` in the alternation and
+       failed on exactly those, which would have taught the next session to add
+       `ui.ts` to the allow-list and lose the check. `length` counts only when
+       it is assigned to, because `gates.length = 0` is a truncation. */
+    const m = txt.match(/\.gates\s*(?:=[^=]|\.(?:pop|shift|splice|push)\s*\(|\.length\s*=[^=]|\[[^\]]*\]\s*=[^=])/g);
+    if (m) bad.push(`${rel}: ${m.join(', ')}`);
+  }
+  assert.deepEqual(bad, [],
+    'these files write g.ground.gates. Only openGate() in sim/gate.ts and the save ' +
+    'filter in sim/unrest.ts may, because the list is the record of three irreversible events.');
 });

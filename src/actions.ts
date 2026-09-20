@@ -6,6 +6,7 @@ import { hap } from './haptics';
 import { regionName } from './sim/region';
 import { anchorAt } from './sim/vaults';
 import { wake } from './sim/unrest';
+import { coreColumn, gateDepth } from './sim/gate';
 import { vaultOpen } from './sim/vaults';
 import { g, S, save, checkpoint, coreM, worldTrait, resetGround, cutGround, padFuel, salePayout, addMark, resetSeen, revealVault, docked } from './sim/state';
 import { blockAt, haulValue, findRoute, planCollapse, cachePrize, findHere } from './sim/world';
@@ -646,11 +647,19 @@ export function hardReset() {
   toast('Progress wiped. The planet is quiet again.');
 }
 
-/* ---------- an Anchor lights ----------
+/* ---------- an Anchor breaks ----------
 
    The biggest thing that happens in this game short of losing the ship, and
-   the only one that is unambiguously good. `POLISH.md`: one event, four
-   channels - light, sound, shake, haptic - fired together.
+   the only one the player reads as unambiguously good. `POLISH.md`: one event,
+   four channels - light, sound, shake, haptic - fired together.
+
+   **It was "an Anchor lights" until round fifteen**, and the change is his:
+   *"I want the anchors to now imply that you are slowly allowing the world to
+   break."* Nothing about the STATE changed - `g.ground.lit` is still the list
+   and it still means the same nine things - and that is deliberate, because
+   renaming a saved field to match a story is how a save stops loading. What
+   changed is every word the player reads and everything they see, which is
+   where the story lives.
 
    A MODAL, unlike a device find, and the difference is deliberate. A device
    banner runs itself out over four seconds while the drill keeps turning,
@@ -663,10 +672,10 @@ export function hardReset() {
    is on the panel at the pad for anybody who wants it; putting "4 of 9" in the
    moment turns a discovery into a checklist, and the research on withheld
    rules is the whole reason this round exists. */
-export function anchorLit(region: number) {
+export function anchorBreaks(region: number) {
   const n = g.ground.lit.length;
-  /* Redraw the cell. The Anchor's BLOCK ID changes when it lights - 'anchor'
-     becomes 'anchorlit' - and the instanced pools are keyed by id, so nothing
+  /* Redraw the cell. The Anchor's BLOCK ID changes when it breaks - 'anchor'
+     becomes 'anchorbroken' - and the instanced pools are keyed by id, so nothing
      in the world knows the cell has to move pools. Without this the monument
      stays dark until the streaming window happens to rebuild, which is when
      you cross a row - so the one thing the player is looking at is the one
@@ -677,18 +686,38 @@ export function anchorLit(region: number) {
      with the world, and this happens nine times in a campaign. */
   const a = anchorAt(region);
   dropBlock(key(a.x, a.d));
+  /* And the five cells of the plinth around it, which break with it. Round
+     fifteen, Y13: the remnant is bigger than the Anchor was, so the cells that
+     change id are not just its own. */
+  for (let dx = -1; dx <= 1; dx++)
+    for (let dd = -1; dd <= 1; dd++) dropBlock(key(a.x + dx, a.d + dd));
   resetBlockCache();
   syncBlocks(true);
   const x = worldX(g.px), y = -g.pd;
-  spray(x, y, 0x8fffc8, 260, 14, 2.4);
-  spray(x, y, 0xffffff, 120, 20, 1.6);
-  /* Short and light, because the CARD is the moment and the flash is only its
-     punctuation. The first version was .40 for 900 ms and it was still washing
-     the screen green when the modal was fully open and being read - a flash
-     under a modal is a flash nobody wants. */
-  flash('rgba(150,255,210,.26)', 480);
-  R.shake = Math.max(R.shake, 0.9);
-  sfx.relic();
+  /* ---------- the break, and it is a break. Round fifteen, Y13 ----------
+
+     His brief: "I want the anchors to now imply that you are slowly allowing
+     the world to break. Each anchor should be dramatic when it breaks."
+
+     Two sprays and the ORDER is the whole sentence: the Anchor's own mint goes
+     out of it first, and then violet comes out of the hole. That is the same
+     violet as the barrier and the spent core, which is the game tying three
+     things together three rounds before anything explains them. */
+  spray(x, y, 0x8fffc8, 200, 16, 1.6);
+  spray(x, y, 0x8a5ad0, 320, 13, 3.0);
+  spray(x, y, 0xffffff, 140, 22, 1.4);
+  /* Violet now, and longer and heavier than the mint one it replaces - but
+     still under .34, because the CARD is the moment and the flash is only its
+     punctuation. The old version was .40 for 900 ms and was still washing the
+     screen when the modal was open and being read. */
+  flash('rgba(138,90,208,.30)', 620);
+  R.shake = Math.max(R.shake, 1.25);
+  /* Not `relic()`, which is a bright chime and was the right sound for finding
+     something. This is a thing coming apart. The collapse under the boom is
+     the planet's own voice, and it is the first time in a campaign that the
+     player hears it anywhere but a cave-in. */
+  sfx.boom();
+  sfx.collapse();
   hap.boom();
   /* And whether that was the fifth of nine.
 
@@ -702,9 +731,20 @@ export function anchorLit(region: number) {
      follow-on cards can never stack. */
   const opened = !answered && vaultOpen(g.ground.lit.length);
   if (opened) revealVault();
-  showEvent('THE ANCHOR WAKES',
+  /* The wording, and it is the second place the reveal is spoken straight.
+
+     It still congratulates, because everything it says is true and useful -
+     the region does settle, the Ballast does hold harder, the map does fill
+     in. What it no longer says is that the Anchor woke. It broke, and the card
+     says so in the first three words, and then moves on to the good news
+     exactly the way somebody reporting a success would.
+
+     The first one gets the extra line, because a player who has broken one
+     thing does not yet know there are nine. */
+  showEvent('THE ANCHOR BREAKS',
     regionName(region) + ' settles. The Ballast holds harder now, and the ground ' +
-    'here has drawn itself onto your map.' +
+    'here has drawn itself onto your map. Whatever was held in the Anchor is ' +
+    'loose in the rock.' +
     (n === 1 ? ' Whatever built these left nine of them.' : ''),
     'GO ON',
     () => {
@@ -714,6 +754,92 @@ export function anchorLit(region: number) {
     });
   /* A large event: written where the ship stands, tank and hold as they are.
      Quit now and CONTINUE returns here. */
+  checkpoint();
+}
+
+
+/* ---------- the core breaks, and the barrier with it ----------
+
+   Round fifteen, Y3. His brief: *"Once you destroy it, the forcefield releases
+   and you can go further down."*
+
+   The order matters and it is the same order `anchorLit` uses: change the
+   state, rebuild the world so the player SEES the barrier gone, and only then
+   put the card up. A card that comes first is a card read over a wall that is
+   still there, and the wall is the thing that just changed.
+
+   **The wording is the deception, and it is the first place the reveal is
+   actually spoken.** It congratulates. Nothing here is untrue - the way down
+   is open, the core is spent - and nothing here is the whole truth either,
+   which is exactly what he asked for: "I want it to look like you are doing a
+   good thing by releasing the dark energy from it." Y15 is what turns this
+   over, and it can only turn over something that was first said straight. */
+export function coreBroken(tier: number) {
+  /* A full rebuild, and for the same reason the Anchor does one: the barrier
+     is 61 cells that all change id at once, from 'gate' to nothing, and the
+     instanced pools are keyed by id. Without it the wall stays drawn across
+     the screen until a streaming rebuild happens to come round, which is the
+     one thing in the frame the player is watching. */
+  dropBlock(key(coreColumn(tier), gateDepth(tier)));
+  resetBlockCache();
+  syncBlocks(true);
+  resetLight();
+  const x = worldX(g.px), y = -g.pd;
+  /* Violet, not the core's gold. What leaves the world here is the BARRIER,
+     and the barrier has been violet since the first moment the player met it -
+     so the spray is the wall coming apart rather than the block they cut. */
+  spray(x, y, 0x7a4fd4, 300, 16, 2.6);
+  spray(x, y, 0xffd27a, 140, 22, 1.8);
+  flash('rgba(122,79,212,.30)', 520);
+  R.shake = Math.max(R.shake, 1.1);
+  sfx.relic();
+  hap.boom();
+  /* And whether that was the FIRST core, which is when the planet starts to
+     come apart and therefore the first time it has anything to say about its
+     own integrity. Decided before the card goes up and applied after it comes
+     down, the same order `anchorBreaks` uses: you opened the way, and THEN the
+     planet reacted to it. Both at once is two modals stacked. */
+  const first = g.ground.gates.length === 1;
+  showEvent('THE WAY OPENS',
+    'The core gives, and the barrier goes with it. Whatever was held here is ' +
+    'held no longer, and the ground below is yours.',
+    'DESCEND',
+    () => {
+      updateHUD();
+      if (first) groundStartsToGo();
+    });
+  /* The way down is permanent and the state now says so. Quit here and
+     CONTINUE comes back through an open gate. */
+  checkpoint();
+}
+
+
+/* ---------- and the planet starts to go ----------
+
+   Round fifteen, Y5. The second half of the first core, and the first time in
+   a campaign that the Ballast exists as far as the player is concerned.
+
+   His brief: *"At that point, the planet integrity shows, and it is shown that
+   the planet is slowly falling apart."* Until this moment the machine on the
+   pad has been standing there full and still, which was true - nothing was
+   falling apart. `drainBallast` starts its clock off the same question this
+   card is asking, so the readout and the thing it reads can never disagree.
+
+   It does not explain the machine and it does not say a number. The sight
+   glass beside the pad is the readout and has been visible since the first
+   landing; what the player has to be told is that it has started to move. */
+export function groundStartsToGo() {
+  R.shake = Math.max(R.shake, 1.4);
+  flash('rgba(180,140,235,.26)', 800);
+  sfx.rumble();
+  hap.quake();
+  showEvent('THE GROUND IS GOING',
+    'Something gave when the core did, a long way down and everywhere at once. ' +
+    'The Ballast on the pad has started to fall. It has been standing full ' +
+    'since you landed, and now it is holding the planet down against ' +
+    'something that is pulling the other way.',
+    'UNDERSTOOD',
+    () => { updateHUD(); });
   checkpoint();
 }
 

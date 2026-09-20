@@ -393,6 +393,20 @@ test('a planet nobody feeds loses ground and then stops', () => {
   const pad = 1;
   const unlit = () => false;          /* everything lit, so only the floor acts */
   for (let i = 0; i < H.REGION_COUNT; i++) s.unrest[i] = 0.7;
+  /* Round fifteen, Y5: the Ballast does not drain at all until the first dark
+     core is released, so "a planet nobody feeds" now begins there. One core
+     and not three, because this test is about the floor and the shape of the
+     cascade, and one is the earliest the clock can be running - which is the
+     version with the most digging left in front of it.
+
+     **And the three Anchors that core cost, which is not decoration.** A gate
+     cannot be open without them (`gateReady`), so a state with a core and no
+     Anchors is one no save can reach. Setting the gate alone measured the
+     first loss at 8 minutes and failed the line below - correctly, and for a
+     scenario that does not exist. With the Anchors the core actually cost, the
+     relief they carry is in the arithmetic where it belongs. */
+  s.gates = [0];
+  s.lit = [0, 1, 2];
   let mins = 0;
   const at = [];
   while (mins < 600 && s.collapsed.length < H.MAX_COLLAPSED) {
@@ -423,5 +437,96 @@ test('a planet nobody feeds loses ground and then stops', () => {
   }
   assert.ok(at[at.length - 1] < 200,
     `it took ${at[at.length - 1]} minutes of digging to break the planet as far as it goes, which nobody will reach`);
+  fresh();
+});
+
+/* ---------- Y5 and Y6: the planet does not start to go until you let it ---------- */
+
+test('the Ballast does not move until the first core is released', () => {
+  /* His brief: "the structure integrity of the planet feels more like a status
+     bar than something integral to the game ... it would feel more intentional
+     if the integrity of the planet didn't show until you made it down
+     further."
+
+     Hiding the readout alone would be the cosmetic half of that and the worse
+     half - a clock nobody can see is still a clock, and losing a region to a
+     meter the game never showed you is the least fair thing it could do. So
+     the DRAIN is what waits, and the readout follows it. */
+  const s = fresh();
+  for (let i = 0; i < H.REGION_COUNT; i++) s.unrest[i] = 1;
+  assert.equal(H.ballastStarted(s), false);
+
+  /* An hour of digging at the angriest the planet gets. */
+  for (let i = 0; i < 60; i++) H.drainBallast(s, 60);
+  assert.equal(s.ballast, 1,
+    `the Ballast fell to ${s.ballast} before any core was released - the opening hour has a clock in it nobody can see`);
+
+  /* Breaking all nine Anchors is not what starts it. A tier of Anchors is
+     something the player reads as unambiguously good, and it still is. */
+  s.lit = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  for (let i = 0; i < 60; i++) H.drainBallast(s, 60);
+  assert.equal(s.ballast, 1, 'breaking Anchors started the clock, and the core is supposed to');
+
+  s.gates = [0];
+  assert.equal(H.ballastStarted(s), true);
+  H.drainBallast(s, 60);
+  assert.ok(s.ballast < 1, 'the first core did not start the clock');
+  fresh();
+});
+
+test('every core released makes the planet fall apart faster', () => {
+  /* His brief: "At each level where a dark energy block is destroyed, the
+     integrity drops faster." Two claims, and the second is the one that is
+     easy to build wrong. */
+  const u = 0.5;
+
+  /* One: at a fixed number of Anchors, each core is strictly worse. */
+  for (let t = 0; t <= 9; t += 3) {
+    for (let c = 1; c <= H.GATE_COUNT; c++) {
+      assert.ok(H.ballastDrain(u, t, 0, c) > H.ballastDrain(u, t, 0, c - 1),
+        `with ${t} Anchors broken, core ${c} did not make the drain worse than core ${c - 1}`);
+    }
+  }
+
+  /* Two, and this is the claim his sentence actually makes: the planet the
+     PLAYER meets falls apart faster at every gate. That player cannot have a
+     core without the three Anchors it cost, and each of those takes
+     BALLAST_TIER_RELIEF off the drain - so a bite that merely beats zero loses
+     to its own price and the planet gets SAFER every tier. Measured at a bite
+     of 1.0: 16, 14, 13, 13 minutes to the first lost region, strictly rising
+     and completely unfeelable. */
+  const real = [];
+  for (let c = 0; c <= H.GATE_COUNT; c++) real.push(H.ballastDrain(u, c * 3, 0, c));
+  for (let c = 1; c < real.length; c++) {
+    assert.ok(real[c] > real[c - 1],
+      `a player with ${c} cores and the ${c * 3} Anchors they cost has an EASIER planet than one with ${c - 1} - ` +
+      `the drain went ${real.map((r) => r.toExponential(2)).join(' -> ')}. BALLAST_CORE_BITE has to beat ` +
+      '3 x BALLAST_TIER_RELIEF, not zero.');
+  }
+
+  /* Three: bounded. There are GATE_COUNT cores and `openGate` will not put one
+     in the list twice, so the worst case is a fixed multiple rather than a
+     curve that runs away. */
+  const worst = H.ballastDrain(u, 9, H.MAX_COLLAPSED, H.GATE_COUNT);
+  assert.ok(worst < H.ballastDrain(u, 0, 0, 0) * 3,
+    `a fully broken planet drains ${(worst / H.ballastDrain(u, 0, 0, 0)).toFixed(2)}x a fresh one, which is a spiral rather than a slope`);
+});
+
+test('the clock still gives several runs of warning once it starts', () => {
+  /* The fairness line that predates this round, re-asked at the state the
+     player is actually in at each gate: a run is about three minutes, and the
+     first region has to be several of them away from the moment the clock
+     starts. This is the CEILING on BALLAST_CORE_BITE and the reason it is 1.75
+     rather than as large as the story would like. */
+  for (let c = 1; c <= H.GATE_COUNT; c++) {
+    const s = fresh();
+    for (let i = 0; i < H.REGION_COUNT; i++) s.unrest[i] = 0.7;
+    s.gates = []; for (let i = 0; i < c; i++) s.gates.push(i);
+    s.lit = []; for (let i = 0; i < c * 3; i++) s.lit.push(i);
+    let mins = 0;
+    while (mins < 900 && !H.drainBallast(s, 60).emptied) mins++;
+    assert.ok(mins >= 8,
+      `with ${c} core(s) released the first region falls after ${mins} minutes of digging, which is under three runs of warning`);
+  }
   fresh();
 });

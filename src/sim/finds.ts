@@ -88,7 +88,7 @@ export const FINDS: Find[] = [
      enough that the FIRST descent is still unguided, which is the one descent
      that should be. */
   { key: 'receiver', below: 48,
-    blurb: 'Hears an unlit Anchor through rock. How near, never which way.' },
+    blurb: 'Hears an intact Anchor through rock. How near, never which way.' },
   { key: 'survey',  below: 62,
     blurb: 'Reads ore through solid rock, so you can dig at something.' },
   { key: 'reactor', below: 70,
