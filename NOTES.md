@@ -5928,6 +5928,39 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## X4: the first Anchor's gift, and why it is judged against the depth row
+
+His ask: the map should show where minerals are concentrated, only for regions
+whose Anchor is lit.
+
+**Measured before the tiers were designed**, as mean ore value per sampled cell:
+row 0 is Verdax 11, Rustmoor 12, Cryon 22; row 3 is Vantomir 896, Halcyne 121,
+Dross 454. **Compared across the world that says nothing a player does not
+already know** - ore is depth-gated and the game says so, and a heat map of it
+is a picture of the depth ladder. Down a ROW the spread is the interesting part
+and it is large: Palewell holds four times what its neighbours hold at the same
+depth. That is a reason to cross the world sideways, which is the one direction
+this game has never given anybody a reason to go.
+
+So richness is a ratio against the region's own depth row, and the test asserts
+it as a property rather than by re-deriving the sweep: every row must contain at
+least one ordinary region, which can only be true if the comparison happens
+inside the row. Planting the world-wide version fails two tests.
+
+**The tile wash alone did not carry, and that is worth remembering for any
+overlay on this map.** Every region is already painted its own rock colour,
+which is how the map says which region you are looking at - so a gold tint over
+olive Palewell is indistinguishable from Palewell being olive. **A signal has to
+sit where the palette is not.** It is a line under the region's name now, in the
+mint the player has already learned means settled.
+
+**The sweep borrows the world and puts it back.** `blockAt` returns null for a
+dug cell and `fallen` for a collapsed region, so a naive sweep would tell a
+player who had mined Palewell out that Palewell was always poor, and would give
+two players with the same seed different maps. `g.dug` and the collapsed list
+are swapped for empties and restored in a `finally`, and a test asserts both
+came back.
+
 ## X2: a rare find announces itself, and a test that inspected nothing
 
 Until now the game gave a solmarrow cut - 196,000 credits, five cells on the

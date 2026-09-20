@@ -3638,8 +3638,8 @@ else in the economy needs rebalancing.
       comprehend", and the research's stated risk is that doing this to many
       ores collapses back into currency with extra steps.
 
-- [ ] **X4 The first Anchor's gift: the Survey map shows where the ground is
-      rich.** Asks 3 and 4. An aggregate richness read per REGION, rendered as
+- [x] **X4 The first Anchor's gift: the Survey map shows where the ground is
+      rich.** Done 2026-09-19. Asks 3 and 4. An aggregate richness read per REGION, rendered as
       two or three heat tiers over that region's tiles, and shown only for
       regions whose Anchor is lit - exactly the gate the map reveal already uses.
 
@@ -3691,3 +3691,124 @@ else in the economy needs rebalancing.
       or to have the hall open a way past when it lights. Whichever is chosen,
       the Anchor is never cuttable again, and the regression test is the one
       that found the plug: every Anchor lights by digging down its own column.
+
+## Round fifteen: the descent becomes a ladder
+
+His brief of 2026-09-19, rewritten to the format `techniques/instruction-design.md`
+sets out: one subject a rule, the TRIGGER first, the reason as a clause rather
+than a paragraph, the receipt named, and about 120 words a part. His words are
+in `gamedev-notes\playtests\lattice.md` verbatim and are the authority; this is
+the reading of them, not a replacement for them.
+
+**The sentence the brief turns on is "it should also work backward from how we
+have it".** Today the Anchors are a COLLECTION that ends in a Vault - nine of
+them anywhere on the planet, lit in any order, and the ninth opens the centre.
+He is asking for a LADDER: a few Anchors per tier, each tier ending in a gate
+you break to descend. The current structure pays once, at the very end. A ladder
+pays at every tier, which is the same sentence as "building in intensity as you
+find more".
+
+### The asks, numbered by their trigger
+
+**Y1, at a depth the player has not earned yet: a forcefield stops the ship.**
+The world is cut into tiers by barriers the drill cannot pass. Default is
+blocked; the exception is a tier whose gate has been broken. Reason: a depth you
+cannot reach is the only thing that makes reaching it an event. Receipt: a test
+that walks the ship down every column and finds it stopped at each tier edge
+until the gate for that tier is broken.
+
+**Y2, when N Anchors of a tier are lit: a dark-energy core appears.** It looks
+inviting and it is the only thing in the tier that can open the gate. Default is
+absent; it exists only once the tier's Anchors are lit. Reason: the Anchors stop
+being a checklist the moment lighting them visibly does something local.
+Receipt: a test that the core is absent at N-1 and present at N.
+
+**Y3, when the core is destroyed: the forcefield below it drops.** One core, one
+tier, for ever - it does not come back. Reason: a gate that can re-lock is a
+chore. Receipt: the Y1 test, run after breaking each core in turn.
+
+**Y4, when the core is destroyed: the player gains one new ability.** One per
+tier and never a number - a verb or a lens, not a bigger tank. Reason: the
+research's rule from Hollow Knight is that each key opens a few locks, and a
+numeric upgrade opens none. Receipt: a test that every tier grants exactly one,
+and that no two tiers grant the same.
+
+**Y5, when the first core is destroyed: planet integrity appears, and it is
+falling.** Before that it does not exist on screen at all. Reason, his: "the
+structure integrity of the planet feels more like a status bar than something
+integral" - a readout shown before it can be acted on is furniture. Receipt: a
+test that the HUD carries no integrity element until the first core is broken.
+
+**Y6, when each further core is destroyed: integrity falls faster.** The
+player's own progress is what is breaking the planet. Reason: this is the
+brief's whole source of escalation, and it costs no new content. Receipt: a test
+that the decay rate after k cores is strictly greater than after k-1, and that
+it is bounded.
+
+**Y7, when the player repairs the planet: it is an activity, not a payment.**
+Feeding materials to a bar is named in the brief as the thing to avoid. Reason:
+a donation has no decision in it, and this game's whole shape is decisions about
+where to spend a descent. Receipt: a test that repair cannot be completed from
+the pad, and that it consumes something other than credits.
+
+**Y8, at every tier gate: a shop and a save point.** Each barrier is also a
+place to stop. Reason: a gate is already the one cell every player in that tier
+passes through, so it is where a service costs no new world. Receipt: a test
+that each tier has exactly one, at its own gate.
+
+**Y9, buying at the first shop: a cap on what it will sell.** The starting shop
+holds few upgrades and stops. Reason, his: "to make sure everything stays
+balanced" - an early game that can buy late-game power has no late game.
+Receipt: a test that the sum of what tier one can sell is under a measured
+ceiling.
+
+**Y10, buying at a deeper shop: more, and abilities as well as numbers.**
+Reason: the shop ladder is the progression, so a deeper shop has to be visibly
+worth reaching. Receipt: a test that each tier's catalogue strictly contains the
+one above it.
+
+**Y11, drawing any shop: it is redesigned.** His words: "redesign the shops
+completely using your own skills and research, to give me something that looks
+and feels better suited for the game." One-thumb portrait, thumb-reach zones,
+locked versus unaffordable distinguished. Receipt: the existing e2e that every
+upgrade has a display case, plus a new one that no control sits outside the
+thumb arc at the shapes the game opens at.
+
+**Y12, throughout: more secrets.** His words: "make it feel like there are
+always more secrets to find." This is the one ask with no mechanism attached to
+it and it is deliberately last - the derelicts, the lode and the veins are all
+recent answers to it, and what it needs is a measurement of how often a descent
+meets anything at all before more is added.
+
+### What this REPLACES, which is the expensive part
+
+Rule 12: a replaced objective is the most expensive stand-in there is, and two
+structures in one game is worse than either. Everything here is in the path of
+the brief and has to be resolved rather than left beside it.
+
+- **The Vault ending.** Nine Anchors opening the centre is the current climax.
+  A ladder of tier gates is a different spine.
+- **The Ballast as a bar you feed**, which Y5 and Y7 replace outright.
+- **The single pad shop**, which Y8 turns into the first of several.
+- **The flat upgrade tree**, which Y9 and Y10 re-cut by tier.
+- **The wake at the fifth Anchor**, whose job - the planet answering partway
+  through - is what Y6 now does at every tier.
+- **Nine Anchors.** A ladder wants a few per tier; nine over four tiers is two
+  and a bit, which is not a number.
+
+### Three things the brief does not settle, and guessing them would be expensive
+
+- [ ] **Y0a Is the Vault still the ending?** A ladder of gates could end AT the
+      Vault - the last gate is its door - or the Vault could go the way the
+      planet core went in round eight. Both are coherent and they are different
+      games.
+- [ ] **Y0b What does a save point save you from?** Death is a tow today: you
+      lose the hold and nothing else, and the game saves continuously. A save
+      point in the sense the word usually carries implies losing progress
+      between them, which is a far larger change than the shop half of Y8.
+- [ ] **Y0c What does "released" or "broken" mean for an Anchor?** Hours before
+      this brief he asked for an Anchor that is "physically located at that spot
+      that you can't dig", and X6 made it permanently uncuttable. "Once the
+      anchors are broken" reads as the opposite. Most likely the dark-energy
+      CORE is the thing broken and the Anchors are still lit - but that is a
+      reading, and the two words are his.

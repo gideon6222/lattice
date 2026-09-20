@@ -11,6 +11,7 @@ export * from '../src/sim/unrest';
 export * from '../src/sim/vaults';
 export * from '../src/sim/state';
 export * from '../src/sim/world';
+export * from '../src/sim/survey';
 export * from '../src/sim/feel';
 export * from '../src/sim/fly';
 export * from '../src/sim/telemetry';

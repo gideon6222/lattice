@@ -41,6 +41,7 @@ import { MAP_TILE, WORLD_DEPTH, mapKey, regionAt, regionName,
 import { el, mustEl } from './ui';
 import { sfx } from './audio';
 import { isCollapsed, unrestBand, UNREST_BANDS, isLit } from './sim/unrest';
+import { richnessOf, surveyKnown } from './sim/survey';
 import { ANCHOR_COUNT, anchorAt, anchorSealed,
          vaultOpen, VAULT_CORE_X, VAULT_CORE_D } from './sim/vaults';
 
@@ -176,6 +177,30 @@ export function draw() {
         ? 'rgb(38,34,36)' : dim(paletteOf(reg).rock, 0.34);
       x.fillRect(tx * MAP_TILE * s, py(ty * MAP_TILE),
                  MAP_TILE * s + 1, MAP_TILE * s + 1);
+
+      /* ---- what the first Anchor bought you ----
+
+         Round fourteen, X4. A region whose Anchor you have lit says whether its
+         ground is rich or lean FOR ITS DEPTH - and that comparison is the whole
+         value of it, because comparing across the world would only redraw the
+         depth ladder the player already knows.
+
+         Painted as a wash over the region's own colour rather than as a marker,
+         because a marker is a place and this is an area. The grain is the
+         region and never the cell: the Receiver gives proximity and never
+         bearing for the same reason, and a pin on the exact vein would undo the
+         one decision this game is built on.
+
+         Only over ground already seen, so it reads as something learned about
+         where you have been rather than as a layer switched on over the dark. */
+      if (surveyKnown(g.ground.lit, reg) && !isCollapsed(g.ground, reg)) {
+        const rich = richnessOf(reg);
+        if (rich !== 0) {
+          x.fillStyle = rich > 0 ? 'rgba(255,207,71,.19)' : 'rgba(120,150,190,.13)';
+          x.fillRect(tx * MAP_TILE * s, py(ty * MAP_TILE),
+                     MAP_TILE * s + 1, MAP_TILE * s + 1);
+        }
+      }
     }
   }
 
@@ -271,6 +296,27 @@ export function draw() {
       : hit ? 'rgba(232,228,218,.42)' : 'rgba(130,145,170,.26)';
     x.fillText(down ? regionName(i).toUpperCase() : hit ? regionName(i).toUpperCase() : '? ? ?',
                cx, py(cd));
+
+    /* ---- what the first Anchor bought, said in words rather than in colour ----
+
+       Round fourteen, X4. The wash over the tiles was the first attempt on its
+       own and it does not carry: every region is ALREADY painted its own rock
+       colour, which is how the map says which region you are looking at, so a
+       gold tint over olive Palewell is indistinguishable from Palewell being
+       olive. A signal has to sit where the palette is not.
+
+       One line under the name, in the Anchor's own mint for rich and a muted
+       blue for lean, so the player spends a meaning they already have - mint
+       means settled, and this is what settling told you. The wash stays as
+       texture; this is the part that is legible. */
+    if (!down && hit && calm) {
+      const rich = richnessOf(i);
+      if (rich !== 0) {
+        x.font = '700 8px "Chakra Petch", system-ui, sans-serif';
+        x.fillStyle = rich > 0 ? 'rgba(255,207,71,.85)' : 'rgba(130,155,195,.6)';
+        x.fillText(rich > 0 ? 'RICH GROUND' : 'POOR GROUND', cx, py(cd) + 11);
+      }
+    }
 
     if (down) {
       x.font = '700 8px "Chakra Petch", system-ui, sans-serif';

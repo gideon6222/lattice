@@ -357,6 +357,34 @@ export const SCENES = {
   },
 
 
+
+  /* THE SURVEY MAP with the first Anchor's gift showing. Round fourteen, X4.
+
+     Three regions lit so the wash appears on some of the map and not all of
+     it - the thing being judged is whether a rich region reads as different
+     from an ordinary one WITHOUT reading as a marker, and that is a judgement
+     about a map with both on it.
+
+     Most of the world seen, because the wash only paints over ground already
+     explored and a fresh save would show a black chart. */
+  surveymap: {
+    secs: 0.3,
+    frames: 3,
+    enter: true,
+    setup: `
+      const seen = [];
+      for (let ty = 0; ty < 113; ty++) for (let tx = 0; tx < 16; tx++) seen.push(tx + ',' + ty);
+      __cw.g.seen = seen;
+      __cw.g.ground.lit = [2, 7, 10];
+      __cw.g.best.depth = 400;
+      __cw.g.px = 6; __cw.g.pd = -1;
+      __cw.advance(0.4);
+      document.getElementById('btnMap').click();
+      __cw.advance(0.4);
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
   /* A VEIN, round fourteen X1. A seven-cell gold vein at 16,72 on planet 0 -
      the biggest between 64 and 140 m, found by sweeping the world rather than
      by looking for a nice one, so this is a typical good find and not a
