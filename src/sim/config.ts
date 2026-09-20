@@ -472,6 +472,102 @@ export const LODE: Ore = {
    which is the whole reason it asserts a relationship. */
 export const LODE_COLLAPSE = 5;
 
+/* ---------- ore comes in veins ----------
+
+   Round fourteen, X1, and the whole of his ask "can you make materials feel
+   more rare? I want it to feel exciting when you find resources."
+
+   **Measured before anything was designed.** Every ore cell on the planet,
+   flood-filled into deposits of the same id:
+
+     ore         deposits  cells  mean size
+     copper           292    307      1.05
+     gold             213    219      1.03
+     ruby              82     83      1.01
+     magmite           40     40      1.00
+     solmarrow          5      5      1.00
+
+   **Every ore in this game was a single isolated cell.** There were no veins
+   anywhere and never had been. Finding gold got you one gold - the number went
+   up and you moved on, which is exactly the "it does not feel exciting" he was
+   reporting. And the deep ores were already savage: solmarrow is five separate
+   cells on the whole planet, about one in 980 below its own floor, so lowering
+   a rate would not have made it exciting, it would have made it absent.
+
+   The research (`C:\dev\plans\lattice\RARITY.md`) says the same from the other
+   side, and it is the finding that governs this: **lowering a spawn rate alone
+   is not shown anywhere to increase excitement.** It comes from the reveal and
+   from the material having a named use. Every game surveyed clusters its rarest
+   resource - Minecraft generates ore as vein blobs rather than single blocks,
+   Deep Rock's Nitra bulges out of cave walls in clumps that read at a distance.
+
+   ---------- how, and why the total cannot drift ----------
+
+   The ladder used to ask one white-noise roll per cell. It now asks ONE roll
+   per BLOCK of `VEIN_W x VEIN_H` cells, so every cell in a block asks the same
+   question and gets the same answer, and then a per-cell roll decides which of
+   those cells actually carry it.
+
+   **The compensation is exact and that is the point.** A block is a vein of ore
+   `o` when its roll is under `o.chance * cellsPerBlock / VEIN_CELLS`, and a
+   cell inside it belongs when it falls inside the vein's disc, which holds
+   `VEIN_CELLS` cells on average. The expected ore per cell is therefore
+   `chance * cellsPerBlock / VEIN_CELLS * VEIN_CELLS / cellsPerBlock`, which is
+   `chance` - the number it was before. **This is a change to WHERE ore is and
+   never to how much**, so nothing else in the economy has to be rebalanced, and
+   `test/vein.test.mjs` asserts the supply rather than trusting this paragraph.
+
+   Scaling every entry by the same constant also preserves the ladder's strict
+   ordering, which is the invariant that lets a new deepest ore convert only the
+   ore directly above it.
+
+   ---------- and why the fill is a DISC, not a second coin flip ----------
+
+   The first build gated each cell of a vein block on its own white-noise roll,
+   which is wrong in a way that only shows up when you measure it: independent
+   per-cell rolls fragment the vein. A 4x4 block at half fill is eight cells
+   scattered through sixteen, and scattered cells are not a blob - they are
+   several blobs of one and two. Measured across four block sizes, the mean
+   connected deposit never moved off 2.5 no matter how big the block got:
+
+     block  fill   total drift   deposits   mean   biggest
+      3x3   0.55        +2.0%         636   2.54        12
+      4x4   0.50        +1.2%         604   2.65        14
+      4x3   0.50        -2.3%         627   2.46        15
+      5x4   0.45        -2.5%         630   2.45        18
+
+   Bigger blocks bought bigger OUTLIERS and no bigger typical vein, which is
+   the opposite of the point: the thing being designed is the ordinary find.
+
+   So a vein is a DISC. The block roll decides whether there is one and which
+   ore; two more rolls place its heart anywhere inside the block; and a cell
+   belongs if it is inside the radius, with a per-cell wobble on the edge so it
+   is a blob rather than a circle. Connected by construction. */
+export const VEIN_W = 4;
+export const VEIN_H = 4;
+
+/* How many cells an average vein holds. This is the dial: it is the size of
+   the find, in cells, and everything else here is derived from it. */
+export const VEIN_CELLS = 5;
+
+/* The radius that holds that many cells, from the area of a circle rather than
+   picked (INDEX.md rule 10b). Deriving it is what keeps "a vein is about five
+   cells" true when somebody retunes the five. */
+export const VEIN_R = Math.sqrt(VEIN_CELLS / Math.PI);
+
+/* How far the edge wobbles, as a multiplier on the radius. At 0 a vein is a
+   clean circle, which in a world of flat-shaded cubes reads as a machine part.
+   The pair averages 1.0 so the expected area is unchanged. */
+export const VEIN_WOBBLE_LO = 0.78;
+export const VEIN_WOBBLE_HI = 1.22;
+
+/* The furthest a vein can reach from its heart, which is how many blocks a
+   cell has to ask about. Derived, so it cannot fall out of step with the
+   wobble - and `VEIN_W` and `VEIN_H` must both stay above twice this, or a
+   vein could reach past its neighbouring block and the four-block sweep in
+   `blockAt` would start missing veins. `test/vein.test.mjs` asserts that. */
+export const VEIN_REACH_MAX = VEIN_R * VEIN_WOBBLE_HI;
+
 /* ---------- the derelict's hold ----------
 
    Round thirteen, W2. What is left in a wrecked drill ship, and the third of

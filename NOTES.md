@@ -5928,6 +5928,84 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## X1: ore comes in veins, and two wrong designs on the way there
+
+His ask was "make materials feel more rare". The measurement said the rate was
+not the problem: **every ore was a single isolated cell**, mean deposit 1.00
+across all eleven, so a find was one cell and a number going up. The deep ores
+were already savage - solmarrow, five cells on the planet - so lowering a rate
+would have made it absent rather than exciting. The research agreed from the
+other side: lowering a spawn rate alone is not shown anywhere to increase
+excitement; it comes from the reveal and from a named use.
+
+So the same supply is clustered. Measured on planet 0: gold went from 213
+deposits of one cell to **51 of 3.9**, mean deposit 1.00 to **3.86**, total ore
+1,582 to 1,535 (**-3.0%**). Met four times less often, worth four times as much.
+
+**Wrong design one: an independent per-cell fill roll fragments its own vein.**
+A 4x4 block at half fill is eight cells scattered through sixteen, and scattered
+cells are several blobs of one and two rather than one blob of eight. Swept four
+block sizes and the mean deposit never left 2.5 - bigger blocks bought bigger
+OUTLIERS and no bigger typical vein, which is the opposite of the point, since
+the thing being designed is the ordinary find. A vein is a DISC now, connected
+by construction, with a per-cell wobble on the edge so it is a blob and not a
+circle.
+
+**Wrong design two: a disc kept inside its own block leaves the grid showing
+through.** Clamping each heart a radius clear of its block's edges meant a vein
+could never straddle a boundary, and the measured result was vertical stripes of
+dead rock at columns 0, 4, 8 ... 60, holding 0 to 2 ore cells where every other
+column held 16 to 38. **Nothing in the supply total showed it** - the world had
+exactly the right amount of ore, arranged as a barcode. Only a per-column
+reading found it, which is why there is a per-column reading in
+`test/vein.test.mjs` now.
+
+The fix is that the heart roams its whole block and a cell asks the blocks whose
+heart could reach it - at most four, because twice the maximum reach is less
+than a block, and `vein.test.mjs` asserts that relationship so a retune cannot
+quietly make the sweep start missing veins.
+
+**Derived rather than written twice** (rule 10b): `VEIN_CELLS` is the dial - a
+vein is about this many cells - and `VEIN_R` is the radius of the circle that
+holds that many, with the wobble averaging exactly 1 so widening it changes how
+ragged a vein is and never how big.
+
+**And the e2e probe that broke was already fragile before veins touched it.**
+`drilling holds the ship against the rock` searched for a column with twenty
+consecutive plain-rock cells; a seam is one rock cell in six, so that is about a
+3% chance per column, and the veins moved the world just enough that no column
+passed. It never needed those twenty: the probe digs that column itself, so what
+was in it never mattered. It checks the two cells it actually drills now.
+Re-verified by planting the collision bug: still 49.4999 against a bar of 49.2.
+
+## Round fourteen, 2026-09-19: the frozen world was re-recorded, the second time ever
+
+`test/baseline/blocks-frozen.json` has one legal reason to be replaced and this
+is it: a deliberate ore rebalance. Round seven was the first (the ladder spread
+from five worlds to eight and density fell from 10% to 7.5%). X1 is the second -
+ore stopped being single scattered cells and started coming in veins.
+
+**The diff was read before the file was replaced.** Of 14,118 cells across
+planets 0-5:
+
+| change | cells |
+|---|---|
+| rock, air or a room changed | 5,915 (already licensed; 44.3% of cells differed from this file BEFORE this change, because the world went from 13 columns and 58 m deep to 61 and 452) |
+| stopped being ore | 832 |
+| started being ore | 683 |
+| one ore became another | 37 |
+
+Ore across those six old windows went 892 to 743, -16.7%. **On the real planet
+it is -3.0%**, 1,582 cells to 1,535, and the gap is the whole story of those
+windows: they are the old 13-column, 58-metre worlds, and vein statistics over
+forty-five blocks are noise. The planet the game is actually played on is the
+number that matters and `test/vein.test.mjs` asserts it within ten per cent.
+
+**`scripts/record-frozen.mjs` is new and exists because round seven left no
+recorder**, so this round had to work the file format out of the file. It prints
+the reading and refuses to write without `--write`, which is the shape the rule
+already asked for in prose: read the diff, write it down, and only then replace.
+
 ## X6: the Anchor had one knob for two different properties
 
 His ask was "make the anchor something physically located at that spot that you

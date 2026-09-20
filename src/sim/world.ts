@@ -1,7 +1,8 @@
 import { W, START_X, ORES, DEF, baseRock, coreDepth, hardMult, valueMult,
          GEODE, GAS, CACHE, BLOOM, BLOOM_MAX, LODE, SALVAGE, RUBBLE, RUBBLE_HARD, SEAM, SEAM_CHANCE, TREMOR_SAFE_RADIUS,
          RELIC_COLOR, RELIC_HOST, relicAt, relicFor,
-         CAVE_MIN_DEPTH, caveChanceOn, gasChanceOn, geodeChanceOn, SUPPLIES, traitOf } from './config';
+         CAVE_MIN_DEPTH, caveChanceOn, gasChanceOn, geodeChanceOn, SUPPLIES, traitOf,
+         VEIN_W, VEIN_H, VEIN_CELLS, VEIN_R, VEIN_WOBBLE_LO, VEIN_WOBBLE_HI, VEIN_REACH_MAX } from './config';
 import { key, mixHex, rnd } from './util';
 import { regionAt, REGION_COUNT } from './region';
 import { vaultCells, anchorHere, WORKED_HARD, SEALED_HARD, HULK_HARD,
@@ -418,7 +419,54 @@ export function blockAt(x: number, d: number): Block | null {
     return null;
   }
 
-  const r = rnd(x, d, g.planet);
+  /* ---------- the vein roll ----------
+
+     One roll per block of cells rather than one per cell, so a whole blob asks
+     the ladder the same question. See the long note in config.ts: the per-cell
+     `fill` gate below compensates exactly, so this moves ore without changing
+     how much of it there is.
+
+     Offset 1063, which was free: 11, 23, 41, 77, 91, 131, 137, 173, 211, 257,
+     311, 313, 421, 431, 601, 619 (and 620, 621), 643, 733, 887, 977 and 1013
+     are taken. 1064 is its neighbour, the way SLOT_SEED uses its own. */
+  /* ---------- which vein, if any, this cell belongs to ----------
+
+     Each block of VEIN_W x VEIN_H cells holds one vein's HEART, and the heart
+     roams its whole block rather than being kept a radius clear of the edges.
+     That freedom is the fix for a real artifact: clamping the heart inside its
+     own block left every block boundary barren, and the measured result was
+     vertical stripes of dead rock at columns 0, 4, 8 ... 60, with 0 to 2 ore
+     cells in a column where every other column had 16 to 38.
+
+     The price is that a cell has to ask more than one block, because a vein now
+     straddles boundaries. At most FOUR: a heart can only reach VEIN_REACH_MAX,
+     and twice that is less than a block, so the blocks that could cover this
+     cell span at most two in each axis.
+
+     Nearest heart wins where two overlap, so a cell belongs to the vein it is
+     most inside rather than to whichever block happened to be visited first. */
+  const wob = VEIN_WOBBLE_LO +
+    rnd(x + 53, d + 97, g.planet + 1066) * (VEIN_WOBBLE_HI - VEIN_WOBBLE_LO);
+  const reach2 = (VEIN_R * wob) * (VEIN_R * wob);
+  const bx0 = Math.floor((x - VEIN_REACH_MAX) / VEIN_W);
+  const bx1 = Math.floor((x + VEIN_REACH_MAX) / VEIN_W);
+  const bd0 = Math.floor((d - VEIN_REACH_MAX) / VEIN_H);
+  const bd1 = Math.floor((d + VEIN_REACH_MAX) / VEIN_H);
+  /* 1 is "no vein here": every entry's scaled chance is well under 1, so the
+     ladder below cannot match it. */
+  let r = 1, best = Infinity;
+  for (let bxi = bx0; bxi <= bx1; bxi++) {
+    for (let bdi = bd0; bdi <= bd1; bdi++) {
+      const hx = (bxi + rnd(bxi * 13 + 5, bdi * 29 + 3, g.planet + 1064)) * VEIN_W;
+      const hd = (bdi + rnd(bxi * 23 + 11, bdi * 7 + 19, g.planet + 1065)) * VEIN_H;
+      const ox = x - hx, od = d - hd;
+      const dist = ox * ox + od * od;
+      if (dist > reach2 || dist >= best) continue;
+      best = dist;
+      r = rnd(bxi * 31 + 7, bdi * 17 + 13, g.planet + 1063);
+    }
+  }
+  const inVein = best < Infinity;
 
   /* Pockets are checked before ore and on their own seed, so they are rare
      enough to be an event rather than a resource. Gas first: it is the one you
@@ -483,7 +531,11 @@ export function blockAt(x: number, d: number): Block | null {
   }
 
   for (const o of ORES) {
-    if (d >= o.min && r < o.chance) {
+    /* The block roll picks which ore this block is a vein of, and the disc
+       decides whether this cell is inside it. The block probability is scaled
+       by cells-per-block over cells-per-vein, so the two multiply back to
+       `chance` - the supply the world had before veins existed. */
+    if (d >= o.min && r < o.chance * (VEIN_W * VEIN_H) / VEIN_CELLS && inVein) {
       return { id: o.id, name: o.name, color: o.color, host: o.host, glow: o.glow, shards: o.shards, tone: o.tone,
                hard: o.hard * hm, wt: o.wt, value: o.value, ore: true };
     }

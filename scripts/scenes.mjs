@@ -356,6 +356,33 @@ export const SCENES = {
     step: `__cw.advance(SECS);`
   },
 
+
+  /* A VEIN, round fourteen X1. A seven-cell gold vein at 16,72 on planet 0 -
+     the biggest between 64 and 140 m, found by sweeping the world rather than
+     by looking for a nice one, so this is a typical good find and not a
+     showpiece.
+
+     The shaft stops three cells short so the shot is the approach: ore glows
+     through unbroken rock (coreGlow, the find-the-vein curve), and what is
+     being judged is whether SEVEN cells of it reads differently from the one
+     cell this game used to give you. */
+  vein: {
+    secs: 0.4,
+    frames: 6,
+    enter: true,
+    setup: `
+      const VX = 16, VD = 72;
+      const dug = [];
+      for (let d = 0; d <= VD - 4; d++) dug.push(VX + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.up.drill = 3;
+      __cw.g.px = VX; __cw.g.pd = VD - 5;
+      __cw.resetBlocks();
+      __cw.advance(0.4);
+    `,
+    step: `__cw.R.held = 'down'; __cw.advance(SECS);`
+  },
+
   /* A LIT ANCHOR, with the ship sitting inside its cell. Round fourteen, X6.
 
      `hallEye()` is Anchor 1's hall, which is the one the intro uses, so its

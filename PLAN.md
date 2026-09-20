@@ -3597,7 +3597,7 @@ sense that matters - the number of separate find-events - while making each one
 a place you stop and work. Total supply is unchanged by construction, so nothing
 else in the economy needs rebalancing.
 
-- [ ] **X1 Ore comes in veins.** The round's biggest change and the answer to
+- [x] **X1 Ore comes in veins.** Done 2026-09-19. The round's biggest change and the answer to
       ask 1. Each ore's cells cluster into blobs around rolled vein sites
       instead of rolling independently per cell. **Total cells per ore stay
       within a few per cent of what they are now** - this is a change to WHERE

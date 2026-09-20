@@ -112,7 +112,16 @@ const FROZEN = {
      depth question, and `g.planet` is in it because the band boundaries wander
      per world. This is the generator, which is what the field still exists
      for. */
-  'sim/world.ts': 21,
+  /* 21 -> 23 on 2026-09-19, round fourteen X1: the vein sampler. Four seeded
+     hashes - the vein roll, the heart's two coordinates and the edge wobble -
+     all on `g.planet + 1063..1066`, which is the generator seeding its own
+     stream exactly as every pocket in this file already does. Two of the four
+     share a line, which is why this is +2 and not +4.
+
+     Not a question `regionAt(x, d)` could answer: there is no cell being asked
+     about, only a stream being started, and the stream has to be the same on
+     every machine that loads the same save. */
+  'sim/world.ts': 23,
   'ui.ts': 2
 };
 
