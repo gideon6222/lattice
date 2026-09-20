@@ -231,10 +231,21 @@ test('a locked door never locks the planet', () => {
 
      So: with NOTHING found, flood the world through everything that is not
      unbreakable and check the bottom is still reachable. This is a claim about
-     the whole planet and it is checked over the whole planet. */
+     the whole planet and it is checked over the whole planet.
+
+     **Round fifteen narrowed the claim and did not weaken it.** The tier gates
+     deliberately DO lock the planet - that is Y1's whole job - so "every depth
+     is reachable with nothing found" stopped being true by design. What still
+     has to be true, and is the same protection under the new structure, is that
+     nothing is ever locked behind ITSELF: every gate is open here, and the test
+     below it checks each tier's own Anchors are reachable without passing the
+     gate they open. Together those two are the old claim, split at the seam the
+     gates put in the world. */
   H.setWorld(0);
   H.g.dug = new Set();
   H.g.ground = H.newGround();
+  H.g.ground.gates = [];
+  for (let t = 0; t < H.GATE_COUNT; t++) H.g.ground.gates.push(t);
   const held = H.g.found.slice();
   H.g.found = [];
 
@@ -518,4 +529,62 @@ test('a lit Anchor does not plug its own column, which is the bug the ghost flag
      reading the wrong shape. */
   assert.ok(route.some((c) => c[0] === a.x && c[1] === a.d),
     'the route home avoided the Anchor, so this test would pass with the flag removed');
+});
+
+test('every Anchor is reachable without passing the gate it opens', () => {
+  /* The unfinishable-save guard, in the shape the tier gates give it. Tier t's
+     three Anchors open tier t's gate, so if any of them sat BELOW that gate the
+     world could never be opened past it and the save would be dead - with
+     nothing on screen to say why.
+
+     Depth alone is checked elsewhere; this is reachability, which is the
+     stronger claim: an Anchor above the gate but walled off by unbreakable
+     ground is just as fatal. Flooded with only the gates ABOVE this tier open,
+     which is exactly what a player arriving at this tier has. */
+  for (let t = 0; t < H.GATE_COUNT; t++) {
+    H.setWorld(0);
+    H.g.dug = new Set();
+    H.g.ground = H.newGround();
+    for (let k = 0; k < t; k++) H.g.ground.gates.push(k);
+    /* WITH the laser, deliberately. Three halls are sealed by design and the
+       laser is their key; whether that key can be reached before it is needed
+       is a different claim with its own test two above this one ("the key is
+       never behind the door it opens"). Asking both questions in one flood made
+       this fail on Kryllon, whose hall is sealed - which was this test
+       over-reaching rather than a gate being wrong. The question here is only
+       about GATES. */
+    const held = H.g.found.slice();
+    H.g.found = ['laser'];
+
+    const seen = new Set(['30,0']);
+    let queue = [[30, 0]];
+    while (queue.length) {
+      const next = [];
+      for (const c of queue) {
+        for (const n of [[c[0], c[1] - 1], [c[0], c[1] + 1], [c[0] - 1, c[1]], [c[0] + 1, c[1]]]) {
+          const x = n[0], d = n[1];
+          if (x < 0 || x >= H.W || d < 0 || d >= H.WORLD_DEPTH) continue;
+          const k = x + ',' + d;
+          if (seen.has(k)) continue;
+          const b = H.blockAt(x, d);
+          if (b && !Number.isFinite(b.hard) && !b.ghost) continue;
+          seen.add(k);
+          next.push(n);
+        }
+      }
+      queue = next;
+    }
+    H.g.found = held;
+
+    for (const r of H.gateAnchors(t)) {
+      const a = H.anchorAt(r);
+      /* The Anchor's own cell is uncuttable, so reaching it means reaching a
+         cell NEXT to it - which is what lighting one actually requires. */
+      const touching = [[a.x, a.d - 1], [a.x, a.d + 1], [a.x - 1, a.d], [a.x + 1, a.d]]
+        .some((c) => seen.has(c[0] + ',' + c[1]));
+      assert.ok(touching,
+        `${H.regionName(r)}'s Anchor at ${a.x},${a.d} cannot be reached with only the gates above ` +
+        `tier ${t} open - it is locked behind the gate it is supposed to open`);
+    }
+  }
 });

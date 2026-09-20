@@ -39,7 +39,11 @@ const ALL_IDS = [
      through, a light that is still on, and the hold behind them. The salvage
      is the only one that enters the hold, which is why it is the only one with
      a DEF row. */
-  'hulk', 'derelictlamp', H.SALVAGE.id
+  'hulk', 'derelictlamp', H.SALVAGE.id,
+  /* Round fifteen's tier gates. One id, because a barrier is one thing in two
+     states and the shut one is the only state that exists as a block - an open
+     gate is simply absent. */
+  'gate', 'darkcore', 'darkspent'
 ].sort();
 const CHAR = new Map(ALL_IDS.map((id, i) => [id, ALPHA[i]]));
 
@@ -265,6 +269,11 @@ const OVERWRITERS = new Set([
      guards the rooms, and the reason to keep the wrecks out of the pool is the
      world staying where the player left it, not this assertion. */
   'hulk', 'derelictlamp', H.SALVAGE.id,
+  /* Round fifteen's tier gates, and the narrow claim again: a barrier is
+     stamped at three FIXED depths before anything else in blockAt can answer,
+     so it replaces the cell it lands on and can change no other. The ore
+     stream underneath is untouched, which is what this file defends. */
+  'gate', 'darkcore', 'darkspent',
   /* And the Bloom, for the same reason as the pockets above it: rolled on its
      own seed after every other roll has happened, so it can change what a cell
      holds and can never change what any other cell holds. */

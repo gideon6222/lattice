@@ -121,7 +121,12 @@ const FROZEN = {
      Not a question `regionAt(x, d)` could answer: there is no cell being asked
      about, only a stream being started, and the stream has to be the same on
      every machine that loads the same save. */
-  'sim/world.ts': 23,
+  /* 23 -> 24 on 2026-09-19, round fifteen Y2: the dark-energy core takes its
+     hardness off the LOCAL BAND like every other authored wall, which is
+     `baseRock(d, g.planet, x)` - the identical call worked stone, the Vault
+     seal, rubble and the derelict's hull all make. The generator seeding
+     itself, which is what the field still exists for. */
+  'sim/world.ts': 24,
   'ui.ts': 2
 };
 

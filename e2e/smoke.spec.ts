@@ -1605,17 +1605,24 @@ test('drilling holds the ship against the rock, never inside it', async ({ page 
        rock: the two cells it cuts, and the shaft it digs to get there. Robust
        to the next room anybody adds, which on this evidence is the point. */
     const ROCKS = new Set(w.ROCKS.map((r: any) => r.id));
+    /* Ordinary diggable ground: a rock band or a mineral seam, which is rock
+       with flecks in it and drills at the band's own hardness. Not ore, not a
+       room, not a hazard - those change what the drill is doing. */
     const plain = (x: number, d: number) => {
       const b = w.blockAt(x, d);
-      return !!b && ROCKS.has(b.id);
+      return !!b && (ROCKS.has(b.id) || b.id === 'seam');
     };
+    /* Only the TWO cells that actually get drilled. The first version also
+       demanded twenty consecutive plain cells down the shaft, which was both
+       unnecessary - the probe digs that column itself, so what was in it never
+       mattered - and fragile: a seam is one rock cell in six, so twenty clean
+       ones in a row is about a 3% chance per column, and round fourteen's veins
+       moved the world just enough to leave no column passing at all. */
     let CX = -1;
     for (let x = 1; x < w.W - 1 && CX < 0; x++) {
-      let ok = plain(x, 50) && plain(x + 1, 40) && plain(x + 1, 49);
-      for (let d = 30; d <= 49 && ok; d++) ok = plain(x, d);
-      if (ok) CX = x;
+      if (plain(x, 50) && plain(x + 1, 40)) CX = x;
     }
-    if (CX < 0) return { fail: 'no column of plain rock to drill in' } as any;
+    if (CX < 0) return { fail: 'no ordinary ground to drill into' } as any;
 
     const probe = (dir: string, px: number, pd: number) => {
       w.g.dug.clear();
@@ -1641,9 +1648,9 @@ test('drilling holds the ship against the rock, never inside it', async ({ page 
      against the face of the cell at 50 puts its centre at 49.16. Anything past
      49.5 has the ship's middle inside the rock. A small margin over 49.16 for
      the skin the collision leaves. */
+  expect((out as any).fail, 'the probe could not find ordinary ground').toBeUndefined();
   expect(out.down.worstY,
     'drilling down drove the ship into the cell it was cutting').toBeLessThan(49.2);
-  expect((out as any).fail, 'the probe could not find plain rock').toBeUndefined();
   expect(out.right.worstX,
     'drilling sideways drove the ship into the cell it was cutting').toBeLessThan(out.cx + 0.2);
   /* and the perpendicular axis is still held on the line, which is what
@@ -3662,6 +3669,16 @@ test('every Anchor lights by digging down its own column', async ({ page }) => {
          reason the next one is reachable. The laser is aboard because three of
          the nine are sealed and it is the key by design. */
       w.g.ground = w.newGround();
+      /* Every gate ABOVE this Anchor's tier open, and its own gate shut.
+
+         Round fifteen: the tier gates block the descent on purpose, so "dig
+         down its own column" is now false below 113 m unless the gates above
+         have been opened - which is exactly the state a player arriving at this
+         tier is in. Opening this Anchor's OWN gate would be the mistake: that
+         is the gate this Anchor exists to open, and leaving it shut is what
+         keeps the test honest about the thing it has always checked, which is
+         that the objective is reachable when you get there. */
+      for (let t = 0; t < w.depthTier(a.d); t++) w.g.ground.gates.push(t);
       w.g.dug = new Set();
       w.g.rubble = new Set();
       w.g.damage = {};

@@ -5928,6 +5928,100 @@ because the list lives in another repo and a test that pinned its words would
 fail every time somebody added one. Verified by putting the whole-word pattern
 back: it fails with `"greyed" is not matched at all`.
 
+## Y2: the dark-energy core, and why it is a cell OF the barrier
+
+His brief: once a tier's Anchors are released, "an unbreakable block will open
+up that looks inviting but full of dark energy. It controls a forcefield or
+something similar that blocks your path."
+
+**The core is one cell of the gate itself, not a room beside it**, and the first
+reason is his own sentence: the block that controls the forcefield belongs ON
+the forcefield. The second is that a player who has met the wall already knows
+where to look, so the hunt stays on the Anchors and is never on the thing they
+unlock - a second hunt after the first one is finished is the "now go and find
+it" chore. The third is that a wall which grows a door is one sentence, and a
+wall plus a door in another room is two.
+
+**Four states, one function.** `gateCellAt(x, d, lit, open)` returns `wall`,
+`core`, `spent` or `open`, and `blockAt`, the map and every test read the same
+answer. Two places deciding what a barrier cell is would be the bug where the
+world draws a wall the ship flies through - which is exactly the shape of the
+`tierOf` collision one milestone earlier, and the reason this one is a single
+function rather than a pair of predicates.
+
+| state | when |
+|---|---|
+| `wall` | the tier's three Anchors are not all released |
+| `core` | they are - one cuttable cell, `hard` off the local band x `hm` x 3 |
+| `spent` | broken; `ghost`, `Infinity`, glow 1.0, for ever |
+| `open` | the rest of the barrier, gone |
+
+**The spent state is Y14, and it is X6's `ghost` doing the job it was built
+for.** X6 separated "cannot be cut" from "is in the way"; the core needs one of
+each. Uncuttable so it can never be tidied away, passable because it sits in the
+one cell every player of the tier below has to pass through. Ticking Y14
+separately was never possible - it is one of the four states above.
+
+**The colour is the deception.** `0xffd27a`, warm gold, in a wall that is cold
+violet. It reads as a reward, which is what his reveal needs: the player is
+meant to believe they are doing a good thing by releasing it. Nothing in the
+game says otherwise until Y15.
+
+Frozen world: **0 cells changed.** The core only exists once Anchors are
+released, so a new world is bit-identical. `blocks.json` moved because adding
+two ids re-sorted the legend alphabet; the counts diff confirms no cell moved.
+
+Verified in the harness by walking the three states in order: `gate` at
+`lit: []`, `darkcore` with hardness 7.2 at `lit: [0,1,2]`, `darkspent` once
+`gates: [0]`, with the neighbouring cells back to `stone`.
+
+## Y1: the tier gates, and the geometry that was already there
+
+His brief asks for forcefields that block the descent until Anchors are
+released. **Nothing about the shape of it was invented.** The world has been
+four region rows of 113 m since round eight, with three Anchors in each of the
+top three rows and none in the deepest, where the Vault sits at 405. So the
+gates fall at 113, 226 and 339, each opened by its own row's three Anchors, and
+the last one is the Vault's door - which is exactly what he confirmed when the
+question was put to him.
+
+A gate is one cell thick, the full width of the world, at a FIXED depth rather
+than a wandering one: a barrier you have to find the end of is a maze, and a
+barrier with no end is a statement. `hard: Infinity` and deliberately NOT
+`ghost` - it is the one block in the game that is both uncuttable and genuinely
+in the way, which is the pair X6 separated and this is what needs both halves.
+
+**Three things cost a cycle each and all three were the test being wrong.**
+
+1. The first reachability helper walked one column and stopped at the first
+   `Infinity` - which is Verdax's unlit ANCHOR at 94 m, not a gate. An Anchor is
+   uncuttable and you fly around it, so "this column is blocked" is not "the
+   world is blocked". It is a flood fill now, which is also the stronger claim:
+   his brief says the forcefield blocks your path, and the only honest way to
+   ask that is to try every way round.
+2. `tierOf` already existed. `unrest.ts` has exported one since round eight
+   meaning "how many Anchors are lit". **Two star-exports of one name are
+   ambiguous and an ES module drops them both silently**, so the new one simply
+   did not exist at the harness and failed as "is not a function". Renamed to
+   `depthTier`. A collision that deletes both sides is worse than one that
+   shadows.
+3. The new unfinishable-save guard failed on Kryllon, whose hall is one of the
+   three SEALED ones. That was the test asking two questions in one flood - the
+   gate question and the laser question - and the laser has its own guard two
+   tests above it. Scoped to gates.
+
+**And `a locked door never locks the planet` had to be narrowed rather than
+deleted.** Its claim was that with nothing found, every depth is reachable. The
+gates make that false ON PURPOSE. What still has to hold is that nothing is
+locked behind itself, so the old test now runs with every gate open, and a new
+one checks each tier's Anchors are reachable with only the gates ABOVE it open.
+Together they are the old claim, split at the seam the gates put in the world.
+Planting a gate above the Anchors that open it fails four tests.
+
+Census: `gate` +1098 across six planets and everything else summing to -1098,
+which is exactly three full-width rows per world. The frozen world moved 0.6%,
+three ore cells, from barriers landing on them.
+
 ## X4: the first Anchor's gift, and why it is judged against the depth row
 
 His ask: the map should show where minerals are concentrated, only for regions

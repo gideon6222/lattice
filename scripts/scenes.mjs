@@ -411,6 +411,55 @@ export const SCENES = {
     step: `__cw.R.held = 'down'; __cw.advance(SECS);`
   },
 
+
+  /* THE BARRIER, and the door in it. Round fifteen, Y1 and Y2.
+
+     Two frames of one place: the ship arriving at tier 0's forcefield with its
+     Anchors not yet broken, and the same cell once they are. What is being
+     judged is whether the barrier reads as a wall rather than as rock, and
+     whether the core reads as an invitation - which is the whole of the turn
+     the story takes, so it has to look like a reward and not like a warning.
+
+     The shaft is cut straight down the core's own column so both frames are
+     the same picture with one cell different. */
+  barrier: {
+    secs: 0.4,
+    frames: 2,
+    enter: true,
+    setup: `
+      const CX = __cw.coreColumn(0), CD = __cw.gateDepth(0);
+      const dug = [];
+      for (let d = 0; d <= CD - 4; d++) dug.push(CX + ',' + d);
+      for (let x = CX - 4; x <= CX + 4; x++) for (let d = CD - 4; d <= CD - 1; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.up.drill = 4; __cw.g.up.scan = 3;
+      __cw.g.px = CX; __cw.g.pd = CD - 3;
+      __cw.resetBlocks();
+      __cw.advance(0.5);
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
+  /* The same wall once the tier's three Anchors are broken. */
+  barrieropen: {
+    secs: 0.4,
+    frames: 2,
+    enter: true,
+    setup: `
+      const CX = __cw.coreColumn(0), CD = __cw.gateDepth(0);
+      const dug = [];
+      for (let d = 0; d <= CD - 4; d++) dug.push(CX + ',' + d);
+      for (let x = CX - 4; x <= CX + 4; x++) for (let d = CD - 4; d <= CD - 1; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.lit = __cw.gateAnchors(0).slice();
+      __cw.g.up.drill = 4; __cw.g.up.scan = 3;
+      __cw.g.px = CX; __cw.g.pd = CD - 3;
+      __cw.resetBlocks();
+      __cw.advance(0.5);
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
   /* A LIT ANCHOR, with the ship sitting inside its cell. Round fourteen, X6.
 
      `hallEye()` is Anchor 1's hall, which is the one the intro uses, so its

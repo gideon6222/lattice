@@ -3710,71 +3710,71 @@ find more".
 
 ### The asks, numbered by their trigger
 
-**Y1, at a depth the player has not earned yet: a forcefield stops the ship.**
+- [x] **Y1, at a depth the player has not earned yet: a forcefield stops the ship.** Done 2026-09-19.
 The world is cut into tiers by barriers the drill cannot pass. Default is
 blocked; the exception is a tier whose gate has been broken. Reason: a depth you
 cannot reach is the only thing that makes reaching it an event. Receipt: a test
 that walks the ship down every column and finds it stopped at each tier edge
 until the gate for that tier is broken.
 
-**Y2, when N Anchors of a tier are lit: a dark-energy core appears.** It looks
+- [x] **Y2, when N Anchors of a tier are lit: a dark-energy core appears.** Done 2026-09-19. It looks
 inviting and it is the only thing in the tier that can open the gate. Default is
 absent; it exists only once the tier's Anchors are lit. Reason: the Anchors stop
 being a checklist the moment lighting them visibly does something local.
 Receipt: a test that the core is absent at N-1 and present at N.
 
-**Y3, when the core is destroyed: the forcefield below it drops.** One core, one
+- [ ] **Y3, when the core is destroyed: the forcefield below it drops.** One core, one
 tier, for ever - it does not come back. Reason: a gate that can re-lock is a
 chore. Receipt: the Y1 test, run after breaking each core in turn.
 
-**Y4, when the core is destroyed: the player gains one new ability.** One per
+- [ ] **Y4, when the core is destroyed: the player gains one new ability.** One per
 tier and never a number - a verb or a lens, not a bigger tank. Reason: the
 research's rule from Hollow Knight is that each key opens a few locks, and a
 numeric upgrade opens none. Receipt: a test that every tier grants exactly one,
 and that no two tiers grant the same.
 
-**Y5, when the first core is destroyed: planet integrity appears, and it is
+- [ ] **Y5, when the first core is destroyed: planet integrity appears, and it is
 falling.** Before that it does not exist on screen at all. Reason, his: "the
 structure integrity of the planet feels more like a status bar than something
 integral" - a readout shown before it can be acted on is furniture. Receipt: a
 test that the HUD carries no integrity element until the first core is broken.
 
-**Y6, when each further core is destroyed: integrity falls faster.** The
+- [ ] **Y6, when each further core is destroyed: integrity falls faster.** The
 player's own progress is what is breaking the planet. Reason: this is the
 brief's whole source of escalation, and it costs no new content. Receipt: a test
 that the decay rate after k cores is strictly greater than after k-1, and that
 it is bounded.
 
-**Y7, when the player repairs the planet: it is an activity, not a payment.**
+- [ ] **Y7, when the player repairs the planet: it is an activity, not a payment.**
 Feeding materials to a bar is named in the brief as the thing to avoid. Reason:
 a donation has no decision in it, and this game's whole shape is decisions about
 where to spend a descent. Receipt: a test that repair cannot be completed from
 the pad, and that it consumes something other than credits.
 
-**Y8, at every tier gate: a shop and a save point.** Each barrier is also a
+- [ ] **Y8, at every tier gate: a shop and a save point.** Each barrier is also a
 place to stop. Reason: a gate is already the one cell every player in that tier
 passes through, so it is where a service costs no new world. Receipt: a test
 that each tier has exactly one, at its own gate.
 
-**Y9, buying at the first shop: a cap on what it will sell.** The starting shop
+- [ ] **Y9, buying at the first shop: a cap on what it will sell.** The starting shop
 holds few upgrades and stops. Reason, his: "to make sure everything stays
 balanced" - an early game that can buy late-game power has no late game.
 Receipt: a test that the sum of what tier one can sell is under a measured
 ceiling.
 
-**Y10, buying at a deeper shop: more, and abilities as well as numbers.**
+- [ ] **Y10, buying at a deeper shop: more, and abilities as well as numbers.**
 Reason: the shop ladder is the progression, so a deeper shop has to be visibly
 worth reaching. Receipt: a test that each tier's catalogue strictly contains the
 one above it.
 
-**Y11, drawing any shop: it is redesigned.** His words: "redesign the shops
+- [ ] **Y11, drawing any shop: it is redesigned.** His words: "redesign the shops
 completely using your own skills and research, to give me something that looks
 and feels better suited for the game." One-thumb portrait, thumb-reach zones,
 locked versus unaffordable distinguished. Receipt: the existing e2e that every
 upgrade has a display case, plus a new one that no control sits outside the
 thumb arc at the shapes the game opens at.
 
-**Y12, throughout: more secrets.** His words: "make it feel like there are
+- [ ] **Y12, throughout: more secrets.** His words: "make it feel like there are
 always more secrets to find." This is the one ask with no mechanism attached to
 it and it is deliberately last - the derelicts, the lode and the veins are all
 recent answers to it, and what it needs is a measurement of how often a descent
@@ -3796,19 +3796,78 @@ the brief and has to be resolved rather than left beside it.
 - **Nine Anchors.** A ladder wants a few per tier; nine over four tiers is two
   and a bit, which is not a number.
 
-### Three things the brief does not settle, and guessing them would be expensive
+### The three open questions, answered by him 2026-09-19
 
-- [ ] **Y0a Is the Vault still the ending?** A ladder of gates could end AT the
-      Vault - the last gate is its door - or the Vault could go the way the
-      planet core went in round eight. Both are coherent and they are different
-      games.
-- [ ] **Y0b What does a save point save you from?** Death is a tow today: you
-      lose the hold and nothing else, and the game saves continuously. A save
-      point in the sense the word usually carries implies losing progress
-      between them, which is a far larger change than the shop half of Y8.
-- [ ] **Y0c What does "released" or "broken" mean for an Anchor?** Hours before
-      this brief he asked for an Anchor that is "physically located at that spot
-      that you can't dig", and X6 made it permanently uncuttable. "Once the
-      anchors are broken" reads as the opposite. Most likely the dark-energy
-      CORE is the thing broken and the Anchors are still lit - but that is a
-      reading, and the two words are his.
+- [x] **Y0a The Vault is still the ending, and the last gate is its door.** His
+      words: "The last gate should be the door." That is exactly what the
+      existing geometry already suggests - the deepest region row holds no
+      Anchors and holds the Vault at 405 m, so tier 2's gate at 339 IS the
+      threshold of the Vault's own tier. Nothing needs moving.
+
+- [ ] **Y0b A save point saves your POSITION, and maybe restocks.** His words:
+      "The save point saves your position and possibly allows you to restock
+      supplies, but we should research and plan what feels better." So this one
+      is answered in outline and deliberately left open in detail, with research
+      asked for by name. **The thing that research has to protect:** this game's
+      core decision is whether to turn around, and fuel is its clock. A
+      checkpoint that removes the climb home deletes the decision. Whatever it
+      does, it must not collapse the fuel economy.
+
+- [x] **Y0c The Anchors BREAK, and the core is what stays lit.** His words: "I
+      want the anchors to now imply that you are slowly allowing the world to
+      break. Each anchor should be dramatic when it breaks and leave remnants
+      behind. The dark ominous feeling thing that breaks the barrier should be
+      the thing that is permanent and stays lit."
+
+      **This inverts X6, which shipped hours earlier**, and that has to be said
+      plainly rather than quietly reversed: X6 made a LIT ANCHOR the permanent
+      uncuttable monument, on his ask that an Anchor be "physically located at
+      that spot that you can't dig". The permanence now belongs to the core
+      instead, and the Anchor becomes the thing you destroy.
+
+      **Almost none of X6 is wasted, and the part that matters transfers
+      whole.** What X6 actually built was the separation of two properties the
+      old code confused - "cannot be cut" and "is in the way" - and the `ghost`
+      flag that lets a cell be a drawn, uncuttable, passable monument that
+      lights its own hall. That is precisely what the spent core has to be. The
+      flag moves from one block to the other; the machinery and its tests do
+      not change.
+
+### The turn the story takes, and what it makes the rest of the round mean
+
+His words: *"I want it to look like you are doing a good thing by releasing the
+dark energy from it, but at the end of the game, find out that you actually
+freed a dark entity. It should play into the ending, and hint at it as you get
+closer to the end."*
+
+**This is the reason the rest of the brief exists, arriving after it.** Every
+piece of the structure above was mechanically sound and narratively arbitrary:
+why do Anchors gate depth, why does integrity fall faster each tier, why repair
+a planet at all. With the reveal, all three answer at once.
+
+- **Integrity falling faster per core is no longer a difficulty knob**, it is
+  the consequence being shown honestly while the player reads it as progress.
+  That also settles the research's objection to it: it argued for tying the
+  acceleration to depth rather than to cores, on Risk of Rain's evidence about
+  punishing success. Under the reveal the acceleration is not a difficulty
+  ratchet at all, it is the plot. It stays on cores.
+- **Repair (Y7) becomes tragic rather than janitorial.** The player patches a
+  planet they are themselves breaking, which is a far better reason to build a
+  real mechanic than "the bar should have something to do".
+- **Y12's "always more secrets" gets a spine.** The hints ARE the secrets, and
+  they escalate toward the Vault, which is what "building in intensity as you
+  find more" has wanted all round.
+
+- [ ] **Y13 The Anchor breaks, dramatically, and leaves a remnant.** Replaces
+      the lighting moment. Receipt: a test that a broken Anchor's cell is
+      permanently marked and that the mark survives a save and load.
+- [x] **Y14 The spent core stays lit for ever.** Done 2026-09-19, inside Y2 - the
+      spent state is one of `gateCellAt`'s four and could not have been built
+      separately. It takes X6's `ghost` - drawn,
+      uncuttable, flown through, lighting its own hall. Receipt: X6's own tests,
+      re-pointed at the core.
+- [ ] **Y15 The reveal, and the hints that escalate toward it.** Near-wordless,
+      in the grammar this game already uses: room templates, remnants, the
+      colour grade, one-line instrument toasts. Receipt: a test that the number
+      of hints delivered is monotonic in tiers opened, and that none of them
+      fires before the first core.

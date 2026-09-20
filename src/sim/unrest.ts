@@ -71,6 +71,7 @@
    column. */
 
 import { ORES, DEF, isOre } from './config';
+import { GATE_COUNT } from './gate';
 import { REGION_COUNT, WORLD_DEPTH, regionAt } from './region';
 
 /* ---------- how fast the ground gets angry ---------- */
@@ -335,12 +336,21 @@ export interface GroundState {
      the fifth Anchor would have no way to know whether it had already
      happened, and the only two options would be paying it twice or never. */
   woke: boolean;
+  /* Tiers whose gate has been opened, by tier index. Round fifteen, Y1.
+
+     A LIST and not a count, for the reason `lit` is one: three different things
+     want to know WHICH - `blockAt` draws the barrier, the route finder decides
+     whether a depth is reachable at all, and the shop ladder asks which tier
+     the player has earned. And like `lit`, nothing is stored beside it that
+     could disagree with it: how deep the ship may go is derived. */
+  gates: number[];
 }
 
 export function newGround(): GroundState {
   return {
     unrest: new Array(REGION_COUNT).fill(0),
-    ballast: 1, lit: [], collapsed: [], pending: -1, collapses: 0, fed: 0, woke: false
+    ballast: 1, lit: [], collapsed: [], pending: -1, collapses: 0, fed: 0, woke: false,
+    gates: []
   };
 }
 
@@ -356,6 +366,15 @@ export function loadGround(raw: unknown): GroundState {
     s.lit = r.lit
       .map((n) => Math.round(Number(n)))
       .filter((n, i, a) => n >= 0 && n < REGION_COUNT && a.indexOf(n) === i);
+  }
+  /* Same shape as `lit`: rounded, bounded and de-duplicated, because a save is
+     a file on somebody's phone and the only thing that has ever been true of
+     one is that it might be wrong. An out-of-range tier here would be a gate
+     that can never be drawn and never be passed. */
+  if (Array.isArray(r.gates)) {
+    s.gates = r.gates
+      .map((n) => Math.round(Number(n)))
+      .filter((n, i, a) => n >= 0 && n < GATE_COUNT && a.indexOf(n) === i);
   }
   if (Array.isArray(r.collapsed)) {
     s.collapsed = r.collapsed

@@ -29,6 +29,7 @@ import { grantFind, grantCache } from './actions';
 import { openMap, closeMap, mapView, mapPan, mapSetView, draw as mapDraw } from './mapui';
 import { landCollapse, closeGround, shoreUp } from './collapse';
 import { collapseTarget, lightAnchor, wake, WAKE_AT, isAwake, feed, feedValue, MAX_COLLAPSED, newGround } from './sim/unrest';
+import { depthTier, gateDepth, gateAnchors, gateReady, GATE_COUNT, coreColumn } from './sim/gate';
 import { anchorAt, anchorSealed, anchorCells, ANCHOR_COUNT, vaultCells,
          vaultOpen, VAULT_CORE_X, VAULT_CORE_D } from './sim/vaults';
 import { setStartHandler, wireTitle, showTitle, showIntro, startIntro } from './titleui';
@@ -270,6 +271,11 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* The Anchors, so a spec can fly to one rather than dig for forty minutes
        looking for it. */
     anchorAt, anchorSealed, anchorCells, ANCHOR_COUNT, vaultCells, lightAnchor, wake, WAKE_AT, isAwake, closeGround,
+    /* Round fifteen's tier gates, so a spec can put the world into the state a
+       player arriving at a given tier is actually in. Without this the e2e that
+       digs down to every Anchor stops at the first barrier, which is the gates
+       working rather than the Anchors being unreachable. */
+    depthTier, gateDepth, gateAnchors, gateReady, GATE_COUNT, coreColumn,
     vaultOpen, VAULT_CORE_X, VAULT_CORE_D
   };
 }

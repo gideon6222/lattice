@@ -8,6 +8,7 @@ import { regionAt, REGION_COUNT } from './region';
 import { vaultCells, anchorHere, WORKED_HARD, SEALED_HARD, HULK_HARD,
          vaultOpen, VAULT_WALL_HARD, ANCHOR_COUNT, anchorAt, VAULT_W, VAULT_H } from './vaults';
 import { isCollapsed, hardScale, isAwake, UNREST_BANDS } from './unrest';
+import { gateCellAt } from './gate';
 import { g , coreM, valueM, worldTrait} from './state';
 import { findMap, cacheSupply, FIND_COLOR, FIND_HOST, FIND_HARD, type Find } from './finds';
 import type { Block, SupplyKey } from '../types';
@@ -162,6 +163,64 @@ export function blockAt(x: number, d: number): Block | null {
      a mining game, so it does nothing at all below the third band and reaches
      about a third more drilling at the top. You notice the tremors first. */
   const hm = hardMult() * (tr.hard ?? 1) * hardScale(g.ground.unrest[reg]);
+
+  /* The gate goes HERE and not higher, because the core's hardness rides the
+     local band like every other authored wall and `hm` is what carries the
+     trait and the unrest into it. Still ahead of the relic, the crates and the
+     rooms, which is the ordering that matters: a forcefield a room can punch a
+     hole in is not one. */
+  /* ---------- a tier gate ----------
+
+     Round fifteen, Y1. One cell thick, the full width of the world, at a fixed
+     depth, and nothing in the game can cut it until its tier is opened.
+
+     Checked HERE - before the bedrock, the relic, the crates and the authored
+     rooms - because a forcefield that a room can punch a hole in is not one.
+     A hall is nine cells tall and a gate is one, so what a collision between
+     them looks like is a seam across the room, which is the right read for
+     something planet-wide.
+
+     `hard: Infinity` and NOT `ghost`: this is the one thing in the game that is
+     both uncuttable and genuinely in the way. That pair is what X6 separated,
+     and this is the block that needs both halves. */
+  const gc = gateCellAt(x, d, g.ground.lit, g.ground.gates);
+  if (gc === 'wall') {
+    return { id: 'gate', name: 'Barrier', color: 0x7a4fd4, host: 0x1a1230,
+             glow: 0.55, shards: 6, tone: 3, ore: true, spoil: true,
+             hard: Infinity, wt: 0, value: 0 };
+  }
+  if (gc === 'core') {
+    /* The one cell of the barrier that can be cut, and only once this tier's
+       Anchors are all broken. His words: "an unbreakable block will open up
+       that looks inviting but full of dark energy."
+
+       **It has to LOOK like a reward**, because that is the whole of the turn
+       the story takes - the player is meant to read releasing it as a good
+       deed. So it is the brightest thing in the tier and it is the warm end of
+       the palette, not the cold one. Nothing here hints; the hints are their
+       own milestone and they escalate.
+
+       Hard, but finite: three times the band, which is what a lit Anchor used
+       to cost to move. Breaking it is the climax of a tier and it should take
+       long enough to be a decision about fuel. */
+    return { id: 'darkcore', name: 'Dark Core', color: 0xffd27a, host: 0x2a1236,
+             glow: 1.0, shards: 10, tone: 10, ore: true, spoil: true,
+             hard: baseRock(d, g.planet, x).hard * hm * 3, wt: 0, value: 0 };
+  }
+  if (gc === 'spent') {
+    /* And what is left when it is broken: permanent, lit, flown through.
+
+       This is X6's `ghost` doing exactly the job it was built for, moved from
+       the Anchor to the core at his ask - "the dark ominous feeling thing that
+       breaks the barrier should be the thing that is permanent and stays lit".
+       Uncuttable for ever so it can never be tidied away, and passable so it is
+       a light in the doorway rather than a plug in the one cell every player of
+       the tier below has to pass through. */
+    return { id: 'darkspent', name: 'Released', color: 0xd8b6ff, host: 0x241a38,
+             glow: 1.0, shards: 10, tone: 10, ore: true, spoil: true, ghost: true,
+             hard: Infinity, wt: 0, value: 0 };
+  }
+
 
   /* The relic, before anything that could hide it. It is one cell on the whole
      planet and it must not lose a coin flip to a cave. */
