@@ -5,7 +5,7 @@ folder holds the one thing that lets it list the game: a **Trusted Web Activity*
 Android app whose whole body is Chrome showing `https://gideon6222.github.io/lattice/`
 full screen, with no browser bar once the site vouches for the app.
 
-`twa-manifest.json` is the source. `scripts\twa.ps1` runs Bubblewrap on it (`update`
+`twa-manifest.json` is the source. `tools\twa.ps1` runs Bubblewrap on it (`update`
 regenerates the Android project, `build` compiles and signs with the studio's upload key),
 verifies the bundle, and puts it on a GitHub release named after the newest changelog
 version. The dashboard's store lane sees a `v*` release carrying `lattice.aab` and uploads

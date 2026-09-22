@@ -1,7 +1,7 @@
 /* The app icon set, which nothing looked at until 2026-09-19.
 
    There are four of these files and they are four renderings of ONE picture:
-   the render `scripts/icon.mjs` shoots out of the game, the flat vector the
+   the render `tools/icon.mjs` shoots out of the game, the flat vector the
    browser may pick instead of it, Android's themed alpha, and the store's copy.
    Which one a given surface shows is not ours to decide - the manifest offers
    the browser a choice and the launcher takes the alpha - so the failure they
@@ -137,7 +137,7 @@ test('the themed PNG is the current rasterisation of the themed SVG', () => {
      the day they were written, and a sentence is not a mechanism. The SVG is
      one white <rect> under a mask, so its own numbers say where the shape
      begins and ends, and the PNG's alpha says where it actually does. Edit the
-     SVG and skip `node scripts/icon.mjs --mono` and these disagree.
+     SVG and skip `node tools/icon.mjs --mono` and these disagree.
 
      It checks the OUTER shape and deliberately not the holes in it: the hull,
      the teeth and the eye are drawn to be looked at, and pinning their
@@ -153,7 +153,7 @@ test('the themed PNG is the current rasterisation of the themed SVG', () => {
   for (const [what, want, got] of [['x', x, box.x], ['y', y, box.y], ['width', w, box.w], ['height', h, box.h]]) {
     assert.ok(Math.abs(want - got) <= 2,
       'icon-monochrome.svg says ' + what + ' ' + want + ' and the PNG has ' + got +
-      ' - run `node scripts/icon.mjs --mono`');
+      ' - run `node tools/icon.mjs --mono`');
   }
 });
 

@@ -1,1 +1,38 @@
-{ "worktree": { "bgIsolation": "none" } }
+{
+  "worktree": { "bgIsolation": "none" },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "studio hook session-start",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "studio hook prompt",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "studio hook stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

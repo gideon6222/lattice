@@ -1,6 +1,6 @@
 /* The economy's shape, asserted rather than simulated.
 
-   `scripts/econ.mjs` is the instrument: it runs a scripted player and reports
+   `tools/econ.mjs` is the instrument: it runs a scripted player and reports
    what happens. This is the gate: the handful of relationships that must hold
    for the report to ever come back healthy, checked in milliseconds so they
    fail on the commit that breaks them rather than the next time someone

@@ -8,16 +8,14 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test \"test/**/*.test.mjs\"",
-    "check": "npm run typecheck && npm test && npm run words && npm run doctor && npm run build && npm run size && npm run e2e",
-    "doctor": "powershell -NoProfile -ExecutionPolicy Bypass -File C:/dev/gamedev-notes/scripts/doctor.ps1 -Repo lattice -Quiet",
-    "words": "node scripts/check-us-english.mjs",
+    "check": "npm run typecheck && npm test && npm run build && npm run size && npm run e2e",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
-    "e2e": "node scripts/check-e2e-browser.mjs && playwright test",
-    "size": "node scripts/check-bundle-size.mjs",
-    "size:update": "node scripts/check-bundle-size.mjs --update",
-    "film": "node scripts/filmstrip.mjs",
-    "econ": "node scripts/econ.mjs",
-    "store": "npm run build && node scripts/store.mjs"
+    "e2e": "node tools/check-e2e-browser.mjs && playwright test",
+    "size": "node tools/check-bundle-size.mjs",
+    "size:update": "node tools/check-bundle-size.mjs --update",
+    "film": "node tools/filmstrip.mjs",
+    "econ": "node tools/econ.mjs",
+    "store": "npm run build && node tools/store.mjs"
   },
   "dependencies": {
     "three": "0.166.0"

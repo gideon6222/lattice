@@ -9,9 +9,9 @@ The Lattice (renamed from Coreward) is a three.js PWA served from GitHub Pages, 
 ## The build/publish pipeline (home PC)
 
 - `twa/twa-manifest.json` — TWA config: package `com.gideon.lattice`, host `gideon6222.github.io`, start URL `/lattice/`, signing key at `C:/dev/keys/upload.keystore` (alias `upload`).
-- `scripts/twa.ps1` — runs Bubblewrap, builds and signs the `.aab` with that upload key, publishes it as a GitHub release tagged `v*`.
+- `tools/twa.ps1` — runs Bubblewrap, builds and signs the `.aab` with that upload key, publishes it as a GitHub release tagged `v*`.
 - A "store lane" on the dashboard watches for those `v*` releases: it auto-uploads the `.aab` to the Play internal testing track, and — only when an `autoListing` flag is on — pushes `store/listing/en-US/` (title, descriptions, screenshots, icon, feature graphic) to the live Play Console store listing. Worth checking that flag's state before assuming the listing text is being kept in sync automatically.
-- `scripts/store.mjs` — generates the store screenshots via Playwright, driven by a `window.__cw` debug handle in the built game. Renders 4 fixed-state screenshots (title, descent, deep, shop) at 1080×1920, plus the icon and feature graphic.
+- `tools/store.mjs` — generates the store screenshots via Playwright, driven by a `window.__cw` debug handle in the built game. Renders 4 fixed-state screenshots (title, descent, deep, shop) at 1080×1920, plus the icon and feature graphic.
 - `public/.well-known/assetlinks.json` — required for the TWA to open full-screen instead of showing a browser address bar. Needs both the Play App Signing certificate's SHA-256 fingerprint and the local upload key's, listed together. This file was created and pushed 2026-09-15; not yet confirmed live at `https://gideon6222.github.io/lattice/.well-known/assetlinks.json` (the repo's CI/deploy takes ~20 min per push).
 
 All 7 of Gideon's current Play Console apps go through some version of this same pipeline, not just The Lattice.

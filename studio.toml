@@ -1,0 +1,23 @@
+slug = "lattice"
+name = "The Lattice"
+engine = "web"
+package = "com.gideon.lattice"
+mechanics_version = "none"
+
+# "npm.cmd" rather than the {npm} placeholder: on this Windows machine
+# subprocess.run(["npm", ...]) fails with WinError 2 (Windows does not resolve a
+# bare "npm" to npm.cmd the way cmd.exe does), which also crashes `studio gate`
+# outright rather than reporting a clean FAIL (studio/checks/smoke.py's
+# ctx.run_command has no FileNotFoundError handler). Reported rather than
+# patched -- C:\dev\studio is not touched by this migration.
+[commands]
+test = ["npm.cmd", "test"]
+smoke = ["npm.cmd", "run", "e2e"]
+
+[budget]
+apk_bytes = 0
+apk_growth = 0.05
+state_bytes = 4096
+
+[strings]
+player_text = ["store/listing/**/*.txt", "store/release-notes/**/*.txt", "src/changelog.ts"]
