@@ -560,10 +560,11 @@ is in `journal/legacy-plan.md`.
       (more: journal/legacy-plan.md)
       design: ## Round fifteen: the descent becomes a ladder
 
-- [ ] **Y0b A save point saves your POSITION, and maybe restocks.** His words:
-      "The save point saves your position and possibly allows you to restock
-      supplies, but we should research and plan what feels better." So this one
-      (more: journal/legacy-plan.md)
+- [x] **Y0b A save point saves your POSITION, and maybe restocks.** Researched
+      2026-09-22 against five games. Position is free, exactly like every
+      checkpoint this game already writes; restocking is Y8's shop, priced like
+      the surface shop, never free; the Point of No Return keeps routing to the
+      surface pad, never to a gate. (more: journal/legacy-plan.md)
       briefs: mechanic-design
       design: ## Round fifteen: the descent becomes a ladder
 

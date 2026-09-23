@@ -2542,6 +2542,44 @@ a planet at all. With the reveal, all three answer at once.
   find more" has wanted all round.
 
 
+### Y0b: what the save point does
+
+His words: *"The save point saves your position and possibly allows you to
+restock supplies, but we should research and plan what feels better."*
+Researched against five games, three that pair a hard survival resource with
+an intermediate waypoint: Deep Rock Galactic prices its mid-mission resupply pod
+in Nitra for a half refill, FTL never gives fuel away (even a dedicated
+refuel event still costs scrap, and every jump costs fuel regardless), and
+Barotrauma's outposts are paid shops whose only "safety" is that your sub
+stops draining while you are physically docked. Against them, the negative
+case: Subnautica's base network recharges power and oxygen for free at as
+many nodes as you build, and players report the power tension gone once one
+base is up; Dome Keeper keeps its wave-timer tension alive specifically by
+having no second free hub at all.
+
+**The pattern holds across all five: the moment a mid-route stop gives
+something for nothing, it functions as a second surface pad, and the
+decision to turn around collapses into "walk to the nearer freebie."** So
+the gate save point answers in two halves that do different jobs:
+
+- **Remembering position is free**, exactly like every checkpoint this game
+  already writes (R9h): CONTINUE resumes there, tank and hull exactly as the
+  run left them, nothing restored. It costs nothing because it changes
+  nothing.
+- **Restocking is Y8's shop, and it is priced like the surface shop, never
+  free.** A gate station that refuels or repairs for nothing, the way the
+  pad does, would make the pad's own free refuel pointless the moment a
+  player reaches the first gate, and every metre below tier 0 would stop
+  being a decision.
+
+**The fuel math itself does not move to the gate.** `climbCells()` and
+`fuelToClimb()` keep routing the Point of No Return to the surface pad at
+`(START_X, -1)` — never to the nearest open gate — so the dial still answers
+"can I get all the way home," not "can I reach the nearer shop." A gate
+makes a long descent more survivable because a shop partway down can sell
+fuel, not because the climb got shorter. See Invariants.
+
+
 ---
 
 # Engineering reference
@@ -2791,6 +2829,14 @@ breaking an import.
 **`AudioContext` needs a real user gesture.** `audioInit()` is on the first
 `pointerdown`/`keydown`. The graph is built atomically and published only when complete, so one
 null check narrows every node.
+
+**A gate save point (Y8) must never become a second surface pad.** `climbCells()` and
+`fuelToClimb()` always route the Point of No Return to the surface pad at `(START_X, -1)`,
+never to the nearest open gate, and a gate checkpoint restores state exactly as the run left
+it - never a free refuel or repair the way the pad gives. Y0b decided this after research
+turned up one pattern across five games: the moment an intermediate stop gives something for
+nothing, it functions as a second home and the decision to turn around collapses. See "Y0b:
+what the save point does" above.
 
 ---
 

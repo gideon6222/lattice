@@ -10,12 +10,10 @@ Moved onto the studio 2026-09-22. Eleven rounds and fourteen numbered phases shi
   Gideon's own console work, and he has explicitly held off ("I will hold off on adding
   anything to the play store for now", 2026-09-18). V0 stays unticked because the work is
   not done, not because anything here is broken.
-- **No mechanism yet for a save point that is not just "continue where you left off".**
-  Every tier gate is a natural stopping place but has no shop or save point of its own (Y8),
-  and what a save point should actually DO — restock, or just remember position — is
-  answered in outline only (Y0b) and needs research before it is built, because this game's
-  whole shape is the decision to turn around, and a checkpoint that removes the climb home
-  deletes that decision.
+- **No shop or save point yet at any tier gate (Y8).** Y0b answered what one does when it
+  exists — remembering position is free, restocking is a priced shop like the surface one,
+  and the Point of No Return keeps routing to the surface pad, never to a gate — but the
+  gate stations themselves are not built.
 - **The shop screens have not had their own redesign pass** (Y11): one-thumb portrait,
   thumb-reach zones, locked vs. unaffordable distinguished.
 - **No material is gated as a key rather than sold as currency** (X3) — very deliberately
@@ -27,11 +25,12 @@ Moved onto the studio 2026-09-22. Eleven rounds and fourteen numbered phases shi
 
 ## Next three milestones
 
-1. **Y0b** — design and build what a save point actually does (position only, or restock
-   too), protecting the fuel-economy decision. `MILESTONES.md`.
-2. **Y8** — a shop and a save point at every tier gate, once Y0b answers what it saves.
-3. **Y11** — redesign the shop screens: one-thumb portrait, thumb-reach zones, locked vs.
+1. **Y8** — a shop and a save point at every tier gate, now that Y0b has answered what it
+   saves and restocks. `MILESTONES.md`.
+2. **Y11** — redesign the shop screens: one-thumb portrait, thumb-reach zones, locked vs.
    unaffordable.
+3. **X3** — name an exact small count of a named deep material as a key rather than a
+   currency, narrowly, per the research's warning against doing this to too many ores.
 
 ## Phone readings
 
