@@ -1,0 +1,116 @@
+name: Listing sync
+# Manual only: pushing the store listing to Play is a deliberate act (the desk's
+# POST /api/listing-sync triggers this with `gh workflow run`), never a side effect of a
+# push (standing rule 3e: a private repo meters Actions minutes, and a listing edit is
+# rare enough that dispatch-only costs nothing).
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Validate with Play without publishing the edit
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Push store/listing to Play
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # The studio program's own `listing` check (contract section 4, #11) already runs
+      # locally before this is triggered -- `studio gate` on the desk -- and installing
+      # the private studio package into this repo's CI just to run it a second time
+      # means pulling a second private repo and its own auth into every game's Actions
+      # run. Not worth it (contract section 5: "a nice-to-have, not a requirement").
+      # This step only catches the one thing that would otherwise fail loudly and late,
+      # deep inside tools/play_listing.py: the listing files not being there at all.
+      - name: Fail early if the listing files are missing
+        run: |
+          set -e
+          if [ ! -d store/listing ]; then
+            echo "::error::no store/listing/ in this repo, nothing to sync"
+            exit 1
+          fi
+          found=0
+          for locale_dir in store/listing/*/; do
+            locale_dir="${locale_dir%/}"
+            if [ -f "$locale_dir/title.txt" ] && [ -f "$locale_dir/short_description.txt" ] \
+               && [ -f "$locale_dir/full_description.txt" ] \
+               && [ -f "$locale_dir/images/icon.png" ] \
+               && [ -f "$locale_dir/images/featureGraphic.png" ]; then
+              found=1
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "::error::no locale under store/listing/ has a complete title, description and image set"
+            exit 1
+          fi
+
+      # A Godot game names it in export_presets.cfg. A web game (lattice) has no export
+      # presets, so studio.toml's own `package = "..."` line answers instead.
+      - name: Read the package name
+        run: |
+          set -e
+          PACKAGE=""
+          if [ -f export_presets.cfg ]; then
+            PACKAGE=$(sed -n 's/^package\/unique_name="\(.*\)"$/\1/p' export_presets.cfg | head -1)
+          fi
+          if [ -z "$PACKAGE" ] && [ -f studio.toml ]; then
+            PACKAGE=$(sed -n 's/^package *= *"\(.*\)"$/\1/p' studio.toml | head -1)
+          fi
+          test -n "$PACKAGE"
+          echo "PACKAGE_NAME=$PACKAGE" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install google-auth and requests
+        run: pip install google-auth requests
+
+      # Written to $RUNNER_TEMP, which lives outside $GITHUB_WORKSPACE and is wiped when
+      # the runner is torn down, so the Play key is never inside the checked-out repo
+      # and never committed by any step that follows. The desk never holds this key at
+      # all (contract section 5): it lives only in this repo's GitHub secret.
+      - name: Write the Play service account key
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -e
+          if [ -z "$PLAY_JSON" ]; then
+            echo "::error::PLAY_SERVICE_ACCOUNT_JSON is not set on this repo"
+            exit 1
+          fi
+          KEY_PATH="$RUNNER_TEMP/play-service-account.json"
+          printf '%s' "$PLAY_JSON" > "$KEY_PATH"
+          echo "PLAY_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+      # tools/play_listing.py (installed by `studio adopt`, contract section 3) reads
+      # store/ directly and calls the Play Developer API (androidpublisher v3) itself --
+      # no metadata-tree copy, no fastlane gem. See that file's module docstring for why
+      # fastlane is not used here: its metadata-only path hits a long-open fastlane bug
+      # (issues 15638, 16071, 17097, 18516) that fails every run with
+      # "Could not find release for version code '' to update changelog", measured on
+      # this repo 2026-09-22 (GitHub Actions runs 35800713986 and 35800951019).
+      - name: Push the listing to Play
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -e
+          ARGS=(--package "$PACKAGE_NAME" --key "$PLAY_KEY_PATH" --store store)
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          python tools/play_listing.py "${ARGS[@]}"
+
+      - name: Remove the Play service account key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/play-service-account.json"
