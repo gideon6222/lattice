@@ -21,3 +21,9 @@ state_bytes = 4096
 
 [strings]
 player_text = ["store/listing/**/*.txt", "store/release-notes/**/*.txt", "src/changelog.ts"]
+
+[play]
+# This app's id in the Play Console URL, so the page can link straight to its
+# content rating, data safety and release pages. Read from the Console
+# 2026-09-22; it never changes for the life of the app.
+app_id = "4974028602351317913"
