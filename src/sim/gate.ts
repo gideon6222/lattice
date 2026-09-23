@@ -195,3 +195,28 @@ export function coreOpens(
 ): number {
   return gateCellAt(x, d, lit, open) === 'core' ? gateAtDepth(d) : -1;
 }
+
+/* ---------- Y8: the gate station ----------
+
+   Round fifteen, Y8. His words: "at every tier gate: a shop and a save
+   point." *Each barrier is already a place to stop* - every player of a tier
+   passes through its one cuttable cell to get below it, and once it is spent
+   that cell is a lit monument nobody can cut away (Y3, Y14). Putting the
+   station there costs no new world: no fixture, no model, no second thing to
+   find. One station per tier, which is what the milestone's own receipt asks
+   for - `gateDepth`/`coreColumn` already guarantee that, since each tier has
+   exactly one gate and each gate exactly one core column.
+
+   Reach is the same shape as an Anchor's: the cell itself and its four
+   neighbours, so arriving from any side counts. A gate that has not opened
+   yet has no station - the core is still the thing blocking the way, not a
+   place to stop at. */
+export function gateNear(x: number, d: number, open: readonly number[]): number {
+  for (const t of open) {
+    const cx = coreColumn(t), cd = gateDepth(t);
+    for (const n of [[0, 0], [0, -1], [0, 1], [-1, 0], [1, 0]]) {
+      if (x + n[0] === cx && d + n[1] === cd) return t;
+    }
+  }
+  return -1;
+}

@@ -350,3 +350,55 @@ test('nothing in the game can shut a gate that is open', () => {
     'these files write g.ground.gates. Only openGate() in sim/gate.ts and the save ' +
     'filter in sim/unrest.ts may, because the list is the record of three irreversible events.');
 });
+
+/* ---------- Y8: at every tier gate, a shop and a save point ----------
+
+   His brief: "Each barrier is already a place to stop." The station is the
+   spent core's cell - no new world, one per tier, by construction of
+   `coreColumn`/`gateDepth`. The receipt his milestone names: a test that each
+   tier has exactly one, at its own gate. */
+
+test('a gate has no station until it is open', () => {
+  for (let t = 0; t < H.GATE_COUNT; t++) {
+    const cx = H.coreColumn(t), cd = H.gateDepth(t);
+    assert.equal(H.gateNear(cx, cd, []), -1,
+      `tier ${t}'s core is a station before its own gate has opened`);
+  }
+});
+
+test('each tier has exactly one station, at its own gate', () => {
+  const open = Array.from({ length: H.GATE_COUNT }, (_, i) => i);
+  for (let t = 0; t < H.GATE_COUNT; t++) {
+    const cx = H.coreColumn(t), cd = H.gateDepth(t);
+    assert.equal(H.gateNear(cx, cd, open), t, `tier ${t}'s own cell is not its station`);
+    /* Reachable from all four sides, the same footprint an Anchor has - it is
+       a place you arrive at, not a single pixel you must land on exactly. */
+    for (const [dx, dd] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+      assert.equal(H.gateNear(cx + dx, cd + dd, open), t,
+        `tier ${t}'s station cannot be reached from (${dx}, ${dd})`);
+    }
+    /* And not further than that - a station you can shop from anywhere in the
+       tier is not "the one cell every player passes through", it is the whole
+       tier, which is what the milestone's "exactly one" rules out. */
+    assert.equal(H.gateNear(cx + 2, cd, open), -1, 'a cell two away is still the station');
+    assert.equal(H.gateNear(cx + 1, cd + 1, open), -1, 'a diagonal cell is still the station');
+  }
+});
+
+test('gateHere reads the ship\'s own position, at whichever gates are open', () => {
+  fresh([0, 1, 2]);
+  const cx = H.coreColumn(1), cd = H.gateDepth(1);
+  H.g.px = cx; H.g.pd = cd;
+  assert.equal(H.gateHere(), 1, 'standing at tier 1\'s station did not answer tier 1');
+  H.g.px = cx + 1; H.g.pd = cd;
+  assert.equal(H.gateHere(), 1, 'standing next to tier 1\'s station did not answer tier 1');
+  H.g.px = 3; H.g.pd = 3;
+  assert.equal(H.gateHere(), -1, 'the ship is nowhere near a gate and gateHere answered anyway');
+});
+
+test('the shop opens at a gate\'s station without needing the pad', () => {
+  fresh([1]);
+  H.g.px = H.coreColumn(1); H.g.pd = H.gateDepth(1);
+  assert.equal(H.docked(), false, 'a gate station is not the pad');
+  assert.equal(H.shopHere(), true, 'the shop refused to open at an open gate\'s station');
+});

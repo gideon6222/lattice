@@ -519,11 +519,17 @@ is in `journal/legacy-plan.md`.
       (more: journal/legacy-plan.md)
       design: ## Round fifteen: the descent becomes a ladder
 
-- [ ] **Y8, at every tier gate: a shop and a save point.** Each barrier is also a
-      place to stop. Reason: a gate is already the one cell every player in that tier
-      passes through, so it is where a service costs no new world. Receipt: a test
-      (more: journal/legacy-plan.md)
-      briefs: menu
+- [x] **Y8, at every tier gate: a shop and a save point.** Done 2026-09-23. The
+      station is the spent core's own cell - the one every player of a tier
+      already passes through once its gate is open - so it cost no new world:
+      no fixture, no second thing to find. The Outfitter opens there exactly
+      as it does at the pad, because the shelf is keyed on best depth and not
+      on where the ship is standing, so restocking is priced there precisely
+      like the surface shop (Y0b). Arriving writes a checkpoint, the same free
+      "remembering position" every large event already gets. What stays the
+      pad's alone: the free refuel, repair and sale, so a gate is a shop and
+      never a second pad. Receipt: a test that each tier has exactly one
+      station, at its own gate.
       design: ## Round fifteen: the descent becomes a ladder
 
 - [x] **Y9, buying at the first shop: a cap on what it will sell.** Done

@@ -9,7 +9,7 @@ function fmtTime(secs: number) {
   const m = Math.floor(secs / 60), r = secs % 60;
   return m + ':' + String(r).padStart(2, '0');
 }
-import { g , coreM, worldTrait, save, docked } from './sim/state';
+import { g , coreM, worldTrait, save, docked, shopHere } from './sim/state';
 import { haulValue } from './sim/world';
 import { R } from './sim/runtime';
 import { openMap, wireMap } from './mapui';
@@ -142,7 +142,7 @@ hold('abSink', (on) => { R.sinkHeld = on; });
 
 ui.btnAuto.onclick = autopilot;
 ui.btnShop.onclick = () => {
-  if (!docked() || g.mode !== 'play') return;
+  if (!shopHere() || g.mode !== 'play') return;
   sfx.ui();
   g.mode = 'shop';
   /* Move the real ship into the station scene. Nothing is copied, so the

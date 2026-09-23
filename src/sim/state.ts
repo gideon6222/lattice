@@ -9,6 +9,7 @@ import { newGround, loadGround, cutCell, drainBallast, planetUnrest, collapseTar
          isCollapsed, unrestBand, lightAnchor, isLit, type GroundState } from './unrest';
 import { anchorNear, vaultCoreNear, vaultOpen, VAULT_CORE_X, VAULT_CORE_D,
          ANCHOR_COUNT } from './vaults';
+import { gateNear } from './gate';
 import type { Best, Cargo, Dir, Drops, Kit, Mode, UpgradeKey, SaveV1, SaveV2 } from '../types';
 import { blankLog, loadLog, type Log } from './telemetry';
 
@@ -281,6 +282,20 @@ export const docked = () => atSurface() && Math.abs(g.px - START_X) <= PAD_HALF;
 
 /* The save is taken at the pad, so it is the dock and not the ground line. */
 export const onPad = docked;
+
+/* ---------- Y8: the gate station ----------
+
+   Which tier's station the ship is standing at, or -1. Unlike `docked()` this
+   answers nothing about fuel, hull or the sale - those stay the pad's alone,
+   see the note at Y0b in DESIGN.md. This only answers "is the Outfitter and a
+   checkpoint reachable here", which a gate earns the moment it is open. */
+export const gateHere = () => gateNear(Math.round(g.px), Math.max(0, Math.round(g.pd)), g.ground.gates);
+
+/* Where the SHOP may be opened from: the pad, or any open gate's station.
+   Restocking there is priced exactly like the pad's shelf - the catalogue is
+   keyed on `g.best.depth`, not on where the ship is standing - so this is the
+   only thing that changes: where the door is. */
+export const shopHere = () => docked() || gateHere() >= 0;
 
 /* ---------- the pad save ----------
 

@@ -6,7 +6,7 @@ import { W, HULL_MAX, DIG_BASE, DEF, SUPPLY_OF, DROP_MIN_VALUE, RELIC_COLOR, rel
          GAS_HULL_DAMAGE, GAS_SOAK, traitOf, heatDepth, tremorDepth, paletteOf } from './sim/config';
 import { clamp, key, mixHex } from './sim/util';
 import { g, S, save, coreM, valueM, worldTrait, cutGround, padFuel, markSeen, docked,
-         groundTick, hereUnrest, lightHere, vaultHere, checkpoint } from './sim/state';
+         groundTick, hereUnrest, lightHere, vaultHere, checkpoint, gateHere } from './sim/state';
 import { unrestBand, tremorScale } from './sim/unrest';
 import { gradeFor } from './sim/grade';
 import { landCollapse, closeGround } from './collapse';
@@ -832,6 +832,14 @@ export function tick(raw: number, draw = true) {
     if (litNow >= 0) anchorBreaks(litNow);
     /* And the same for the centre, which is the end of the game. */
     else if (vaultHere()) vaultReached();
+
+    /* Round fifteen, Y8: arriving at a gate's station writes a checkpoint,
+       exactly as free as the pad's - see the note at Y0b in DESIGN.md. Edge
+       triggered on the tier changing, the same shape as R.wasAtSurface above,
+       so standing at one for a minute writes it once rather than every frame. */
+    const gateNow = gateHere();
+    if (gateNow >= 0 && gateNow !== R.wasAtGate) checkpoint();
+    R.wasAtGate = gateNow;
 
     /* The Ballast's own clock, and it only runs while the game is playing -
        not behind a shop sheet, not on the title, not mid-crossing. It decays
