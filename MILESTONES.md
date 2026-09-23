@@ -544,10 +544,23 @@ is in `journal/legacy-plan.md`.
       (more: journal/legacy-plan.md)
       design: ## Round fifteen: the descent becomes a ladder
 
-- [ ] **Y11, drawing any shop: it is redesigned.** His words: "redesign the shops
-      completely using your own skills and research, to give me something that looks
-      and feels better suited for the game." One-thumb portrait, thumb-reach zones,
-      (more: journal/legacy-plan.md)
+- [x] **Y11, drawing any shop: it is redesigned.** Done 2026-09-23. His words:
+      "redesign the shops completely using your own skills and research, to
+      give me something that looks and feels better suited for the game."
+      One-thumb portrait: the four arrows that walk the aisles and the cases
+      used to sit in the header, the hardest third of a tall phone to reach
+      one-handed; they are in their own bar just above the tray now, in the
+      same reachable third as UNDOCK and the buy button, and the room's own
+      framing was re-measured against the new header and tray heights so it
+      still fills exactly the space between them. Locked vs. unaffordable:
+      a per-tier cap (Y9) used to fall through the case's own lamp logic to
+      'ready' even though the card underneath it already knew better and
+      greyed its button - so a case could glow cyan and say buy me for a row
+      no price would move. It reads as locked now, the same as a depth seal,
+      because both mean no amount of credits fixes it, which short-on-credits
+      or short-on-ore never mean. Receipt: `shelfState` gets a `capped` state
+      with its own tests, and `visibleBand`/the framing tests measure the new
+      bar instead of assuming its height.
       briefs: menu
       design: ## Round fifteen: the descent becomes a ladder
 

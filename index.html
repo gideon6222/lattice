@@ -753,20 +753,21 @@
 
   /* ---------- the aisle bar ----------
 
-     The visible half of the aisle navigation. The diegetic half is the neon
-     sign over each bay, in the same color; these dots mirror it so the two
-     are obviously the same control seen twice.
+     The dots only now (Y11 moved the arrows out - see .shopnav below). The
+     diegetic half is the neon sign over each bay, in the same color; these
+     dots mirror it so the two are obviously the same information seen twice.
+     A readout, not a control, so it stays up here where it is easy to glance
+     at even though that is a hard place to reach with a thumb.
 
      A dot per station, lit for the one you are standing in, dimmed to almost
      nothing for a department with no stock yet - which in the first hour is
      ORDNANCE, every device of which has to be dug out of the ground. A dark
      dot is a promise. A missing one is nothing. */
   .aislebar{
-    flex:0 0 auto; display:flex; align-items:center; gap:6px;
+    flex:0 0 auto; display:flex; align-items:center; justify-content:center;
     padding:7px 10px 8px;
     background:linear-gradient(180deg,rgba(9,13,20,.82),rgba(9,13,20,0));
   }
-  .aislemid{flex:1 1 auto; text-align:center; min-width:0;}
   #aisles{display:flex; justify-content:center; gap:7px;}
   #aisles .dot{
     width:7px; height:7px; border-radius:50%; background:var(--c,#7f8ea8);
@@ -777,14 +778,29 @@
   #aisles .dot.on{opacity:1; transform:scale(1.5); box-shadow:0 0 9px 2px var(--c,#7f8ea8);}
   #aisles .dot.off{opacity:.1;}
   #aisles .dot.pump{--c:#b8863c; border-radius:2px;}
+
+  /* ---------- the shop nav ----------
+
+     Y11, moved down from the header: "redesign the shops...one-thumb
+     portrait, thumb-reach zones." The four arrows are the real control (the
+     dots above only say where you are, and the diegetic sign in the room says
+     what it is) and a control belongs where a thumb already rests. Sitting
+     just above the tray puts it in the same reachable third as UNDOCK and the
+     buy button, rather than in the header a stretched thumb used to have to
+     find. aisleL/R (bigger jump, between departments) flank bayU/D (smaller
+     jump, between cases in one), same grouping the header had, just lower. */
+  .shopnav{
+    flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+    gap:12px; padding:6px 16px 4px;
+  }
   .arw{
     flex:0 0 auto; width:40px; height:40px; border-radius:11px;
     border:1px solid var(--line); background:rgba(255,255,255,.04);
     color:var(--ink); font-size:22px; line-height:1; font-weight:700;
     transition:opacity var(--t-fast) var(--ease);
   }
-  /* Greyed rather than removed: an arrow that vanishes moves the dots under
-     the thumb that was about to press it. */
+  /* Greyed rather than removed: an arrow that vanishes would shift its
+     neighbours under a thumb already lined up on one of them. */
   .arw.gone{opacity:.18; pointer-events:none;}
   .screen #upgrades, .screen #supplies{padding:0 16px;}
   /* A counter reads as a label riveted to the bulkhead: a short bright rule
@@ -1477,25 +1493,29 @@
     <div class="shopcred">&#9672; <span id="shopCredits">0</span></div>
   </div>
 
-  <!-- The aisle bar. Dots AND arrows, both, from the first commit: NN/g
-       measured a 21% drop in task completion for navigation with no visible
-       affordance, so a swipe on its own would be a shop most people only ever
-       see one quarter of. -->
+  <!-- The dots, on their own: WHERE you are, not a control - a readout can
+       live wherever it reads best. The arrows that MOVE you used to hang here
+       too; they are in .shopnav now, at the bottom, because a control has to
+       live where a thumb already is instead. -->
   <div class="aislebar">
-    <button id="aisleL" class="arw" aria-label="previous aisle">&#8249;</button>
-    <div class="aislemid">
-      <div id="aisles"></div>
-    </div>
-    <button id="aisleR" class="arw" aria-label="next aisle">&#8250;</button>
-    <!-- Up and down walk the cases in the aisle you are standing in, which is
-         the half of his ask the left/right arrows never answered. Greyed the
-         same way they are: a control that can do nothing has to look like it. -->
-    <button id="bayU" class="arw" aria-label="previous case">&#9650;</button>
-    <button id="bayD" class="arw" aria-label="next case">&#9660;</button>
+    <div id="aisles"></div>
   </div>
 
   <!-- pointer-events:none, so a tap lands on the bay behind it -->
   <div class="stage" id="shopStage"><div class="hintline" id="shopHint">SWIPE TO WALK THE AISLES</div></div>
+
+  <!-- Y11: "redesign the shops completely...one-thumb portrait, thumb-reach
+       zones." These four arrows used to sit in the header, which on a phone
+       this tall is the hardest third of the screen to reach one-handed - the
+       title screen learned the same lesson first (see its own note on the
+       menu sitting at the bottom). Same buttons, same job, moved down next to
+       everything else in here you can actually touch. -->
+  <div class="shopnav">
+    <button id="aisleL" class="arw" aria-label="previous aisle">&#8249;</button>
+    <button id="bayU" class="arw" aria-label="previous case">&#9650;</button>
+    <button id="bayD" class="arw" aria-label="next case">&#9660;</button>
+    <button id="aisleR" class="arw" aria-label="next aisle">&#8250;</button>
+  </div>
 
   <!-- The supplies grid is gone from here. They are crates in a drawer under
        the counter now: found by opening caches, and bought by pulling the

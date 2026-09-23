@@ -50,6 +50,21 @@ test('maxed beats affordability, because there is nothing to buy', () => {
     'a maxed case must not report as unaffordable');
 });
 
+test('a per-tier cap beats affordability too, because money does not fix it either', () => {
+  /* Y11: the card built from `levelCap` already greyed itself and named the
+     next depth (see buildUpgradeRow in ui.ts); the case itself used to fall
+     straight through to 'ready' here, which is the same lie a sealed case
+     quoting a price would tell. */
+  const u = up('drill');
+  const cap = H.levelCap(u, 0);
+  const s = H.shelfState(u, cap, rich, stocked, 0);
+  assert.equal(s.state, 'capped', 'drill at its own level cap read as "' + s.state + '"');
+  assert.doesNotMatch(s.line, /◈/, 'a capped case must not quote a price it will not sell at');
+  /* one level below the cap is an ordinary case again, not capped */
+  assert.notEqual(H.shelfState(u, cap - 1, rich, stocked, 0).state, 'capped',
+    'a level below the cap read as capped');
+});
+
 test('short on credits reads as short, and still says the price', () => {
   const u = up('drill');
   const cost = H.costOf(u, 0);
@@ -92,7 +107,7 @@ test('every upgrade produces a state and a non-empty line at every level', () =>
     for (let lvl = 0; lvl <= u.max; lvl++) {
       for (const [credits, stock, depth] of [[0, {}, 0], [rich, stocked, 300], [500, { iron: 1 }, 50]]) {
         const s = H.shelfState(u, lvl, credits, stock, depth);
-        assert.ok(['ready', 'short', 'sealed', 'max'].includes(s.state),
+        assert.ok(['ready', 'short', 'sealed', 'capped', 'max'].includes(s.state),
           u.key + ' lv' + lvl + ' gave state "' + s.state + '"');
         assert.ok(s.line && s.line.length > 0, u.key + ' lv' + lvl + ' had a blank plate');
         assert.doesNotMatch(s.line, /NaN|undefined/, u.key + ' lv' + lvl + ': ' + s.line);

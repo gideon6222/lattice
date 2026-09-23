@@ -1267,16 +1267,28 @@ export const MAT_FROM_LEVEL = 4;
 /* What state a shop case is in, and what its plate should say.
 
    Pure, and separate from the room that draws it, because this is the part with
-   judgement in it: which of four states wins when several apply at once, and
+   judgement in it: which of five states wins when several apply at once, and
    what the one line of text under the name should say.
 
    The order matters and is the design. Sealed beats everything - a depth lock
    is not negotiable and quoting a price you could pay would be a lie. Maxed
-   beats affordability, because there is nothing to buy. And when you cannot
-   afford it, the MINERAL is named ahead of the credits, because credits are
-   what the loop pays constantly and a mineral you have never seen is the thing
-   actually stopping you. */
-export type ShelfState = 'ready' | 'short' | 'sealed' | 'max';
+   beats affordability, because there is nothing to buy. Capped comes next and
+   for the same reason sealed does: Y9's per-tier cap is money cannot fix
+   either, so it has to read as LOCKED rather than as ready, or the case lies
+   the same way a sealed one quoting a price would. Only once none of those
+   apply does it matter whether you can actually pay - and when you cannot, the
+   MINERAL is named ahead of the credits, because credits are what the loop
+   pays constantly and a mineral you have never seen is the thing actually
+   stopping you.
+
+   Y11: this used to stop at "sealed", and a capped row - held below its own
+   level cap, unbuyable at any price until the next barrier - fell through to
+   'ready' here even though the card built from the same numbers (`buildUpgradeRow`
+   in ui.ts) already greyed its button and named the next depth. The case glowed
+   cyan and said "you can buy this" for a row that could not be bought; the card
+   underneath told the truth. `capped` closes that gap so the thing you glance at
+   and the thing you tap say the same thing. */
+export type ShelfState = 'ready' | 'short' | 'sealed' | 'capped' | 'max';
 export interface Shelf { state: ShelfState; line: string; }
 
 export function shelfState(
@@ -1284,6 +1296,10 @@ export function shelfState(
 ): Shelf {
   if (bestDepth < u.unlock) return { state: 'sealed', line: u.unlock + ' m' };
   if (lvl >= u.max) return { state: 'max', line: 'MAX' };
+  if (lvl >= levelCap(u, bestDepth)) {
+    const nextStep = TIER_DEPTHS.find((d) => d > bestDepth);
+    return { state: 'capped', line: nextStep ? nextStep + ' m' : 'HELD' };
+  }
   const cost = costOf(u, lvl);
   const mat = matCost(u, lvl);
   if (mat && (stock[mat.id] || 0) < mat.need) {

@@ -453,17 +453,21 @@ export function markSeen() { seenFound = g.found.slice(); }
 
 /* ---------- the aisle bar ----------
 
-   A dot per station in its own colour, plus an arrow either side. Both, and
-   from the first commit, because the research is unambiguous: NN/g measured a
-   21% drop in task completion for navigation with no visible affordance, and
-   roughly half the discoverability. A swipe nobody finds is a shop with one
-   aisle, and this room has already shipped one control that did nothing.
+   A dot per station in its own colour, plus an arrow either side - dots up
+   here, arrows down in .shopnav since Y11 split them by job rather than by
+   habit: a readout stays where it is easy to glance at, a control moves to
+   where a thumb already is. Both exist at all, from the first commit, because
+   the research is unambiguous: NN/g measured a 21% drop in task completion for
+   navigation with no visible affordance, and roughly half the discoverability.
+   A swipe nobody finds is a shop with one aisle, and this room has already
+   shipped one control that did nothing.
 
-   In the DOM rather than in the room, deliberately, and it is the one thing in
-   here that is allowed to be. It has to be legible at every station including
-   the ones it is pointing away from, and a fitting that is visible from
-   everywhere is a fitting that is nowhere. The diegetic half is the sign over
-   each bay, in the same colour, which is the thing the dots mirror. */
+   The dots are in the DOM rather than in the room, deliberately, and they are
+   the one thing in here that is allowed to be. They have to be legible at
+   every station including the ones they are pointing away from, and a fitting
+   that is visible from everywhere is a fitting that is nowhere. The diegetic
+   half is the sign over each bay, in the same colour, which is the thing the
+   dots mirror. */
 export function paintAisleBar() {
   const bar = document.getElementById('aisles');
   if (!bar) return;
@@ -539,10 +543,16 @@ export function visibleBand(): { top: number; bottom: number } {
   const H = window.innerHeight;
   const bar = document.querySelector('#shop .shopbar') as HTMLElement | null;
   const ais = document.querySelector('#shop .aislebar') as HTMLElement | null;
+  const nav = document.querySelector('#shop .shopnav') as HTMLElement | null;
   const tray = document.querySelector('#shop .tray') as HTMLElement | null;
   const top = (bar ? bar.getBoundingClientRect().height : 0) +
               (ais ? ais.getBoundingClientRect().height : 0);
-  const bottom = tray ? tray.getBoundingClientRect().height : 0;
+  /* Y11 moved the four arrows out of .aislebar and into .shopnav, just above
+     the tray - so the band the camera frames against has to count that bar
+     too, or the room gets composed into space the nav bar is now sitting on
+     top of. */
+  const bottom = (nav ? nav.getBoundingClientRect().height : 0) +
+                 (tray ? tray.getBoundingClientRect().height : 0);
   /* A guard, not a nicety. If nothing has been laid out the band is the whole
      screen, which is the old behaviour and is merely unframed rather than
      broken. It must stay rare: see the note above about the afternoon it spent
@@ -757,13 +767,16 @@ export function refreshKit() {
    Playtest: *"doing something to visually show that certain upgrades aren't
    available or you don't have enough money to purchase it by dimming it."*
 
-   Four states, and each one is said three ways - the strip of light, the plate,
-   and how dark the alcove is - so it reads at a glance AND survives being
-   colour-blind, which a colour-only code would not.
+   Five states, and each one is said three ways - the strip of light, the
+   plate, and how dark the alcove is - so it reads at a glance AND survives
+   being colour-blind, which a colour-only code would not.
 
      READY    cyan strip, price in cyan, alcove clear
-     SHORT    amber strip, price in amber, alcove smoked
+     SHORT    amber strip, price or mineral in amber, alcove smoked
      SEALED   strip off, the depth in dull red, alcove smoked harder
+     CAPPED   strip off, the next depth in dull red, alcove smoked harder -
+              LOCKED reads the same as SEALED (Y11): both mean no amount of
+              credits buys this yet, which SHORT never means
      MAX      green strip, "MAX", alcove clear
 
    The part itself is never dimmed by touching its material, because those
@@ -835,10 +848,12 @@ export function refreshBays() {
       ready:  { tone: '#3fe0ff', lamp: 0x3fe0ff, on: 0.9,  smoke: 0    },
       short:  { tone: '#ffc861', lamp: 0xffc861, on: 0.8,  smoke: 0.42 },
       sealed: { tone: '#8c4a52', lamp: 0x101010, on: 0,    smoke: 0.62 },
+      capped: { tone: '#8c4a52', lamp: 0x101010, on: 0,    smoke: 0.62 },
       max:    { tone: '#4be08a', lamp: 0x4be08a, on: 0.85, smoke: 0    }
     }[sh.state];
+    const locked = sh.state === 'sealed' || sh.state === 'capped';
 
-    drawPlate(b, SHORT[b.key] || u.name.toUpperCase(), sh.line, look.tone, sh.state === 'sealed');
+    drawPlate(b, SHORT[b.key] || u.name.toUpperCase(), sh.line, look.tone, locked);
     const lm = b.lamp.material as THREE.MeshBasicMaterial;
     lm.color.setHex(look.lamp);
     lm.opacity = look.on;

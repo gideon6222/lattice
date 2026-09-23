@@ -2545,7 +2545,15 @@ test('the drawer opens, holds only what you have found, and sells it', async ({ 
     const w = (window as any).__cw;
     const el = document.getElementById('shopStage')!;
     const x = Math.round(window.innerWidth * 0.5);
-    const y = Math.round(window.innerHeight * 0.22);
+    /* Y11 moved the aisle arrows out of the aisle bar and down into
+       .shopnav, which shrank the bar and let the room's own framing fill the
+       space that freed up - so a FIXED 22% down the screen is no longer
+       guaranteed to be the empty strip it used to be; it now lands on a case.
+       Measured fresh instead, the same way the frame tests above do: just
+       under the aisle bar is the one band of the room that stays empty at
+       every station regardless of how the bar above it is sized. */
+    const barBottom = document.querySelector('#shop .aislebar')!.getBoundingClientRect().bottom;
+    const y = Math.round(barBottom + 14);
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y }));
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x, clientY: y }));
     w.advance(3);
