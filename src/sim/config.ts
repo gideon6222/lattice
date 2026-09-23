@@ -1306,6 +1306,11 @@ export function shelfState(
     const def = DEF[mat.id];
     return { state: 'short', line: mat.need + ' ' + (def ? def.name.toUpperCase() : mat.id.toUpperCase()) };
   }
+  const key = capstoneCost(u, lvl);
+  if (key && (stock[key.id] || 0) < key.need) {
+    const def = DEF[key.id];
+    return { state: 'short', line: key.need + ' ' + (def ? def.name.toUpperCase() : key.id.toUpperCase()) };
+  }
   const price = '◈ ' + cost.toLocaleString();
   return { state: credits < cost ? 'short' : 'ready', line: price };
 }
@@ -1457,5 +1462,25 @@ export const matTotalFor = (u: Upgrade, throughLevel: number) => {
   }
   return n;
 };
+
+/* ---------- X3: a mineral that is a key, not a currency ----------
+
+   Ask 2, "make them more useful ... so they feel like you are searching for
+   them." Every mineral above is spent in a growing handful and replenished by
+   the next descent - a currency wearing an ore's name. Solmarrow never has
+   been: nothing in the game names it, so a find just becomes credits at the
+   pad, which is the very complaint ask 2 raises. The research's own caution
+   against doing this broadly (Dome Keeper capped its whole game at three
+   resource types) says pick very few - this is one, and it is deliberately
+   not folded into matCost's scaling: a key is not a bigger number, it is a
+   single fact that becomes true once. Godcore, the Drill's own last tier, is
+   the only upgrade already named as an ending, which is the one place in the
+   tree a literal legendary find belongs. */
+export const CAPSTONE_MAT: Partial<Record<UpgradeKey, MatCost>> = {
+  drill: { id: 'solmarrow', need: 1 }
+};
+
+export const capstoneCost = (u: Upgrade, lvl: number): MatCost =>
+  lvl + 1 === u.max ? (CAPSTONE_MAT[u.key] ?? null) : null;
 
 export const START_X = Math.floor(W / 2);

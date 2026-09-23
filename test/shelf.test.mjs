@@ -116,6 +116,41 @@ test('every upgrade produces a state and a non-empty line at every level', () =>
   }
 });
 
+/* ---------- X3: a mineral that is a key, not a currency ---------- */
+
+test('the Drill\'s last rung asks for its named key, exactly and only there', () => {
+  const u = up('drill');
+  for (let lvl = 0; lvl < u.max; lvl++) {
+    const key = H.capstoneCost(u, lvl);
+    if (lvl === u.max - 1) {
+      assert.deepEqual(key, { id: 'solmarrow', need: 1 },
+        'the level that reaches Godcore should ask for exactly 1 Solmarrow');
+    } else {
+      assert.equal(key, null, `level ${lvl} of the drill should not ask for a key yet`);
+    }
+  }
+});
+
+test('a Solmarrow shortfall reads as short even with every other mineral banked', () => {
+  const u = up('drill');
+  const lvl = u.max - 1;
+  const short = H.shelfState(u, lvl, rich, stocked, 300);
+  assert.equal(short.state, 'short');
+  assert.match(short.line, /SOLMARROW/, 'the missing key must be named, not the credits');
+  const ok = H.shelfState(u, lvl, rich, { ...stocked, solmarrow: 1 }, 300);
+  assert.equal(ok.state, 'ready', 'exactly one Solmarrow must be enough to flip it');
+});
+
+test('no other upgrade has been given a key by accident', () => {
+  for (const u of H.UPGRADES) {
+    if (u.key === 'drill') continue;
+    for (let lvl = 0; lvl < u.max; lvl++) {
+      assert.equal(H.capstoneCost(u, lvl), null,
+        `${u.key} lv${lvl} asks for a capstone key, and X3 named only the Drill`);
+    }
+  }
+});
+
 test('a sealed case stays sealed at every level it could be at', () => {
   for (const u of H.UPGRADES) {
     if (u.unlock === 0) continue;

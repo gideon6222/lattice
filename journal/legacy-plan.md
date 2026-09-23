@@ -3627,16 +3627,38 @@ else in the economy needs rebalancing.
       **Not to be confused with the first-of-its-kind banner**, which already
       exists and fires once ever per material. This is every time.
 
-- [ ] **X3 One or two materials become keys rather than currency.** Ask 2.
-      Materials already gate upgrades through `matCost`, so the change is
-      narrowing: name an EXACT small count of a named deep material for one or
-      two specific things, the way Deep Rock's resupply costs exactly 80 Nitra
-      and Terraria's tiers are hard-gated by pickaxe power rather than by price.
+- [x] **X3 One or two materials become keys rather than currency.** Done
+      2026-09-23. Ask 2, cut to the research's own narrowest reading of itself:
+      Dome Keeper's designer capped his whole game at three resource types,
+      arguing more "would add more information to comprehend", so this is one
+      material for one purchase rather than the two or three the research
+      allowed.
 
-      **Very few, deliberately.** Dome Keeper's designer capped the whole game
-      at three resource types, arguing more "would add more information to
-      comprehend", and the research's stated risk is that doing this to many
-      ores collapses back into currency with extra steps.
+      **Solmarrow is the key.** It is the rarest mineral in the world - about
+      five cells on the whole planet, none of them above 372 m - and until now
+      nothing asked for it by name; a find just became credits at the pad,
+      which is the very complaint ask 2 raises about the eleven ores in
+      general. The Drill's own last tier already carries the name Godcore, the
+      only upgrade in the game already claiming to be an ending, which makes
+      it the one place in the tree a literal legendary find belongs. Reaching
+      it now costs exactly one Solmarrow, on top of whatever iron the rest of
+      the ladder already asks for through `matCost`.
+
+      **Deliberately its own mechanism, not a case inside `matCost`.** A key is
+      not a bigger number - it is a single fact that becomes true once, the
+      way Deep Rock's resupply costs exactly 80 Nitra rather than a rising
+      price. Threading it through `matCost`'s per-level scaling would have
+      mixed two materials under one upgrade's `mat` field, which is exactly
+      what `matTotalFor` and the save-grandfathering in `state.ts` assume never
+      happens - both sum a level range and credit the total to `u.mat` alone.
+      `capstoneCost(u, lvl)` sits beside `matCost` instead: it fires only at
+      the level that reaches `u.max`, is checked and spent alongside whatever
+      `matCost` already wants rather than instead of it, and touches nothing
+      else in the economy - `matCost` and its golden test are unchanged.
+      Receipt: `shelf.test.mjs` asserts the key sits on that one rung and no
+      other upgrade, and that a single Solmarrow is exactly enough to flip the
+      case from short to ready.
+      design: ### The measurement that decides asks 1 and 2
 
 - [x] **X4 The first Anchor's gift: the Survey map shows where the ground is
       rich.** Done 2026-09-19. Asks 3 and 4. An aggregate richness read per REGION, rendered as

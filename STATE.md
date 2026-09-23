@@ -10,31 +10,29 @@ Moved onto the studio 2026-09-22. Eleven rounds and fourteen numbered phases shi
   Gideon's own console work, and he has explicitly held off ("I will hold off on adding
   anything to the play store for now", 2026-09-18). V0 stays unticked because the work is
   not done, not because anything here is broken.
-- **No material is gated as a key rather than sold as currency** (X3) — very deliberately
-  not done yet; the research warns that doing this to too many ores collapses back into
-  currency with extra steps.
 - **"Always more secrets" (Y12) and the reveal's escalating hints (Y15) have no measurement**
   of how often a descent currently meets anything at all, which is what would tell us
   whether more is even needed yet.
 
 ## Next three milestones
 
-Done 2026-09-23: **Y11**, the shop redesigned for one thumb. The four arrows that walk
-the aisles and the cases moved out of the header — the hardest third of a tall phone to
-reach one-handed — into their own bar just above the tray, next to UNDOCK and the buy
-button; the room's own camera framing re-measures against the new header and tray heights
-rather than assuming them. A per-tier cap (Y9) used to read as 'ready' on the case's own
-lamp even though the card underneath already knew it was unbuyable; `shelfState` now has a
-`capped` state that reads the same as a depth seal — locked, not just short of money —
-which is the "locked vs. unaffordable" half of the brief.
+Done 2026-09-23: **X3**, one material promoted from currency to key. Solmarrow — the
+rarest mineral in the world, about five cells on the whole planet, none of them above
+372 m — was wanted by nothing before this; a find just became credits at the pad. Now
+the Drill's own last tier, Godcore, the only upgrade already named as an ending, costs
+exactly one Solmarrow on top of whatever iron the rest of the ladder already asks for.
+Deliberately its own mechanism, `capstoneCost`, rather than a case folded into `matCost`'s
+per-level scaling — a key is not a bigger number, it is a single fact that becomes true
+once — so `matCost`, `matTotalFor` and the save-grandfathering that trusts one material
+per upgrade are all untouched.
 
-1. **X3** — name an exact small count of a named deep material as a key rather than a
-   currency, narrowly, per the research's warning against doing this to too many ores.
-2. **Y12** — blocked on its own prerequisite: no measurement yet of how often a descent
+1. **Y12** — blocked on its own prerequisite: no measurement yet of how often a descent
    meets a secret at all, which is what would say whether "always more" needs more built or
-   just needs the ones that exist to be found more often. `MILESTONES.md` also has Y15
-   (escalating hints) behind the same missing number.
+   just needs the ones that exist to be found more often.
+2. **Y15** — the escalating hints toward the reveal, behind the same missing number as Y12.
 3. **V0** — the Play listing, held by Gideon's own word since 2026-09-18.
+
+These are the only three open boxes left (`studio progress`).
 
 ## Phone readings
 

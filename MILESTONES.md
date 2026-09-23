@@ -451,11 +451,10 @@ is in `journal/legacy-plan.md`.
       (more: journal/legacy-plan.md)
       design: ### The measurement that decides asks 1 and 2
 
-- [ ] **X3 One or two materials become keys rather than currency.** Ask 2.
-      Materials already gate upgrades through `matCost`, so the change is
-      narrowing: name an EXACT small count of a named deep material for one or
+- [x] **X3 One or two materials become keys rather than currency.** Done
+      2026-09-23, cut to one material for one purchase, per the research's own
+      warning against doing this broadly. Solmarrow - the rarest mineral in
       (more: journal/legacy-plan.md)
-      briefs: economy
       design: ### The measurement that decides asks 1 and 2
 
 - [x] **X4 The first Anchor's gift: the Survey map shows where the ground is

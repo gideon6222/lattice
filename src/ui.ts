@@ -1,4 +1,4 @@
-import { HULL_MAX, DEF, isOre, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
+import { HULL_MAX, DEF, isOre, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
 import { setGauges, setFuelReserve } from './gauges';
 import { clamp } from './sim/util';
 import { flashScale } from './motion';
@@ -622,7 +622,11 @@ function buildUpgradeRow(u: Upgrade) {
   const c = costOf(u, lvl);
   const mat = maxed ? null : matCost(u, lvl);
   const have = mat ? (g.stock[mat.id] || 0) : 0;
-  const short = !!mat && have < mat.need;
+  /* X3: the Drill's last rung also wants a named key, checked and spent
+     alongside whatever matCost already asks for rather than instead of it. */
+  const keyMat = maxed ? null : capstoneCost(u, lvl);
+  const keyHave = keyMat ? (g.stock[keyMat.id] || 0) : 0;
+  const short = (!!mat && have < mat.need) || (!!keyMat && keyHave < keyMat.need);
 
   const row = document.createElement('div');
   row.className = 'up';
@@ -631,10 +635,17 @@ function buildUpgradeRow(u: Upgrade) {
      "6 Emerald" is only actionable if you know emerald starts at 78 m. */
   const def = mat ? DEF[mat.id] : null;
   const matLine = mat && def
-    ? '<div class="upmat' + (short ? ' short' : '') + '">' +
+    ? '<div class="upmat' + (have < mat.need ? ' short' : '') + '">' +
       '<span class="dot" style="background:#' + def.color.toString(16).padStart(6, '0') + '"></span>' +
       mat.need + ' ' + def.name + ' · you have ' + have +
-      (short && isOre(def) ? ' · from ' + def.min + ' m' : '') + '</div>'
+      (have < mat.need && isOre(def) ? ' · from ' + def.min + ' m' : '') + '</div>'
+    : '';
+  const keyDef = keyMat ? DEF[keyMat.id] : null;
+  const keyLine = keyMat && keyDef
+    ? '<div class="upmat' + (keyHave < keyMat.need ? ' short' : '') + '">' +
+      '<span class="dot" style="background:#' + keyDef.color.toString(16).padStart(6, '0') + '"></span>' +
+      keyMat.need + ' ' + keyDef.name + ' · you have ' + keyHave +
+      (keyHave < keyMat.need && isOre(keyDef) ? ' · from ' + keyDef.min + ' m' : '') + '</div>'
     : '';
   row.innerHTML =
     '<div class="upinfo"><div class="upname">' + label + '</div>' +
@@ -643,7 +654,7 @@ function buildUpgradeRow(u: Upgrade) {
       ? '<div class="upmat short">The rig will not take another at this depth' +
         (nextStep ? ' · past ' + nextStep + ' m it will' : '') + '</div>'
       : '') +
-    matLine + '</div>';
+    matLine + keyLine + '</div>';
   const btn = document.createElement('button');
   btn.className = 'buy';
   btn.textContent = maxed ? 'MAX'
@@ -654,6 +665,7 @@ function buildUpgradeRow(u: Upgrade) {
     if (g.credits < c || maxed || capped || short) return;
     g.credits -= c;
     if (mat) g.stock[mat.id] = have - mat.need;
+    if (keyMat) g.stock[keyMat.id] = keyHave - keyMat.need;
     g.up[u.key]++;
     if (u.key === 'tank') g.fuel = padFuel();
     if (u.key === 'scan') lamp.distance = S.light();
