@@ -1,5 +1,7 @@
 {
-  "worktree": { "bgIsolation": "none" },
+  "worktree": {
+    "bgIsolation": "none"
+  },
   "hooks": {
     "SessionStart": [
       {
@@ -33,6 +35,11 @@
           }
         ]
       }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Bash(*adb*)"
     ]
   }
 }
