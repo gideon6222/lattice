@@ -8,6 +8,7 @@ import { anchorAt } from './sim/vaults';
 import { wake } from './sim/unrest';
 import { coreColumn, gateDepth } from './sim/gate';
 import { abilityFor } from './sim/ability';
+import { hintAt } from './sim/hints';
 import { scarHere, repairable, repairRoom, packScar } from './sim/repair';
 import { vaultOpen } from './sim/vaults';
 import { g, S, save, checkpoint, coreM, worldTrait, resetGround, cutGround, padFuel, salePayout, addMark, resetSeen, revealVault, docked } from './sim/state';
@@ -822,6 +823,12 @@ export function coreBroken(tier: number) {
       updateHUD();
       updateKit();
       if (first) groundStartsToGo();
+      /* Y15: one line, after the card closes rather than fighting it for the
+         screen - the toast this game already uses everywhere else for "one
+         more fact, quietly". `g.ground.gates.length` is tiers opened, which
+         is exactly this break's own count. */
+      const hint = hintAt(g.ground.gates.length);
+      if (hint) toast(hint);
     });
   /* The way down is permanent and the state now says so. Quit here and
      CONTINUE comes back through an open gate. */

@@ -10,29 +10,24 @@ Moved onto the studio 2026-09-22. Eleven rounds and fourteen numbered phases shi
   Gideon's own console work, and he has explicitly held off ("I will hold off on adding
   anything to the play store for now", 2026-09-18). V0 stays unticked because the work is
   not done, not because anything here is broken.
-- **"Always more secrets" (Y12) and the reveal's escalating hints (Y15) have no measurement**
-  of how often a descent currently meets anything at all, which is what would tell us
-  whether more is even needed yet.
 
 ## Next three milestones
 
-Done 2026-09-23: **X3**, one material promoted from currency to key. Solmarrow — the
-rarest mineral in the world, about five cells on the whole planet, none of them above
-372 m — was wanted by nothing before this; a find just became credits at the pad. Now
-the Drill's own last tier, Godcore, the only upgrade already named as an ending, costs
-exactly one Solmarrow on top of whatever iron the rest of the ladder already asks for.
-Deliberately its own mechanism, `capstoneCost`, rather than a case folded into `matCost`'s
-per-level scaling — a key is not a bigger number, it is a single fact that becomes true
-once — so `matCost`, `matTotalFor` and the save-grandfathering that trusts one material
-per upgrade are all untouched.
+Done 2026-09-23: **Y12 and Y15 together.** Y12's own box asked for a measurement of how
+often a descent meets a secret at all before adding more; `tools/secrets-probe.mjs` walked
+a campaign's shaft-and-corridor across five offsets and found only about 27% of mining
+sessions meet one of the four kinds (find, relic, wreck, cache), and that caches are
+about 90% of every hit because the other three are each finite and a campaign runs out of
+them. No rate tuning fixes a finite pool, so Y12 is closed by Y15 instead: `src/sim/hints.ts`
+delivers one escalating one-line toast per gate broken (three total), the mechanism
+DESIGN.md had already named as Y12's real spine because a hint costs nothing to place and
+is never exhausted by finding it. Delivered from `coreBroken`, keyed on the tiers-opened
+count that call already had. Receipt: `test/hints.test.mjs` and `tools/secrets-probe.mjs`'s
+own printed run.
 
-1. **Y12** — blocked on its own prerequisite: no measurement yet of how often a descent
-   meets a secret at all, which is what would say whether "always more" needs more built or
-   just needs the ones that exist to be found more often.
-2. **Y15** — the escalating hints toward the reveal, behind the same missing number as Y12.
-3. **V0** — the Play listing, held by Gideon's own word since 2026-09-18.
+Only one open box is left (`studio progress`):
 
-These are the only three open boxes left (`studio progress`).
+1. **V0** — the Play listing, held by Gideon's own word since 2026-09-18.
 
 ## Phone readings
 

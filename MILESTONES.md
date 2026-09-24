@@ -563,9 +563,18 @@ is in `journal/legacy-plan.md`.
       briefs: menu
       design: ## Round fifteen: the descent becomes a ladder
 
-- [ ] **Y12, throughout: more secrets.** His words: "make it feel like there are
-      always more secrets to find." This is the one ask with no mechanism attached to
-      it and it is deliberately last - the derelicts, the lode and the veins are all
+- [x] **Y12, throughout: more secrets.** Done 2026-09-23, closed by Y15 rather than
+      by its own new content. His words: "make it feel like there are always more
+      secrets to find." The measurement the box asked for
+      (`tools/secrets-probe.mjs`) found that a campaign's shaft-and-corridor meets
+      one of the four secret kinds in only about 27% of mining sessions, and that
+      the interesting three of the four - a find crate, the one relic, a wreck's
+      hold - are each finite and run out, which no rate tuning fixes: the cache
+      alone (about 90% of every hit) is what is left once a campaign has found
+      everything else. DESIGN.md had already named the real answer before the
+      probe ran: "the hints ARE the secrets, and they escalate toward the Vault" -
+      an escalating hint costs nothing to place and cannot be exhausted by finding
+      it, which answers "always more" in a way a finite crate never could. See Y15.
       (more: journal/legacy-plan.md)
       briefs: level-design
       design: ## Round fifteen: the descent becomes a ladder
@@ -604,9 +613,17 @@ is in `journal/legacy-plan.md`.
       (more: journal/legacy-plan.md)
       design: ### The turn the story takes, and what it makes the rest of the round mean
 
-- [ ] **Y15 The reveal, and the hints that escalate toward it.** Near-wordless,
-      in the grammar this game already uses: room templates, remnants, the
-      colour grade, one-line instrument toasts. Receipt: a test that the number
+- [x] **Y15 The reveal, and the hints that escalate toward it.** Done 2026-09-23.
+      Near-wordless, in the grammar this game already uses: a one-line toast,
+      the mechanism every other quiet consequence in this game already speaks
+      through. `src/sim/hints.ts` is three lines, one per gate broken, each a
+      half-truth a little less deniable than the last: the first is a stray
+      fact (a core that dark should not go out that easily), the third names
+      what the cores were actually for (something being let OUT, not spent).
+      Delivered from `coreBroken` once its "THE WAY OPENS" card closes, keyed
+      on `g.ground.gates.length` - the tiers-opened count that call already had
+      in hand, so no new state and no new trigger. Also closes Y12; see its box
+      for the measurement that pointed here.
       (more: journal/legacy-plan.md)
       briefs: level-design
       design: ### The turn the story takes, and what it makes the rest of the round mean

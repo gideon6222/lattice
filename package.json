@@ -15,6 +15,7 @@
     "size:update": "node tools/check-bundle-size.mjs --update",
     "film": "node tools/filmstrip.mjs",
     "econ": "node tools/econ.mjs",
+    "secrets": "node tools/secrets-probe.mjs",
     "store": "npm run build && node tools/store.mjs"
   },
   "dependencies": {
