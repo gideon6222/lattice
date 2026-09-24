@@ -575,6 +575,9 @@ is in `journal/legacy-plan.md`.
       probe ran: "the hints ARE the secrets, and they escalate toward the Vault" -
       an escalating hint costs nothing to place and cannot be exhausted by finding
       it, which answers "always more" in a way a finite crate never could. See Y15.
+      **Closed on paper 2026-09-24**, per Fable's review: the 27% is now recorded in
+      DESIGN.md as the accepted figure, so a later reader does not mistake a closed
+      box for dense secrets. See Round sixteen.
       (more: journal/legacy-plan.md)
       briefs: level-design
       design: ## Round fifteen: the descent becomes a ladder
@@ -627,3 +630,25 @@ is in `journal/legacy-plan.md`.
       (more: journal/legacy-plan.md)
       briefs: level-design
       design: ### The turn the story takes, and what it makes the rest of the round mean
+
+### Round sixteen: closing Fable's review, 2026-09-24
+
+- [ ] **Z1 The Vault's own card names the entity, and one core break gets filmed.**
+      Fable's review of the Y1-Y15 packet: the hints escalate but the ending still
+      reads as reassurance rather than a turn, and Y13's dramatic break was never
+      filmed, only its aftermath. Rewrite `vaultReached`'s card (and the matching
+      line in the manifest's vault panel) to land his third answer plainly, and
+      shoot a contact sheet of a core actually breaking, not just the scar it
+      leaves.
+      briefs: level-design
+      design: ## Round sixteen: closing Fable's review
+
+- [ ] **Z2 A real phone read, before V0.** Fable's review: S6's phone pass was
+      desk evidence (draw calls, filmed contact sheets), never a reading taken on
+      the handset, and PWA install/offline behaviour has never been checked on
+      this phone at all. `studio phone read perf`, a shot of a shop station and
+      of the third hint, and an install-and-offline pass in Chrome on the S26
+      Ultra - none of it needs Gideon's held console work, so it does not wait on
+      V0.
+      briefs: phone
+      design: ## Round sixteen: closing Fable's review

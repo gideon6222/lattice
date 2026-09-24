@@ -2580,6 +2580,44 @@ makes a long descent more survivable because a shop partway down can sell
 fuel, not because the climb got shorter. See Invariants.
 
 
+## Round sixteen: closing Fable's review
+
+Fable reviewed the Y1-Y15 packet on 2026-09-24, the standing check-in Gideon asked every
+game to run at a major milestone (`gamedev-notes\playtests\lattice.md` has the reply
+verbatim). Three things from that review changed the plan.
+
+### The reveal never reached the Vault itself
+
+His third answer, 2026-09-19: *"I want it to look like you are doing a good thing by
+releasing the dark energy from it, but at the end of the game, find out that you actually
+freed a dark entity."* Y15 built the half of that which escalates on the way down - the
+three hints in `src/sim/hints.ts` - but the Vault's own card (`vaultReached`, `src/actions.ts`)
+never named the entity, so a player who reads the hints and then reads the ending sees three
+suspicious rumors and a reassurance that seems to contradict them. Z1 rewrites that card to
+say the thing plainly, and adds the film receipt round fifteen never took: Y13 asked for
+every Anchor break to be dramatic and leave remnants, and nothing filmed the break itself,
+only its aftermath (`anchorbroken` in `tools/scenes.mjs` shoots the scar, not the moment).
+
+### S6's phone pass was desk evidence
+
+STATE.md's own phone-readings section says the last check found no device connected, and
+every "phone pass" milestone since (S6, W10) has stood on draw-call counts and filmed
+contact sheets rather than a reading taken on the handset itself - and PWA install and
+offline behaviour, which only a real device or real Chrome can exercise, has never been
+checked there at all. Z2 is that reading, before V0 is argued from a phone number nobody
+has actually read off the phone.
+
+### Y12 closes on paper, not with new content
+
+Y12's own box already carries the number - a campaign's shaft-and-corridor meets one of
+the four secret kinds in about 27% of mining sessions, and caches are about 90% of every
+hit because the other three are each finite. That is the accepted figure for "how often
+does a descent meet a secret," recorded here rather than only in the milestone file so a
+later round arguing for a rate change is arguing against a number instead of a memory:
+**27% is accepted as correct for a campaign that has also shipped Y15's hints**, because
+the hints are what makes "always more" true without the rate itself needing to move.
+
+
 ---
 
 # Engineering reference
