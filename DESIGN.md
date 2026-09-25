@@ -2883,6 +2883,32 @@ four pockets a key, one key a pocket, at least half at home, geodes at most a qu
 first tier's value, no money ore below its ceiling. The X4 richness overlay now reads the key
 homes, which is what AM builds on.
 
+### AM: a key find is an event, and a hunt
+
+Every key cell is the whole event, since a pocket is one cell. The cut flashes the screen in the
+key's own colour, sprays it, plays the relic sound, buzzes 15 ms (`hap.key`), toasts the name and
+the count aboard, and marks the map with an outlined diamond in that colour (outlined so an
+emerald never reads as the green FOUND mark). The first of each key gets the discovery card with
+its own head and footer: NEW KEY, and "banked at the pad, never sold" in place of the ore card's
+"sell it at the pad", which was the one wrong instruction on it.
+
+The camera then leans a third of the way toward the cell and 1.2 units closer for 0.6 s
+(`R.keyHold`). It is camera only, it ends on the frame the held direction changes, and it never
+starts within a second of the hull going down. That is how "never while touching a hazard" is
+read: the find still counts and still marks the map, but the screen is never taken while the
+ship is being hurt. The hurt clock reads the hull itself, so a new hazard cannot forget to tell it.
+
+The hunt: `keyNear(x, d, range, dug)` in `src/sim/keys.ts` returns the nearest undug pocket's
+NAME within range and never its cell or bearing, the Receiver's own fence. Range is
+`2 + scan * 0.5 + survey * 1.6` cells, so the starter rig hears only what the drill is about to
+touch and a full Sensors line hears about eleven cells, not the screen. The HUD shows it as a chip
+over the dials, "EMERALD NEAR" in the key's colour. The map names each key's home region, "EMERALD
+LIVES HERE", once the key's window starts above `reachableDepth(gates)`.
+
+Receipts: `test/sense.test.mjs`; three e2e specs (the mark and the lean and a turn ending it, no
+lean while hurt, the chip naming a key and going quiet once it is cut); `npm run film keyfind`,
+two finds of one emerald on one strip.
+
 ### Fable's second review, after the research, and what it changed
 
 - **One wrongness colour, defined once.** Hollow Knight's Infection works because orange

@@ -57,6 +57,10 @@ export const hap = {
   quake: () => buzz([90, 60, 45]),
   /* Buying something, and the tow, which is the game taking something. */
   buy: () => buzz(16),
+  /* A key coming out of the rock (round seventeen, AM). Short on purpose:
+     the flash, the spray and the camera's lean carry the size of it, and a
+     long buzz would read as damage. */
+  key: () => buzz(15),
   tow: () => buzz([40, 70, 40, 70, 40]),
   /* A core coming apart. It is allowed to be the biggest thing here. */
   boom: () => buzz([120, 50, 80, 40, 60])

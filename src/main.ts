@@ -14,8 +14,8 @@ import { syncDrops } from './drops';
 import { setDrillTier, setUpgradeHardware, rig, bit, player } from './ship';
 import { stationCamera, stationScene, roomReady, pickPart, shipYaw, turnShip } from './station';
 import { partKeys } from './ship';
-import { keyPockets, KEY_PLANS, keyHome } from './sim/keys';
-import { baySystem, selectSystem } from './ui';
+import { keyPockets, KEY_PLANS, keyHome, keyNear, senseRange } from './sim/keys';
+import { baySystem, selectSystem, sensedKey } from './ui';
 import { el, updateHUD, audioLabels, buildShop, toast, foundBanner, buildBallast, flash } from './ui';
 import { frame, tick, advance, stopClock, startClock, clockRunning } from './loop';
 import { installPanelGrain } from './grain';
@@ -281,6 +281,6 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* Round seventeen, AB: which panels the close stack holds, top last. */
     openPanels,
     /* Round seventeen, AL: where the keys are. */
-    keyPockets, KEY_PLANS, keyHome, detailGeometryOf
+    keyPockets, KEY_PLANS, keyHome, detailGeometryOf, keyNear, senseRange, sensedKey, updateHUD
   };
 }

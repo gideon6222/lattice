@@ -761,7 +761,7 @@ export function markSeen(keys: string[]) {
 
    Deduplicated on the exact cell, because a cache re-opened by a bomb after
    the drill already took it would otherwise stack two marks on one spot. */
-export function addMark(kind: 'f' | 'c', x: number, d: number) {
-  const k = kind + ',' + Math.round(x) + ',' + Math.round(d);
+export function addMark(kind: 'f' | 'c' | 'k', x: number, d: number, what = '') {
+  const k = kind + ',' + Math.round(x) + ',' + Math.round(d) + (what ? ',' + what : '');
   if (!g.marks.includes(k)) g.marks.push(k);
 }

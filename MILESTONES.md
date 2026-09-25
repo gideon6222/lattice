@@ -738,7 +738,7 @@ is in `journal/legacy-plan.md`.
       briefs: level-design, balance, art
       design: ## Round seventeen, the shop and the minerals
 
-- [ ] **AM A key find is an event, and a hunt.** The first cut of each pocket fires it: light,
+- [x] **AM A key find is an event, and a hunt.** The first cut of each pocket fires it: light,
       sound, a 15 ms haptic, a short camera hold, a map mark, the key's name. Any move input ends
       the hold on that frame, and it never fires while the ship touches a hazard. The Sensors
       line names the key pockets within range, never the cell; the map shows each key's home

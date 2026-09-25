@@ -38,6 +38,11 @@ export const R = {
      cannot shorten a shot that is read off a clock. -1 rather than 0 because 0
      is a real instant in it. */
   endShot: -1,
+  /* Round seventeen, AM. The camera's lean toward a key the drill just cut:
+     seconds left, and where it leans. Null the rest of the time. It moves the
+     camera only and never the ship, and a change of direction ends it that
+     frame, so it can never cost a thumb anything. */
+  keyHold: null as { t: number; x: number; y: number; dir: string | null } | null,
   /* Wall-clock seconds since landing on this world, for the fastest-core
      record. Reset by arrive(); read once, when a core breaks. */
   worldT: 0,

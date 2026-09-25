@@ -624,5 +624,42 @@ export const SCENES = {
       __cw.advance(0.5);
     `,
     step: `__cw.advance(SECS);`
+  },
+
+  /* Round seventeen, AM. Drilling down onto an emerald: the chip naming it,
+     the cut, the flash in its colour and the camera's lean, then the lean
+     letting go. Two finds of one key on one strip, a second pocket reset in
+     halfway, so the sheet shows the moment is the same size the second time. */
+  keyfind: {
+    secs: 0.2,
+    frames: 24,
+    enter: true,
+    setup: `
+      const pk = __cw.keyPockets(0).pockets.find((p) => p.id === 'emerald');
+      const KX = pk.cells[0][0], KD = pk.cells[0][1];
+      window.__KF = { KX, KD, n: 0 };
+      __cw.g.ground.gates = [0, 1];
+      __cw.g.up.cool = 5; __cw.g.up.drill = 5; __cw.setDrillTier && __cw.setDrillTier(5);
+      const dug = [];
+      for (let d = KD - 5; d <= KD - 1; d++) for (let x = KX - 3; x <= KX + 3; x++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = KX; __cw.g.pd = KD - 1;
+      __cw.R.vx = 0; __cw.R.vy = 0; __cw.R.digging = null;
+      __cw.resetBlocks();
+      __cw.advance(0.4);
+      __cw.R.held = 'down';
+    `,
+    step: `
+      __KF.n++;
+      __cw.R.held = 'down';
+      if (__KF.n === 12) {
+        __cw.g.dug.delete(__KF.KX + ',' + __KF.KD);
+        __cw.g.px = __KF.KX; __cw.g.pd = __KF.KD - 1;
+        __cw.R.vx = 0; __cw.R.vy = 0; __cw.R.digging = null; __cw.R.keyHold = null;
+        __cw.resetBlocks();
+      }
+      __cw.advance(SECS);
+      window.__KF.log = (window.__KF.log || '') + (__cw.R.keyHold ? 'L' : __cw.g.dug.has(__KF.KX + ',' + __KF.KD) ? 'c' : '.');
+    `
   }
 };

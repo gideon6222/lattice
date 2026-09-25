@@ -1,4 +1,5 @@
 import { SYSTEMS, SUPPLY_SYSTEM, WHAT, shelfStock, type SystemKey } from './sim/config';
+import { keyNear, senseRange } from './sim/keys';
 import { HULL_MAX, DEF, isOre, isKey, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
 import { setGauges, setFuelReserve } from './gauges';
 import { clamp } from './sim/util';
@@ -36,7 +37,7 @@ export const mustEl = (id: string): HTMLElement => {
 };
 export const ui = {
   planet: mustEl('planet'), credits: mustEl('credits'), haul: mustEl('haul'), depth: mustEl('depth'),
-  anchors: mustEl('anchors'), callLamp: mustEl('callLamp'),
+  anchors: mustEl('anchors'), callLamp: mustEl('callLamp'), keyNear: mustEl('keyNear'),
   cargoTxt: mustEl('cargoTxt'), fuelTxt: mustEl('fuelTxt'),
   toast: mustEl('toast'), shop: mustEl('shop'), shopCredits: mustEl('shopCredits'),
   rack: mustEl('rack'), systems: mustEl('systems'), shopName: mustEl('shopName'), shopSub: mustEl('shopSub'),
@@ -126,18 +127,21 @@ let foundT = 0;
    different promises. A device is bolted on and its ladder opens; a supply is
    in the hold and the counter will restock it. Saying "FITTED" over a Fuel
    Cell would be a small lie in the one place the game is teaching. */
-export function foundBanner(name: string, what: string, kind: 'device' | 'supply' | 'ore' = 'device') {
+export function foundBanner(name: string, what: string, kind: 'device' | 'supply' | 'ore' | 'key' = 'device') {
   if (!ui.found || !ui.foundName || !ui.foundWhat) return;
   ui.foundName.textContent = name;
   ui.foundWhat.textContent = what;
   const head = ui.found.querySelector('.fhead');
   const fit = ui.found.querySelector('.ffit');
   if (head) head.textContent = kind === 'device' ? 'DEVICE RECOVERED'
-    : kind === 'supply' ? 'NEW SUPPLY' : 'NEW MINERAL';
+    : kind === 'supply' ? 'NEW SUPPLY' : kind === 'key' ? 'NEW KEY' : 'NEW MINERAL';
   if (fit) {
     fit.textContent = kind === 'device'
       ? 'FITTED · UPGRADE IT AT THE OUTFITTER'
       : kind === 'supply' ? 'IN THE HOLD · THE OUTFITTER STOCKS IT NOW'
+      /* A key is never sold (round seventeen, AK), so the ore line would be
+         the one wrong instruction on the card. */
+      : kind === 'key' ? 'IN THE HOLD · BANKED AT THE PAD, NEVER SOLD'
       : 'IN THE HOLD · SELL IT AT THE PAD';
   }
   ui.found.classList.add('on');
@@ -230,6 +234,29 @@ function paintCallLamp() {
   ui.callLamp.style.setProperty('--call', String(v));
 }
 
+/* The Sensors hearing a key. Round seventeen, AM.
+
+   A name and nothing else - "EMERALD NEAR" - in the key's own colour, so the
+   hunt has a warmer-colder without a compass in it. Asked again only when the
+   ship crosses into a new cell or the rock changes, since the answer cannot
+   change in between. */
+let paintedNear = '';
+export function sensedKey(): string | null {
+  const x = Math.round(g.px), d = Math.max(0, Math.round(g.pd));
+  if (d < 1) return null;
+  return keyNear(x, d, senseRange(g.up.scan, g.up.survey ?? 0), (cx, cd) => g.dug.has(cx + ',' + cd));
+}
+function paintKeyNear() {
+  const id = sensedKey();
+  const k = (id || '') + '|' + Math.round(g.px) + '|' + Math.round(g.pd);
+  if (k === paintedNear) return;
+  paintedNear = k;
+  ui.keyNear.classList.toggle('hidden', !id);
+  if (!id) return;
+  ui.keyNear.textContent = DEF[id].name.toUpperCase() + ' NEAR';
+  ui.keyNear.style.color = '#' + DEF[id].color.toString(16).padStart(6, '0');
+}
+
 export function updateHUD() {
   /* The chip names WHERE YOU ARE, and it is the only always-visible place that
      happens.
@@ -258,6 +285,7 @@ export function updateHUD() {
   ui.depth.textContent = 'DEPTH ' + Math.max(0, Math.round(g.pd)) + ' m   /   ' + coreM() + ' m DEEP';
   paintAnchorPips();
   paintCallLamp();
+  paintKeyNear();
   /* The dials take fractions and do their own smoothing - see gauges.ts. The
      two numbers under them are the exact reading a needle cannot give you, and
      fuel is the one that decides whether to turn round. Rounded UP, so a gauge

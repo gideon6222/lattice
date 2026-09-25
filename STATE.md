@@ -6,7 +6,6 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## What still does not exist
 
-- **A key find is not an event yet** beyond the old rare-find banner (AM).
 - **Every gate opens the same bay as the pad** (AO). Back and the X work in the browser; on the
   installed app they have not been pressed yet (AB).
 - **The store listing's mineral and shop paragraphs are pre-overhaul**, and the whole listing
@@ -16,19 +15,18 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## Next three milestones
 
-Done 2026-09-25: **AL, where minerals sit.** Keys are one-cell pockets with a home region and a
-depth window, drawn as their own crystal; a find is one key, one rung. Money thins below its band,
-geodes are a quarter of the first tier's value instead of three quarters, and top-rung prices
-eased. Probe: tiers of 8, 18 and 27 game-minutes, the Vault at 55, credits and keys binding in
-every tier. Before it: **AN** the fitting bay, **AK** keys that never sell. Not pushed live yet,
-by his choice, until the balance was right. **AB** waits on one press of Android back on his
-phone.
+Done 2026-09-25: **AM, a key find is an event and a hunt.** Each key cut flashes and sprays in
+its colour, buzzes, marks the map and leans the camera in for 0.6 s (a turn ends it, and it never
+starts while the hull is going). The Sensors chip names a key in range, never where; the map names
+each key's home region once its depths are open. Before it: **AL** where minerals sit (pushed
+live), **AN** the fitting bay, **AK** keys that never sell. **AB** waits on one press of Android
+back on his phone.
 
-1. **AM** - a key find is an event, and the Sensors line makes it a hunt.
-2. **AO** - each gate its own room around the same lift, selling Sink and one item a visit.
-3. **AE** - the barrier and the core become objects; the drain shows in the world.
+1. **AO** - each gate its own room around the same lift, selling Sink and one item a visit.
+2. **AE** - the barrier and the core become objects; the drain shows in the world.
+3. **AF** - repair shows in the rock; SEAL and Ballast readouts hide before the first core.
 
-Then AF, AH, AI, AJ, Z2, V0.
+Then AH, AI, AJ, Z2, V0.
 
 ## Phone readings
 

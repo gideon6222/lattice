@@ -341,6 +341,12 @@
     display:flex; align-items:center; justify-content:center;
   }
   #callLamp.hidden{display:none;}
+  #keyNear{
+    position:absolute; left:42px; top:-17px; height:14px; padding:0 7px;
+    border-radius:7px; border:1px solid currentColor; background:rgba(6,7,5,.8);
+    font-size:9px; font-weight:700; line-height:14px; letter-spacing:.12em; white-space:nowrap;
+  }
+  #keyNear.hidden{display:none;}
   #callLamp i{
     width:7px; height:7px; border-radius:50%; display:block;
     background:rgba(255,200,97,calc(.10 + var(--call, 0) * .90));
@@ -1390,6 +1396,8 @@
        Hidden entirely until the receiver is aboard: an empty instrument is a
        question the player cannot answer yet. -->
   <div id="callLamp" class="hidden" aria-hidden="true"><i></i></div>
+  <!-- Round seventeen, AM. The Sensors naming a key in range, never where. -->
+  <div id="keyNear" class="hidden" role="status"></div>
   <div id="clusterTxt"><s id="fuelTxt">100%</s><s id="cargoTxt">0 / 60 KG</s></div>
 </div>
 <div id="kit">

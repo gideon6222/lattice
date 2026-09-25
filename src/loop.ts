@@ -5,7 +5,7 @@ import { W, HULL_MAX, DIG_BASE, DEF, SUPPLY_OF, DROP_MIN_VALUE, RELIC_COLOR, rel
          coreDepth, valueMult, skyHi, skyLo, ORES,
          GAS_HULL_DAMAGE, GAS_SOAK, traitOf, heatDepth, tremorDepth, paletteOf } from './sim/config';
 import { clamp, key, mixHex } from './sim/util';
-import { g, S, save, coreM, valueM, worldTrait, cutGround, padFuel, markSeen, docked,
+import { g, S, save, coreM, valueM, worldTrait, cutGround, padFuel, markSeen, docked, addMark,
          groundTick, hereUnrest, lightHere, vaultHere, checkpoint, gateHere } from './sim/state';
 import { unrestBand, tremorScale } from './sim/unrest';
 import { gradeFor } from './sim/grade';
@@ -134,6 +134,13 @@ function startDig(tx: number, td: number, dir: Dir) {
 }
 
 let camZBoost = 0, freeze = 0, thrustLevel = 0, bank = 0;
+/* Seconds since the hull last went down, for the key lean (AM), and the hull
+   it was at. Read off the hull itself rather than hooked into each damage
+   site, so a new hazard cannot forget to tell it. */
+let hurtClock = 99, hullWas = -1;
+/* How long the lean holds, how far toward the cell it goes, how much closer,
+   and how long after a hit it will not start. */
+const KEY_HOLD = 0.6, KEY_LEAN = 0.35, KEY_ZOOM = 1.2, KEY_HOLD_SAFE = 1;
 
 /* ---------- the way in, applied ----------
 
@@ -268,6 +275,8 @@ export function advance(seconds: number, step = 1 / 60) {
 
 export function tick(raw: number, draw = true) {
   clock += raw;
+  hurtClock = hullWas >= 0 && g.hull < hullWas ? 0 : hurtClock + raw;
+  hullWas = g.hull;
   const frozen = freeze > 0;
   if (frozen) freeze -= raw;
   const dt = frozen ? 0 : raw;
@@ -603,11 +612,15 @@ export function tick(raw: number, draw = true) {
             flash('rgba(255,255,255,.30)', 420);
             sfx.relic();
             hap.boom();
-            foundBanner(b.name,
-              'Worth ◈ ' + Math.round(b.value * valueM()).toLocaleString() +
-              ' a unit.' + (ore ? ' It does not exist above ' + ore.min + ' m.' : ''),
-              'ore');
-          } else if (b.value >= 400) {
+            /* A key's card says what a key is, not what it would sell for:
+               it is never sold (round seventeen, AK), so a price on it would
+               be the one wrong number on the screen. */
+            foundBanner(b.name, b.key
+              ? 'A key. The rig asks for it by name, and the Sensors hear it before you see it.'
+              : 'Worth ◈ ' + Math.round(b.value * valueM()).toLocaleString() +
+                ' a unit.' + (ore ? ' It does not exist above ' + ore.min + ' m.' : ''),
+              b.key ? 'key' : 'ore');
+          } else if (!b.key && b.value >= 400) {
             toast(b.name + '  +◈ ' + Math.round(b.value * valueM()).toLocaleString());
           }
           /* ---------- and every time, not just the first ----------
@@ -633,6 +646,30 @@ export function tick(raw: number, draw = true) {
             spray(worldX(R.digging.x), -R.digging.d, b.color,
                   Math.round(40 + rv * 90), 5 + rv * 4, 1.1 + rv * 0.9);
             hap.boom();
+          }
+          /* ---------- a key, every time ----------
+
+             Round seventeen, AM. His ask was for a find to "feel exciting", and
+             a key is one cell in a pocket of one: the whole event is this cut.
+             Its own colour in the flash and the spray, its own buzz, a mark on
+             the map in that colour, a line naming it and the count now aboard,
+             and the camera leaning in on the cell for a beat.
+
+             The lean is camera only and ends the frame the thumb changes
+             direction, and it never starts in the second after a hit: a
+             moment that took the screen while the hull was going would be the
+             game choosing spectacle over the player. */
+          if (b.key) {
+            const hex = '#' + b.color.toString(16).padStart(6, '0');
+            flash(hex + '55', 360);
+            spray(worldX(R.digging.x), -R.digging.d, b.color, 120, 9, 2.2);
+            sfx.relic();
+            hap.key();
+            addMark('k', R.digging.x, R.digging.d, b.id);
+            toast(b.name.toUpperCase() + ' · KEY · ' + (g.cargo[b.id] || 0) + ' aboard');
+            if (hurtClock > KEY_HOLD_SAFE) {
+              R.keyHold = { t: KEY_HOLD, x: worldX(R.digging.x), y: -R.digging.d, dir: R.held };
+            }
           }
           /* ---------- the lode's price ----------
 
@@ -1316,9 +1353,22 @@ export function tick(raw: number, draw = true) {
   const flying = g.mode === 'fly';
   const kx = flying ? CAM_FOLLOW_FLY : CAM_FOLLOW_PLAY;
   const ky = flying ? CAM_FOLLOW_FLY_Y : CAM_FOLLOW_PLAY_Y;
-  camera.position.x = approach(camera.position.x, clamp(vx, -lim, lim), kx, raw);
-  camera.position.y = approach(camera.position.y, vy - CAM_Y_OFFSET + surfaceT * CAM_SURFACE_LIFT, ky, raw);
-  camera.position.z = approach(camera.position.z, zNow, CAM_ZOOM_RATE, raw);
+  /* Round seventeen, AM: the lean toward a key. A third of the way from the
+     ship to the cell and a little closer in, eased in and out by the same
+     follow the camera always uses, so it cannot snap. */
+  let lx = 0, ly = 0, lz = 0;
+  if (R.keyHold) {
+    R.keyHold.t -= raw;
+    if (R.keyHold.t <= 0 || R.held !== R.keyHold.dir || hurtClock < KEY_HOLD_SAFE) R.keyHold = null;
+    else {
+      lx = (R.keyHold.x - vx) * KEY_LEAN;
+      ly = (R.keyHold.y - vy) * KEY_LEAN;
+      lz = -KEY_ZOOM;
+    }
+  }
+  camera.position.x = approach(camera.position.x, clamp(vx + lx, -lim, lim), kx, raw);
+  camera.position.y = approach(camera.position.y, vy + ly - CAM_Y_OFFSET + surfaceT * CAM_SURFACE_LIFT, ky, raw);
+  camera.position.z = approach(camera.position.z, zNow + lz, CAM_ZOOM_RATE, raw);
   /* Parallax reads the camera AFTER the follow but BEFORE the shake, or the
      background jitters independently of the foreground and the illusion that
      they are one space goes with it. */

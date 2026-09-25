@@ -116,3 +116,30 @@ export function keyPockets(planet = 0): { pockets: Pocket[]; cells: Map<string, 
 export function keyAt(x: number, d: number, planet = 0): string | null {
   return keyPockets(planet).cells.get(x + ',' + d) ?? null;
 }
+
+/* ---------- the Sensors line hears keys: round seventeen, AM ----------
+
+   How far, in cells, the ship's sensors hear a key pocket. The scanner is the
+   Sensors line's opening rung and the Deep Survey its found device, so both
+   widen it; with neither it hears only what the drill is about to touch. */
+export function senseRange(scan: number, survey: number): number {
+  return 2 + scan * 0.5 + survey * 1.6;
+}
+
+/* The NAME of the nearest key pocket still in the rock within `range`, or
+   null. Never the cell and never a bearing: like the Receiver it says near,
+   never where - choosing a direction and digging it is the game's decision,
+   and an instrument that answered it outright would take the decision away. */
+export function keyNear(x: number, d: number, range: number, dug: (cx: number, cd: number) => boolean,
+                        planet = 0): string | null {
+  let best: string | null = null, bestD = Infinity;
+  for (const p of keyPockets(planet).pockets) {
+    for (const [cx, cd] of p.cells) {
+      const dx = cx - x, dd = cd - d;
+      const dist = Math.sqrt(dx * dx + dd * dd);
+      if (dist > range || dist >= bestD || dug(cx, cd)) continue;
+      best = p.id; bestD = dist;
+    }
+  }
+  return best;
+}

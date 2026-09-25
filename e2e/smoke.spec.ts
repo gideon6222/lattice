@@ -5195,3 +5195,82 @@ test('a key is drawn as its own crystal, never as a money ore in another colour'
   expect(got.keys.length, 'no key was found in the world at all').toBeGreaterThan(0);
   for (const k of got.keys) expect(got.money, 'a key shares its drawing with a money ore').not.toContain(k);
 });
+
+/* ---------- round seventeen, AM: a key find is an event and a hunt ---------- */
+
+/* Drill straight down onto a key pocket from a shaft dug above it, and return
+   what the find left behind. `hurt` bleeds the hull every step, which is the
+   one case the lean must refuse. */
+async function cutKey(page: Page, hurt: boolean) {
+  return page.evaluate((hurt) => {
+    const w = (window as any).__cw;
+    w.stopClock();
+    const pk = w.keyPockets(0).pockets.find((p: any) => p.id === 'emerald');
+    const [KX, KD] = pk.cells[0];
+    w.g.ground.gates = [0, 1];
+    w.g.up.cool = 5; w.g.hull = 9999;
+    const dug: string[] = [];
+    for (let d = 1; d < KD; d++) dug.push(KX + ',' + d);
+    w.g.dug = new Set(dug);
+    w.g.marks = [];
+    w.g.px = KX; w.g.pd = KD - 1;
+    w.R.vx = 0; w.R.vy = 0; w.R.digging = null; w.R.keyHold = null;
+    w.resetBlocks();
+    w.R.held = 'down';
+    let held: any = null;
+    for (let i = 0; i < 200 && !w.g.dug.has(KX + ',' + KD); i++) {
+      if (hurt) w.g.hull -= 0.5;
+      w.advance(0.05);
+      if (w.R.keyHold) held = { ...w.R.keyHold };
+    }
+    const cut = w.g.dug.has(KX + ',' + KD);
+    /* A thumb that turns ends the lean on that frame. */
+    const before = !!w.R.keyHold;
+    w.R.held = 'left';
+    w.advance(0.02);
+    return { cut, held, before, after: !!w.R.keyHold, marks: w.g.marks.slice(), KX, KD,
+             toast: (document.getElementById('toast')?.textContent || '') };
+  }, hurt);
+}
+
+test('cutting a key marks the map in its name and leans the camera in, until the thumb turns', async ({ page }) => {
+  await inPlay(page);
+  const got = await cutKey(page, false);
+  expect(got.cut, 'the drill never reached the key').toBe(true);
+  expect(got.marks).toContain('k,' + got.KX + ',' + got.KD + ',emerald');
+  expect(got.held, 'the camera never leaned toward the key').not.toBeNull();
+  expect(got.before, 'the lean ended before anything turned the ship').toBe(true);
+  expect(got.after, 'turning the ship did not end the lean').toBe(false);
+});
+
+test('a key cut while the hull is going is marked but never takes the camera', async ({ page }) => {
+  await inPlay(page);
+  const got = await cutKey(page, true);
+  expect(got.cut).toBe(true);
+  expect(got.marks).toContain('k,' + got.KX + ',' + got.KD + ',emerald');
+  expect(got.held, 'the camera leaned in while the ship was being hurt').toBeNull();
+});
+
+test('the sensors name a key in range, and go quiet once it is cut', async ({ page }) => {
+  await inPlay(page);
+  const got = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.stopClock();
+    const pk = w.keyPockets(0).pockets.find((p: any) => p.id === 'emerald');
+    const [KX, KD] = pk.cells[0];
+    const others = w.keyPockets(0).pockets.filter((p: any) => p !== pk)
+      .some((p: any) => p.cells.some(([x, d]: number[]) => Math.hypot(x - KX, d - KD) < 8));
+    w.g.up.scan = 0; w.g.up.survey = 0;
+    w.g.px = KX; w.g.pd = KD - 1;
+    const near = w.sensedKey();
+    w.updateHUD();
+    const chip = document.getElementById('keyNear')!;
+    const shown = !chip.classList.contains('hidden') ? chip.textContent : '';
+    w.g.dug.add(KX + ',' + KD);
+    const after = others ? 'skip' : w.sensedKey();
+    return { near, shown, after };
+  });
+  expect(got.near).toBe('emerald');
+  expect(got.shown).toBe('EMERALD NEAR');
+  if (got.after !== 'skip') expect(got.after).toBeNull();
+});

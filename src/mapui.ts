@@ -36,13 +36,15 @@
 
 import { panelOpened, panelClosed } from './closestack';
 import { g, save } from './sim/state';
-import { W, paletteOf } from './sim/config';
+import { W, DEF, paletteOf } from './sim/config';
 import { MAP_TILE, WORLD_DEPTH, mapKey, regionAt, regionName,
          REGION_COLS, REGION_ROWS, REGION_COUNT } from './sim/region';
 import { el, mustEl } from './ui';
 import { sfx } from './audio';
 import { isCollapsed, unrestBand, UNREST_BANDS, isLit } from './sim/unrest';
 import { richnessOf, surveyKnown } from './sim/survey';
+import { KEY_PLANS, keyHome } from './sim/keys';
+import { reachableDepth } from './sim/gate';
 import { hasAbility } from './sim/ability';
 import { secretsHeard } from './sim/secrets';
 import { ANCHOR_COUNT, anchorAt, anchorSealed,
@@ -302,6 +304,20 @@ export function draw() {
     x.fillText(down ? regionName(i).toUpperCase() : hit ? regionName(i).toUpperCase() : '? ? ?',
                cx, py(cd));
 
+    /* ---- where a key lives ----
+
+       Round seventeen, AM. Each key's home region, named in the key's own
+       colour above the region's name, once the barrier above its depths is
+       open. A region and never a cell: most of a key's pockets are there and
+       the rest are anywhere in its depths, so this says where to hunt and
+       never where to dig. */
+    const homes = KEY_PLANS.filter((p) => keyHome(p) === i && p.lo < reachableDepth(g.ground.gates));
+    homes.forEach((p, j) => {
+      x.font = '700 8px "Chakra Petch", system-ui, sans-serif';
+      x.fillStyle = '#' + DEF[p.id].color.toString(16).padStart(6, '0');
+      x.fillText(DEF[p.id].name.toUpperCase() + ' LIVES HERE', cx, py(cd) - 12 - j * 10);
+    });
+
     /* ---- what the first Anchor bought, said in words rather than in colour ----
 
        Round fourteen, X4. The wash over the tiles was the first attempt on its
@@ -351,6 +367,10 @@ export function draw() {
     const md = +p[2];
     if (md < d0 || md > d1) continue;
     if (p[0] === 'f') diamond(x, +p[1] * s, py(md), '#00ff41', 5);
+    /* A key you cut, outlined in its own colour: the map remembers where each
+       one was, which is how a home region stops being a rumour. Outlined so an
+       emerald can never be read as a green FOUND diamond. */
+    else if (p[0] === 'k') diamondOutline(x, +p[1] * s, py(md), p[3] ? '#' + (DEF[p[3]]?.color ?? 0xffffff).toString(16).padStart(6, '0') : '#ffffff', 4);
     else dot(x, +p[1] * s, py(md), '#ff8fd8', 3);
   }
 
