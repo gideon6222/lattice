@@ -28,3 +28,4 @@ export * from '../src/sim/call';
 export * from '../src/sim/encounter';
 export * from '../src/sim/grade';
 export * from '../src/sim/hints';
+export * from '../src/sim/keys';

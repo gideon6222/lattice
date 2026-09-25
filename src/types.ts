@@ -24,6 +24,10 @@ export interface Ore {
      count and it stays. */
   shards: number;
   tone: number;
+  /* The deepest metre a MONEY ore still rolls at. Round seventeen, AL: copper
+     was the commonest ore at the bottom of the world; below its band it thins
+     to nothing. Keys have no ceiling here - sim/keys.ts places them. */
+  max?: number;
 }
 
 export interface Rock {
@@ -120,6 +124,9 @@ export interface Block {
      is open around it already, and the lighting in this game is calibrated
      enough that it is not worth touching without a measurement. */
   ghost?: boolean;
+  /* A key mineral, placed in a pocket rather than rolled out of the ladder
+     (round seventeen, AL). Drawn as its own crystal, never as a money ore. */
+  key?: boolean;
 }
 
 export type UpgradeKey =

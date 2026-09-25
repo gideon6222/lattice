@@ -277,6 +277,14 @@ export function displaceLikeRock(m: THREE.Material, bump: number) {
   }, 'rock' + bump.toFixed(3));
 }
 export const shardGeo = new THREE.OctahedronGeometry(1, 0);
+/* A key's crystal (round seventeen, AL): a long six-sided point, drawn in a
+   fan of five from one spot on the face. Pointed along +Y so a scale on Y is
+   its length; the base sits at the origin so the fan grows out of one point. */
+export const keyGeo = (() => {
+  const g = new THREE.CylinderGeometry(0, 1, 1, 6, 1);
+  g.translate(0, 0.5, 0);
+  return g;
+})();
 /* Cache contents. A flat slab rather than a crystal: at thirty pixels the only
    thing that separates man-made from mineral is that the faces are parallel. */
 export const crateGeo = new THREE.BoxGeometry(1, 0.62, 0.62);

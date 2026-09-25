@@ -1175,7 +1175,7 @@ test('an upgrade past the free tier needs minerals, not just credits', async ({ 
   /* Round seventeen, AK: magmite is a deep key, asked for one a rung. */
   await expect(card.locator('.upmat')).toContainText('1 Magmite');
   await expect(card.locator('.upmat'), 'a requirement you cannot meet must say where to go')
-    .toContainText('from 210 m');
+    .toContainText('from 200 m');
 
   /* levels inside the free tier are still pure credits */
   card = await tapBay(page, 'drill');
@@ -1220,7 +1220,7 @@ test('an upgrade past the free tier needs minerals, not just credits', async ({ 
   await page.locator('#shopClose').dispatchEvent('click');
   await page.locator('#btnManifest').dispatchEvent('click');
   await expect(page.locator('#vault')).toContainText('Magmite');
-  await expect(page.locator('#vault')).toContainText('from 210 m');
+  await expect(page.locator('#vault')).toContainText('from 200 m');
   await expect(page.locator('#err')).toHaveClass(/hidden/);
 });
 
@@ -5176,4 +5176,22 @@ test('every line has a real part on the ship, and none is a placeholder', async 
     return { parts: w.partKeys() as string[], lines: w.UPGRADES.map((u: any) => u.key) as string[] };
   });
   for (const k of got.lines) expect(got.parts, k + ' has no part on the ship').toContain(k);
+});
+
+test('a key is drawn as its own crystal, never as a money ore in another colour', async ({ page }) => {
+  /* Round seventeen, AL, and Fable's line on it: a ruby that looks like tinted
+     copper is the object that breaks the illusion. Every key in the world is
+     asked what it is drawn with, against every money ore. */
+  const got = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    const keys = new Set<string>(), money = new Set<string>();
+    for (let d = 0; d < 398; d += 1) for (let x = 0; x < w.W; x++) {
+      const b = w.blockAt(x, d);
+      if (!b || !b.ore || b.cache || b.find || b.salvage) continue;
+      (b.key ? keys : money).add(w.detailGeometryOf(b).uuid);
+    }
+    return { keys: [...keys], money: [...money] };
+  });
+  expect(got.keys.length, 'no key was found in the world at all').toBeGreaterThan(0);
+  for (const k of got.keys) expect(got.money, 'a key shares its drawing with a money ore').not.toContain(k);
 });

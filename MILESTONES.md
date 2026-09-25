@@ -728,7 +728,7 @@ is in `journal/legacy-plan.md`.
       briefs: menu, art, feel
       design: ## Round seventeen, the shop and the minerals
 
-- [ ] **AL Where minerals sit.** Each key has a depth window, a home region rolled on its own
+- [x] **AL Where minerals sit.** Each key has a depth window, a home region rolled on its own
       seed offset, at least four pockets, and no pocket over a third of any one rung's ask;
       commons thin out below their band; geodes fall under a quarter of the value in 0-113 m.
       Each key has its own mesh and material in the wall, never a recolour of a money ore. The

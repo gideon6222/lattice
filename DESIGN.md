@@ -2838,6 +2838,51 @@ drag turns the ship, a rack scroll does not, and a tap on the drill bit opens DR
 line has a part on the ship. The room's aisle geometry is still built by `stationroom.ts`, out
 of the camera's view; AO rebuilds the rooms around the same lift and retires it there.
 
+### AL: where minerals sit
+
+Built 2026-09-25. **Keys left the ore ladder.** Each is a fixed set of one-cell pockets placed on
+its own seed (`src/sim/keys.ts`, offsets 1301-1309) inside a depth window, 60% of them in one
+home region the Survey map can point at and the rest anywhere in the window, so the home is
+where to hunt and never the only place to look. A pocket is one key and a rung asks for one key,
+so every find is exactly one rung and no find is ever a band - the one-vein-finishes-the-laser
+fault is gone by construction. Windows and pockets: amethyst 85-205 m (40), emerald 118-222
+(40), ruby 150-320 (36), magmite 200-340 (40, home on the top edge of the heat zone), coreite
+250-392 (20), umbrite 300-392 (10), Solmarrow 345-394 (5). Every window ends above the door.
+Keys draw as their own crystal - a fan of long six-sided points out of one spot, glassier and
+brighter - never as a money ore's scatter of flecks in another colour.
+
+**Money thinned and moved.** Copper stops rolling below 150 m, iron below 220, silver below 300,
+gold below 398, so the commons are shallow finds again rather than the commonest thing at the
+bottom. Geodes went from 6,200 credits to 1,500 and to about a third as common above the second
+gate, which takes them from 69-76% of the first tier's value to 25%; below the second gate they
+come back at three times that rate, because there money is gold, lodes and geodes and the
+heat-zone rungs have to be paid for. The upgrade price curves eased (1.55 to 1.42 a level, 1.5
+to 1.38, 1.6 to 1.45), since keys now hold back the upper bands and the old top-rung prices
+were set for the geode economy - the Cooling Rig's last level went from 102,516 to 57,188.
+
+**Three things the tuning found, all written down because each one looked like a balance
+problem and one was not.** Two a rung of the common keys turned tier 1 into seventy
+game-minutes of fetching on the probe, so it is one a rung. Magmite's first home at 230-340 m put
+every pocket in heat the Cooling Rig was needed to survive, and the rig needed magmite: the probe
+sat on 130,000 credits unable to reach any, so its home moved to 200-226 m, a heat run you can
+live through. And the probe itself had stopped one metre above every barrier it opened, so its
+shelf never stepped past the first cap - which also inflated every tier-2 figure recorded before
+this, including AA's 25.5 and AK's 42.5 minutes.
+
+**The probe now:** tier 0 8.4 game-minutes, tier 1 17.6, tier 2 26.9, the Vault at minute 55.
+Credits and keys both bind: 5 and 0 purchases waited on them in tier 0, 8 and 5 in tier 1, 1 and
+10 in tier 2. The probe hunts a key the way a player reading the map does - only for the line
+that fixes what stops its next goal, only once the credits are banked, and up to three nearby
+pockets a trip.
+
+Goldens, diffs read first: the frozen world changed 345 of 14,118 recorded cells (2.4%) - 128
+started being ore, 118 changed ore, 44 stopped - and ore cells went 740 to 824 as the old key
+rolls fell to gold and silver; `blocks.json` changed 1,127 of 27,755 cells on the reference
+planet, all key, money-ceiling and geode cells. `test/keys.test.mjs` pins the placement: at least
+four pockets a key, one key a pocket, at least half at home, geodes at most a quarter of the
+first tier's value, no money ore below its ceiling. The X4 richness overlay now reads the key
+homes, which is what AM builds on.
+
 ### Fable's second review, after the research, and what it changed
 
 - **One wrongness colour, defined once.** Hollow Knight's Infection works because orange

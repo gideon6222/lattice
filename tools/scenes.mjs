@@ -602,5 +602,27 @@ export const SCENES = {
       __cw.vaultReached();
     `,
     step: `__cw.advance(SECS);`
+  },
+
+  /* Round seventeen, AL: a key pocket in the wall, beside the money ore around
+     it - the thing to judge is whether the key reads as its own crystal and
+     never as a recolour of a money ore. The nearest emerald pocket, with the
+     ground opened around it. */
+  keypocket: {
+    secs: 0.4,
+    frames: 2,
+    enter: true,
+    setup: `
+      const pk = __cw.keyPockets(0).pockets.find((p) => p.id === 'emerald');
+      const KX = pk.cells[0][0], KD = pk.cells[0][1];
+      __cw.g.ground.gates = [0];
+      const dug = [];
+      for (let d = KD - 5; d <= KD - 1; d++) for (let x = KX - 3; x <= KX + 3; x++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = KX; __cw.g.pd = KD - 2;
+      __cw.resetBlocks();
+      __cw.advance(0.5);
+    `,
+    step: `__cw.advance(SECS);`
   }
 };

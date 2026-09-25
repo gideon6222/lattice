@@ -9,7 +9,7 @@ import { regionAt } from './sim/region';
 import { blockAt } from './sim/world';
 import { rnd } from './sim/util';
 import { scene } from './scene';
-import { crackGeo, crackMat, mat, shade, tintRock, makeGlow, worldX, boxGeo, pebbleGeo, shardGeo, crateGeo, chunkFor, glowTex,
+import { crackGeo, crackMat, mat, shade, tintRock, makeGlow, worldX, boxGeo, pebbleGeo, shardGeo, keyGeo, crateGeo, chunkFor, glowTex,
          displaceLikeRock, rockRelief, ROCK_BUMP } from './materials';
 import { applyLight, applyGlow, markLightDirty } from './lightmap';
 import type { Block } from './types';
@@ -69,6 +69,13 @@ const scratchColor = new THREE.Color();
    and every block's shade rides on the instance. Emissive cannot vary per
    instance, which is why pools are keyed by block id rather than by glow: each
    id has one correct emissive, and scoria's smoulder survives. */
+/* Which shape a block's detail is drawn with: a crate for anything somebody
+   packed, a key's crystal fan for a key (round seventeen, AL), a shard for a
+   money ore, a pebble for rock. One function so the test can ask it too. */
+export function detailGeometryOf(b: Block): THREE.BufferGeometry {
+  return b.cache || b.find || b.salvage ? crateGeo : b.key ? keyGeo : b.ore ? shardGeo : pebbleGeo;
+}
+
 function poolFor(b: Block): Pool {
   const existing = pools.get(b.id);
   if (existing) return existing;
@@ -92,7 +99,9 @@ function poolFor(b: Block): Pool {
     : b.ore
     ? new THREE.Color(b.host || 0x333038).multiplyScalar(0.02)
     : new THREE.Color(b.color).multiplyScalar(b.glow || 0.02);
-  const detailEmissive = new THREE.Color(b.color).multiplyScalar(b.glow || 0.02);
+  /* A key glows a third brighter than a money ore of the same glow: it is the
+     thing the hunt is for (round seventeen, AL). */
+  const detailEmissive = new THREE.Color(b.color).multiplyScalar((b.glow || 0.02) * (b.key ? 1.35 : 1));
 
   /* This is the material almost the whole screen is made of, so it is the one
      that decides whether the world reads as rock or as painted plastic.
@@ -121,7 +130,7 @@ function poolFor(b: Block): Pool {
     /* Crystal is the one thing down here that is NOT rough: a gemstone that
        scatters light like gravel stops reading as a gemstone, and the ore being
        the only smooth thing in frame is most of why it catches the eye. */
-    metalness: 0, roughness: b.ore ? 0.25 : 1.0,
+    metalness: b.key ? 0.12 : 0, roughness: b.key ? 0.06 : b.ore ? 0.25 : 1.0,
     /* pebbles are chunk geometry and carry vertex colours; crystal shards are
        octahedra and do not */
     vertexColors: !b.ore
@@ -134,7 +143,7 @@ function poolFor(b: Block): Pool {
     /* A wreck's hold is crated too, and for the same reason: it is somebody
        else's haul rather than something the planet grew. Drawn as gems it read
        as a geode with a ship built round it. */
-    b.cache || b.find || b.salvage ? crateGeo : b.ore ? shardGeo : pebbleGeo, detailMat,
+    detailGeometryOf(b), detailMat,
     b.ore || b.seam ? MAX_DETAILS : MAX_CELLS
   );
   detail.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -469,7 +478,25 @@ function rebuild() {
       pool.body.setColorAt(pool.bodies, scratchColor.setHex(shade(tintRock(b.host || 0x333038, regionAt(x, d)), jit * ao)));
       pool.bodies++;
 
-      const n = b.shards || 5;
+      /* A key: a cluster of long six-sided crystals fanning out of one point
+         on the face, the one gem in the ground - never a money ore's scatter
+         of flecks in another colour (round seventeen, AL). */
+      if (b.key) {
+        const k = 5;
+        for (let i = 0; i < k; i++) {
+          const r1 = rnd(x * 13 + i, d * 7 + i * 3, 0);
+          const ang = (i / k) * Math.PI * 2 + r1 * 0.6;
+          const len = 0.36 + r1 * 0.2;
+          scratch.rotation.set(Math.sin(ang) * 0.9, 0, Math.cos(ang) * 0.9 + Math.PI);
+          scratch.scale.set(0.11, len, 0.11);
+          scratch.position.set(px + Math.sin(ang) * 0.1, py + Math.cos(ang) * 0.1, 0.4);
+          scratch.updateMatrix();
+          pool.detail.setMatrixAt(pool.details, scratch.matrix);
+          pool.detail.setColorAt(pool.details, scratchColor.setHex(b.color));
+          pool.details++;
+        }
+      }
+      const n = b.key ? 0 : b.shards || 5;
       for (let i = 0; i < n; i++) {
         const r1 = rnd(x * 13 + i, d * 7 + i * 3, g.planet);
         const r2 = rnd(x * 3 + i * 5, d * 17 + i, g.planet + 11);

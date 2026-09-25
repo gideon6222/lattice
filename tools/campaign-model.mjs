@@ -59,7 +59,7 @@ export function makeCampaign(H) {
   /* One trip, priced. `stopAt` is the depth to stand at; `corridor` works the
      seam at the bottom until the hold is full or the tank reaches its reserve.
      Nothing is committed: the caller does that with `commit`. */
-  function price(x, stopAt, corridor) {
+  function price(x, stopAt, corridor, extra = []) {
     let t = 0, fuel = S.fuelCap(), hull = S.hullCap(), soak = 0;
     const cap = S.cargoCap();
     const cargo = {}; let weight = 0;
@@ -122,7 +122,20 @@ export function makeCampaign(H) {
         side = -side; if (side === 1) off++;
       }
     }
-    move(stopAt / speed + Math.abs((route ? route.c : x) - START) / speed + (route ? Math.abs(route.c - x) / speed : 0));
+    /* A tour: from the first stop on to more stops, cutting across then down
+       - the way a player digs from one glowing pocket to the next rather than
+       flying home between them. */
+    let lastX = x, lastD = stopAt;
+    for (const [ex, ed] of extra) {
+      if (blockedAt >= 0) break;
+      const cells = [];
+      for (let cx = lastX; cx !== ex; cx += Math.sign(ex - lastX)) cells.push([cx + Math.sign(ex - lastX), lastD]);
+      for (let cd = lastD; cd !== ed; cd += Math.sign(ed - lastD)) cells.push([ex, cd + Math.sign(ed - lastD)]);
+      if (cells.some(([cx, cd]) => wall(cx, cd))) { blockedAt = ed; break; }
+      for (const [cx, cd] of cells) take(cx, cd);
+      lastX = ex; lastD = ed;
+    }
+    move(lastD / speed + Math.abs(lastX - START) / speed + (route && !extra.length ? Math.abs(route.c - x) / speed : 0));
     const ok = blockedAt < 0 && fuel > 0 && hull > 0;
     return { ok, blockedAt, t, fuel, hull, cargo, weight, cut, finds, caches };
   }
@@ -212,6 +225,33 @@ export function makeCampaign(H) {
       if (g.ground.gates.includes(t) || !H.gateReady(t, g.ground.lit)) continue;
       out.push({ kind: 'core', what: t, x: H.coreColumn(t), d: H.gateDepth(t) - 1 });
     }
+    /* A pocket of a key some rung is waiting on (round seventeen, AL): a
+       player hunts the pocket the Survey and the sensors point at rather than
+       mining a row and hoping. The six nearest the pad, so the goal list does
+       not grow with the world. */
+    const want = wantedKeys();
+    const ks = [];
+    for (const pk of H.keyPockets(g.planet).pockets) {
+      if (!want[pk.id]) continue;
+      const [x, d] = pk.cells[0];
+      if (g.dug.has(x + ',' + d)) continue;
+      /* A pocket a room or a gate was stamped over is not a key in the world. */
+      const b = H.blockAt(x, d);
+      if (!b || b.id !== pk.id) continue;
+      ks.push({ kind: 'key', what: pk.id, x, d, far: Math.abs(x - START) + d });
+    }
+    ks.sort((a, b) => a.far - b.far);
+    /* Each pocket goal carries up to two more wanted pockets near it, so a
+       trip is a short tour rather than one cell and home. */
+    for (const k of ks.slice(0, 6)) {
+      const then = [];
+      let cx = k.x, cd = k.d;
+      for (const o of ks) {
+        if (o === k || then.length >= 2) continue;
+        if (Math.abs(o.x - cx) + Math.abs(o.d - cd) <= 8) { then.push([o.x, o.d]); cx = o.x; cd = o.d; }
+      }
+      out.push({ ...k, then });
+    }
     if (H.vaultOpen(g.ground.gates) && !g.won) {
       out.push({ kind: 'vault', what: 0, x: H.VAULT_CORE_X, d: H.VAULT_CORE_D - 1 });
     }
@@ -220,7 +260,13 @@ export function makeCampaign(H) {
 
   function arrive(goal) {
     if (goal.kind === 'anchor') H.lightAnchor(g.ground, goal.what);
-    else if (goal.kind === 'core') H.openGate(g.ground.gates, goal.what);
+    else if (goal.kind === 'core') {
+      H.openGate(g.ground.gates, goal.what);
+      /* Breaking a core is flying into the gate's own cell, so the deepest
+         metre reached is the gate's - without this the shelf never stepped,
+         because the probe stood one metre above every barrier it opened. */
+      g.best.depth = Math.max(g.best.depth, H.gateDepth(goal.what));
+    }
     else if (goal.kind === 'vault') g.won = true;
     else if (goal.kind === 'device' && !g.found.includes(goal.what)) {
       g.found.push(goal.what); g.up[goal.what] = Math.max(g.up[goal.what] || 0, 1);
@@ -241,11 +287,22 @@ export function makeCampaign(H) {
      A player hunts the key, so the probe values a wanted key well above its
      weight in money. */
   const KEY_WANT = 4000;
+  /* What stops the nearest goal: out of fuel wants the tank, cooked by the
+     heat wants the rig and the plating. Set each run from the goal trips that
+     failed, so the hunt is for the fix a player would reach for. */
+  let needLines = ['tank', 'cool', 'drill'];
   function wantedKeys() {
     const want = {};
     for (const u of H.shelfStock(g.best.depth, g.found)) {
+      /* Only the lines that fix what is stopping the next goal. A player
+         hunts a key for the tank that reaches the next Anchor, not for the
+         magnet; the rest are bought when keys turn up. */
+      if (!needLines.includes(u.key)) continue;
       const lvl = g.up[u.key] || 0;
       if (lvl >= Math.min(u.max, H.levelCap(u, g.best.depth))) continue;
+      /* Only once the credits are in the bank: a key for a rung you cannot
+         pay for yet is a key you fetch and then sit on. */
+      if (H.costOf(u, lvl) > g.credits) continue;
       for (const m of [H.matCost(u, lvl), H.capstoneCost(u, lvl)]) {
         if (m && (g.stock[m.id] || 0) < m.need) want[m.id] = true;
       }
@@ -255,7 +312,17 @@ export function makeCampaign(H) {
   function bestMine() {
     let best = null;
     const want = wantedKeys();
-    for (const mx of MINE_XS) {
+    /* And a shaft down the middle of each wanted key's home region, the way a
+       player reads the Survey map (round seventeen, AL: keys live in pockets,
+       most of them in one home region, not wherever the ladder rolled them). */
+    const cols = MINE_XS.slice();
+    for (const p of H.KEY_PLANS) {
+      if (!want[p.id]) continue;
+      const home = H.keyHome(p, g.planet);
+      const span = H.W / H.REGION_COLS;
+      cols.push(Math.round((home % H.REGION_COLS + 0.5) * span));
+    }
+    for (const mx of cols) {
       for (let d = 6; d < H.WORLD_DEPTH; d += 6) {
         const trip = price(mx, d, true);
         if (trip.blockedAt >= 0) break;
@@ -282,12 +349,16 @@ export function makeCampaign(H) {
 
     while (runs < maxRuns && !g.won) {
       /* The cheapest reachable goal, if any trip to one is survivable. */
-      let pick = null;
+      let pick = null, nearestFail = null;
       for (const goal of goals()) {
-        const trip = price(goal.x, goal.d, false);
-        if (!trip.ok) continue;
+        const trip = price(goal.x, goal.d, false, goal.then || []);
+        if (!trip.ok) {
+          if (goal.kind !== 'key' && trip.blockedAt < 0 && (!nearestFail || trip.t < nearestFail.t)) nearestFail = trip;
+          continue;
+        }
         if (!pick || trip.t < pick.trip.t) pick = { goal, trip };
       }
+      if (nearestFail) needLines = nearestFail.fuel <= 0 ? ['tank', 'drill'] : ['cool', 'hull'];
       let trip, label;
       if (pick) { trip = pick.trip; label = pick.goal; }
       else {
@@ -299,7 +370,9 @@ export function makeCampaign(H) {
       const depthReached = label.kind === 'mine' ? label.d : label.d;
       g.best.depth = Math.max(g.best.depth, depthReached);
       commit(trip);
-      if (label.kind !== 'mine') {
+      if (label.kind === 'key') {
+        note('key ' + label.what + ' at ' + (label.d) + ' m');
+      } else if (label.kind !== 'mine') {
         arrive(label);
         note(label.kind + ' ' + (label.kind === 'anchor' ? H.regionName(label.what) : label.what) + ' at ' + (label.d + 1) + ' m');
         sinceProgress = 0;

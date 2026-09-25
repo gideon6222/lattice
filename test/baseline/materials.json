@@ -8,7 +8,7 @@
       "hard": 23,
       "wt": 21,
       "value": 196000,
-      "min": 372,
+      "min": 345,
       "chance": 0.0012,
       "glow": 0.72,
       "shards": 8,
@@ -22,7 +22,7 @@
       "hard": 19.5,
       "wt": 18,
       "value": 82000,
-      "min": 312,
+      "min": 300,
       "chance": 0.0026,
       "glow": 0.58,
       "shards": 7,
@@ -36,7 +36,7 @@
       "hard": 16,
       "wt": 16,
       "value": 34000,
-      "min": 258,
+      "min": 250,
       "chance": 0.0048,
       "glow": 0.6,
       "shards": 7,
@@ -50,7 +50,7 @@
       "hard": 13,
       "wt": 13,
       "value": 14000,
-      "min": 210,
+      "min": 200,
       "chance": 0.0078,
       "glow": 0.5,
       "shards": 6,
@@ -64,7 +64,7 @@
       "hard": 10,
       "wt": 10,
       "value": 5600,
-      "min": 168,
+      "min": 150,
       "chance": 0.0125,
       "glow": 0.32,
       "shards": 6,
@@ -78,7 +78,7 @@
       "hard": 8.5,
       "wt": 8.5,
       "value": 2800,
-      "min": 130,
+      "min": 118,
       "chance": 0.02,
       "glow": 0.3,
       "shards": 5,
@@ -92,7 +92,7 @@
       "hard": 7,
       "wt": 7,
       "value": 1400,
-      "min": 95,
+      "min": 85,
       "chance": 0.029,
       "glow": 0.28,
       "shards": 5,
@@ -110,7 +110,8 @@
       "chance": 0.038,
       "glow": 0.2,
       "shards": 5,
-      "tone": 4
+      "tone": 4,
+      "max": 398
     },
     {
       "id": "silver",
@@ -124,7 +125,8 @@
       "chance": 0.046,
       "glow": 0.16,
       "shards": 4,
-      "tone": 3
+      "tone": 3,
+      "max": 300
     },
     {
       "id": "iron",
@@ -138,7 +140,8 @@
       "chance": 0.062,
       "glow": 0.1,
       "shards": 4,
-      "tone": 2
+      "tone": 2,
+      "max": 220
     },
     {
       "id": "copper",
@@ -152,7 +155,8 @@
       "chance": 0.075,
       "glow": 0.1,
       "shards": 4,
-      "tone": 1
+      "tone": 1,
+      "max": 150
     }
   ],
   "rocks": [

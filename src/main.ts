@@ -6,7 +6,7 @@ import { HULL_MAX, UPGRADES, SUPPLIES, ORES, ROCKS, shelfStock, tremorDepth, hea
 import { g, S, save, load, hasSave, coreM, padRegion, worldUnrest, markSeen, onPad, docked, atSurface } from './sim/state';
 import { R } from './sim/runtime';
 import { camera, lamp, resize, scene, amb, sun, rim, fog, renderer } from './scene';
-import { syncBlocks, resetBlockCache } from './blocks';
+import { syncBlocks, resetBlockCache, detailGeometryOf } from './blocks';
 import { findCells, blockAt, cachePrize, haulValue } from './sim/world';
 import { regionAt, regionName, MAP_TILE, WORLD_DEPTH, REGION_COUNT } from './sim/region';
 import { setMark } from './mark';
@@ -14,6 +14,7 @@ import { syncDrops } from './drops';
 import { setDrillTier, setUpgradeHardware, rig, bit, player } from './ship';
 import { stationCamera, stationScene, roomReady, pickPart, shipYaw, turnShip } from './station';
 import { partKeys } from './ship';
+import { keyPockets, KEY_PLANS, keyHome } from './sim/keys';
 import { baySystem, selectSystem } from './ui';
 import { el, updateHUD, audioLabels, buildShop, toast, foundBanner, buildBallast, flash } from './ui';
 import { frame, tick, advance, stopClock, startClock, clockRunning } from './loop';
@@ -278,6 +279,8 @@ if (new URLSearchParams(location.search).has('debug')) {
        a picture rather than digging out and cutting a real core on camera. */
     coreBroken, vaultReached,
     /* Round seventeen, AB: which panels the close stack holds, top last. */
-    openPanels
+    openPanels,
+    /* Round seventeen, AL: where the keys are. */
+    keyPockets, KEY_PLANS, keyHome, detailGeometryOf
   };
 }

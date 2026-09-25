@@ -33,8 +33,12 @@ test('the map says something, and does not say it about everything', () => {
   const plain = TIERS.filter((t) => t === 0).length;
   assert.ok(rich > 0, 'no region on the planet is rich, so the reading never says anything');
   assert.ok(plain > 0, 'every region carries a mark, so the map is a wash');
-  assert.ok(rich + lean <= H.REGION_COUNT / 2,
-    `${rich + lean} of ${H.REGION_COUNT} regions are flagged - most of the map should be ordinary`);
+  /* Three quarters, not half, since round seventeen (AL): the keys live in
+     pockets clustered in one home region each, so in a row with a home the
+     other regions read lean by comparison - which is true, and is the map
+     pointing at where to hunt. What must not happen is every region flagged. */
+  assert.ok(rich + lean <= H.REGION_COUNT * 0.75,
+    `${rich + lean} of ${H.REGION_COUNT} regions are flagged - the map is a wash`);
 });
 
 test('richness is judged against the same depth, not against the world', () => {

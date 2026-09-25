@@ -12,15 +12,15 @@
         null,
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "coreite",
@@ -38,7 +38,7 @@
           "need": 1
         }
       ],
-      "total": 8
+      "total": 5
     },
     {
       "key": "cargo",
@@ -52,31 +52,31 @@
         null,
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         }
       ],
       "capstone": [],
-      "total": 12
+      "total": 6
     },
     {
       "key": "thrust",
@@ -90,15 +90,15 @@
         null,
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "magmite",
@@ -114,7 +114,7 @@
         }
       ],
       "capstone": [],
-      "total": 9
+      "total": 6
     },
     {
       "key": "tank",
@@ -128,15 +128,15 @@
         null,
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "magmite",
@@ -152,7 +152,7 @@
         }
       ],
       "capstone": [],
-      "total": 9
+      "total": 6
     },
     {
       "key": "cool",
@@ -198,31 +198,31 @@
         null,
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         }
       ],
       "capstone": [],
-      "total": 12
+      "total": 6
     },
     {
       "key": "auto",
@@ -235,11 +235,11 @@
         null,
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         },
         {
           "id": "magmite",
@@ -251,7 +251,7 @@
         }
       ],
       "capstone": [],
-      "total": 6
+      "total": 4
     },
     {
       "key": "bomb",
@@ -301,15 +301,15 @@
         null,
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "coreite",
@@ -327,7 +327,7 @@
           "need": 1
         }
       ],
-      "total": 8
+      "total": 5
     },
     {
       "key": "magnet",
@@ -340,23 +340,23 @@
         null,
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         }
       ],
       "capstone": [],
-      "total": 8
+      "total": 4
     },
     {
       "key": "survey",
@@ -369,19 +369,19 @@
         null,
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         }
       ],
       "capstone": [],
-      "total": 6
+      "total": 3
     },
     {
       "key": "receiver",
@@ -394,19 +394,19 @@
         null,
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "amethyst",
-          "need": 2
+          "need": 1
         },
         {
           "id": "ruby",
-          "need": 2
+          "need": 1
         }
       ],
       "capstone": [],
-      "total": 6
+      "total": 3
     },
     {
       "key": "drone",
@@ -419,11 +419,11 @@
         null,
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "emerald",
-          "need": 2
+          "need": 1
         },
         {
           "id": "magmite",
@@ -431,7 +431,7 @@
         }
       ],
       "capstone": [],
-      "total": 5
+      "total": 3
     }
   ]
 }

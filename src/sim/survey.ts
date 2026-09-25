@@ -90,6 +90,9 @@ function sweep(): Richness[] {
         const r = regionAt(x, d);
         cells[r]++;
         const b = blockAt(x, d);
+        /* Keys included, and since round seventeen (AL) that is most of what
+           this reads: keys sit in pockets clustered in one home region each,
+           so "rich" here is where a key lives - the hunt the map is for. */
         if (b && b.ore && ids.has(b.id)) value[r] += b.value;
       }
     }

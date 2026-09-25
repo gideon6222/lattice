@@ -279,7 +279,9 @@ test('the deepest ores are reachable on some planet, and not before', () => {
   let worst = 0, at = 0;
   for (let i = 1; i < mins.length; i++)
     if (mins[i] - mins[i - 1] > worst) { worst = mins[i] - mins[i - 1]; at = mins[i - 1]; }
-  const tail = deepest - mins[mins.length - 1];
+  /* Measured to the Vault's door, not the floor: since round seventeen (AC)
+     nothing below the last gate is dug for, and the keys (AL) all sit above it. */
+  const tail = Math.min(deepest, H.VAULT_DOOR_D) - mins[mins.length - 1];
   assert.ok(worst <= 62, 'a ' + worst + ' m stretch from ' + at + ' m has no new ore in it');
   /* 85, not 55. The world is 452 metres now and Solmarrow starts at 372, so
      the deepest material has eighty metres of ground to itself - which is the

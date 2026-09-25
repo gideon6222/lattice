@@ -2,7 +2,7 @@
   "drill": {
     "name": "Drill Bit",
     "base": 340,
-    "mul": 1.55,
+    "mul": 1.42,
     "max": 9,
     "tiers": [
       "Steel",
@@ -18,15 +18,15 @@
     ],
     "costs": [
       340,
-      527,
-      817,
-      1266,
-      1962,
-      3042,
-      4715,
-      7308,
-      11327,
-      17558
+      483,
+      686,
+      974,
+      1382,
+      1963,
+      2787,
+      3958,
+      5621,
+      7981
     ],
     "effects": [
       "Power 1.00x",
@@ -46,15 +46,15 @@
       null,
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "coreite",
@@ -66,25 +66,25 @@
       },
       null
     ],
-    "matTotal": 8
+    "matTotal": 5
   },
   "cargo": {
     "name": "Cargo Hold",
     "base": 320,
-    "mul": 1.55,
+    "mul": 1.42,
     "max": 9,
     "tiers": null,
     "costs": [
       320,
-      496,
-      769,
-      1192,
-      1847,
-      2863,
-      4438,
-      6878,
-      10661,
-      16525
+      454,
+      645,
+      916,
+      1301,
+      1848,
+      2623,
+      3725,
+      5290,
+      7512
     ],
     "effects": [
       "45 kg",
@@ -104,48 +104,48 @@
       null,
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       }
     ],
-    "matTotal": 12
+    "matTotal": 6
   },
   "thrust": {
     "name": "Thrusters",
     "base": 300,
-    "mul": 1.55,
+    "mul": 1.42,
     "max": 9,
     "tiers": null,
     "costs": [
       300,
-      465,
-      721,
-      1117,
+      426,
+      605,
+      859,
+      1220,
       1732,
-      2684,
-      4160,
-      6448,
-      9995,
-      15492
+      2460,
+      3493,
+      4959,
+      7042
     ],
     "effects": [
       "3.0 cells/s",
@@ -165,15 +165,15 @@
       null,
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "magmite",
@@ -188,25 +188,25 @@
         "need": 1
       }
     ],
-    "matTotal": 9
+    "matTotal": 6
   },
   "tank": {
     "name": "Fuel Tank",
     "base": 1100,
-    "mul": 1.55,
+    "mul": 1.42,
     "max": 9,
     "tiers": null,
     "costs": [
       1100,
-      1705,
-      2643,
-      4096,
-      6349,
-      9841,
-      15254,
-      23644,
-      36648,
-      56804
+      1562,
+      2218,
+      3150,
+      4472,
+      6351,
+      9018,
+      12806,
+      18184,
+      25822
     ],
     "effects": [
       "90 fuel",
@@ -226,15 +226,15 @@
       null,
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "magmite",
@@ -249,23 +249,23 @@
         "need": 1
       }
     ],
-    "matTotal": 9
+    "matTotal": 6
   },
   "cool": {
     "name": "Cooling Rig",
     "base": 6000,
-    "mul": 1.5,
+    "mul": 1.38,
     "max": 7,
     "tiers": null,
     "costs": [
       6000,
-      9000,
-      13500,
-      20250,
-      30375,
-      45563,
-      68344,
-      102516
+      8280,
+      11426,
+      15768,
+      21760,
+      30029,
+      41441,
+      57188
     ],
     "effects": [
       "0% heat shield",
@@ -300,20 +300,20 @@
   "scan": {
     "name": "Scanner Array",
     "base": 700,
-    "mul": 1.55,
+    "mul": 1.42,
     "max": 9,
     "tiers": null,
     "costs": [
       700,
-      1085,
-      1682,
-      2607,
-      4040,
-      6263,
-      9707,
-      15046,
-      23321,
-      36148
+      994,
+      1411,
+      2004,
+      2846,
+      4041,
+      5739,
+      8149,
+      11572,
+      16432
     ],
     "effects": [
       "8m light · 82% view",
@@ -333,45 +333,45 @@
       null,
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       }
     ],
-    "matTotal": 12
+    "matTotal": 6
   },
   "auto": {
     "name": "Autopilot",
     "base": 4900,
-    "mul": 1.55,
+    "mul": 1.42,
     "max": 6,
     "tiers": null,
     "costs": [
       4900,
-      7595,
-      11772,
-      18247,
-      28283,
-      43838,
-      67950
+      6958,
+      9880,
+      14030,
+      19923,
+      28290,
+      40172
     ],
     "effects": [
       "Not installed",
@@ -387,11 +387,11 @@
       null,
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       },
       {
         "id": "magmite",
@@ -402,19 +402,19 @@
         "need": 1
       }
     ],
-    "matTotal": 6
+    "matTotal": 4
   },
   "bomb": {
     "name": "Seismic Charge",
     "base": 3000,
-    "mul": 1.6,
+    "mul": 1.45,
     "max": 3,
     "tiers": null,
     "costs": [
       3000,
-      4800,
-      7680,
-      12288
+      4350,
+      6308,
+      9146
     ],
     "effects": [
       "Not installed",
@@ -432,16 +432,16 @@
   "laser": {
     "name": "Cutting Laser",
     "base": 12500,
-    "mul": 1.6,
+    "mul": 1.45,
     "max": 5,
     "tiers": null,
     "costs": [
       12500,
-      20000,
-      32000,
-      51200,
-      81920,
-      131072
+      18125,
+      26281,
+      38108,
+      55256,
+      80122
     ],
     "effects": [
       "Not installed",
@@ -472,20 +472,20 @@
   "hull": {
     "name": "Hull Plating",
     "base": 3700,
-    "mul": 1.5,
+    "mul": 1.38,
     "max": 9,
     "tiers": null,
     "costs": [
       3700,
-      5550,
-      8325,
-      12488,
-      18731,
-      28097,
-      42145,
-      63218,
-      94827,
-      142240
+      5106,
+      7046,
+      9724,
+      13419,
+      18518,
+      25555,
+      35266,
+      48667,
+      67160
     ],
     "effects": [
       "100 hull",
@@ -505,15 +505,15 @@
       null,
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "coreite",
@@ -525,22 +525,22 @@
       },
       null
     ],
-    "matTotal": 8
+    "matTotal": 5
   },
   "magnet": {
     "name": "Salvage Magnet",
     "base": 1200,
-    "mul": 1.5,
+    "mul": 1.38,
     "max": 6,
     "tiers": null,
     "costs": [
       1200,
-      1800,
-      2700,
-      4050,
-      6075,
-      9113,
-      13669
+      1656,
+      2285,
+      3154,
+      4352,
+      6006,
+      8288
     ],
     "effects": [
       "Not installed",
@@ -556,36 +556,36 @@
       null,
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       }
     ],
-    "matTotal": 8
+    "matTotal": 4
   },
   "survey": {
     "name": "Deep Survey",
     "base": 3600,
-    "mul": 1.55,
+    "mul": 1.42,
     "max": 5,
     "tiers": null,
     "costs": [
       3600,
-      5580,
-      8649,
-      13406,
-      20779,
-      32208
+      5112,
+      7259,
+      10308,
+      14637,
+      20785
     ],
     "effects": [
       "Not installed",
@@ -600,32 +600,32 @@
       null,
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       }
     ],
-    "matTotal": 6
+    "matTotal": 3
   },
   "receiver": {
     "name": "Lattice Receiver",
     "base": 3500,
-    "mul": 1.5,
+    "mul": 1.38,
     "max": 5,
     "tiers": null,
     "costs": [
       3500,
-      5250,
-      7875,
-      11813,
-      17719,
-      26578
+      4830,
+      6665,
+      9198,
+      12694,
+      17517
     ],
     "effects": [
       "Not installed",
@@ -640,32 +640,32 @@
       null,
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "amethyst",
-        "need": 2
+        "need": 1
       },
       {
         "id": "ruby",
-        "need": 2
+        "need": 1
       }
     ],
-    "matTotal": 6
+    "matTotal": 3
   },
   "drone": {
     "name": "Repair Drone",
     "base": 4400,
-    "mul": 1.5,
+    "mul": 1.38,
     "max": 5,
     "tiers": null,
     "costs": [
       4400,
-      6600,
-      9900,
-      14850,
-      22275,
-      33413
+      6072,
+      8379,
+      11564,
+      15958,
+      22022
     ],
     "effects": [
       "Not installed",
@@ -680,17 +680,17 @@
       null,
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "emerald",
-        "need": 2
+        "need": 1
       },
       {
         "id": "magmite",
         "need": 1
       }
     ],
-    "matTotal": 5
+    "matTotal": 3
   }
 }

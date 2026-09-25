@@ -87,3 +87,42 @@ test('the first band of every line is credits only, and a capstone asks for one 
     }
   }
 });
+
+/* ---------- where they sit: round seventeen, AL ---------- */
+
+test('every key has its pockets: at least four, one key each, most of them at home', () => {
+  const { pockets } = H.keyPockets(0);
+  for (const p of H.KEY_PLANS) {
+    const mine = pockets.filter((k) => k.id === p.id);
+    assert.ok(mine.length >= 4, `${p.id} has ${mine.length} pockets - one lucky find would be the whole hunt`);
+    for (const k of mine) {
+      assert.ok(k.cells.length <= 1, `a ${p.id} pocket holds ${k.cells.length} keys - a single find would pay for more than a rung`);
+      for (const [, d] of k.cells) assert.ok(d >= p.lo && d <= p.hi, `a ${p.id} pocket at ${d} m is outside its window ${p.lo}-${p.hi}`);
+    }
+    const home = H.keyHome(p, 0);
+    const atHome = mine.filter((k) => H.regionAt(k.cells[0][0], k.cells[0][1]) === home).length;
+    assert.ok(atHome >= mine.length * 0.5, `${p.id}: only ${atHome} of ${mine.length} pockets are in its home region, so the map has nothing to point at`);
+  }
+});
+
+test('money is money: geodes no longer carry the shallow tier, and commons thin out below their band', () => {
+  H.setWorld(0); H.g.dug = new Set(); H.g.ground = H.newGround();
+  let geode = 0, all = 0;
+  for (let d = 0; d < H.gateDepth(0); d++) {
+    for (let x = 0; x < H.W; x++) {
+      const b = H.blockAt(x, d);
+      if (!b || !b.ore || !b.value || H.isKey(b.id) || b.cache) continue;
+      all += b.value;
+      if (b.id === 'geode') geode += b.value;
+    }
+  }
+  assert.ok(geode / all <= 0.26, `geodes are ${Math.round(geode / all * 100)}% of the value in the first tier - the exciting find is still a thing no recipe asks for`);
+  for (const o of H.ORES.filter((x) => x.max !== undefined)) {
+    for (let d = o.max + 1; d < Math.min(o.max + 60, H.WORLD_DEPTH); d++) {
+      for (let x = 0; x < H.W; x++) {
+        const b = H.blockAt(x, d);
+        assert.ok(!b || b.id !== o.id, `${o.id} at ${x},${d}, below its ceiling at ${o.max} m`);
+      }
+    }
+  }
+});

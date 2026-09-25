@@ -8,10 +8,13 @@ import { regionAt, REGION_COUNT } from './region';
 import { vaultCells, anchorHere, anchorPlinth, WORKED_HARD, SEALED_HARD, HULK_HARD,
          vaultOpen, VAULT_WALL_HARD, ANCHOR_COUNT, anchorAt, VAULT_W, VAULT_H } from './vaults';
 import { isCollapsed, hardScale, isAwake, UNREST_BANDS } from './unrest';
-import { gateCellAt } from './gate';
+import { gateCellAt, gateDepth } from './gate';
 import { g , coreM, valueM, worldTrait} from './state';
 import { findMap, cacheSupply, FIND_COLOR, FIND_HOST, FIND_HARD, type Find } from './finds';
-import type { Block, SupplyKey } from '../types';
+import { keyAt } from './keys';
+
+const GEODE_DEEP_MULT = 3;
+import type { Block, SupplyKey, Ore } from '../types';
 
 /* The crates buried on the world you are standing on, cached.
 
@@ -551,6 +554,18 @@ export function blockAt(x: number, d: number): Block | null {
     }
   }
 
+  /* A key pocket (round seventeen, AL). Keys no longer roll out of the ore
+     ladder: each is a fixed set of small seeded pockets, most in one home
+     region, so the map can point at a key and no single find finishes a band
+     of the upgrade ladder. An overwriter on its own seed - see sim/keys.ts -
+     checked before caves so a pocket is never swallowed by open ground. */
+  const kid = keyAt(x, d);
+  if (kid) {
+    const o = DEF[kid] as Ore;
+    return { id: o.id, name: o.name, color: o.color, host: o.host, glow: o.glow, shards: o.shards, tone: o.tone,
+             hard: o.hard * hm, wt: o.wt, value: o.value, ore: true, key: true };
+  }
+
   /* Caves, in 2x2 blobs so they read as open ground rather than confetti.
      Evaluated on a coarse grid and with its own seed offset, so adding them
      leaves every ore and rock roll exactly where it was. */
@@ -664,13 +679,25 @@ export function blockAt(x: number, d: number): Block | null {
              glow: LODE.glow, shards: LODE.shards, tone: LODE.tone,
              hard: LODE.hard * hm, wt: LODE.wt, value: LODE.value, ore: true, lode: true };
   }
-  if (d >= GEODE.min && pr > 1 - geodeChanceOn(tr)) {
+  /* Deeper than the second gate the geodes come back at three times the rate
+     (round seventeen, AL). The cut that took them from 69% of the shallow
+     value to a quarter was about the shallow tiers, where they drowned the
+     keys; below 226 m money is gold, lodes and these, and with too few of
+     them the heat-zone rungs became a credit grind on the campaign probe. */
+  if (d >= GEODE.min && pr > 1 - geodeChanceOn(tr) * (d >= gateDepth(1) ? GEODE_DEEP_MULT : 1)) {
     return { id: GEODE.id, name: GEODE.name, color: GEODE.color, host: GEODE.host, glow: GEODE.glow,
              shards: GEODE.shards, tone: GEODE.tone, hard: GEODE.hard * hm, wt: GEODE.wt,
              value: GEODE.value, ore: true };
   }
 
   for (const o of ORES) {
+    /* Keys never come out of the ladder (sim/keys.ts places them), and money
+       ore thins out below its own band - copper was the commonest ore at the
+       very bottom of the world, which is a reason to feel nothing when you
+       find it (round seventeen, AL). Skipping an entry leaves its cells to the
+       rock underneath rather than to the next ore up. */
+    if (isKey(o.id)) continue;
+    if (o.max !== undefined && d > o.max) continue;
     /* The block roll picks which ore this block is a vein of, and the disc
        decides whether this cell is inside it. The block probability is scaled
        by cells-per-block over cells-per-vein, so the two multiply back to

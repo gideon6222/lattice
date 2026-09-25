@@ -341,9 +341,15 @@ export const valueMult = (_p: number = 0) => 1;
 
 /* Worth roughly a full hold of amethyst, in one block that breaks easily. The
    payoff for exploring sideways rather than straight down. */
+/* Round seventeen, AL: the census found geodes were 69-76% of all the value
+   in the top tier and paid more per kilo than every ore above coreite - the
+   exciting thing to find was a thing no recipe asked for, which is half of why
+   the keys never felt like the prize. Value down from 6,200 and rarer, so a
+   geode is a good find again rather than the economy, and money has to be
+   earned from the whole seam rather than from one pink pocket. */
 export const GEODE: Ore = {
   id: 'geode', name: 'Geode', color: 0x7fffe0, host: 0x2b3340,
-  hard: 6, wt: 4, value: 6200, min: 52, chance: 0.011, glow: 0.75, shards: 9, tone: 10
+  hard: 6, wt: 4, value: 1500, min: 52, chance: 0.0040, glow: 0.75, shards: 9, tone: 10
 };
 
 /* Breaks faster than the rock around it, so you tend to hit one by accident
@@ -820,17 +826,17 @@ export const RUBBLE: Rock = {
    world: copper and iron on the first, silver at the bottom of it, and
    Solmarrow not until 372 m - which is planet seven. */
 export const ORES: Ore[] = [
-  { id: 'solmarrow', name: 'Solmarrow', color: 0xfff0b0, host: 0x3a3226, hard: 23,   wt: 21,  value: 196000, min: 372, chance: 0.0012, glow: 0.72, shards: 8, tone: 10 },
-  { id: 'umbrite',   name: 'Umbrite',   color: 0x9d7bff, host: 0x241f33, hard: 19.5, wt: 18,  value: 82000,  min: 312, chance: 0.0026, glow: 0.58, shards: 7, tone: 10 },
-  { id: 'coreite',  name: 'Coreite',  color: 0x66fff0, host: 0x2a2f3a, hard: 16,  wt: 16,  value: 34000, min: 258, chance: 0.0048, glow: 0.60, shards: 7, tone: 9 },
-  { id: 'magmite',  name: 'Magmite',  color: 0xff7a18, host: 0x2e2228, hard: 13,  wt: 13,  value: 14000, min: 210, chance: 0.0078, glow: 0.50, shards: 6, tone: 8 },
-  { id: 'ruby',     name: 'Ruby',     color: 0xff3b5c, host: 0x33303a, hard: 10,  wt: 10,  value: 5600,  min: 168, chance: 0.0125, glow: 0.32, shards: 6, tone: 7 },
-  { id: 'emerald',  name: 'Emerald',  color: 0x2fd07a, host: 0x2f3a38, hard: 8.5, wt: 8.5, value: 2800,  min: 130, chance: 0.0200, glow: 0.30, shards: 5, tone: 6 },
-  { id: 'amethyst', name: 'Amethyst', color: 0xa060ff, host: 0x35323f, hard: 7,   wt: 7,   value: 1400,  min: 95,  chance: 0.0290, glow: 0.28, shards: 5, tone: 5 },
-  { id: 'gold',     name: 'Gold',     color: 0xffcf47, host: 0x3d3a34, hard: 5.5, wt: 9,   value: 660,   min: 64,  chance: 0.0380, glow: 0.20, shards: 5, tone: 4 },
-  { id: 'silver',   name: 'Silver',   color: 0xd8e0e8, host: 0x3a3c40, hard: 4.5, wt: 6,   value: 240,   min: 30,  chance: 0.0460, glow: 0.16, shards: 4, tone: 3 },
-  { id: 'iron',     name: 'Iron',     color: 0xb0b6bd, host: 0x3a3630, hard: 3.5, wt: 4.5, value: 95,    min: 16,  chance: 0.0620, glow: 0.10, shards: 4, tone: 2 },
-  { id: 'copper',   name: 'Copper',   color: 0xc87137, host: 0x3c342c, hard: 2.6, wt: 3.5, value: 40,    min: 3,   chance: 0.0750, glow: 0.10, shards: 4, tone: 1 }
+  { id: 'solmarrow', name: 'Solmarrow', color: 0xfff0b0, host: 0x3a3226, hard: 23,   wt: 21,  value: 196000, min: 345, chance: 0.0012, glow: 0.72, shards: 8, tone: 10 },
+  { id: 'umbrite',   name: 'Umbrite',   color: 0x9d7bff, host: 0x241f33, hard: 19.5, wt: 18,  value: 82000,  min: 300, chance: 0.0026, glow: 0.58, shards: 7, tone: 10 },
+  { id: 'coreite',  name: 'Coreite',  color: 0x66fff0, host: 0x2a2f3a, hard: 16,  wt: 16,  value: 34000, min: 250, chance: 0.0048, glow: 0.60, shards: 7, tone: 9 },
+  { id: 'magmite',  name: 'Magmite',  color: 0xff7a18, host: 0x2e2228, hard: 13,  wt: 13,  value: 14000, min: 200, chance: 0.0078, glow: 0.50, shards: 6, tone: 8 },
+  { id: 'ruby',     name: 'Ruby',     color: 0xff3b5c, host: 0x33303a, hard: 10,  wt: 10,  value: 5600,  min: 150, chance: 0.0125, glow: 0.32, shards: 6, tone: 7 },
+  { id: 'emerald',  name: 'Emerald',  color: 0x2fd07a, host: 0x2f3a38, hard: 8.5, wt: 8.5, value: 2800,  min: 118, chance: 0.0200, glow: 0.30, shards: 5, tone: 6 },
+  { id: 'amethyst', name: 'Amethyst', color: 0xa060ff, host: 0x35323f, hard: 7,   wt: 7,   value: 1400,  min: 85,  chance: 0.0290, glow: 0.28, shards: 5, tone: 5 },
+  { id: 'gold',     name: 'Gold',     color: 0xffcf47, host: 0x3d3a34, hard: 5.5, wt: 9,   value: 660,   min: 64,  chance: 0.0380, glow: 0.20, shards: 5, tone: 4, max: 398 },
+  { id: 'silver',   name: 'Silver',   color: 0xd8e0e8, host: 0x3a3c40, hard: 4.5, wt: 6,   value: 240,   min: 30,  chance: 0.0460, glow: 0.16, shards: 4, tone: 3, max: 300 },
+  { id: 'iron',     name: 'Iron',     color: 0xb0b6bd, host: 0x3a3630, hard: 3.5, wt: 4.5, value: 95,    min: 16,  chance: 0.0620, glow: 0.10, shards: 4, tone: 2, max: 220 },
+  { id: 'copper',   name: 'Copper',   color: 0xc87137, host: 0x3c342c, hard: 2.6, wt: 3.5, value: 40,    min: 3,   chance: 0.0750, glow: 0.10, shards: 4, tone: 1, max: 150 }
 ];
 
 /* ---------- rock, and the seams in it ----------
@@ -1082,12 +1088,12 @@ export function callReach(level: number): number {
 }
 
 export const UPGRADES: Upgrade[] = [
-  { key: 'drill',  name: 'Drill Bit',     base: 340, mul: 1.55, max: 9, keys: ['amethyst', 'coreite'], system: 'drill', group: 'rig', unlock: 0,
+  { key: 'drill',  name: 'Drill Bit',     base: 340, mul: 1.42, max: 9, keys: ['amethyst', 'coreite'], system: 'drill', group: 'rig', unlock: 0,
     tiers: ['Steel', 'Tungsten', 'Carbide', 'Diamond', 'Ionized', 'Plasma', 'Graviton', 'Singularity', 'Starbreaker', 'Godcore'],
     effect: (l: number) => 'Power ' + (1 + l * 0.95).toFixed(2) + 'x' },
-  { key: 'cargo',  name: 'Cargo Hold',    base: 320, mul: 1.55, max: 9, keys: ['emerald', 'ruby'], system: 'hold', group: 'rig', unlock: 0,
+  { key: 'cargo',  name: 'Cargo Hold',    base: 320, mul: 1.42, max: 9, keys: ['emerald', 'ruby'], system: 'hold', group: 'rig', unlock: 0,
     effect: (l: number) => (45 + l * 10) + ' kg' },
-  { key: 'thrust', name: 'Thrusters',     base: 300, mul: 1.55, max: 9, keys: ['amethyst', 'magmite'], system: 'engines', group: 'rig', unlock: 0,
+  { key: 'thrust', name: 'Thrusters',     base: 300, mul: 1.42, max: 9, keys: ['amethyst', 'magmite'], system: 'engines', group: 'rig', unlock: 0,
     effect: (l: number) => (3.0 + l * 0.7).toFixed(1) + ' cells/s' },
   /* Priced against the depth where running dry actually strands you, not
      against the first haul.
@@ -1095,7 +1101,7 @@ export const UPGRADES: Upgrade[] = [
      The Scanner moved from amethyst at 56 m to copper at 4: amethyst is below
      every heat line and the scanner is an opening-kit row. See HEAT_FRACTION
      for why the line itself moved rather than the tank's mineral. */
-  { key: 'tank',   name: 'Fuel Tank',     base: 1100, mul: 1.55, max: 9, keys: ['emerald', 'magmite'], system: 'engines', group: 'survival', unlock: 0,
+  { key: 'tank',   name: 'Fuel Tank',     base: 1100, mul: 1.42, max: 9, keys: ['emerald', 'magmite'], system: 'engines', group: 'survival', unlock: 0,
     effect: (l: number) => (90 + l * 40) + ' fuel' +
       (tankSave(l) > 0 ? ' · ' + Math.round(tankSave(l) * 100) + '% less fuel per cell' : '') },
   /* The expensive one, and the ladder you save for.
@@ -1106,14 +1112,14 @@ export const UPGRADES: Upgrade[] = [
      a rig that could not be paid for - two gates on one thing, and one of them
      pointing at nothing. The design it protects is unchanged: you still have to
      survive inside the heat to buy the thing that answers it. */
-  { key: 'cool',   name: 'Cooling Rig',   base: 6000, mul: 1.5, max: 7, keys: ['magmite', 'coreite'], system: 'hull', group: 'survival', unlock: 226,
+  { key: 'cool',   name: 'Cooling Rig',   base: 6000, mul: 1.38, max: 7, keys: ['magmite', 'coreite'], system: 'hull', group: 'survival', unlock: 226,
     effect: (l: number) => Math.round(Math.min(0.72, l * 0.09) * 100) + '% heat shield' },
   /* The effect line names the framing as well as the lamp, because the
      framing is now the part the player actually feels. */
-  { key: 'scan',   name: 'Scanner Array', base: 700, mul: 1.55, max: 9, keys: ['emerald', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
+  { key: 'scan',   name: 'Scanner Array', base: 700, mul: 1.42, max: 9, keys: ['emerald', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
     effect: (l: number) => (8 + l * 2.4).toFixed(0) + 'm light · ' +
       Math.round(zoomForScan(l) * 100) + '% view' },
-  { key: 'auto',   name: 'Autopilot',     base: 4900, mul: 1.55, max: 6, keys: ['ruby', 'magmite'], system: 'engines', group: 'instruments', unlock: 113,
+  { key: 'auto',   name: 'Autopilot',     base: 4900, mul: 1.42, max: 6, keys: ['ruby', 'magmite'], system: 'engines', group: 'instruments', unlock: 113,
     effect: (l: number) => (l === 0 ? 'Not installed' : (0.55 - (l - 1) * 0.075).toFixed(2) + ' fuel per meter') },
 
   /* ---------- ordnance ----------
@@ -1126,14 +1132,14 @@ export const UPGRADES: Upgrade[] = [
      Gated so neither arrives before the player has felt the problem it solves.
      The charge at 40 m, about where hard rock starts costing real time; the
      laser at 90 m, where a shaft is long enough that cutting one is a job. */
-  { key: 'bomb',   name: 'Seismic Charge', base: 3000, mul: 1.6, max: 3, system: 'ordnance', group: 'ordnance', unlock: 0,
+  { key: 'bomb',   name: 'Seismic Charge', base: 3000, mul: 1.45, max: 3, system: 'ordnance', group: 'ordnance', unlock: 0,
     effect: (l) => (l === 0 ? 'Not installed' : bombCells(l) + ' cells around the target' +
       (ordnancePower(l, 0) > 0 ? ' · +' + ordnancePower(l, 0) + ' power' : '')) },
   /* Ruby, not silver. Silver starts at 22 m and the laser unseals at 90, so
      the mineral gate was doing nothing at all behind the depth gate - one of
      the two was decoration. Ruby lives at 105 m, which puts both gates in the
      same neighbourhood, and a ruby laser is the better fiction anyway. */
-  { key: 'laser',  name: 'Cutting Laser',  base: 12500, mul: 1.6, max: 5, keys: ['magmite', 'coreite'], system: 'drill', group: 'ordnance', unlock: 226,
+  { key: 'laser',  name: 'Cutting Laser',  base: 12500, mul: 1.45, max: 5, keys: ['magmite', 'coreite'], system: 'drill', group: 'ordnance', unlock: 226,
     effect: (l) => (l === 0 ? 'Not installed' : laserRange(l) + ' cells straight ahead' +
       (ordnancePower(0, l) > 0 ? ' · +' + ordnancePower(0, l) + ' power' : '')) },
 
@@ -1148,13 +1154,13 @@ export const UPGRADES: Upgrade[] = [
      "the deep is chewing me up" was always a consumable, never a rig. Gated at
      45 m and on iron, both cheap, because this is the one that makes the
      middle of the game survivable rather than the end of it. */
-  { key: 'hull',   name: 'Hull Plating',   base: 3700, mul: 1.5, max: 9, keys: ['amethyst', 'coreite'], system: 'hull', group: 'survival', unlock: 113,
+  { key: 'hull',   name: 'Hull Plating',   base: 3700, mul: 1.38, max: 9, keys: ['amethyst', 'coreite'], system: 'hull', group: 'survival', unlock: 113,
     effect: (l: number) => (100 + l * 25) + ' hull' },
 
   /* SALVAGE MAGNET. Ore dropped when the hold filled has to be re-approached
      one cell at a time, which is the least interesting minute in the game.
      Radius, not automation: you still have to go back for it. */
-  { key: 'magnet', name: 'Salvage Magnet', base: 1200, mul: 1.5, max: 6, keys: ['emerald', 'ruby'], system: 'hold', group: 'rig', unlock: 0,
+  { key: 'magnet', name: 'Salvage Magnet', base: 1200, mul: 1.38, max: 6, keys: ['emerald', 'ruby'], system: 'hold', group: 'rig', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Pulls drops from ' + (0.8 + l * 0.55).toFixed(1) + ' cells') },
 
   /* DEEP SURVEY. Distinct from the Scanner, which is light and framing: this
@@ -1162,7 +1168,7 @@ export const UPGRADES: Upgrade[] = [
      buried Jump Drive component, which is the thing the goal most needs a way
      to find - a component you can only locate by digging the whole world is a
      goal made of patience. */
-  { key: 'survey', name: 'Deep Survey',    base: 3600, mul: 1.55, max: 5, keys: ['amethyst', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
+  { key: 'survey', name: 'Deep Survey',    base: 3600, mul: 1.42, max: 5, keys: ['amethyst', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Reads ore ' + (2 + l * 1.6).toFixed(1) + ' m through rock') },
 
   /* LATTICE RECEIVER. The other instrument, and the one that answers a question
@@ -1197,13 +1203,13 @@ export const UPGRADES: Upgrade[] = [
      Magnet at 20 for 1200. The depth a device is buried at and the depth its
      row opens at are one fact (INDEX.md rule 10b), and the other six devices
      already agree that way. */
-  { key: 'receiver', name: 'Lattice Receiver', base: 3500, mul: 1.5, max: 5, keys: ['amethyst', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
+  { key: 'receiver', name: 'Lattice Receiver', base: 3500, mul: 1.38, max: 5, keys: ['amethyst', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Hears an intact Anchor ' + callReach(l) + ' m off') },
 
   /* REPAIR DRONE. Turns a bad run into a long one instead of a tow. Slow on
      purpose - it must never make heat survivable, only recoverable, so it is
      an order of magnitude under what soak takes at depth. */
-  { key: 'drone',  name: 'Repair Drone',   base: 4400, mul: 1.5, max: 5, keys: ['emerald', 'magmite'], system: 'hull', group: 'survival', unlock: 113,
+  { key: 'drone',  name: 'Repair Drone',   base: 4400, mul: 1.38, max: 5, keys: ['emerald', 'magmite'], system: 'hull', group: 'survival', unlock: 113,
     effect: (l: number) => (l === 0 ? 'Not installed' : '+' + (l * 0.55).toFixed(2) + ' hull/s underground') }
 ];
 /* What the Fuel Tank's upper rungs save, as a fraction of a cell's fuel cost.
@@ -1437,10 +1443,13 @@ export function keyBand(u: Upgrade, level: number): number {
   return steps - 1;
 }
 
-/* Two of the common keys a rung, one of the deep ones. The supply check lives
-   in `test/keys.test.mjs`: every key's whole ask has to sit well under what
-   the rock holds, because a key is a thing you hunt, never a thing you farm. */
-const KEY_EACH = (id: string) => (id === 'magmite' || id === 'coreite' ? 1 : 2);
+/* One key a rung, and a pocket holds one key (sim/keys.ts), so every find is
+   one rung and no find is ever a whole band. Round seventeen, AL: two a rung
+   of the common keys turned tier 1 into seventy game-minutes of fetching on
+   the probe - a hunt had become a farm. The supply check lives in
+   `test/keys.test.mjs`: every key's whole ask sits well under what the rock
+   holds, because a key is a thing you hunt, never a thing you farm. */
+const KEY_EACH = (_id: string) => 1;
 
 export const matCost = (u: Upgrade, lvl: number): MatCost => {
   const buying = lvl + 1;

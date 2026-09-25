@@ -6,8 +6,6 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## What still does not exist
 
-- **Keys have no homes yet.** They are ingredients now, but they sit where the old ore roll put
-  them: magmite is thin, so tier 2 runs 43 game-minutes on the probe (it was 29) (AL).
 - **A key find is not an event yet** beyond the old rare-find banner (AM).
 - **Every gate opens the same bay as the pad** (AO). Back and the X work in the browser; on the
   installed app they have not been pressed yet (AB).
@@ -18,17 +16,19 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## Next three milestones
 
-Done 2026-09-25: **AN, the fitting bay.** The walked shop is gone. The ship stands on its lift,
-six systems sit under it, and the chosen system is a rack of cards: one sentence of what it
-does, the number before and after, the keys, and FIT with the price - two taps to a level.
-Every line has its own part on the ship. Before it, **AK**: keys bank and never sell. **AB** is
-live and waits on one press of Android back in the shop on his phone.
+Done 2026-09-25: **AL, where minerals sit.** Keys are one-cell pockets with a home region and a
+depth window, drawn as their own crystal; a find is one key, one rung. Money thins below its band,
+geodes are a quarter of the first tier's value instead of three quarters, and top-rung prices
+eased. Probe: tiers of 8, 18 and 27 game-minutes, the Vault at 55, credits and keys binding in
+every tier. Before it: **AN** the fitting bay, **AK** keys that never sell. Not pushed live yet,
+by his choice, until the balance was right. **AB** waits on one press of Android back on his
+phone.
 
-1. **AL** - where minerals sit: homes, pockets, a look of their own; tier 2 back under 30 min.
-2. **AM** - a key find is an event, and the Sensors line makes it a hunt.
-3. **AO** - each gate its own room around the same lift, selling Sink and one item a visit.
+1. **AM** - a key find is an event, and the Sensors line makes it a hunt.
+2. **AO** - each gate its own room around the same lift, selling Sink and one item a visit.
+3. **AE** - the barrier and the core become objects; the drain shows in the world.
 
-Then AE, AF, AH, AI, AJ, Z2, V0.
+Then AF, AH, AI, AJ, Z2, V0.
 
 ## Phone readings
 
