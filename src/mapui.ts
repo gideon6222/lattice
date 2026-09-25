@@ -34,6 +34,7 @@
    names you have never seen is a table of contents. The research is explicit
    that too many open hooks at once reads as confusion rather than as mystery. */
 
+import { panelOpened, panelClosed } from './closestack';
 import { g, save } from './sim/state';
 import { W, paletteOf } from './sim/config';
 import { MAP_TILE, WORLD_DEPTH, mapKey, regionAt, regionName,
@@ -105,11 +106,13 @@ export function openMap() {
      world and makes you scroll to find yourself is a map you stop opening. */
   centreOnShip();
   draw();
+  panelOpened('map', closeMap);
 }
 
 export function closeMap() {
   const scr = el('map');
   if (!scr) return;
+  panelClosed('map');
   scr.classList.add('hidden');
   g.mode = 'play';
   save();

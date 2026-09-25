@@ -964,6 +964,17 @@
     box-shadow:0 20px 60px rgba(0,0,0,.6);
   }
   .sheet h2{margin:0 0 4px; font-size:19px; letter-spacing:.06em;}
+  /* Round seventeen, AB: an X on every panel, 48 px square, the same close as
+     the panel's own bottom button. Sticky inside a scrolling sheet so it is
+     still there at the bottom of a long one; floated so the heading wraps
+     round it rather than under it. */
+  .x{
+    float:right; position:sticky; top:0; z-index:2;
+    width:48px; height:48px; margin:-10px -10px 0 8px; padding:0;
+    border-radius:12px; font-size:26px; line-height:1; font-weight:400;
+    background:rgba(10,14,20,.72); color:var(--dim); border:1px solid var(--line);
+  }
+  .maphead .x, .shopbar .x{float:none; position:static; margin:0 0 0 8px; flex:none;}
 
   /* ---------- the map ----------
 
@@ -1491,6 +1502,7 @@
       <div class="shopsub">DOCK 04 &middot; <span id="shopPlanet">&mdash;</span></div>
     </div>
     <div class="shopcred">&#9672; <span id="shopCredits">0</span></div>
+    <button class="x" data-for="shopClose" aria-label="Close">&times;</button>
   </div>
 
   <!-- The dots, on their own: WHERE you are, not a control - a readout can
@@ -1530,6 +1542,7 @@
 <!-- The Ballast. The one thing on the surface with a stake in it. -->
 <div id="ballast" class="modal hidden">
   <div class="sheet">
+    <button class="x" data-for="ballastClose" aria-label="Close">&times;</button>
     <h2>The Ballast</h2>
     <div class="sub" id="balSub">&mdash;</div>
     <div class="bal">
@@ -1553,6 +1566,7 @@
         <h2>Survey</h2>
         <div class="sub" id="mapWhere">&mdash;</div>
       </div>
+      <button class="x" data-for="mapClose" aria-label="Close">&times;</button>
       <div class="mapright">
         <div class="mapdepth" id="mapDepth">0 &ndash; 0 m</div>
         <div class="maphint">DRAG TO SCROLL</div>
@@ -1577,6 +1591,7 @@
 
 <div id="manifest" class="modal hidden">
   <div class="sheet">
+    <button class="x" data-for="manifestClose" aria-label="Close">&times;</button>
     <h2>Cargo Manifest</h2>
     <div class="sub">Sold automatically when you touch the pad</div>
     <div id="manifestRows"></div>
@@ -1589,6 +1604,7 @@
 
 <div id="pause" class="modal hidden">
   <div class="sheet">
+    <button class="x" data-for="btnResume" aria-label="Close">&times;</button>
     <h2 id="pauseTitle">Paused</h2>
     <div class="sub" id="pauseSub">Everything is frozen until you resume</div>
     <div id="pauseStats"></div>
@@ -1673,6 +1689,7 @@
 
 <div id="event" class="modal hidden">
   <div class="sheet">
+    <button class="x" data-for="evBtn" aria-label="Close">&times;</button>
     <h2 id="evTitle"></h2>
     <p id="evBody"></p>
     <button id="evBtn" class="wide"></button>

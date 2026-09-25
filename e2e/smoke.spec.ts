@@ -5361,3 +5361,93 @@ test('the ending pulls the camera back over the world, and gives it back', async
     `the camera ended at ${after} against ${before} before, so the ending never gave the frame back`)
     .toBeLessThan(1.5);
 });
+
+/* ---------- Round seventeen, AB: back, the X, and the scroll ----------
+
+   A fullscreen PWA with nothing on the history stack leaves the app on back,
+   and this game pushed nothing, so back over the shop closed the game. These
+   pin the close stack (src/closestack.ts): back closes the top panel and
+   nothing more, every panel opens through the stack and has an X, and every
+   sheet reaches its last item at the phone's own size. What they cannot prove
+   is that the Android back key on the installed app reaches this code at all;
+   that is a phone reading, and AB's box carries it. */
+
+const panels = () => (window as any).__cw.openPanels() as string[];
+
+async function inPlay(page: Page) {
+  await page.goto('/?debug');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+}
+
+test('back closes the open panel and nothing more, and the game is still there', async ({ page }) => {
+  await inPlay(page);
+  await page.locator('#btnShop').dispatchEvent('click');
+  await expect(page.locator('#shop')).not.toHaveClass(/hidden/);
+  expect(await page.evaluate(panels)).toEqual(['shop']);
+
+  await page.evaluate(() => history.back());
+  await expect(page.locator('#shop')).toHaveClass(/hidden/);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play');
+  expect(await page.evaluate(panels)).toEqual([]);
+  expect(page.url(), 'back over a panel navigated the page away').toContain('debug');
+  expect(await page.evaluate(() => !!(window as any).__cw)).toBe(true);
+
+  /* Closed by its own button, then opened again: the entry the button left
+     behind is reused, and back still closes exactly one thing. */
+  await page.locator('#btnManifest').dispatchEvent('click');
+  await page.locator('#manifestClose').dispatchEvent('click');
+  await page.locator('#btnMap').dispatchEvent('click');
+  await expect(page.locator('#map')).not.toHaveClass(/hidden/);
+  await page.evaluate(() => history.back());
+  await expect(page.locator('#map')).toHaveClass(/hidden/);
+  expect(page.url()).toContain('debug');
+});
+
+test('every panel opens through the close stack, and its X closes it', async ({ page }) => {
+  await inPlay(page);
+  const cases: { open: () => Promise<void>; panel: string; id: string }[] = [
+    { open: () => page.locator('#btnShop').dispatchEvent('click'), panel: '#shop', id: 'shop' },
+    { open: () => page.locator('#btnManifest').dispatchEvent('click'), panel: '#manifest', id: 'manifest' },
+    { open: () => page.locator('#btnMap').dispatchEvent('click'), panel: '#map', id: 'map' },
+    { open: () => page.locator('#btnPause').dispatchEvent('click'), panel: '#pause', id: 'pause' },
+    { open: () => page.locator('#btnBallast').dispatchEvent('click'), panel: '#ballast', id: 'ballast' },
+    { open: () => page.evaluate(() => (window as any).__cw.coreBroken(0)), panel: '#event', id: 'event' }
+  ];
+  for (const c of cases) {
+    await page.waitForFunction(() => (window as any).__cw.g.mode === 'play');
+    await c.open();
+    await expect(page.locator(c.panel), c.id + ' did not open').not.toHaveClass(/hidden/);
+    expect(await page.evaluate(panels), c.id + ' opened around the close stack').toEqual([c.id]);
+    const x = page.locator(c.panel + ' button.x');
+    await expect(x, c.id + ' has no X').toBeVisible();
+    await x.dispatchEvent('click');
+    await expect(page.locator(c.panel), c.id + "'s X did not close it").toHaveClass(/hidden/);
+    expect(await page.evaluate(panels)).toEqual([]);
+  }
+});
+
+test('every sheet scrolls to its last item at the phone size', async ({ page }) => {
+  /* 1080x2340 at the phone's density of 3. */
+  await page.setViewportSize({ width: 360, height: 780 });
+  await inPlay(page);
+  const sheets: { open: string; panel: string; last: string }[] = [
+    { open: '#btnPause', panel: '#pause', last: '#btnResume' },
+    { open: '#btnManifest', panel: '#manifest', last: '#manifestClose' },
+    { open: '#btnBallast', panel: '#ballast', last: '#ballastClose' },
+    { open: '#btnShop', panel: '#shop', last: '#shopClose' }
+  ];
+  for (const s of sheets) {
+    await page.waitForFunction(() => (window as any).__cw.g.mode === 'play');
+    await page.locator(s.open).dispatchEvent('click');
+    await expect(page.locator(s.panel)).not.toHaveClass(/hidden/);
+    await page.locator(s.last).scrollIntoViewIfNeeded();
+    const box = await page.locator(s.last).boundingBox();
+    expect(box, s.last + ' has no box').toBeTruthy();
+    expect(box!.y + box!.height, s.last + ' is below the screen after scrolling').toBeLessThanOrEqual(780 + 1);
+    expect(box!.y, s.last + ' is above the screen after scrolling').toBeGreaterThanOrEqual(-1);
+    await page.locator(s.last).dispatchEvent('click');
+    await expect(page.locator(s.panel)).toHaveClass(/hidden/);
+  }
+});

@@ -1,3 +1,4 @@
+import { panelOpened } from './closestack';
 import { g, save, hasSave, onPad } from './sim/state';
 import { R } from './sim/runtime';
 import { sfx, setDuck } from './audio';
@@ -228,6 +229,7 @@ function openSettings(withNotes: boolean) {
   const resume = el('btnResume');
   resume.textContent = 'BACK';
   sheet.classList.remove('hidden');
+  panelOpened('pause', () => resume.click());
   el('notes').classList.toggle('hidden', !withNotes);
   if (withNotes) el('notes').scrollIntoView({ block: 'nearest' });
 }

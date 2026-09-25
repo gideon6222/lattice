@@ -1,3 +1,4 @@
+import { panelOpened, panelClosed } from './closestack';
 import { hap, haptics, setHaptics } from './haptics';
 import { coreDepth, planetName, traitOf, SUPPLIES, RELIC_OF } from './sim/config';
 import { atTitle, showTitle } from './titleui';
@@ -159,8 +160,10 @@ ui.btnShop.onclick = () => {
      is the whole screen" on every single open. */
   ui.shop.classList.remove('hidden');
   resizeStation();
+  panelOpened('shop', closeShop);
 };
-mustEl('shopClose').onclick = () => {
+function closeShop() {
+  panelClosed('shop');
   sfx.ui();
   /* What has been seen is settled on the way OUT, not on the way in. Marking
      it at the door would fire the "open on the new aisle" beat and then
@@ -171,7 +174,8 @@ mustEl('shopClose').onclick = () => {
   document.body.classList.remove('docked');
   ui.shop.classList.add('hidden');
   g.mode = 'play';
-};
+}
+mustEl('shopClose').onclick = closeShop;
 
 /* Taps fall through the shop's transparent stage onto the bay behind it, so
    this is a raycast into the station scene rather than a click handler on a
@@ -281,8 +285,13 @@ document.addEventListener('pointerup', (e) => {
   if (hit) sfx.ui();
   buildCard();
 });
-mustEl('btnManifest').onclick = () => { if (g.mode !== 'play') return; sfx.ui(); g.mode = 'manifest'; buildManifest(); ui.manifest.classList.remove('hidden'); };
-mustEl('manifestClose').onclick = () => { sfx.ui(); ui.manifest.classList.add('hidden'); g.mode = 'play'; };
+function closeManifest() { panelClosed('manifest'); sfx.ui(); ui.manifest.classList.add('hidden'); g.mode = 'play'; }
+mustEl('btnManifest').onclick = () => {
+  if (g.mode !== 'play') return;
+  sfx.ui(); g.mode = 'manifest'; buildManifest(); ui.manifest.classList.remove('hidden');
+  panelOpened('manifest', closeManifest);
+};
+mustEl('manifestClose').onclick = closeManifest;
 
 /* The map. Gated on 'play' like the manifest: a screen opened out of another
    screen is how you get two modals and no way back. */
@@ -299,16 +308,19 @@ function openBallast() {
   g.mode = 'ballast';
   buildBallast();
   ballastSheet.classList.remove('hidden');
+  panelOpened('ballast', closeBallast);
 }
 mustEl('btnBallast').onclick = openBallast;
 mustEl('btnSeal').onclick = () => { sfx.ui(); packHere(); };
-mustEl('ballastClose').onclick = () => {
+mustEl('ballastClose').onclick = () => closeBallast();
+function closeBallast() {
+  panelClosed('ballast');
   sfx.ui();
   ballastSheet.classList.add('hidden');
   g.mode = 'play';
   updateHUD();
   save();
-};
+}
 /* Delegated, because the rows are rebuilt after every tap and handlers bound
    to the old nodes would be bound to nodes that no longer exist. */
 ballastSheet.onclick = (e) => {
@@ -383,6 +395,7 @@ mustEl('btnPause').onclick = () => {
     '<div class="val">' + Math.floor((g.seen.length /
       (Math.ceil(W / MAP_TILE) * Math.ceil(WORLD_DEPTH / MAP_TILE))) * 100) + '%</div></div>';
   ui.pause.classList.remove('hidden');
+  panelOpened('pause', () => mustEl('btnResume').click());
 };
 /* Built on the click, never while the game is running. ONE panel open at a
    time: the pause sheet is already the tallest thing in the game, and two open
@@ -453,6 +466,7 @@ window.addEventListener('blur', focusChanged);
 window.addEventListener('focus', focusChanged);
 
 mustEl('btnResume').onclick = () => {
+  panelClosed('pause');
   sfx.ui();
   ui.pause.classList.add('hidden');
   /* The pause sheet doubles as the title screen's Settings, so closing it has
@@ -479,3 +493,9 @@ document.addEventListener('contextmenu', (e) => e.preventDefault());
    here rather than inside scene.ts's resize(), because scene.ts is imported BY
    station.ts and the reverse import would be a cycle. */
 window.addEventListener('resize', resizeStation);
+
+/* Round seventeen, AB: every panel's X is its own bottom button, pressed. One
+   close per panel, so the X can never close less (or more) than the button. */
+for (const b of document.querySelectorAll<HTMLElement>('button.x[data-for]')) {
+  b.onclick = () => mustEl(b.dataset.for as string).click();
+}

@@ -1,3 +1,4 @@
+import { panelOpened, panelClosed } from './closestack';
 import * as THREE from 'three';
 import { W, HULL_MAX, DEF, isOre, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf, LODE_COLLAPSE, WAKE_CLOSES, WAKE_TRIES } from './sim/config';
 import { clamp, key, stream } from './sim/util';
@@ -607,7 +608,8 @@ export function showEvent(title: string, bodyTxt: string, btnTxt: string, cb: ()
   ui.evBody.textContent = bodyTxt;
   ui.evBtn.textContent = btnTxt;
   ui.event.classList.remove('hidden');
-  ui.evBtn.onclick = () => { sfx.ui(); ui.event.classList.add('hidden'); g.mode = 'play'; cb(); };
+  ui.evBtn.onclick = () => { panelClosed('event'); sfx.ui(); ui.event.classList.add('hidden'); g.mode = 'play'; cb(); };
+  panelOpened('event', () => ui.evBtn.click());
 }
 
 export function hardReset() {
