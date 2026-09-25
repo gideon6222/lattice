@@ -61,7 +61,12 @@ export const ABILITIES: Ability[] = [
     blurb: 'Shows empty space through rock, close by. Not what is in it.'
   },
   {
-    key: 'sink', tier: 1, icon: 'SINK',
+    /* Round seventeen, AC: no core hands this over any more. The last core is
+       the Vault's door, so three abilities became two, and Sink - the one that
+       could not pass the laser-sealed Anchors of the tier it came in - moves
+       to the gate vendors (AO) as the first thing a deeper shop sells that the
+       pad never will. Until then no save has it. */
+    key: 'sink', tier: -1, icon: 'SINK',
     name: 'Sink',
     /* A VERB, and the one that opens many locks at once. Depth in this game
        has always been gated by the drill, so every band below your tier is a
@@ -71,13 +76,13 @@ export const ABILITIES: Ability[] = [
     blurb: 'Fall straight through solid rock. It costs hull, and you mine nothing.'
   },
   {
-    key: 'call', tier: 2, icon: '',
+    key: 'call', tier: 1, icon: '',
     name: 'The Call',
     /* DOUBLE DUTY. It finishes the map - every secret still in the ground in a
        region whose Anchor you broke - which is the reason to go back over the
        whole planet, and it is the first time the game says out loud that the
        thing you have been releasing is the thing doing the finding. */
-    blurb: 'Whatever is still buried in the regions you have broken answers you.'
+    blurb: 'Whatever is still buried within your reach answers you, on the Survey map.'
   }
 ];
 
@@ -87,9 +92,12 @@ export function abilityFor(tier: number): Ability | undefined {
 }
 
 /* Whether a save has an ability yet. The gates are the record. */
-export function hasAbility(open: readonly number[], key: AbilityKey): boolean {
+/* `skills` is what a gate vendor sold (round seventeen): an ability with no
+   core of its own (tier -1) is had by owning it, never by breaking anything. */
+export function hasAbility(open: readonly number[], key: AbilityKey, skills: readonly string[] = []): boolean {
   const a = ABILITIES.find((x) => x.key === key);
-  return !!a && open.includes(a.tier);
+  if (!a) return false;
+  return a.tier >= 0 ? open.includes(a.tier) : skills.includes(key);
 }
 
 /* Everything the player has, in the order they got it. */

@@ -109,9 +109,9 @@ test('a full Ballast lasts several runs, and a furious planet costs you a couple
     `a full tank at ordinary Unrest lasts ${quiet.toFixed(0)} minutes - outside the window where it is a campaign pressure`);
   assert.ok(angry < quiet * 0.85,
     `a furious planet drains it in ${angry.toFixed(0)} minutes against ${quiet.toFixed(0)} - Unrest has to be felt here`);
-  /* An Anchor has to be worth lighting. */
-  assert.ok(H.ballastDrain(0.5, 3) < H.ballastDrain(0.5, 0),
-    'lighting Anchors does nothing to the drain');
+  /* Round seventeen, AC: an Anchor broken makes the planet worse, not safer. */
+  assert.ok(H.ballastDrain(0.5, 3) > H.ballastDrain(0.5, 0),
+    'breaking Anchors does nothing to the drain, or eases it');
 });
 
 test('feeding prefers deep ore without making shallow ore pointless', () => {
@@ -489,19 +489,19 @@ test('every core released makes the planet fall apart faster', () => {
   }
 
   /* Two, and this is the claim his sentence actually makes: the planet the
-     PLAYER meets falls apart faster at every gate. That player cannot have a
-     core without the three Anchors it cost, and each of those takes
-     BALLAST_TIER_RELIEF off the drain - so a bite that merely beats zero loses
-     to its own price and the planet gets SAFER every tier. Measured at a bite
-     of 1.0: 16, 14, 13, 13 minutes to the first lost region, strictly rising
-     and completely unfeelable. */
+     PLAYER meets falls apart faster at every gate, counting the three Anchors
+     each core cost. Round seventeen, AC: an Anchor broken now makes the drain
+     worse on its own as well (it used to ease it), so this also pins that. */
+  for (let t = 1; t <= 9; t++) {
+    assert.ok(H.ballastDrain(u, t, 0, 1) > H.ballastDrain(u, t - 1, 0, 1),
+      `breaking Anchor ${t} made the planet safer - the opposite of letting the world break`);
+  }
   const real = [];
   for (let c = 0; c <= H.GATE_COUNT; c++) real.push(H.ballastDrain(u, c * 3, 0, c));
   for (let c = 1; c < real.length; c++) {
     assert.ok(real[c] > real[c - 1],
       `a player with ${c} cores and the ${c * 3} Anchors they cost has an EASIER planet than one with ${c - 1} - ` +
-      `the drain went ${real.map((r) => r.toExponential(2)).join(' -> ')}. BALLAST_CORE_BITE has to beat ` +
-      '3 x BALLAST_TIER_RELIEF, not zero.');
+      `the drain went ${real.map((r) => r.toExponential(2)).join(' -> ')}.`);
   }
 
   /* Three: bounded. There are GATE_COUNT cores and `openGate` will not put one
@@ -516,8 +516,8 @@ test('the clock still gives several runs of warning once it starts', () => {
   /* The fairness line that predates this round, re-asked at the state the
      player is actually in at each gate: a run is about three minutes, and the
      first region has to be several of them away from the moment the clock
-     starts. This is the CEILING on BALLAST_CORE_BITE and the reason it is 1.75
-     rather than as large as the story would like. */
+     starts. This is the ceiling on both bites, and the reason they are as
+     small as they are rather than as large as the story would like. */
   for (let c = 1; c <= H.GATE_COUNT; c++) {
     const s = fresh();
     for (let i = 0; i < H.REGION_COUNT; i++) s.unrest[i] = 0.7;

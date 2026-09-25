@@ -714,7 +714,7 @@ export function tick(raw: number, draw = true) {
          `stopDigging` first, because sinking and drilling are two answers to
          the same wall and the drill's half-cut cell would otherwise be kept
          and charged for twice. */
-      const canSink = hasAbility(g.ground.gates, 'sink') && !docked();
+      const canSink = hasAbility(g.ground.gates, 'sink', g.skills) && !docked();
       /* A LATCH, not a reading. The button starts it; reaching air ends it;
          nothing else does either. Asking `embedded()` on its own was the first
          version and it meant a ship inside rock for any other reason started
@@ -1169,7 +1169,7 @@ export function tick(raw: number, draw = true) {
   /* Which of the three acts the campaign is in, asked once and spent on the
      sky, the fog, the air and the distant rock below. `src/sim/grade.ts` owns
      what each act means; this file only paints it. */
-  const act = gradeFor(g.ground.lit.length, g.won);
+  const act = gradeFor(g.ground.gates.length, g.won);
   const hot = heatT(g.pd, heatDepth(g.planet, worldTrait()),
                     (coreM() - heatDepth(g.planet, worldTrait())) * 0.55);
   /* The sky at night is the sky at the bottom of the world: the same two

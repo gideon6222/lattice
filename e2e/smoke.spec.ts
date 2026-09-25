@@ -3320,44 +3320,45 @@ test('an Anchor hall is shut until you cut it, and lights by standing there', as
    that moved are both things a player might not notice for a run; a shaft that
    is not there when you come back is the moment the map goes stale, and it is
    the one that can take a run if it is wrong. */
-test('the fifth Anchor wakes the planet, and the ground stops staying where you left it',
+test('the first core wakes the planet, and the ground stops staying where you left it',
   async ({ page }) => {
+  /* Round seventeen, AC: the wake was the fifth Anchor of nine, a second
+     escalation beside the ladder's. It is the first core's now. */
   await page.goto('/?debug');
   await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
   await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
-  /* Four Anchors lit through the real path, and nothing has woken. */
-  const before = await page.evaluate((n: number) => {
+  /* Every Anchor of the first tier broken, and nothing has woken. */
+  const before = await page.evaluate(() => {
     const w = (window as any).__cw;
-    for (let i = 0; i < n - 1; i++) w.lightAnchor(w.g.ground, i);
+    for (const r of w.gateAnchors(0)) w.lightAnchor(w.g.ground, r);
     let blooms = 0;
     for (let d = 10; d < 200; d += 3) for (let x = 0; x < w.W; x += 3) {
       const b = w.blockAt(x, d);
       if (b && b.id === 'bloom') blooms++;
     }
     return { lit: w.g.ground.lit.length, awake: w.isAwake(w.g.ground), blooms };
-  }, 5);
-  expect(before.lit).toBe(4);
-  expect(before.awake, 'the planet woke before the fifth Anchor').toBe(false);
+  });
+  expect(before.lit).toBe(3);
+  expect(before.awake, 'the planet woke on Anchors alone').toBe(false);
   expect(before.blooms, 'Blooms generated on a planet that has not answered').toBe(0);
 
-  /* The fifth, through the real path: fly to it and stand there. */
+  /* The first core, the way loop.ts breaks it: the state half, then the
+     moment. */
   const target = await page.evaluate(() => {
     const w = (window as any).__cw;
-    const a = w.anchorAt(4);
-    w.g.px = a.x; w.g.pd = a.d - 1;
-    w.g.fuel = w.S.fuelCap(); w.g.hull = w.S.hullCap();
-    w.advance(0.2);
-    return { region: 4, mode: w.g.mode, title: (document.getElementById('evTitle') || {}).textContent };
+    w.g.ground.gates.push(0);
+    w.coreBroken(0);
+    return { mode: w.g.mode, title: (document.getElementById('evTitle') || {}).textContent };
   });
-  expect(target.mode, 'lighting the fifth Anchor did not stop the game').toBe('event');
+  expect(target.mode, 'breaking the first core did not stop the game').toBe('event');
 
-  /* The Anchor's own card first, then the planet's. Two modals in the order
+  /* The core's own card first, then the ground's. Two modals in the order
      the player experiences them, never stacked. */
-  expect(target.title).toMatch(/ANCHOR/i);
+  expect(target.title).toMatch(/WAY OPENS/i);
   await page.locator('#evBtn').dispatchEvent('click');
-  await expect(page.locator('#evTitle')).toHaveText(/PLANET ANSWERS/i);
+  await expect(page.locator('#evTitle')).toHaveText(/GROUND IS GOING/i);
   await page.locator('#evBtn').dispatchEvent('click');
   await expect(page.locator('#event')).toHaveClass(/hidden/);
 
@@ -3371,7 +3372,7 @@ test('the fifth Anchor wakes the planet, and the ground stops staying where you 
     return { awake: w.isAwake(w.g.ground), woke: w.g.ground.woke, blooms, shallow,
              unrest: w.g.ground.unrest.slice() };
   });
-  expect(after.awake, 'five Anchors did not wake the planet').toBe(true);
+  expect(after.awake, 'the first core did not wake the planet').toBe(true);
   expect(after.woke, 'the wake was not recorded, so a reload would pay for it again').toBe(true);
   expect(after.blooms, 'nothing new grew in the woken world').toBeGreaterThan(5);
   expect(after.shallow,
@@ -3432,22 +3433,25 @@ test('the fifth Anchor wakes the planet, and the ground stops staying where you 
    you might find by accident; this waits for the entire errand, and nothing in
    the game opens it early.
 
-   Driven with the Anchors lit through the state rather than flown to nine
-   halls, because nine halls is an evening. Everything after the ninth - the
-   seal opening, the map learning where the centre is, and the ending firing
-   when the ship reaches it - is the shipping path. */
-test('the Vault at the centre opens on the ninth Anchor', async ({ page }) => {
+   Round seventeen, AC: the Vault used to open on the ninth Anchor while the
+   last barrier still stood over it. The last gate is its door now, and its
+   core is the only thing that opens it. All nine Anchors and two gates through
+   the state; the last core, the seal opening, the map learning where the
+   centre is, and the ending firing when the ship reaches it are the shipping
+   path. */
+test('the Vault opens only when the last core breaks, and the last gate is its door', async ({ page }) => {
   await page.goto('/?debug');
   await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
   await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
-  /* ---- shut, with eight of nine ---- */
+  /* ---- shut, with all nine Anchors broken and two gates open ---- */
   const shut = await page.evaluate(() => {
     const w = (window as any).__cw;
-    for (let i = 0; i < w.ANCHOR_COUNT - 1; i++) w.lightAnchor(w.g.ground, i);
-    /* And the wake, which a real save with eight Anchors lit has already paid
-       for - the fixture lights them through the state, so it owes the step. */
+    for (let i = 0; i < w.ANCHOR_COUNT; i++) w.lightAnchor(w.g.ground, i);
+    w.g.ground.gates.push(0, 1);
+    /* And the wake, which a real save past the first core has already paid
+       for - the fixture opens the gates through the state, so it owes it. */
     w.wake(w.g.ground);
     const V = w.vaultCells();
     /* A seal cell, found from the stamp rather than named. */
@@ -3457,7 +3461,7 @@ test('the Vault at the centre opens on the ninth Anchor', async ({ page }) => {
     const b = w.blockAt(+seal!.slice(0, i), +seal!.slice(i + 1));
     const core = w.blockAt(w.VAULT_CORE_X, w.VAULT_CORE_D);
     return {
-      lit: w.g.ground.lit.length, open: w.vaultOpen(w.g.ground.lit.length),
+      lit: w.g.ground.lit.length, open: w.vaultOpen(w.g.ground.gates),
       seal, sealId: b ? b.id : null, sealShut: !!b && !Number.isFinite(b.hard),
       coreId: core ? core.id : null,
       coreShut: !!core && !Number.isFinite(core.hard),
@@ -3465,26 +3469,23 @@ test('the Vault at the centre opens on the ninth Anchor', async ({ page }) => {
         Math.floor(w.VAULT_CORE_X / w.MAP_TILE) + ',' + Math.floor(w.VAULT_CORE_D / w.MAP_TILE))
     };
   });
-  expect(shut.lit).toBe(8);
-  expect(shut.open, 'eight Anchors opened the centre').toBe(false);
+  expect(shut.lit).toBe(9);
+  expect(shut.open, 'nine Anchors opened the centre with its door still shut').toBe(false);
   expect(shut.sealId, 'the Vault has no seal around it').toBe('vaultwall');
   expect(shut.sealShut,
-    'the last wall in the game can be drilled with eight of nine Anchors lit').toBe(true);
+    'the last wall in the game can be drilled before its door is broken').toBe(true);
   expect(shut.coreId).toBe('vaultcore');
   expect(shut.coreShut, 'the Vault core can be mined').toBe(true);
   expect(shut.seenCentre, 'the map already knows where the centre is').toBe(false);
 
-  /* ---- the ninth ---- */
+  /* ---- the door: the last core, the way loop.ts breaks it ---- */
   await page.evaluate(() => {
     const w = (window as any).__cw;
-    const a = w.anchorAt(w.ANCHOR_COUNT - 1);
-    w.g.px = a.x; w.g.pd = a.d - 1;
-    w.g.fuel = w.S.fuelCap(); w.g.hull = w.S.hullCap();
-    w.advance(0.2);
+    const t = w.GATE_COUNT - 1;
+    w.g.ground.gates.push(t);
+    w.coreBroken(t);
   });
-  await expect(page.locator('#evTitle')).toHaveText(/ANCHOR/i);
-  await page.locator('#evBtn').dispatchEvent('click');
-  await expect(page.locator('#evTitle')).toHaveText(/CENTER IS OPEN/i);
+  await expect(page.locator('#evTitle')).toHaveText(/DOOR OPENS/i);
   await page.locator('#evBtn').dispatchEvent('click');
 
   const open = await page.evaluate((seal: string) => {
@@ -3500,13 +3501,13 @@ test('the Vault at the centre opens on the ninth Anchor', async ({ page }) => {
     };
   }, shut.seal!);
   expect(open.lit).toBe(9);
-  expect(open.sealId, 'the seal did not open on the ninth Anchor').toBe('vaultopen');
+  expect(open.sealId, 'the seal did not open when its door broke').toBe('vaultopen');
   expect(Number.isFinite(open.hard), 'the seal is open and still uncuttable').toBe(true);
   expect(open.hard,
     `the open seal drills at ${open.hard} - the last wall should still cost something`)
     .toBeGreaterThan(20);
   expect(open.seenCentre,
-    'nine Anchors and the map still does not know where the centre is').toBe(true);
+    'the door is open and the map still does not know where the centre is').toBe(true);
   expect(open.won, 'the game ended before the ship got there').toBe(false);
 
   /* ---- and reaching it ----
@@ -3843,7 +3844,9 @@ test('the cores hand over abilities, and each one appears with its own core', as
 
   expect(await state([]), 'an ability is aboard before any core is broken').toEqual({ see: false, sink: false });
   expect(await state([0]), 'the first core did not hand over The Hollow').toEqual({ see: true, sink: false });
-  expect(await state([0, 1]), 'the second core did not hand over Sink').toEqual({ see: true, sink: true });
+  /* Round seventeen, AC: no core hands over Sink any more - the gate vendors
+     sell it (AO) - so the second core adds the Call, which has no button. */
+  expect(await state([0, 1]), 'a core handed over Sink').toEqual({ see: true, sink: false });
 });
 
 test('Sink carries the ship through rock, and never through a barrier', async ({ page }) => {
@@ -3864,9 +3867,10 @@ test('Sink carries the ship through rock, and never through a barrier', async ({
     const w = (window as any).__cw;
     const gate = w.gateDepth(0);
     w.g.ground = w.newGround();
-    /* Both cores of the tiers above, so Sink is aboard - and tier 0's gate
-       deliberately left SHUT, which is the wall this is trying to get past. */
-    w.g.ground.gates.push(1);
+    /* Sink owned as a skill (round seventeen: the gate vendors sell it), and
+       tier 0's gate deliberately left SHUT, which is the wall this is trying
+       to get past. */
+    w.g.skills = ['sink'];
     w.g.dug = new Set();
     w.g.rubble = new Set();
     w.g.damage = {};
@@ -5168,43 +5172,45 @@ test('a browser with no WebGL gets a plain explanation, not a stack trace', asyn
    against the Outfitter, where an e2e asserted ten display cases, failed for the
    wrong reason, and "would have been fixed by editing the number". */
 
-test('the objective is on screen, and the row is as long as the campaign', async ({ page }) => {
+test('the objective is on screen: this tier Anchors and the core they wake', async ({ page }) => {
+  /* Round seventeen, AC: the row was nine pips and a Vault diamond, the old
+     collection. The ladder is three at a time, so it is the three Anchors
+     holding the barrier you are working on, and a diamond for its core. */
   await enterGame(page);
-
-  const pips = page.locator('#anchors i:not(.vault)');
-  const count = await page.evaluate(() => (window as unknown as {
-    __cw: { ANCHOR_COUNT?: number } }).__cw?.ANCHOR_COUNT);
-  /* Falls back to reading the game's own tally text if the debug hook does not
-     export the constant, rather than hard-coding nine here. */
-  const expected = typeof count === 'number' ? count : 9;
-  await expect(pips).toHaveCount(expected);
+  const per = await page.evaluate(() => (window as any).__cw.gateAnchors(0).length);
+  await expect(page.locator('#anchors i:not(.vault)')).toHaveCount(per);
   await expect(page.locator('#anchors i.vault')).toHaveCount(1);
-
-  /* A fresh run has none lit, so the row must be all rings. This is the state
-     the complaint was about - a player who does not know what the game wants. */
   await expect(page.locator('#anchors i.lit')).toHaveCount(0);
   await expect(page.locator('#anchors i.vault.open')).toHaveCount(0);
 });
 
-test('the row fills as Anchors are lit, and the Vault opens only on the last', async ({ page }) => {
+test('the row fills as this tier Anchors break, and starts again at the next gate', async ({ page }) => {
   await page.goto('/?debug');
   await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
   await enterGame(page);
 
-  /* Driven through the sim rather than by writing classes: the point of the
-     test is that the readout follows the game state, so setting the readout
-     would assert nothing. */
-  for (const [lit, wantOpen] of [[0, false], [3, false], [8, false], [9, true]] as const) {
-    await page.evaluate((n) => {
-      const cw = (window as unknown as { __cw: {
-        g: { ground: { lit: number[] } }; updateHUD?: () => void; advance: (s: number) => void } }).__cw;
-      cw.g.ground.lit = Array.from({ length: n }, (_, i) => i);
-      cw.advance(0.05);
-    }, lit);
+  /* Driven through the sim rather than by writing classes: the point is that
+     the readout follows the game state. [Anchors broken, gates open] ->
+     [pips lit, core diamond lit]. */
+  const cases: [number[], number[], number, boolean][] = [
+    [[], [], 0, false],
+    [[0], [], 1, false],
+    [[0, 1, 2], [], 3, true],
+    [[0, 1, 2], [0], 0, false],
+    [[0, 1, 2, 3, 4], [0], 2, false],
+    [[0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2], 3, true]
+  ];
+  for (const [lit, gates, wantLit, wantOpen] of cases) {
+    await page.evaluate(([l, gs]) => {
+      const w = (window as any).__cw;
+      w.g.ground.lit = (l as number[]).slice();
+      w.g.ground.gates = (gs as number[]).slice();
+      w.advance(0.05);
+    }, [lit, gates]);
     await expect(page.locator('#anchors i.lit'),
-      `${lit} Anchors lit and the row does not show it`).toHaveCount(lit);
+      `${lit.length} Anchors and gates ${gates.join(',')}: the row does not show it`).toHaveCount(wantLit);
     await expect(page.locator('#anchors i.vault.open'),
-      `${lit} lit and the Vault pip is ${wantOpen ? 'shut' : 'open'}`).toHaveCount(wantOpen ? 1 : 0);
+      `${lit.length} Anchors and gates ${gates.join(',')}: the core diamond is wrong`).toHaveCount(wantOpen ? 1 : 0);
   }
 });
 
@@ -5306,7 +5312,10 @@ test('each act paints the world differently', async ({ page }) => {
       cw.g.dug = dug;
       cw.g.px = 6; cw.g.pd = 18;
       cw.g.ground.lit = litList;
-      cw.g.ground.woke = litList.length >= 5;
+      /* Round seventeen, AC: the acts follow the cores now (the wake is the
+         first core's), so a fixture past the wake has broken one. */
+      (cw.g.ground as any).gates = litList.length >= 3 ? [0] : [];
+      cw.g.ground.woke = litList.length >= 3;
       cw.g.won = w;
       cw.advance(0.4);
       return (document.getElementById('game') as HTMLElement).style.background;

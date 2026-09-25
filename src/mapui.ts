@@ -414,7 +414,7 @@ export function draw() {
      there is nothing here at all, because a marker for a place you cannot open
      for six hours is the "too many unexplained hooks at once" failure the
      research names by name. */
-    if (vaultOpen(g.ground.lit.length) && VAULT_CORE_D >= d0 && VAULT_CORE_D <= d1) {
+    if (vaultOpen(g.ground.gates) && VAULT_CORE_D >= d0 && VAULT_CORE_D <= d1) {
       star(x, VAULT_CORE_X * s, py(VAULT_CORE_D), g.won ? '#fff0b8' : '#ffd98a');
     }
 

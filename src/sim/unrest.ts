@@ -143,7 +143,12 @@ export function hardScale(u: number): number {
    inside a run and always present across an evening, which is the shape a
    phone game's campaign pressure has to have. */
 export const BALLAST_DRAIN = 0.001;      /* a second, at the reference Unrest */
-export const BALLAST_TIER_RELIEF = 0.25; /* each Anchor slows the drain by this share */
+/* Round seventeen, AC: each Anchor broken now makes the drain WORSE by this
+   share. It used to ease it by a quarter, and its card said the planet "holds
+   harder" - the opposite of his "you are slowly allowing the world to break".
+   Small, because it compounds with the core bite below and the fairness line
+   in `the clock still gives several runs of warning` bounds the product. */
+export const BALLAST_ANCHOR_BITE = 0.05;
 
 /* And what each fallen region takes off it.
 
@@ -165,34 +170,25 @@ export const BALLAST_DOWN_RELIEF = 0.5;
    punishing success is a Risk of Rain trap. It is not punishing success. It is
    the consequence.
 
-   **It is squeezed between two existing numbers rather than chosen, and both
-   bounds are worth writing down.**
-
-   The FLOOR is `BALLAST_TIER_RELIEF`. Every core costs three Anchors and every
-   Anchor takes 0.25 off the drain, so a core has to beat 0.75 or breaking one
-   makes the planet safer - the opposite of the sentence. It has to beat it by
-   a margin, not squeak past: at a bite of 1.0 the measured campaign ran 16, 14,
-   13, 13 minutes to the first lost region, which is strictly rising and which
-   no player would ever feel.
-
-   The CEILING is the fairness line in `a planet nobody feeds loses ground and
-   then stops`, which predates this round: the first region has to fall several
-   runs after the clock starts, and a run is three minutes. At tier 3 with one
-   core that is `16 * 1.75 / (1 + bite) > 10`, so the bite is under 1.8.
-
-   1.75 is where those meet, and the campaign it measures is no clock at all,
-   then 10, 9, 8 minutes. The receipt is a test on the DERIVED quantity - that
+   Round seventeen, AC, re-derived it. It used to be 1.75, squeezed between a
+   floor (each Anchor then EASED the drain by a quarter, so a core had to beat
+   three of those) and the fairness ceiling. With Anchors now making things
+   worse themselves there is no floor to beat, and only the ceiling is left:
+   the first region has to fall several runs after the clock starts, and a run
+   is three minutes, at every core counting the Anchors it cost. At an Anchor
+   bite of 0.05 and a core bite of 0.1 the clock reads about 12, 10 and 8
+   minutes at the three cores, rising with every Anchor in between. The receipt is a test on the DERIVED quantity - that
    the drain rises at every gate counting the Anchors that gate cost - rather
    than on this number, because both bounds are tuned values that will move.
 
    Bounded by construction: there are `GATE_COUNT` cores in the world and the
    list they come off can hold each only once (`openGate`), so the worst case
    is a fixed multiple and not a curve that runs away. */
-export const BALLAST_CORE_BITE = 1.75;
+export const BALLAST_CORE_BITE = 0.1;
 
 export function ballastDrain(planetUnrest: number, tier: number, down = 0, cores = 0): number {
-  return BALLAST_DRAIN * (0.35 + planetUnrest) * (1 + cores * BALLAST_CORE_BITE) /
-         ((1 + tier * BALLAST_TIER_RELIEF) * (1 + down * BALLAST_DOWN_RELIEF));
+  return BALLAST_DRAIN * (0.35 + planetUnrest) * (1 + cores * BALLAST_CORE_BITE) *
+         (1 + tier * BALLAST_ANCHOR_BITE) / (1 + down * BALLAST_DOWN_RELIEF);
 }
 
 /* How many Anchors are lit. Derived, never stored. */
@@ -212,7 +208,8 @@ export const UNREST_AFTER_ANCHOR = 0.15;
 
 /* ---------- the planet answers ----------
 
-   At the fifth Anchor of nine, and it is the strongest longevity device the
+   At the first core (round seventeen, AC; it was the fifth Anchor of nine,
+   a second escalation beside the ladder's), and it is the strongest longevity device the
    research turned up for a procedurally generated world: Terraria's Hardmode
    does not build new space, it EDITS the world you already have. A map you
    spent hours filling in becoming unfamiliar is worth more than a map twice
@@ -234,8 +231,8 @@ export const UNREST_AFTER_ANCHOR = 0.15;
    dangerous and it is also worth more. Waking it has to be something a player
    chooses to do rather than something that happens to them for playing well.
 
-   Half of nine and not all of it, so there is a whole second act after it. */
-export const WAKE_AT = 5;
+   The first core, so the whole rest of the ladder is the second act. */
+export const WAKE_AT = 1;   /* cores broken - round seventeen, AC; it was five Anchors */
 
 /* What every region gains, once and for ever. A twelfth of the meter: enough
    that Calm ground stops being calm and not enough to push anywhere a whole
@@ -247,7 +244,7 @@ export const WAKE_STEP = 0.12;
    runs after it. */
 export const WAKE_CUT_MULT = 1.35;
 
-export const isAwake = (s: GroundState) => s.lit.length >= WAKE_AT;
+export const isAwake = (s: GroundState) => s.woke || s.gates.length >= WAKE_AT;
 
 /* Applied once, by the caller that lit the Anchor that crossed the line.
    Returns true if this was the moment. */
@@ -261,7 +258,7 @@ export function wake(s: GroundState): boolean {
      fixture lit the first few Anchors through the state directly and only the
      last one through the real path, so the first call this ever saw was
      always the fifth. */
-  if (s.woke || s.lit.length < WAKE_AT) return false;
+  if (s.woke || s.gates.length < WAKE_AT) return false;
   s.woke = true;
   for (let i = 0; i < REGION_COUNT; i++) s.unrest[i] = clamp01(s.unrest[i] + WAKE_STEP);
   return true;

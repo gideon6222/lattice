@@ -76,6 +76,9 @@ export const g: {
   /* Consumables ever held. The Outfitter will not sell one you have never had
      in your hands - see the note on supplies in finds.ts. */
   foundKit: string[];
+  /* Skills bought rather than handed over by a core. Round seventeen, AC:
+     Sink left the core list and the gate vendors (AO) sell it. */
+  skills: string[];
   /* Every material you have ever cut out of the rock. The first of each is an
      event; after that it is just ore. See the reveal in loop.ts. */
   seenOre: string[];
@@ -127,7 +130,7 @@ export const g: {
   px: START_X, pd: -1,
   face: 'down',
   fuel: 90, hull: HULL_MAX, soak: 0, charge: CHARGE_MAX,
-  cargo: {}, weight: 0, stock: {}, drops: {}, damage: {}, relics: [], relicsTaken: [], found: [], foundKit: [], seenOre: [], seen: [], marks: [],
+  cargo: {}, weight: 0, stock: {}, drops: {}, damage: {}, relics: [], relicsTaken: [], found: [], foundKit: [], skills: [], seenOre: [], seen: [], marks: [],
   log: blankLog(),
   best: { depth: 0, haul: 0, fastest: 0, worlds: 0 },
   ground: newGround(),
@@ -340,7 +343,7 @@ function stateNow(at: SaveAt): Record<string, unknown> {
     kit: g.kit, stock: g.stock, rubble: Array.from(g.rubble), best: g.best,
     drops: g.drops, damage: g.damage, charge: g.charge,
     relics: g.relics, relicsTaken: g.relicsTaken, log: g.log,
-    found: g.found, foundKit: g.foundKit, seenOre: g.seenOre, seen: g.seen,
+    found: g.found, foundKit: g.foundKit, skills: g.skills, seenOre: g.seenOre, seen: g.seen,
     marks: g.marks,
     ground: g.ground
   };
@@ -482,6 +485,7 @@ export function load() {
          written before today is a save whose owner could buy every consumable
          freely, so every consumable in it counts as known. New saves write the
          list properly and this never fires for them again. */
+      g.skills = Array.isArray(s.skills) ? s.skills.filter((k: unknown) => typeof k === 'string') : [];
       if (Array.isArray(s.foundKit)) {
         g.foundKit = s.foundKit.slice();
       } else {
@@ -684,7 +688,7 @@ export function lightHere(): number {
    frame: the act is "I flew down to it". */
 export function vaultHere(): boolean {
   if (g.won) return false;
-  if (!vaultOpen(g.ground.lit.length)) return false;
+  if (!vaultOpen(g.ground.gates)) return false;
   return vaultCoreNear(Math.round(g.px), Math.max(0, Math.round(g.pd)));
 }
 

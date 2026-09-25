@@ -48,8 +48,21 @@ export const GATE_COUNT = REGION_ROWS - 1;
    answer rather than a number somebody liked. */
 export const ANCHORS_PER_GATE = REGION_COLS;
 
+/* The last gate is the Vault's door. Round seventeen, AC, and his answer of
+   2026-09-19 taken literally: *"The last gate should be the door."* It used to
+   sit at 339 m, the top of the deepest region row, and left 66 m of empty
+   rock between it and the Vault - the ninth Anchor opened the Vault while the
+   barrier still stood, so the game had two door moments and the first was the
+   old one. Now the barrier runs directly over the Vault room (399-411 m, core
+   at 405) and its core is the one cell above the Vault's own crown.
+
+   Written out rather than imported from `vaults.ts`, because vaults imports
+   this file; `gate.test.mjs` asserts it is the row directly above the room. */
+export const VAULT_DOOR_D = 398;
+
 /* The depth of tier `t`'s gate, which is the bottom edge of that tier. */
 export function gateDepth(tier: number): number {
+  if (tier === GATE_COUNT - 1) return VAULT_DOOR_D;
   return Math.round((WORLD_DEPTH / REGION_ROWS) * (tier + 1));
 }
 
@@ -63,8 +76,9 @@ export function gateDepth(tier: number): number {
    "H.tierOf is not a function". A collision that silently deletes both sides is
    worse than one that shadows, and the fix is the name. */
 export function depthTier(d: number): number {
-  const t = Math.floor(d / (WORLD_DEPTH / REGION_ROWS));
-  return t < 0 ? 0 : t >= REGION_ROWS ? REGION_ROWS - 1 : t;
+  let t = 0;
+  for (let g = 0; g < GATE_COUNT; g++) if (d >= gateDepth(g)) t = g + 1;
+  return t;
 }
 
 /* The Anchors that open tier `t`'s gate. Regions are numbered row-major, so a
@@ -129,6 +143,9 @@ export function reachableDepth(open: readonly number[]): number {
 const CORE_EDGE_PAD = 6;
 
 export function coreColumn(tier: number): number {
+  /* The door's core is the Vault's crown: the same column as the Vault core,
+     which is `Math.floor(W / 2)` in vaults.ts (asserted in gate.test.mjs). */
+  if (tier === GATE_COUNT - 1) return Math.floor(W / 2);
   const span = W - 1 - CORE_EDGE_PAD * 2;
   return Math.round(CORE_EDGE_PAD + rnd(tier * 37 + 11, tier * 13 + 5, 1069) * span);
 }

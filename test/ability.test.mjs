@@ -16,15 +16,17 @@ import { loadPure } from './harness.mjs';
 
 const H = await loadPure();
 
-test('every gate hands over exactly one ability', () => {
-  for (let t = 0; t < H.GATE_COUNT; t++) {
+test('every gate but the door hands over exactly one ability', () => {
+  /* Round seventeen, AC: the last core is the Vault's door, and the door is
+     its gift. Every other core hands over exactly one. Sink comes from no core
+     (tier -1): it is what the gate vendors sell (AO). */
+  for (let t = 0; t < H.GATE_COUNT - 1; t++) {
     const mine = H.ABILITIES.filter((a) => a.tier === t);
     assert.equal(mine.length, 1,
       `tier ${t} hands over ${mine.length} abilities: ${mine.map((a) => a.key).join(', ')}`);
     assert.equal(H.abilityFor(t).tier, t);
   }
-  assert.equal(H.ABILITIES.length, H.GATE_COUNT,
-    'there are abilities that no core hands over, so they are unreachable');
+  assert.equal(H.abilityFor(H.GATE_COUNT - 1), undefined, 'the door handed over an ability');
 });
 
 test('no two cores hand over the same thing', () => {
@@ -38,7 +40,7 @@ test('an ability arrives with its core and never before it', () => {
   /* Derived from `g.ground.gates`, which is already the save's record of which
      cores are broken - so this is really asserting that nothing keeps a second
      copy of that list. A player who has broken no core has nothing. */
-  for (const a of H.ABILITIES) {
+  for (const a of H.ABILITIES.filter((x) => x.tier >= 0)) {
     assert.equal(H.hasAbility([], a.key), false, `${a.key} is aboard before any core is broken`);
     assert.equal(H.hasAbility([a.tier], a.key), true, `tier ${a.tier}'s core did not hand over ${a.key}`);
     for (const other of H.ABILITIES) {
@@ -51,10 +53,10 @@ test('an ability arrives with its core and never before it', () => {
 
 test('the abilities arrive in the order the cores do', () => {
   const all = [];
-  for (let t = 0; t < H.GATE_COUNT; t++) all.push(t);
-  const got = H.abilitiesOf(all).map((a) => a.tier);
+  for (let t = 0; t < H.GATE_COUNT - 1; t++) all.push(t);
+  const got = H.abilitiesOf([...all, H.GATE_COUNT - 1]).map((a) => a.tier);
   assert.deepEqual(got, all, 'the ladder is out of order, so the ending arrives before the middle');
-  assert.deepEqual(H.abilitiesOf([1]).map((a) => a.key), ['sink']);
+  assert.deepEqual(H.abilitiesOf([1]).map((a) => a.key), ['call']);
   assert.deepEqual(H.abilitiesOf([]).length, 0);
 });
 
@@ -81,21 +83,18 @@ test('sinking cannot get past the things nothing cuts', () => {
   assert.ok(H.SINK_RATE > 0);
 });
 
-test('The Call answers only where an Anchor has been broken', () => {
-  /* The same fence X4's richness shading runs on, and the reason both are
-     worth the trip. A planet-wide answer handed over at tier 2 would
-     retroactively delete every Anchor the player has not been to. */
-  for (let r = 0; r < H.ANCHOR_COUNT; r++) {
-    assert.equal(H.callAnswers([], r), false, `region ${r} answers before its Anchor is broken`);
-    assert.equal(H.callAnswers([r], r), true);
-    assert.equal(H.callAnswers([(r + 1) % H.ANCHOR_COUNT], r), false,
-      'a region answers because somebody broke a different region\'s Anchor');
-  }
-  /* And the bottom row, which has no Anchor at all and can never answer. */
-  for (let r = H.ANCHOR_COUNT; r < H.REGION_COUNT; r++) {
-    assert.equal(H.callAnswers([0, 1, 2, 3, 4, 5, 6, 7, 8], r), false,
-      `region ${r} has no Anchor, so nothing there can have been broken open`);
-  }
+test('The Call hears everything the ship can reach, and nothing past a shut gate', () => {
+  /* Round seventeen, AC. It answered only in regions whose Anchor was broken -
+     ground already worked - and it arrived with the last core, where it could
+     say nothing about the tier it came in. It is the second core's now and
+     points somewhere the player has not been, but never below a gate that is
+     still shut, because a secret the ship cannot reach is a promise the game
+     cannot keep yet. */
+  const g0 = H.gateDepth(0), g1 = H.gateDepth(1);
+  assert.equal(H.callAnswers([0], g1 - 1), true, 'ground above the next shut gate is silent');
+  assert.equal(H.callAnswers([0], g1 + 5), false, 'the Call heard through a shut gate');
+  assert.equal(H.callAnswers([0], g0 + 5), true);
+  assert.equal(H.callAnswers([], g0 + 5), false);
 });
 
 test('The Call hears what is buried, and stops hearing it once it is dug', () => {
@@ -103,20 +102,20 @@ test('The Call hears what is buried, and stops hearing it once it is dug', () =>
   H.g.dug = new Set();
   H.g.ground = H.newGround();
   H.resetSecrets();
-  assert.deepEqual(H.secretsHeard(), [], 'the planet answers before any Anchor is broken');
-
-  H.g.ground.lit = [0];
-  H.resetSecrets();
+  /* Round seventeen, AC: it hears everything the ship can reach, so with no
+     gate open that is the first tier and nothing below it. */
   const heard = H.secretsHeard();
-  assert.ok(heard.length > 0, 'a broken region has nothing buried in it at all');
-
-  /* Every one of them is inside that region, is something the player would
-     make a trip for, and is still in the ground. */
+  assert.ok(heard.length > 0, 'nothing is buried in the whole first tier');
   for (const s of heard) {
-    assert.equal(H.regionAt(s.x, s.d), 0, `it answered from region ${H.regionAt(s.x, s.d)}, not the broken one`);
+    assert.ok(s.d < H.gateDepth(0), `it answered from ${s.d} m, below the shut first gate`);
     assert.ok(['find', 'relic', 'cache', 'wreck'].includes(s.kind));
     assert.ok(H.blockAt(s.x, s.d), 'it answered from a cell with nothing in it');
   }
+  H.g.ground.gates = [0];
+  H.resetSecrets();
+  assert.ok(H.secretsHeard().some((s) => s.d > H.gateDepth(0)), 'opening a gate let it hear nothing deeper');
+  H.g.ground.gates = [];
+  H.resetSecrets();
 
   /* Dig one out and it stops answering, which is what makes the map a list of
      what is LEFT rather than a list of what exists. */

@@ -186,7 +186,7 @@ export function makeCampaign(H) {
       if (g.ground.gates.includes(t) || !H.gateReady(t, g.ground.lit)) continue;
       out.push({ kind: 'core', what: t, x: H.coreColumn(t), d: H.gateDepth(t) - 1 });
     }
-    if (H.vaultOpen(g.ground.lit.length) && !g.won) {
+    if (H.vaultOpen(g.ground.gates) && !g.won) {
       out.push({ kind: 'vault', what: 0, x: H.VAULT_CORE_X, d: H.VAULT_CORE_D - 1 });
     }
     return out;

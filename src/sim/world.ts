@@ -383,7 +383,7 @@ export function blockAt(x: number, d: number): Block | null {
       /* The last wall. Not sealed stone: sealed stone waits for a tool you can
          find by accident, and this waits for all nine Anchors - which is the
          difference between a locked door and an ending. */
-      const open = vaultOpen(g.ground.lit.length);
+      const open = vaultOpen(g.ground.gates);
       /* Lit even while it is shut, and that is the point of it.
 
          At 0.18 it went black with the rock at the edge of the lamp, so the

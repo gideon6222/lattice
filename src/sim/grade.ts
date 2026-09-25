@@ -63,9 +63,11 @@ export const ACT_QUIET = 2;
    three for ever, including on a New Game Plus pass where `lit` has been reset,
    because act three is about what the player has DONE and `g.won` is the one
    flag a wipe does not clear (see `vaultReached` in actions.ts). */
-export function actOf(lit: number, won: boolean): number {
+/* `cores` is the number of cores broken: round seventeen moved the wake from
+   the fifth Anchor to the first core, and act two moved with it. */
+export function actOf(cores: number, won: boolean): number {
   if (won) return ACT_QUIET;
-  if (lit >= WAKE_AT) return ACT_WAKE;
+  if (cores >= WAKE_AT) return ACT_WAKE;
   return ACT_DEAD;
 }
 
@@ -102,6 +104,6 @@ export function gradeOf(act: number): Grade {
 }
 
 /* The grade for a save, which is the only call the renderer needs. */
-export function gradeFor(lit: number, won: boolean): Grade {
-  return gradeOf(actOf(lit, won));
+export function gradeFor(cores: number, won: boolean): Grade {
+  return gradeOf(actOf(cores, won));
 }

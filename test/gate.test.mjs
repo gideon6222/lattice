@@ -402,3 +402,22 @@ test('the shop opens at a gate\'s station without needing the pad', () => {
   assert.equal(H.docked(), false, 'a gate station is not the pad');
   assert.equal(H.shopHere(), true, 'the shop refused to open at an open gate\'s station');
 });
+
+/* ---------- Round seventeen, AC: the last gate is the Vault's door ---------- */
+
+test('the last gate sits directly on the Vault, and its core is the Vault crown', () => {
+  const last = H.GATE_COUNT - 1;
+  const top = H.VAULT_CORE_D - Math.floor(H.THE_VAULT.rows.length / 2);
+  assert.equal(H.gateDepth(last), top - 1,
+    `the door is at ${H.gateDepth(last)} m but the Vault room starts at ${top} m - there is empty ground between them again`);
+  assert.equal(H.coreColumn(last), H.VAULT_CORE_X, 'the door core is not over the Vault');
+  assert.equal(H.VAULT_DOOR_D, H.gateDepth(last));
+});
+
+test('the ninth Anchor opens nothing; only the last core opens the Vault', () => {
+  const all = Array.from({ length: H.ANCHOR_COUNT }, (_, i) => i);
+  assert.equal(H.vaultOpen([]), false);
+  assert.equal(H.vaultOpen([0, 1]), false, 'the Vault opened with its door still shut');
+  assert.equal(H.gateReady(H.GATE_COUNT - 1, all), true);
+  assert.equal(H.vaultOpen([0, 1, H.GATE_COUNT - 1]), true, 'breaking the door did not open the Vault');
+});

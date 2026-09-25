@@ -56,6 +56,7 @@
 import { rnd } from './util';
 import { W, CACHE } from './config';
 import { REGION_COLS, REGION_ROWS, REGION_COUNT, WORLD_DEPTH, regionAt } from './region';
+import { GATE_COUNT } from './gate';
 
 /* The size of an ORDINARY room. The Vault is bigger, so the stamp reads each
    template's own dimensions and these two are only the figure the wild slots
@@ -694,7 +695,11 @@ export const HULK_HARD = (WORKED_HARD + SEALED_HARD) / 2;
    even after you have earned the right to cut it. */
 export const VAULT_WALL_HARD = 6.0;
 
-export const vaultOpen = (litCount: number) => litCount >= ANCHOR_COUNT;
+/* Open when the last gate is. Round seventeen, AC: it used to open on the
+   ninth Anchor, while the barrier above it still stood - the old spine's door
+   beside the new one's. Now breaking the last core IS opening the Vault, and
+   nothing else does. Takes the open gates, not a count of Anchors. */
+export const vaultOpen = (openGates: readonly number[]) => openGates.includes(GATE_COUNT - 1);
 
 /* Whether a cell is the Vault's core, and whether one is next to it. Same
    shape as the Anchors' pair and for the same reason: reaching it is standing

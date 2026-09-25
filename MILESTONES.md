@@ -681,7 +681,7 @@ is in `journal/legacy-plan.md`.
       briefs: menu, web
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AC The last gate is the Vault's door.** Gate 3 moves onto the Vault; core 3's break
+- [x] **AC The last gate is the Vault's door.** Gate 3 moves onto the Vault; core 3's break
       opens it and nothing else does; the ninth Anchor opens nothing. Abilities reshuffle:
       the Hollow at core 1, the Call at core 2 answering for unbroken regions too, Sink
       leaves the core list for the gate shop (AG). Each Anchor broken steps the drain up

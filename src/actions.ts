@@ -4,10 +4,10 @@ import { W, HULL_MAX, DEF, isOre, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_H
 import { clamp, key, stream } from './sim/util';
 import { FIND_OF } from './sim/finds';
 import { hap } from './haptics';
-import { regionName } from './sim/region';
+import { regionName, REGION_COLS } from './sim/region';
 import { anchorAt } from './sim/vaults';
 import { wake } from './sim/unrest';
-import { coreColumn, gateDepth } from './sim/gate';
+import { coreColumn, gateDepth, gateAnchors, GATE_COUNT } from './sim/gate';
 import { abilityFor } from './sim/ability';
 import { hintAt } from './sim/hints';
 import { scarHere, repairable, repairRoom, packScar } from './sim/repair';
@@ -627,7 +627,7 @@ export function hardReset() {
      lying. `g.up` was already being zeroed, so the devices came back at tier
      zero and were still on the shelf - a fresh start that had somehow already
      done the finding. Same for the kit, the mineral reveals and the map. */
-  g.found = []; g.foundKit = [];
+  g.found = []; g.foundKit = []; g.skills = [];
   g.seenOre = []; g.seen = []; g.marks = [];
   resetSeen();
   /* `won` deliberately SURVIVES a reset. It is not progress, it is something
@@ -729,39 +729,27 @@ export function anchorBreaks(region: number) {
   sfx.boom();
   sfx.collapse();
   hap.boom();
-  /* And whether that was the fifth of nine.
+  /* Round seventeen, AC: an Anchor no longer opens anything by itself - not
+     the wake (the first core's now) and not the Vault (the last core's). What
+     it does is bring its own tier's barrier one Anchor closer to giving way,
+     and the card says how many are still holding it.
 
-     Decided BEFORE the card goes up and applied after it comes down, so the
-     two events are in the order the player experiences them: you lit an
-     Anchor, and then the planet reacted to it. Both at once would be one
-     confusing flash and two modals stacked. */
-  const answered = wake(g.ground);
-  /* And whether that was the ninth of nine, which opens the centre. Mutually
-     exclusive with the wake by construction - five is not nine - so the two
-     follow-on cards can never stack. */
-  const opened = !answered && vaultOpen(g.ground.lit.length);
-  if (opened) revealVault();
-  /* The wording, and it is the second place the reveal is spoken straight.
-
-     It still congratulates, because everything it says is true and useful -
-     the region does settle, the Ballast does hold harder, the map does fill
-     in. What it no longer says is that the Anchor woke. It broke, and the card
-     says so in the first three words, and then moves on to the good news
-     exactly the way somebody reporting a success would.
-
-     The first one gets the extra line, because a player who has broken one
-     thing does not yet know there are nine. */
+     The wording is the reveal spoken straight for the second time. It used to
+     congratulate - the region "settles", the Ballast "holds harder" - and the
+     drain now does the opposite of that, so the card stops saying it. */
+  const tier = Math.floor(region / REGION_COLS);
+  const left = gateAnchors(tier).filter((r) => !g.ground.lit.includes(r)).length;
   showEvent('THE ANCHOR BREAKS',
-    regionName(region) + ' settles. The Ballast holds harder now, and the ground ' +
-    'here has drawn itself onto your map. Whatever was held in the Anchor is ' +
-    'loose in the rock.' +
-    (n === 1 ? ' Whatever built these left nine of them.' : ''),
+    regionName(region) + ' gives way, and the ground here has drawn itself onto ' +
+    'your map. Whatever the Anchor was holding is loose in the rock now. ' +
+    (left === 0
+      ? 'Nothing is holding the barrier at ' + gateDepth(tier) + ' m shut any more.'
+      : left === 1
+        ? 'One more Anchor holds the barrier at ' + gateDepth(tier) + ' m.'
+        : left + ' more Anchors hold the barrier at ' + gateDepth(tier) + ' m.') +
+    (n === 1 ? ' Three of them hold every barrier in this planet.' : ''),
     'GO ON',
-    () => {
-      updateHUD();
-      if (answered) planetAnswers();
-      else if (opened) centreOpens();
-    });
+    () => { updateHUD(); });
   /* A large event: written where the ship stands, tank and hold as they are.
      Quit now and CONTINUE returns here. */
   checkpoint();
@@ -815,12 +803,24 @@ export function coreBroken(tier: number) {
      gets from a core that is theirs to USE - the barrier coming down is the
      world changing, and this is the ship changing. */
   const gift = abilityFor(tier);
-  showEvent('THE WAY OPENS',
-    'The core gives, and the barrier goes with it. Whatever was held here is ' +
-    'held no longer, and the ground below is yours.' +
-    (gift ? '  Something of it is in the ship now: ' + gift.name.toUpperCase() +
-            '. ' + gift.blurb : ''),
-    'DESCEND',
+  /* Round seventeen, AC: the first core is also the wake - the planet
+     answering used to wait for the fifth Anchor, a second escalation beside
+     this one. Applied now; the ground-goes card says it after this one. */
+  if (first) wake(g.ground);
+  /* And the last core is the Vault's door. It opens the Vault and nothing
+     else does, and it hands over no ability - the door is the gift. */
+  const door = tier === GATE_COUNT - 1;
+  if (door) revealVault();
+  showEvent(door ? 'THE DOOR OPENS' : 'THE WAY OPENS',
+    door
+      ? 'The last core gives, and it was never only a barrier core. The Vault is ' +
+        'under it - one wall of worked stone deep - and it is open. Your map ' +
+        'knows where it is.'
+      : 'The core gives, and the barrier goes with it. Whatever was held here is ' +
+        'held no longer, and the ground below is yours.' +
+        (gift ? '  Something of it is in the ship now: ' + gift.name.toUpperCase() +
+                '. ' + gift.blurb : ''),
+    door ? 'GO DOWN' : 'DESCEND',
     () => {
       updateHUD();
       updateKit();
@@ -905,59 +905,24 @@ export function groundStartsToGo() {
     'Something gave when the core did, a long way down and everywhere at once. ' +
     'The Ballast on the pad has started to fall. It has been standing full ' +
     'since you landed, and now it is holding the planet down against ' +
-    'something that is pulling the other way.',
-    'UNDERSTOOD',
-    () => { updateHUD(); });
-  checkpoint();
-}
-
-
-/* ---------- the planet answers ----------
-
-   The fifth Anchor of nine. `unrest.ts` decides what it does to the state;
-   this is the half the player experiences, and it is the one moment in the
-   game where everything stops and the world talks about itself.
-
-   HERE rather than in collapse.ts, which is where the rest of the world-change
-   code lives, and for a reason worth writing down: collapse.ts would have had
-   to import `showEvent` from this file, and this file would have had to import
-   `planetAnswers` from that one. A cycle that happens to work because of the
-   order two bindings are read is a trap for whoever moves a call next - and
-   this repo has already lost an afternoon to exactly that, with the symptom
-   "Cannot access 'k' before initialization" and a shop that never opened.
-
-   The text names the ANCHORS as the cause, because the point is that the
-   player did this: it is a consequence of playing well, not weather. And it
-   does not say what any of the three changes are in numbers. You find out that
-   Blooms exist by cutting one, and that the ground closes by coming back to a
-   shaft that is not there. */
-export function planetAnswers() {
-  R.shake = Math.max(R.shake, 1.7);
-  flash('rgba(232,198,255,.30)', 900);
-  sfx.collapse();
-  hap.quake();
-  showEvent('THE PLANET ANSWERS',
-    'Five of nine. Something under all of this has noticed, and the whole ' +
-    'crust has shifted a degree - every region, at once. The ground will not ' +
-    'be as you left it any more. Watch what grows in it.',
+    'something that is pulling the other way. The ground will not stay as you ' +
+    'left it any more. Watch what grows in it.',
     'UNDERSTOOD',
     () => {
-      /* Blooms start generating the instant this flag is set, so the window
-         the player is looking at has to be rebuilt or the change arrives
-         whenever they next cross a row - the same trap the Anchor's own
-         re-draw was. */
+      updateHUD();
+      /* The wake's half of this, folded in from the old fifth-Anchor card
+         (round seventeen, AC). Blooms generate from the moment the flag is
+         set, so the window is rebuilt; then the ground already dug closes. */
       for (const k of Array.from(meshes.keys())) dropBlock(k);
       resetBlockCache();
       syncBlocks(true);
-      /* And the half of the card's promise that is about ground already dug.
-         Round twelve, V6: until now "the ground will not be as you left it"
-         was entirely about the future. After the rebuild, so the closed cells
-         are drawn in the same frame the player is handed back. */
       const closed = wakeCloses();
       if (closed) toast('The ground closes behind you · ' + closed + ' cells');
     });
   checkpoint();
 }
+
+
 
 /* ---------- the Vault ----------
 
@@ -1020,25 +985,3 @@ export function vaultReached() {
 }
 
 
-/* The ninth Anchor. Not the ending - the ending is a place you still have to
-   fly to - but the moment the map tells you where it is.
-
-   Deliberately a card and not a toast: everything else the Anchors do is a
-   quiet consequence, and this is the one that changes what you are going to do
-   next. */
-export function centreOpens() {
-  flash('rgba(255,217,138,.30)', 800);
-  R.shake = Math.max(R.shake, 1.0);
-  sfx.relic();
-  hap.boom();
-  /* The seals around the Vault change block id when they open. */
-  for (const k of Array.from(meshes.keys())) dropBlock(k);
-  resetBlockCache();
-  syncBlocks(true);
-  showEvent('THE CENTER IS OPEN',
-    'All nine. Something at the middle of the planet has stopped holding its ' +
-    'door shut, and your map knows where it is now. It is a long way down.',
-    'GO',
-    () => { updateHUD(); });
-  checkpoint();
-}

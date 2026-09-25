@@ -7,7 +7,7 @@ import { heatDamagePerSecond } from './sim/feel';
 import type { Upgrade, Supply } from './types';
 import { VERSION, CHANGELOG } from './changelog';
 import { haulValue } from './sim/world';
-import { ANCHOR_COUNT, vaultOpen } from './sim/vaults';
+import { GATE_COUNT, ANCHORS_PER_GATE, gateAnchors, gateReady } from './sim/gate';
 import { resonance } from './sim/call';
 import { lamp } from './scene';
 import { setDrillTier, setUpgradeHardware } from './ship';
@@ -193,19 +193,21 @@ export function flash(color: string, ms?: number) {
 export const atSurface = aboveGround;
 export { docked };
 
-/* The Anchor tally, built once and then only reclassed.
+/* The Anchor tally: THIS tier's Anchors and the core they wake.
 
-   Nine pips and a Vault diamond. Built here rather than in index.html because
-   ANCHOR_COUNT is the source of how many there are - CLAUDE.md's own note on the
-   Outfitter records what the literal version of that costs: an e2e asserted one
-   display case per upgrade against a hard-coded 10, failed for the wrong reason,
-   and "would have been fixed by editing the number". A row of nine hand-written
-   <i> tags is the same mistake waiting for the day the grid changes. */
+   Round seventeen, AC. It was nine pips and a Vault diamond - the old spine,
+   a collection of nine that ended at the centre - on the HUD all game. The
+   ladder is three at a time, so the row is the three Anchors holding the
+   barrier you are working on and a diamond for that barrier's core, which
+   lights when the three are broken. Past the last gate the row stays full.
+
+   Built from ANCHORS_PER_GATE rather than hand-written tags, for the reason
+   CLAUDE.md records about literals that go stale the day the grid changes. */
 let anchorPips: HTMLElement[] = [];
 let vaultPip: HTMLElement | null = null;
 function buildAnchorPips() {
   if (anchorPips.length) return;
-  for (let i = 0; i < ANCHOR_COUNT; i++) {
+  for (let i = 0; i < ANCHORS_PER_GATE; i++) {
     const pip = document.createElement('i');
     anchorPips.push(pip);
     ui.anchors.appendChild(pip);
@@ -215,27 +217,23 @@ function buildAnchorPips() {
   ui.anchors.appendChild(vaultPip);
 }
 
-/* Which pip means which Anchor is deliberately NOT the region order.
-
-   A pip lights when the COUNT reaches its index, so the row fills left to
-   right whatever order they are found in. Mapping pip i to Anchor i would make
-   the row a map - a gap in the middle would say "you have not done the middle
-   one", which is a location, and this game's whole direction design is that the
-   instrument says near and never says where (src/sim/call.ts). The row answers
-   "how far through", and the Survey map answers "which". */
-let paintedLit = -1;
+/* The row still fills left to right by COUNT, not by which Anchor: pip i means
+   "i of this tier's three", never "the i-th region", because the instrument
+   says how far through and the map says which (src/sim/call.ts). */
+let paintedKey = '';
 function paintAnchorPips() {
   buildAnchorPips();
-  const lit = g.ground.lit.length;
-  /* updateHUD runs every frame, and lighting an Anchor happens nine times in a
-     campaign. Ten idempotent classList.toggle calls a frame are cheap but they
-     are not free, and this file is under the thumb. */
-  if (lit === paintedLit) return;
-  paintedLit = lit;
-  for (let i = 0; i < anchorPips.length; i++) {
-    anchorPips[i].classList.toggle('lit', i < lit);
-  }
-  if (vaultPip) vaultPip.classList.toggle('open', vaultOpen(lit));
+  let t = 0;
+  while (t < GATE_COUNT && g.ground.gates.includes(t)) t++;
+  const lit = t >= GATE_COUNT ? ANCHORS_PER_GATE
+    : gateAnchors(t).filter((r) => g.ground.lit.includes(r)).length;
+  const ready = t >= GATE_COUNT || gateReady(t, g.ground.lit);
+  /* updateHUD runs every frame; this changes a handful of times a campaign. */
+  const k = t + '|' + lit + '|' + ready;
+  if (k === paintedKey) return;
+  paintedKey = k;
+  for (let i = 0; i < anchorPips.length; i++) anchorPips[i].classList.toggle('lit', i < lit);
+  if (vaultPip) vaultPip.classList.toggle('open', ready);
 }
 
 /* The Lattice Receiver's telltale.
@@ -416,7 +414,7 @@ export function updateOrd() {
     [ui.abSee, 'hollow'] as const,
     [ui.abSink, 'sink'] as const
   ]) {
-    const has = hasAbility(g.ground.gates, key);
+    const has = hasAbility(g.ground.gates, key, g.skills);
     el.classList.toggle('none', !has || hidden);
     /* The Hollow is the only one that runs off power; sinking is paid in hull
        and is therefore never cold, only expensive. */

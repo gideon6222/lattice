@@ -6,10 +6,8 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## What still does not exist
 
-- **The last gate is not the Vault's door.** The Vault opens on the ninth Anchor while the third
-  barrier still stands; the deepest quarter (339-452 m) holds nothing but the flight down (AC).
-- **The old spine still talks.** Captions, cards, the pip row and the store listing still say
-  "light nine Anchors"; breaking an Anchor still eases the drain instead of worsening it (AC, AD).
+- **The old spine still talks.** Captions, the title line, the pause sheet and the store
+  listing still say "light nine Anchors"; old film scenarios build states that cannot occur (AD).
 - **Minerals are not ingredients.** Selling also banks them, geodes carry the economy, caches
   hand out more rare ore than the rock holds (AK, AL, AM).
 - **The shop is the old walked gas station**, the same at every gate, with no X and no back (AB,
@@ -19,17 +17,19 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## Next three milestones
 
-Done 2026-09-25: **AA, the ladder measured.** `npm run campaign` plays the campaign from nothing
-on the pure layer and prints runs and game-minutes per tier; a floor, since it never hesitates.
-First reading: tier 0 7.5 min, tier 1 10.0, tier 2 25.5 (mostly mining until it can survive the
-heat to fetch the laser), tier 3 2.2 - the Vault at minute 45. The secrets probe stops at closed
-barriers now. `tools/econ.mjs`, which still believed the world was 13 wide, is gone.
+Done 2026-09-25: **AC, the last gate is the Vault's door.** The last barrier sits at 398 m right
+over the Vault, and its core is the only thing that opens it. The ninth Anchor and the fifth
+Anchor's wake are gone as triggers - the wake is the first core's now - every Anchor broken makes
+the drain worse, the Call is core 2's and hears everything in reach, Sink waits for the gate
+vendors, and the pip row shows this tier's three Anchors. Probe: the Vault at minute 48, no empty
+tier. **AB** is built and live but not ticked: it needs one press of Android back in the shop on
+his phone.
 
-1. **AB** - back closes the top panel, every panel has an X and scrolls; proven on the phone.
-2. **AC** - the last gate moves onto the Vault; Anchors worsen the drain; abilities reshuffle.
-3. **AD** - the old spine's words, dead code and film scenarios retired.
+1. **AD** - the old spine's words, dead code and film scenarios retired.
+2. **AK** - minerals become ingredients: keys you bank and never sell.
+3. **AN** - the fitting bay replaces the walked shop.
 
-Then AK, AN, AL, AM, AO (minerals and the fitting bay), AE, AF, AH, AI, AJ, Z2, V0.
+Then AL, AM, AO, AE, AF, AH, AI, AJ, Z2, V0.
 
 ## Phone readings
 

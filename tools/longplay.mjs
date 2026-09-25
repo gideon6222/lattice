@@ -135,7 +135,7 @@ if (SEED_LIT || SEED_CREDITS) {
       }
     }
     w.wake(w.g.ground);
-    if (w.vaultOpen(w.g.ground.lit.length)) w.revealVault && w.revealVault();
+    if (w.vaultOpen(w.g.ground.gates)) w.revealVault && w.revealVault();
     w.g.credits += c;
     w.resetBlocks();
   }, { n: SEED_LIT, c: SEED_CREDITS });
@@ -399,7 +399,7 @@ while (true) {
     const sealed = pick(true);
     if (sealed) return sealed;
     /* Nothing left to light. If the centre is open, go and finish it. */
-    if (w.vaultOpen(w.g.ground.lit.length) && !w.g.won) {
+    if (w.vaultOpen(w.g.ground.gates) && !w.g.won) {
       return { kind: 'vault', x: w.VAULT_CORE_X, d: w.VAULT_CORE_D };
     }
     return null;

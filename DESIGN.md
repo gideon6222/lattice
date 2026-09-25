@@ -2732,6 +2732,38 @@ column running through an Anchor's remnant is worth avoiding when AC re-places t
 The secrets probe now opens the gates above each leg and stops at the one below it; it had been
 digging straight through barriers.
 
+### AC: the last gate is the Vault's door
+
+Built 2026-09-25, as he chose it. The last barrier moved from 339 m to 398 m, the row directly
+above the Vault room (399-411 m, core at 405), and its core sits at the Vault's own column, so
+breaking it opens the Vault and nothing else does; `vaultOpen` takes the open gates now, not a
+count of Anchors. The card for that core is THE DOOR OPENS and hands over no ability - the door
+is the gift. What moved with it:
+
+- **The old spine's two openings are gone.** The ninth Anchor opens nothing (the THE CENTER IS
+  OPEN card is deleted), and the fifth-Anchor wake is the first core's: the Blooms, the Unrest
+  step and the ground closing arrive with THE GROUND IS GOING, and the colour grade's second act
+  starts there too. `WAKE_AT` is 1 core.
+- **An Anchor makes the planet worse.** `BALLAST_ANCHOR_BITE` 0.05 replaces the old quarter of
+  relief, and the core bite fell from 1.75 to 0.1 because it no longer has the Anchors' relief
+  to beat. The fairness line still holds: the clock reads about 12, 10 and 8 minutes at the
+  three cores and rises with every Anchor between them. Its card says how many Anchors still
+  hold its barrier, never that anything "holds harder".
+- **Abilities.** The Hollow at core 1, the Call at core 2 - and it hears everything the ship can
+  reach, not only broken regions, stopping at the next shut gate. Sink comes from no core; it
+  is a skill (`g.skills`) the gate vendors will sell (AO), and until then no save has it.
+- **The pip row is this tier's three Anchors and its core**, starting again at each gate.
+
+**The golden diff, read before re-recording** `test/baseline/blocks.json`: on all six recorded
+planets exactly two rows changed - 339 m, where the barrier no longer runs (61 cells back to what
+the generator always had under it), and 398 m, where it now does. No ore moved anywhere else;
+the per-id count shifts are only those two rows. The frozen golden did not need re-recording.
+
+**The probe on the new ladder** (`npm run campaign`): tier 0 7.5 min, tier 1 9.8, tier 2 29.4
+(226 m to the door, still mostly mining until the ship survives the heat at 281 m for the
+laser), then 1.5 min to cut through the door into the Vault - the Vault at minute 48.2, and no
+empty tier left.
+
 ### Fable's second review, after the research, and what it changed
 
 - **One wrongness colour, defined once.** Hollow Knight's Infection works because orange

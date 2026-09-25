@@ -36,8 +36,8 @@
 import { W } from './config';
 import { g } from './state';
 import { blockAt } from './world';
-import { regionAt, WORLD_DEPTH } from './region';
-import { ANCHOR_COUNT } from './vaults';
+import { WORLD_DEPTH } from './region';
+import { reachableDepth } from './gate';
 
 export interface Secret {
   x: number;
@@ -48,10 +48,15 @@ export interface Secret {
   kind: 'find' | 'relic' | 'cache' | 'wreck';
 }
 
-/* Whether a region's secrets answer. The Anchor is what broke the ground open
-   enough to hear them, which is the same rule the map's richness runs on. */
-export function callAnswers(lit: readonly number[], region: number): boolean {
-  return region < ANCHOR_COUNT && lit.includes(region);
+/* Whether a cell's secret answers. Round seventeen, AC: it used to be only
+   regions whose Anchor was broken, which meant ground the player had already
+   worked - and the Call arrived with the last core, in an Anchor-less tier it
+   could say nothing about. It is the second core's gift now, and it hears
+   everything the ship can currently reach, broken regions or not, so it
+   points somewhere the player has not been. Still never past a shut gate:
+   a secret the ship cannot get to is a promise the game cannot keep yet. */
+export function callAnswers(openGates: readonly number[], d: number): boolean {
+  return d <= reachableDepth(openGates);
 }
 
 let ckey = '';
@@ -61,7 +66,7 @@ export function secretsHeard(): Secret[] {
   /* Everything the sweep is a function of. `dug.size` rather than the set
      itself because it only ever grows; `collapsed` and `woke` because both
      change what `blockAt` answers without any cell being dug. */
-  const k = g.ground.lit.slice().sort().join('.') + '|' + g.dug.size + '|' +
+  const k = g.ground.gates.slice().sort().join('.') + '|' + g.dug.size + '|' +
             g.found.length + '|' + g.relics.length + '|' +
             g.ground.collapsed.length + '|' + (g.ground.woke ? 1 : 0);
   if (k === ckey) return cached;
@@ -70,7 +75,7 @@ export function secretsHeard(): Secret[] {
   const out: Secret[] = [];
   for (let x = 0; x < W; x++) {
     for (let d = 0; d <= WORLD_DEPTH; d++) {
-      if (!callAnswers(g.ground.lit, regionAt(x, d))) continue;
+      if (!callAnswers(g.ground.gates, d)) continue;
       /* Anything already dug is already gone: `blockAt` answers `g.dug` before
          it answers anything else, so a cell the player has taken is null here
          and falls out on the next line. An explicit check for it was the first

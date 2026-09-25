@@ -31,35 +31,33 @@ function fresh() {
 
 /* ---------- the step ---------- */
 
-test('the planet answers at the fifth Anchor, not the first and not the last', () => {
+test('the planet answers at the first core, and never before it', () => {
+  /* Round seventeen, AC: the wake used to fire at the fifth Anchor of nine, a
+     second escalation beside the per-core drain. It is the first core's now -
+     one ladder, one moment the ground starts to go - and nine Anchors broken
+     with no core broken is still a sleeping planet. */
   const s = fresh();
-  assert.equal(H.WAKE_AT, 5, 'the wake is meant to leave a whole second act after it');
-  for (let i = 0; i < H.WAKE_AT - 1; i++) {
+  assert.equal(H.WAKE_AT, 1, 'the wake belongs to the first core');
+  for (let i = 0; i < H.ANCHOR_COUNT; i++) {
     H.lightAnchor(s, i);
-    assert.equal(H.isAwake(s), false, `the planet woke at ${i + 1} Anchors`);
+    assert.equal(H.isAwake(s), false, `the planet woke at ${i + 1} Anchors and no core`);
   }
-  H.lightAnchor(s, H.WAKE_AT - 1);
-  assert.equal(H.isAwake(s), true, `the planet did not wake at ${H.WAKE_AT} Anchors`);
+  H.openGate(s.gates, 0);
+  assert.equal(H.isAwake(s), true, 'the planet did not wake at the first core');
 });
 
-test('the step is not paid before the fifth Anchor', () => {
-  /* The bug this exists for, and it shipped for an hour: wake() checked only
-     whether the planet had already woken, not whether it was TIME - so the
-     first Anchor of nine set the flag and the whole second act fired in the
-     first ten minutes.
-
-     Every fixture missed it for the same reason: they lit the early Anchors
-     through the state directly and only the last one through the real path,
-     so the first call wake() ever saw was always the fifth. */
+test('the step is not paid before the first core', () => {
+  /* The bug the old version of this pinned still applies: wake() must check
+     that it is TIME, not only that it has not happened yet. */
   const s = fresh();
-  assert.equal(H.wake(s), false, 'the planet woke with no Anchors lit at all');
-  for (let i = 0; i < H.WAKE_AT - 1; i++) {
+  assert.equal(H.wake(s), false, 'the planet woke with nothing broken at all');
+  for (let i = 0; i < H.ANCHOR_COUNT; i++) {
     H.lightAnchor(s, i);
     assert.equal(H.wake(s), false, `the planet woke at ${i + 1} Anchors`);
     assert.equal(s.woke, false);
   }
-  H.lightAnchor(s, H.WAKE_AT - 1);
-  assert.equal(H.wake(s), true, 'the planet did not wake at the fifth');
+  H.openGate(s.gates, 0);
+  assert.equal(H.wake(s), true, 'the planet did not wake at the first core');
 });
 
 test('the step is paid once, whatever happens afterwards', () => {
@@ -68,7 +66,7 @@ test('the step is paid once, whatever happens afterwards', () => {
      itself to maximum - once per Anchor after the fifth, once per save
      reload, once per anything that calls it. */
   const s = fresh();
-  for (let i = 0; i < H.WAKE_AT; i++) H.lightAnchor(s, i);
+  H.openGate(s.gates, 0);
   for (let i = 0; i < H.REGION_COUNT; i++) s.unrest[i] = 0.2;
   assert.equal(H.wake(s), true);
   const after = s.unrest.slice();
@@ -86,7 +84,7 @@ test('the step is paid once, whatever happens afterwards', () => {
 
 test('the step lifts every region, and cannot push one over the top', () => {
   const s = fresh();
-  for (let i = 0; i < H.WAKE_AT; i++) H.lightAnchor(s, i);
+  H.openGate(s.gates, 0);
   for (let i = 0; i < H.REGION_COUNT; i++) s.unrest[i] = i / (H.REGION_COUNT - 1);
   const before = s.unrest.slice();
   H.wake(s);
@@ -131,7 +129,7 @@ test('a Bloom generates nowhere at all until the planet answers', () => {
   assert.equal(asleep, 0, `${asleep} Blooms generated on a planet that has not woken`);
 
   const s = H.g.ground;
-  for (let i = 0; i < H.WAKE_AT; i++) H.lightAnchor(s, i);
+  H.openGate(s.gates, 0);
   assert.equal(H.isAwake(s), true);
   let awake = 0, shallow = 0;
   for (let d = 0; d < H.WORLD_DEPTH; d++) {
@@ -183,7 +181,7 @@ test('a Bloom overwrites, and never moves the ore under it', () => {
     before.push(b ? b.id : '(empty)');
   }
   const s = H.g.ground;
-  for (let i = 0; i < H.WAKE_AT; i++) H.lightAnchor(s, i);
+  H.openGate(s.gates, 0);
   let i = 0, changed = 0;
   for (let d = 0; d < 200; d++) for (let x = 0; x < H.W; x += 3) {
     const b = H.blockAt(x, d);
@@ -196,7 +194,10 @@ test('a Bloom overwrites, and never moves the ore under it', () => {
        its plinth becomes a scar; that is what breaking an Anchor IS. What the
        test is defending has not moved: nothing changes except the cells these
        events are defined to change, and in particular no ore does. */
-    assert.ok(now === 'bloom' || now === 'anchorbroken' || now === 'anchorscar',
+    /* And since round seventeen the wake is the first core, so gate 0's own
+       barrier row opening is also one of the defined changes. */
+    assert.ok(now === 'bloom' || now === 'anchorbroken' || now === 'anchorscar' ||
+              (d === H.gateDepth(0) && (was === 'gate' || was === 'gatecore')),
       `(${x},${d}) went from ${was} to ${now} when the planet woke - the ore stream moved`);
     if (now === 'bloom') changed++;
   }
@@ -229,7 +230,7 @@ test('calm ground never closes, however awake the planet is', () => {
   /* And the mirror: awake, and every region under the Restless line. */
   const s = fresh();
   for (let d = 20; d < 200; d++) H.g.dug.add('30,' + d);
-  for (let i = 0; i < H.WAKE_AT; i++) H.lightAnchor(s, i);
+  H.openGate(s.gates, 0);
   for (let i = 0; i < H.REGION_COUNT; i++) s.unrest[i] = 0;
   const n = H.g.dug.size;
   assert.equal(H.isAwake(s), true);
@@ -240,7 +241,7 @@ test('calm ground never closes, however awake the planet is', () => {
 
 test('restless ground closes, and angrier ground closes faster', () => {
   const s = fresh();
-  for (let i = 0; i < H.WAKE_AT; i++) H.lightAnchor(s, i);
+  H.openGate(s.gates, 0);
 
   const run = (u) => {
     H.g.dug = new Set();
@@ -258,7 +259,7 @@ test('restless ground closes, and angrier ground closes faster', () => {
 
 test('what closes is rubble you can dig, and it is never the way off the pad', () => {
   const s = fresh();
-  for (let i = 0; i < H.WAKE_AT; i++) H.lightAnchor(s, i);
+  H.openGate(s.gates, 0);
   for (let i = 0; i < H.REGION_COUNT; i++) s.unrest[i] = 1;
   for (let d = 0; d < 200; d++) H.g.dug.add(H.START_X + ',' + d);
 
