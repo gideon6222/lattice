@@ -25,7 +25,7 @@ import { growthCounts, growthKindAt } from './growth';
 import { buildGauges } from './gauges';
 import { lmDebug, LM_COLS } from './lightmap';
 import { sfx, busGain, audioCtxState, audioFocus } from './audio';
-import { grantFind, grantCache } from './actions';
+import { grantFind, grantCache, coreBroken, vaultReached } from './actions';
 import { openMap, closeMap, mapView, mapPan, mapSetView, draw as mapDraw } from './mapui';
 import { landCollapse, closeGround, shoreUp } from './collapse';
 import { collapseTarget, lightAnchor, wake, WAKE_AT, isAwake, feed, feedValue, MAX_COLLAPSED, newGround } from './sim/unrest';
@@ -282,6 +282,10 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* Round fifteen's abilities, so a spec can check what a core handed over
        and whether the lens is actually drawing anything. */
     ABILITIES, abilityFor, hasAbility, hollowCount, secretsHeard,
-    vaultOpen, VAULT_CORE_X, VAULT_CORE_D
+    vaultOpen, VAULT_CORE_X, VAULT_CORE_D,
+    /* Round sixteen, Z1: so a film scenario can fire the break and the ending
+       directly, the same way other scenarios skip straight to the moment worth
+       a picture rather than digging out and cutting a real core on camera. */
+    coreBroken, vaultReached
   };
 }

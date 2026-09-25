@@ -490,7 +490,10 @@ export function buildVault() {
     const w = document.createElement('div');
     w.className = 'upeff';
     w.style.marginTop = '10px';
-    w.textContent = 'The center is open. The planet is quiet, and it is quiet because of you.';
+    /* Z1: the same turn `vaultReached`'s own card states, kept to one line
+       because this sits in a sidebar a player may reread many times over. */
+    w.textContent = 'The center is open. The cores held one entity, not energy - ' +
+      'it is loose now, and it is quiet because of you.';
     ui.vault.appendChild(w);
   }
 }

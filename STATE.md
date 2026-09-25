@@ -13,21 +13,30 @@ Moved onto the studio 2026-09-22. Eleven rounds and fourteen numbered phases shi
 
 ## Next three milestones
 
-Done 2026-09-23: **Y12 and Y15 together.** Y12's own box asked for a measurement of how
-often a descent meets a secret at all before adding more; `tools/secrets-probe.mjs` walked
-a campaign's shaft-and-corridor across five offsets and found only about 27% of mining
-sessions meet one of the four kinds (find, relic, wreck, cache), and that caches are
-about 90% of every hit because the other three are each finite and a campaign runs out of
-them. No rate tuning fixes a finite pool, so Y12 is closed by Y15 instead: `src/sim/hints.ts`
-delivers one escalating one-line toast per gate broken (three total), the mechanism
-DESIGN.md had already named as Y12's real spine because a hint costs nothing to place and
-is never exhausted by finding it. Delivered from `coreBroken`, keyed on the tiers-opened
-count that call already had. Receipt: `test/hints.test.mjs` and `tools/secrets-probe.mjs`'s
-own printed run.
+Fable reviewed the Y1-Y15 packet on 2026-09-24 (the standing check-in Gideon asked every
+game to run at a major milestone) and two things held up: the reveal never reached the
+Vault's own card, and S6's "phone pass" was desk evidence, never a reading taken on the
+handset. Both became milestones (Round sixteen, DESIGN.md), Y12 closed on paper at the
+same time, and the plan change committed on its own before either was built.
 
-Only one open box is left (`studio progress`):
+Done 2026-09-24: **Z1, the Vault's own card names the entity, and one core break gets
+filmed.** `vaultReached`'s card (`src/actions.ts`) now states his third answer plainly -
+"The cores were one thing, held apart, and every one you broke let more of it out" - rather than
+only reassuring, and keeps "it is quiet now, and it is quiet because of you" verbatim
+because `src/sim/grade.ts` quotes that exact clause as the reason act three grades
+quieter than act one. The manifest's vault panel (`src/ui.ts`) carries the same turn in
+one line. Two new scenarios in `tools/scenes.mjs`, `corebreak` and `vaultend`, drive
+`coreBroken`/`vaultReached` directly (now exposed on the `__cw` debug seam) to shoot the
+break itself and the ending, not just their aftermath. Receipt:
+`test-results/film-corebreak.png`, `test-results/film-vaultend.png`.
 
-1. **V0** — the Play listing, held by Gideon's own word since 2026-09-18.
+Two open boxes are left (`studio progress`):
+
+1. **Z2** — a real phone read before V0 is argued from a phone number nobody has actually
+   read off the phone (Fable's review): `studio phone read perf`, a shot of a shop station
+   and of the third hint, an install-and-offline pass in Chrome. Needs the phone connected;
+   the last check this session found none.
+2. **V0** — the Play listing, held by Gideon's own word since 2026-09-18.
 
 ## Phone readings
 

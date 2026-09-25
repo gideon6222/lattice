@@ -995,10 +995,22 @@ export function vaultReached() {
   for (const k of Array.from(meshes.keys())) dropBlock(k);
   resetBlockCache();
   syncBlocks(true);
+  /* Round sixteen, Z1, on Fable's 2026-09-24 review: this is the one card built
+     to carry his third answer ("you think you are freeing dark energy... find
+     out you freed an entity"), and until now it never named it - every reader
+     of the three hints in `src/sim/hints.ts` arrived here to a reassurance that
+     read as if it contradicted them instead of confirming what they suspected.
+     The turn is stated straight and the closing clause is kept verbatim
+     ("it is quiet now, and it is quiet because of you"): `src/sim/grade.ts`
+     quotes that exact clause as the reason act three grades quieter than act
+     one, and changing the words there would go stale against the code that
+     explains it. */
   showEvent('THE VAULT',
-    'Nine Anchors, and the center is open. Whatever the Lattice was holding ' +
-    'down has been here the whole time, and it is not finished with this ' +
-    'planet - but it is quiet now, and it is quiet because of you.\n\n' +
+    'Nine Anchors, and the center is open. Every core gave the same reason on ' +
+    'the way down: releasing it was the kind thing to do. It was never energy. ' +
+    'The cores were one thing, held apart, and every one you broke let more of ' +
+    'it out - it has been here the whole time, and it is not finished with this planet ' +
+    '- but it is quiet now, and it is quiet because of you.\n\n' +
     'The ground is yours. There is more of it than you have seen.',
     'STAY',
     () => { updateHUD(); });

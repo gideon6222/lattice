@@ -633,13 +633,18 @@ is in `journal/legacy-plan.md`.
 
 ### Round sixteen: closing Fable's review, 2026-09-24
 
-- [ ] **Z1 The Vault's own card names the entity, and one core break gets filmed.**
-      Fable's review of the Y1-Y15 packet: the hints escalate but the ending still
-      reads as reassurance rather than a turn, and Y13's dramatic break was never
-      filmed, only its aftermath. Rewrite `vaultReached`'s card (and the matching
-      line in the manifest's vault panel) to land his third answer plainly, and
-      shoot a contact sheet of a core actually breaking, not just the scar it
-      leaves.
+- [x] **Z1 The Vault's own card names the entity, and one core break gets filmed.**
+      Done 2026-09-24. `vaultReached`'s card (`src/actions.ts`) now says the turn
+      plainly - "The cores were one thing, held apart, and every one you broke let
+      more of it out" - rather than only reassuring, and keeps "it is quiet now, and it is
+      quiet because of you" verbatim because `src/sim/grade.ts` quotes that exact
+      clause as the reason act three grades quieter than act one. The manifest's
+      vault panel (`src/ui.ts`) carries the same turn in one line. Two new film
+      scenarios in `tools/scenes.mjs`, `corebreak` and `vaultend`, drive
+      `coreBroken`/`vaultReached` directly (exposed on the `__cw` debug seam) the
+      way `act3` already shortcuts to a won state, and shot clean contact sheets
+      of both - the break's own card and the ending's. Receipt:
+      `test-results/film-corebreak.png`, `test-results/film-vaultend.png`.
       briefs: level-design
       design: ## Round sixteen: closing Fable's review
 

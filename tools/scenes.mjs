@@ -600,5 +600,54 @@ export const SCENES = {
       __cw.advance(0.3);
     `,
     step: `__cw.R.held = 'down'; __cw.advance(SECS);`
+  },
+
+  /* Round sixteen, Z1, on Fable's review: the core breaking, not just the
+     scar it leaves. `anchorbroken` above shoots the aftermath; nothing shot
+     the moment itself - the flash, the shake, and the card that is the first
+     place the game's own deception is spoken. Driven straight through
+     `coreBroken` rather than by digging a real gate out and cutting it on
+     camera, the same shortcut `act3` above takes for winning. */
+  corebreak: {
+    secs: 0.35,
+    frames: 4,
+    enter: true,
+    setup: `
+      const CX = __cw.coreColumn(0), CD = __cw.gateDepth(0);
+      const dug = [];
+      for (let d = 0; d <= CD; d++) dug.push(CX + ',' + d);
+      for (let x = CX - 4; x <= CX + 4; x++) for (let d = CD - 4; d <= CD; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.lit = __cw.gateAnchors(0).slice();
+      __cw.g.px = CX; __cw.g.pd = CD - 2;
+      __cw.resetBlocks();
+      __cw.advance(0.3);
+      /* The state half first, as loop.ts does, so this is the FIRST core:
+         the card, then the ground-goes card, then hint one. */
+      __cw.g.ground.gates.push(0);
+      __cw.coreBroken(0);
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
+  /* Z1's other half: the Vault's own card, now that it names the entity
+     rather than only reassuring - the same shortcut, `vaultReached` fired
+     directly rather than requiring all nine Anchors dug to and lit for real. */
+  vaultend: {
+    secs: 0.4,
+    frames: 4,
+    enter: true,
+    setup: `
+      const VX = __cw.VAULT_CORE_X, VD = __cw.VAULT_CORE_D;
+      const dug = [];
+      for (let x = VX - 5; x <= VX + 5; x++) for (let d = VD - 6; d <= VD; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.lit = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+      __cw.g.px = VX; __cw.g.pd = VD - 3;
+      __cw.resetBlocks();
+      __cw.advance(0.3);
+      __cw.vaultReached();
+    `,
+    step: `__cw.advance(SECS);`
   }
 };
