@@ -700,6 +700,60 @@ is in `journal/legacy-plan.md`.
       briefs: first-minute, store
       design: ## Round seventeen: the ladder, finished
 
+- [ ] **AK Minerals become ingredients.** MONEY (copper, iron, silver, gold, geodes, lodes)
+      sells; KEYS (amethyst, emerald, ruby, magmite, coreite, umbrite, Solmarrow) ride in the
+      hold by weight, are banked on docking and never sell, and a hull loss takes only the hold,
+      never the bank. Rungs 1-3 of a line cost credits only; each later band asks for the keys
+      of the tier it opens with; capstones ask for umbrite or Solmarrow. Credits still gate
+      every within-tier rung and all supplies. Caches give money and supplies, never keys. The
+      catalogue folds from 16 rows to six systems: DRILL (bit, the laser as its sealed-stone
+      rung carrying its own power), HOLD (cargo, magnet), ENGINES (thrusters, tank, autopilot),
+      HULL (plating, cooling, drone), SENSORS (scanner, survey, receiver), ORDNANCE (charge);
+      Reactor and Scrubber are cut. Receipt: tests (every key asked for, supply at least 2.5x
+      its ask, no cache yields a key, a hull loss leaves the bank), and AA's probe per tier
+      showing one rung where credits are bought last and one where the key is.
+      briefs: economy, balance
+      design: ## Round seventeen, the shop and the minerals
+
+- [ ] **AN The fitting bay, the only purchase screen.** Top 60%: the ship on a lift as a
+      rotatable model, dimmed under anything drawn over it. A strip of six system icons at 56dp
+      or more that also lights when a part of the ship is tapped. A bottom sheet with the chosen
+      system as a scrolling rack of cards (price, key slots filled from the bank, one plain
+      sentence and the before-to-after number), buy in the thumb zone, the X and back from AB.
+      Found devices are owned cards in their system with their sentence. Buying bolts the part
+      on in view, and every part has its own model. Receipt: an e2e that opens the bay, scrolls
+      to the last card of the longest line, buys in two taps and leaves by the X; a test that a
+      drag on the model rotates it and a drag on the sheet scrolls it, never both; a test that
+      no part uses the placeholder mesh; a 1080x2340 shot with the strip and the last card.
+      briefs: menu, art, feel
+      design: ## Round seventeen, the shop and the minerals
+
+- [ ] **AL Where minerals sit.** Each key has a depth window, a home region rolled on its own
+      seed offset, at least four pockets, and no pocket over a third of any one rung's ask;
+      commons thin out below their band; geodes fall under a quarter of the value in 0-113 m.
+      Each key has its own mesh and material in the wall, never a recolour of a money ore. The
+      frozen golden is re-recorded with the diff read. Receipt: a census test in the gate
+      asserting all three placement rules, and a test that no key shares a material with a
+      money ore.
+      briefs: level-design, balance, art
+      design: ## Round seventeen, the shop and the minerals
+
+- [ ] **AM A key find is an event, and a hunt.** The first cut of each pocket fires it: light,
+      sound, a 15 ms haptic, a short camera hold, a map mark, the key's name. Any move input ends
+      the hold on that frame, and it never fires while the ship touches a hazard. The Sensors
+      line names the key pockets within range, never the cell; the map shows each key's home
+      region once its tier is open. Receipt: a film of two finds of one key; tests that the
+      event fires per pocket and that a thrust ends the hold.
+      briefs: feel, controls
+      design: ## Round seventeen, the shop and the minerals
+
+- [ ] **AO Gate vendors.** Each gate is a different room around the same lift, stocked with that
+      tier's rungs, Sink (a skill the pad never sells) at the first gate, one key-priced
+      consumable per visit, a visible save moment, and no pump. Receipt: a test that each
+      vendor's stock differs, and a screenshot per gate.
+      briefs: menu, economy
+      design: ## Round seventeen, the shop and the minerals
+
 - [ ] **AE The barrier and the core become objects, and the drain shows in the world.** The
       core's light is the one wrongness colour, defined once; the pip row, the scar and the
       gate room take it from that constant and nothing else uses it. The barrier's look lives

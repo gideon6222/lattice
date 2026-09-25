@@ -2721,6 +2721,67 @@ He answered two questions the same day: **the last gate moves down onto the Vaul
   bound that his own session times replace.
 
 
+## Round seventeen, the shop and the minerals
+
+His ask of 2026-09-25, verbatim: *"Can you also do a full overhaul of the shop for visuals,
+structure, and how upgrades are purchased? Along with restructuring where and how much of
+different valuable minerals/ore is found? I want it to be more rare and feel exciting when you
+find some. I also want it to be rebalanced, so it feels like they are key ingredients you are
+trying to find."* It is the second time he has asked for rarity: X1-X4 answered 2026-09-19 and
+did not land. Two audits (every one of the 61x452 cells counted with the real generator, and the
+shop read end to end), two research briefs, and two Fable reviews shaped what follows.
+
+### Why the rarity pass did not land
+
+1. **Selling also banked the ore**, so spending a mineral cost nothing: a free tally of where you
+   had been, never a choice.
+2. **Geodes were the economy.** No recipe uses them, and they were 69% of all value in 0-113 m,
+   paying more per kilo than every ore above coreite.
+3. **Money swamped minerals.** The world holds 4.5x the whole shop's credit price.
+4. **Caches out-supplied the rock**: 58 coreite from caches against 17 in the ground, 9 Solmarrow
+   against 3. The legendary key most likely arrived as a toast.
+5. **Recipes asked for the wrong things**: copper 51 and silver 42, ruby 6 and coreite 4. The four
+   commons are 5-14x oversupplied and only gate from level 4, past 113 m.
+6. **One vein finished a recipe.** A single coreite vein is 70% of the laser's need.
+7. **Nothing had a home.** No ore reads its region, so the X4 map's "rich" meant geodes and noise;
+   ore density is flat at 6-7% of cells at every depth.
+
+### What the shop was
+
+A walked gas station: five camera stations, four aisles, cases re-sorted by price between
+counter and rack, a supplies drawer, dots plus two arrow pairs plus swipe plus a hint to get
+around, 3-7 taps to own a level, no X and no back. Sixteen rows, four of them each answering hull
+damage, seeing and fuel; six shown as a plain steel cube; effects as bare multipliers; a found
+device's sentence shown once at its find and never again. The gate shops were the same room.
+
+### Decisions
+
+- **Money and keys.** Copper, iron, silver, gold, geodes and lodes sell. Amethyst, emerald, ruby,
+  magmite, coreite, umbrite and Solmarrow are keys: they ride in the hold by weight, bank on
+  docking, never sell, and a hull loss takes only the hold, never the bank. Every reference game
+  with a special material keeps it out of the sell pool (SteamWorld Dig's orbs, Deep Rock's
+  crafting minerals, Dome Keeper's cobalt at 10:1 over iron); selling keys at a poor rate would
+  only let a desperate player sell the ruby the next gate needs.
+- **Credits still bind.** Rungs 1-3 of a line are credits only, and credits gate every rung and
+  every supply, so every sale at the pad is for something; keys gate each band past the first.
+- **Every key has a home and many small pockets.** A depth window, a home region on its own seed
+  offset, at least four pockets, none holding more than a third of any one rung's ask - no source
+  was found for this ratio, and "one find finishes it" is this game's own finding.
+- **A find is an event per pocket, and a hunt.** Detection in Terraria and Deep Rock names what is
+  near and never marks the cell; the Sensors line does the same for keys.
+- **One bay, everywhere.** The ship on a lift in the top 60% as a rotatable model, six system
+  icons, the chosen line as a scrolling card rack in the bottom sheet where the thumb rests
+  (Hoober's thumb zone), two taps from open to owned, before-to-after shown the way Hill Climb
+  Racing 2 previews an upgrade. A drag on the model rotates it and a drag on the sheet scrolls it,
+  never both. Gate vendors are different rooms around the same lift, never a second UI.
+- **Sixteen rows become six systems.** DRILL (bit; the laser as its sealed-stone rung, carrying
+  its own power), HOLD (cargo; magnet), ENGINES (thrusters, tank; autopilot), HULL (plating,
+  cooling, drone), SENSORS (scanner, survey, receiver), ORDNANCE (charge). Reactor and Scrubber
+  are cut: invisible multipliers.
+- **Order**: AK first (pure sim, the thing that failed twice), then the bay (AN) so the keys have
+  somewhere to show, then placement (AL), the find (AM), and the gate vendors (AO).
+
+
 ---
 
 # Engineering reference
