@@ -577,6 +577,35 @@ const dish = bolt(dishGeo, trimMat, 0.13, 0.42, -0.08, [Math.PI / 2.6, 0, 0]);
 /* Thrust: a second pair of jets outboard of the originals. */
 const jets = boltRow(jetGeo, steelMat, [[-0.3, 0.26, 0], [0.3, 0.26, 0]]);
 
+/* ---------- round seventeen, AN: a part for every line ----------
+
+   Six lines had nothing to bolt on, and the old shop showed several of them
+   as a plain steel cube - the object that breaks the illusion. The fitting bay
+   shows the ship itself, so every line needs a real part on it: small, in the
+   ship's own materials, one or two meshes each so a fully fitted ship stays
+   inside the draw-call budget. Each appears at its first level. */
+const plateGeo = new THREE.BoxGeometry(0.04, 0.2, 0.3);
+const plates = boltRow(plateGeo, hullMat, [[-0.34, 0.06, 0.0], [0.34, 0.06, 0.0]], [0, 0, 0.12]);
+const coil = bolt(new THREE.TorusGeometry(0.075, 0.022, 6, 14), steelMat, 0, -0.24, 0.12, [Math.PI / 2, 0, 0]);
+const probe = bolt(new THREE.ConeGeometry(0.04, 0.16, 6), trimMat, -0.14, -0.2, 0.16, [Math.PI, 0, 0]);
+const whip = bolt(new THREE.CylinderGeometry(0.006, 0.01, 0.36, 4), steelMat, -0.14, 0.36, -0.1);
+const droneBody = bolt(new THREE.BoxGeometry(0.12, 0.04, 0.12), darkMat, 0.0, 0.26, 0.14);
+const beacon = bolt(new THREE.OctahedronGeometry(0.045, 0), trimMat, 0.0, 0.3, -0.24);
+const charges = boltRow(new THREE.CylinderGeometry(0.03, 0.03, 0.1, 6), darkMat,
+  [[0.2, -0.16, 0.18], [0.26, -0.16, 0.18], [0.32, -0.16, 0.18]], [0, 0, Math.PI / 2]);
+const barrel = bolt(new THREE.CylinderGeometry(0.022, 0.03, 0.34, 6), steelMat, 0.16, -0.26, 0.04);
+
+/* Which line each part belongs to, for the bay: a tap on the ship finds the
+   part it hit and opens its system. */
+const PART_OF: [THREE.Object3D, string][] = [
+  [tanks, 'tank'], [rads, 'cool'], [pod, 'cargo'], [mast, 'scan'], [dish, 'scan'], [jets, 'thrust'],
+  [plates, 'hull'], [coil, 'magnet'], [probe, 'survey'], [whip, 'receiver'], [droneBody, 'drone'],
+  [beacon, 'auto'], [charges, 'bomb'], [barrel, 'laser'], [bit, 'drill']
+];
+for (const [o, k] of PART_OF) o.traverse((c) => { c.userData.part = k; });
+/* Every line a part exists for, for the test that no line is a placeholder. */
+export const partKeys = (): string[] => [...new Set(PART_OF.map(([, k]) => k))];
+
 /* Imported hardware, hung on the same hardpoints as the coded parts and shown
    in place of them once it has arrived. Absent until the shop has been opened
    once, and absent forever if the fetch failed - which is why every one of
@@ -601,6 +630,10 @@ export function fitImportedHardware() {
   if (a) { a.position.set(-0.20, 0.24, 0); imported.jetA = a; rig.add(a); }
   const b = shipPart('thrusterBig', 0.13);
   if (b) { b.position.set(0.20, 0.24, 0); imported.jetB = b; rig.add(b); }
+  /* Tagged like the coded parts, so a tap on them opens their line in the bay. */
+  for (const [o, k] of [[imported.collar, 'drill'], [imported.jetA, 'thrust'], [imported.jetB, 'thrust']] as const) {
+    o?.traverse((c) => { c.userData.part = k; });
+  }
   shipToLayer();
 }
 
@@ -616,6 +649,14 @@ export function setUpgradeHardware(up: Record<string, number>) {
   on(pod, (up.cargo || 0) >= 3);
   on(mast, (up.scan || 0) >= 2);
   on(dish, (up.scan || 0) >= 5);
+  plates.count = upto(up.hull || 0, [1, 5]);
+  on(coil, (up.magnet || 0) >= 1);
+  on(probe, (up.survey || 0) >= 1);
+  on(whip, (up.receiver || 0) >= 1);
+  on(droneBody, (up.drone || 0) >= 1);
+  on(beacon, (up.auto || 0) >= 1);
+  charges.count = Math.min(3, up.bomb || 0);
+  on(barrel, (up.laser || 0) >= 1);
   /* The drill itself grows. This is the one upgrade whose hardware already
      existed, and scaling it is what makes the tier legible next to the colour
      change that on its own was not. */

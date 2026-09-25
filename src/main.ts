@@ -2,7 +2,7 @@
    body, which is what the single-file version got for free by being written
    top to bottom. */
 import * as THREE from 'three';
-import { HULL_MAX, UPGRADES, SUPPLIES, ORES, ROCKS, shelfStock, tremorDepth, heatDepth, traitAt, W, START_X, CAVE_MIN_DEPTH, costOf, matCost, GROWTH_BAND } from './sim/config';
+import { HULL_MAX, UPGRADES, SUPPLIES, ORES, ROCKS, shelfStock, tremorDepth, heatDepth, traitAt, W, START_X, CAVE_MIN_DEPTH, costOf, matCost, GROWTH_BAND, SUPPLY_SYSTEM } from './sim/config';
 import { g, S, save, load, hasSave, coreM, padRegion, worldUnrest, markSeen, onPad, docked, atSurface } from './sim/state';
 import { R } from './sim/runtime';
 import { camera, lamp, resize, scene, amb, sun, rim, fog, renderer } from './scene';
@@ -12,12 +12,9 @@ import { regionAt, regionName, MAP_TILE, WORLD_DEPTH, REGION_COUNT } from './sim
 import { setMark } from './mark';
 import { syncDrops } from './drops';
 import { setDrillTier, setUpgradeHardware, rig, bit, player } from './ship';
-import { GROUP_ORDER } from './stationsigns';
-import { stationX } from './stationroom';
-import { selectableKeys } from './station';
-import { pickBay, selectBay, selectedBay, bays, kitCases, refreshKit, drawerOpen, roomDrawer,
-         stationCamera, stationScene, roomReady, goAisle, stepAisle,
-         currentAisle, currentGroup, aisleStocked, AISLE_COUNT } from './station';
+import { stationCamera, stationScene, roomReady, pickPart, shipYaw, turnShip } from './station';
+import { partKeys } from './ship';
+import { baySystem, selectSystem } from './ui';
 import { el, updateHUD, audioLabels, buildShop, toast, foundBanner, buildBallast, flash } from './ui';
 import { frame, tick, advance, stopClock, startClock, clockRunning } from './loop';
 import { installPanelGrain } from './grain';
@@ -199,23 +196,16 @@ if (new URLSearchParams(location.search).has('debug')) {
     },
     /* Where the way in starts, so a spec can ask rather than type a cell. */
     hallEye,
-    pickBay, selectBay, selectedBay, bays, stationCamera, roomReady,
+    stationCamera, roomReady,
+    /* Round seventeen, AN: the fitting bay. */
+    baySystem, selectSystem, pickPart, shipYaw, turnShip, partKeys, SUPPLY_SYSTEM,
     /* The options, so a spec can assert that a slider moved a bus and that
        focus loss actually paused the context rather than just ducking it. */
-    busGain, audioCtxState, audioFocus, selectableKeys,
-    /* The aisles, so a smoke test can drive the shop the way a thumb does. */
-    goAisle, stepAisle, currentAisle, currentGroup, aisleStocked, AISLE_COUNT,
+    busGain, audioCtxState, audioFocus,
     /* The scene itself, so the framing harness can project a world position
        into screen pixels and count the lights that are actually in it. */
     stationScene,
-    /* Which aisle a given upgrade lives in, so a test can walk there rather
-       than hard-coding a department that the layout may later move it out of. */
-    aisleOf: (k: string) => {
-      const u = UPGRADES.find((x) => x.key === k);
-      return u ? GROUP_ORDER.indexOf(u.group as never) + 1 : -1;
-    },
     upgradeOf: (k: string) => UPGRADES.find((x) => x.key === k) || null,
-    stationXOf: stationX,
     grantFind, buildShop, buildBallast,
     /* Constructors, so a spec can build a Box3 or a Vector3 without importing
        three itself - under the dev server an import() resolves to a different
@@ -225,7 +215,6 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* What is buried on this world, so a test can dig up the real crate rather
        than a cell it picked out of the air. */
     findCells, blockAt,
-    drawerOpen, roomDrawer, kitCases, refreshKit,
     /* So a spec can open a cache the way the drill does, and ask what a given
        cell would pay before it opens one. */
     /* `ROCKS` beside `ORES` so a fixture can ask whether a cell is PLAIN rock

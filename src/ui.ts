@@ -1,13 +1,14 @@
+import { SYSTEMS, SUPPLY_SYSTEM, WHAT, shelfStock, type SystemKey } from './sim/config';
 import { HULL_MAX, DEF, isOre, isKey, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
 import { setGauges, setFuelReserve } from './gauges';
 import { clamp } from './sim/util';
 import { flashScale } from './motion';
-import { g, S, save, coreM, valueM, worldTrait, padFuel, worldUnrest, docked, shopHere, atSurface as aboveGround } from './sim/state';
+import { g, S, save, coreM, valueM, worldTrait, padFuel, worldUnrest, docked, shopHere, gateHere, atSurface as aboveGround } from './sim/state';
 import { heatDamagePerSecond } from './sim/feel';
 import type { Upgrade, Supply } from './types';
 import { VERSION, CHANGELOG } from './changelog';
 import { haulValue } from './sim/world';
-import { GATE_COUNT, ANCHORS_PER_GATE, gateAnchors, gateReady } from './sim/gate';
+import { GATE_COUNT, ANCHORS_PER_GATE, gateAnchors, gateReady, gateDepth } from './sim/gate';
 import { resonance } from './sim/call';
 import { lamp } from './scene';
 import { setDrillTier, setUpgradeHardware } from './ship';
@@ -21,7 +22,7 @@ import { regionName, regionAt } from './sim/region';
 import { hasAbility } from './sim/ability';
 import { scarHere, repairable, repairRoom, repairValue } from './sim/repair';
 import { hap, haptics, setHaptics } from './haptics';
-import { selectedBay, refreshBays, refreshKit, paintAisleBar, reframeIfNeeded } from './station';
+import { reframeIfNeeded, boltOn } from './station';
 
 
 export /* el() is for lookups that may legitimately be absent. mustEl() is for the
@@ -38,7 +39,7 @@ export const ui = {
   anchors: mustEl('anchors'), callLamp: mustEl('callLamp'),
   cargoTxt: mustEl('cargoTxt'), fuelTxt: mustEl('fuelTxt'),
   toast: mustEl('toast'), shop: mustEl('shop'), shopCredits: mustEl('shopCredits'),
-  shopCard: mustEl('shopCard'), shopHint: mustEl('shopHint'),
+  rack: mustEl('rack'), systems: mustEl('systems'), shopName: mustEl('shopName'), shopSub: mustEl('shopSub'),
   event: mustEl('event'), evTitle: mustEl('evTitle'), evBody: mustEl('evBody'), evBtn: mustEl('evBtn'),
   manifest: mustEl('manifest'), manifestRows: mustEl('manifestRows'), manifestTotal: mustEl('manifestTotal'),
   vault: mustEl('vault'),
@@ -54,7 +55,6 @@ export const ui = {
   ordBomb: mustEl('ordBomb'), ordLaser: mustEl('ordLaser'),
   abSee: mustEl('abSee'), abSink: mustEl('abSink'),
   power: mustEl('power'), powerChip: mustEl('powerChip'),
-  shopPlanet: mustEl('shopPlanet'),
   verNum: mustEl('verNum'), notes: mustEl('notes'), btnNotes: mustEl('btnNotes'),
   runlog: mustEl('runlog'), btnLog: mustEl('btnLog'),
   creditsPanel: mustEl('creditsPanel'), btnCredits: mustEl('btnCredits'),
@@ -147,35 +147,6 @@ export function tickFound(dt: number) {
   if (foundT <= 0) return;
   foundT -= dt;
   if (foundT <= 0 && ui.found) ui.found.classList.remove('on');
-}
-
-/* ---------- the aisle hint ----------
-
-   It retires once it has been obeyed. A line of instructions that never goes
-   away is a line of instructions the player stops seeing and the room keeps
-   paying for - and this one sits in the only empty band of a frame that has
-   four other things competing for it. One successful walk down the aisles is
-   proof it landed, and it is persisted, because the second session should not
-   be taught again.
-
-   HERE rather than in input.ts, which is where it was written first. input.ts
-   imports `ui` from this module, so a call the other way is a cycle - and the
-   symptom was not a warning, it was "Cannot access 'k' before initialization"
-   at boot, with the shop simply never opening. A hint is a UI concern and this
-   is the UI module; the cycle was the design telling me where it belonged.
-
-   Read through try/catch for the same reason the haptics toggle is: private
-   browsing can make localStorage throw on access, and a shop that will not
-   open because a hint could not remember itself is a bad trade. */
-const HINT_KEY = 'coreward.hint.aisle';
-let hintSeen = false;
-try { hintSeen = localStorage.getItem(HINT_KEY) === '1'; } catch (e) { /* ignore */ }
-export function aisleHintSeen() { return hintSeen; }
-export function retireHint() {
-  if (hintSeen) return;
-  hintSeen = true;
-  try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* ignore */ }
-  ui.shopHint.classList.add('gone');
 }
 
 export function flash(color: string, ms?: number) {
@@ -505,183 +476,227 @@ export function buildVault() {
    Everything underneath is unchanged: costs, level caps, the mineral gate and
    the depth seals all still come from config, and the buy path is the same one
    the list used. Only the presentation moved. */
+/* ---------- the fitting bay, round seventeen AN ----------
+
+   His ask of 2026-09-25: *"a full overhaul of the shop for visuals, structure,
+   and how upgrades are purchased."* The walked gas station is gone: no aisles,
+   no cases re-sorting by price, no drawer, no four arrows. The ship stands on
+   its lift in the room; six systems sit in a strip under it; the chosen
+   system's lines are a scrolling rack of cards, each saying in one sentence
+   what it does, what the number goes from and to, what it costs, and which
+   keys it wants - with the buy button on the card, in the thumb's third. Two
+   taps from an open bay to a new level: the system, then the buy.
+
+   Supplies live in the system they serve (a coolant flush is HULL), so there
+   is no second place to look. A found device is a card like any other, owned
+   from the moment it came out of the rock; one never found is not shown at
+   all, which keeps it a discovery. */
+const SYS_ICON: Record<string, string> = {
+  drill: '<svg viewBox="0 0 24 24"><path d="M12 22 7 9h10z"/><path d="M8 5h8v4H8z"/><path d="M10 13h4M9.5 16h5"/></svg>',
+  hold: '<svg viewBox="0 0 24 24"><path d="M3 8l9-4 9 4v9l-9 4-9-4z"/><path d="M3 8l9 4 9-4M12 12v9"/></svg>',
+  engines: '<svg viewBox="0 0 24 24"><path d="M8 3h8v7l-4 3-4-3z"/><path d="M9 14c0 3 3 4 3 7 0-3 3-4 3-7"/></svg>',
+  hull: '<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>',
+  sensors: '<svg viewBox="0 0 24 24"><path d="M5 19a10 10 0 0 1 0-14"/><path d="M9 15a5 5 0 0 1 0-6"/><circle cx="14" cy="12" r="2"/><path d="M14 14v7"/></svg>',
+  ordnance: '<svg viewBox="0 0 24 24"><circle cx="11" cy="14" r="6"/><path d="M15 9l3-3M17 4l3 3"/></svg>'
+};
+
+let baySys: SystemKey = 'drill';
+/* Which card the keyboard is on - the arrows and Enter drive the bay too. */
+let bayPick = 0;
+export function baySystem(): SystemKey { return baySys; }
+export function selectSystem(k: SystemKey) {
+  if (k !== baySys) bayPick = 0;
+  baySys = k;
+  buildShop();
+  ui.rack.scrollTop = 0;
+}
+export function stepSystem(dir: number) {
+  const i = SYSTEMS.findIndex((x) => x.key === baySys);
+  selectSystem(SYSTEMS[(i + dir + SYSTEMS.length) % SYSTEMS.length].key);
+}
+export function stepCard(dir: number) {
+  const n = ui.rack.querySelectorAll('.bcard').length;
+  if (!n) return;
+  bayPick = Math.max(0, Math.min(n - 1, bayPick + dir));
+  buildShop();
+  const el = ui.rack.querySelectorAll('.bcard')[bayPick] as HTMLElement | undefined;
+  if (el) el.scrollIntoView({ block: 'nearest' });
+}
+/* The keyboard's confirm: press the picked card's own buy button. */
+export function confirmCard(): boolean {
+  const card = ui.rack.querySelectorAll('.bcard')[bayPick] as HTMLElement | undefined;
+  const btn = card ? card.querySelector('button.bbuy') as HTMLButtonElement | null : null;
+  if (!btn || btn.disabled) return false;
+  btn.click();
+  return true;
+}
+
+/* The lines a system shows, in the order the table lists them: everything the
+   shelf stocks (found devices included, unfound ones not) plus its one teaser. */
+function linesOf(sys: SystemKey): Upgrade[] {
+  return shelfStock(g.best.depth, g.found).filter((u) => u.system === sys);
+}
+function suppliesOf(sys: SystemKey): Supply[] {
+  return SUPPLIES.filter((sp) => SUPPLY_SYSTEM[sp.key] === sys && g.foundKit.includes(sp.key));
+}
+
+/* Whether anything in a system can be bought right now - the strip's pip. */
+function canBuyIn(sys: SystemKey): boolean {
+  for (const u of linesOf(sys)) if (buyState(u).ok) return true;
+  for (const sp of suppliesOf(sys)) if (g.kit[sp.key] < sp.max && g.credits >= sp.cost) return true;
+  return false;
+}
+
+interface BuyState {
+  ok: boolean; sealed: boolean; maxed: boolean; capped: boolean; short: boolean;
+  cost: number; keys: { id: string; need: number }[]; next?: number;
+}
+function buyState(u: Upgrade): BuyState {
+  const lvl = g.up[u.key];
+  const sealed = g.best.depth < u.unlock;
+  const maxed = lvl >= u.max;
+  const capped = !maxed && lvl >= levelCap(u, g.best.depth);
+  const keys: { id: string; need: number }[] = [];
+  if (!maxed) for (const m of [matCost(u, lvl), capstoneCost(u, lvl)]) if (m) keys.push(m);
+  const short = keys.some((m) => (g.stock[m.id] || 0) < m.need);
+  const cost = costOf(u, lvl);
+  const next = TIER_DEPTHS.find((d) => d > g.best.depth);
+  return { ok: !sealed && !maxed && !capped && !short && g.credits >= cost, sealed, maxed, capped, short, cost, keys, next };
+}
+
 export function buildShop() {
   ui.shopCredits.textContent = Math.floor(g.credits).toLocaleString();
-  ui.shopPlanet.textContent = planetName(g.world).toUpperCase();
-  /* The cases carry price and availability too, so they have to be redrawn
-     whenever anything they show can have changed - which is exactly when this
-     runs: opening the shop, and after every purchase. */
-  refreshBays();
-  refreshKit();
-  /* The dots too, and the arrows with them: buying the last thing in a
-     department cannot change which aisles have stock, but FINDING one can, and
-     a purchase is the moment the shop is rebuilt either way. */
-  paintAisleBar();
-  buildCard();
-  /* After the card, because the card is the thing whose height can move. */
+  /* Where you are, never a planet name: the pad, or the gate you are standing
+     in (round seventeen - the header said "DOCK 04 · VERDAX" off a vestigial
+     planet field). */
+  const gate = gateHere();
+  ui.shopSub.textContent = gate >= 0 ? 'GATE ' + (gate + 1) + ' · ' + gateDepth(gate) + ' M' : 'THE PAD';
+  buildStrip();
+  buildRack();
   reframeIfNeeded();
 }
 
-export function buildCard() {
-  const key = selectedBay();
-  /* Hidden while something is picked, and hidden for good once the player has
-     walked the aisles once - see `retireHint` in input.ts. */
-  ui.shopHint.classList.toggle('gone', !!key || aisleHintSeen());
-  ui.shopCard.innerHTML = '';
-  if (!key) {
-    /* Deliberately empty WHILE the floating hint is up: it already says what to
-       do, and saying it twice on one screen reads as a bug. That reasoning was
-       right and it EXPIRES - `retireHint` puts the hint away for good on the
-       first walk and remembers it in localStorage, so from the second visit
-       onward the hint was gone AND this slab said nothing, leaving 124 px of
-       blank under the room with no line anywhere telling you what to do. The
-       `.cempty` rule in the stylesheet was written for a sentence that was
-       never put in it.
-
-       So the line moves here when the hint goes. The two are still never both
-       on screen, which is what the original note was protecting. */
-    ui.shopCard.innerHTML = aisleHintSeen()
-      ? '<div class="cempty">Tap a case to inspect it</div>'
-      : '<div class="cempty">&nbsp;</div>';
-    return;
+function buildStrip() {
+  ui.systems.innerHTML = '';
+  for (const sys of SYSTEMS) {
+    const b = document.createElement('button');
+    b.className = 'sysb' + (sys.key === baySys ? ' on' : '') + (canBuyIn(sys.key) ? ' can' : '');
+    b.dataset.sys = sys.key;
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', String(sys.key === baySys));
+    b.innerHTML = SYS_ICON[sys.key] + '<span>' + sys.name + '</span><i class="pip"></i>';
+    b.onclick = () => { sfx.ui(); selectSystem(sys.key); };
+    ui.systems.appendChild(b);
   }
-  const sup = SUPPLY_OF[key];
-  if (sup) { buildSupplyRow(sup); return; }
-  const u = UPGRADES.find((x) => x.key === key);
-  if (!u) return;
-  buildUpgradeRow(u);
 }
 
-/* One consumable, in the same card the upgrades use.
+const hex = (c: number) => '#' + c.toString(16).padStart(6, '0');
 
-   Playtest: *"a secret display case at the bottom of the screen pops open and
-   shows all of the upgrades you have collected and lets you purchase the
-   upgrades there."*
+function buildRack() {
+  ui.rack.innerHTML = '';
+  let i = 0;
+  for (const u of linesOf(baySys)) ui.rack.appendChild(upgradeCard(u, i++ === bayPick));
+  const sups = suppliesOf(baySys);
+  if (sups.length) {
+    const h = document.createElement('div');
+    h.className = 'bsub';
+    h.textContent = 'SUPPLIES';
+    ui.rack.appendChild(h);
+    for (const sp of sups) ui.rack.appendChild(supplyCard(sp, i++ === bayPick));
+  }
+  if (!i) {
+    const e = document.createElement('div');
+    e.className = 'bwhat';
+    e.style.padding = '14px 4px';
+    e.textContent = 'Nothing in this system yet. Some of it is still in the rock.';
+    ui.rack.appendChild(e);
+  }
+}
 
-   The six chips in the tray are gone. They were the last list on this screen,
-   and a Bulwark Field - three impacts absorbed outright - sitting in a grid
-   next to a price is exactly the "too big of an advantage to just purchase"
-   he named. Now you have to have held one, and then you have to open a drawer
-   to buy another.
+function keyChip(m: { id: string; need: number }): string {
+  const d = DEF[m.id];
+  const have = g.stock[m.id] || 0;
+  const short = have < m.need;
+  return '<span class="bkey upmat' + (short ? ' short' : '') + '"><i style="background:' + hex(d.color) + '"></i>' +
+    m.need + ' ' + d.name + ' · you have ' + have +
+    (short && isOre(d) ? ' · from ' + d.min + ' m' : '') + '</span>';
+}
 
-   The same card as an upgrade on purpose: one place at the bottom of the
-   screen where what you picked explains itself, whether you picked it off a
-   counter or out of a drawer. */
-function buildSupplyRow(sup: Supply) {
-  const held = g.kit[sup.key];
-  const full = held >= sup.max;
-  const row = document.createElement('div');
-  row.className = 'up';
-  row.innerHTML =
-    '<div class="upinfo"><div class="upname">' + sup.name +
-    ' <span class="mult">' + held + '/' + sup.max + '</span></div>' +
-    '<div class="upeff">' + sup.blurb + '</div></div>';
-  ui.shopCard.appendChild(row);
-
-  const bar = document.createElement('div');
-  bar.className = 'crow';
+function upgradeCard(u: Upgrade, picked: boolean): HTMLElement {
+  const lvl = g.up[u.key];
+  const st = buyState(u);
+  const card = document.createElement('div');
+  card.className = 'bcard' + (picked ? ' sel' : '') + (st.sealed ? ' dim' : '');
+  card.dataset.key = u.key;
+  const label = u.tiers ? u.name + ' — ' + u.tiers[Math.min(lvl, u.tiers.length - 1)] : u.name;
+  let html =
+    '<div class="bhead"><div class="bname">' + label + '</div>' +
+    '<div class="blvl">' + (st.sealed ? 'SEALED' : 'Lv ' + lvl + '/' + u.max) + '</div></div>' +
+    '<div class="bwhat">' + (WHAT[u.key] || '') + '</div>';
+  if (st.sealed) {
+    html += '<div class="bnote">Sealed until you have reached ' + u.unlock + ' m</div>';
+  } else {
+    html += '<div class="beff">' + u.effect(lvl) + (st.maxed ? '' : ' → <b>' + u.effect(lvl + 1) + '</b>') + '</div>';
+    if (st.keys.length) html += '<div class="bkeys">' + st.keys.map(keyChip).join('') + '</div>';
+    if (st.capped) {
+      html += '<div class="bnote">The rig will not take another at this depth' +
+        (st.next ? ' · past ' + st.next + ' m it will' : '') + '</div>';
+    }
+  }
+  card.innerHTML = html;
   const btn = document.createElement('button');
-  btn.className = 'cbuy';
-  btn.textContent = full ? 'HOLD IS FULL' : 'BUY  ◈ ' + sup.cost.toLocaleString();
-  btn.disabled = full || g.credits < sup.cost;
+  btn.className = 'bbuy buy';
+  btn.textContent = st.sealed ? u.unlock + ' m'
+    : st.maxed ? 'FULLY FITTED'
+    : st.capped ? (st.next ? 'PAST ' + st.next + ' M' : 'HELD')
+    : 'FIT  ◈ ' + st.cost.toLocaleString();
+  btn.disabled = !st.ok;
+  btn.onclick = () => buyLine(u);
+  card.appendChild(btn);
+  return card;
+}
+
+function supplyCard(sp: Supply, picked: boolean): HTMLElement {
+  const held = g.kit[sp.key];
+  const full = held >= sp.max;
+  const card = document.createElement('div');
+  card.className = 'bcard' + (picked ? ' sel' : '');
+  card.dataset.key = sp.key;
+  card.innerHTML =
+    '<div class="bhead"><div class="bname">' + sp.name + '</div><div class="blvl">' + held + '/' + sp.max + ' aboard</div></div>' +
+    '<div class="bwhat">' + sp.blurb + '</div>';
+  const btn = document.createElement('button');
+  btn.className = 'bbuy cbuy';
+  btn.textContent = full ? 'HOLD IS FULL' : 'BUY  ◈ ' + sp.cost.toLocaleString();
+  btn.disabled = full || g.credits < sp.cost;
   btn.onclick = () => {
-    if (full || g.credits < sup.cost) return;
-    g.credits -= sup.cost;
-    g.kit[sup.key]++;
+    if (full || g.credits < sp.cost) return;
+    g.credits -= sp.cost;
+    g.kit[sp.key]++;
     sfx.buy();
     hap.buy();
     save(); buildShop(); updateHUD();
     flash('rgba(120,255,200,.25)', 160);
   };
-  bar.appendChild(btn);
-  ui.shopCard.appendChild(bar);
+  card.appendChild(btn);
+  return card;
 }
 
-function buildUpgradeRow(u: Upgrade) {
-  const lvl = g.up[u.key];
-
-  /* Sealed: shown, named, and not purchasable. The depth is the price. */
-  if (g.best.depth < u.unlock) {
-    const row = document.createElement('div');
-    row.className = 'up sealed';
-    row.innerHTML =
-      '<div class="upinfo"><div class="upname">' + u.name + '</div>' +
-      '<div class="upeff">Sealed until you have reached ' + u.unlock + ' m</div></div>' +
-      '<div class="seal">' + u.unlock + ' m</div>';
-    ui.shopCard.appendChild(row);
-    return;
-  }
-
-  /* Round fifteen, Y9: the level cap, which steps with the barriers.
-
-     `capped` is not `maxed`. A maxed row is finished and says MAX; a capped
-     row is a row the player can afford and the shop will not sell, which has
-     to say WHY or it reads as a bug. The next step's depth is the answer, and
-     it is the same sentence the sealed rows above use - "come back deeper" -
-     which is the shop's one idea said twice rather than two ideas. */
-  const cap = levelCap(u, g.best.depth);
-  const capped = lvl >= cap && lvl < u.max;
-  const nextStep = TIER_DEPTHS.find((d) => d > g.best.depth);
-  const maxed = lvl >= u.max;
-  const c = costOf(u, lvl);
-  const mat = maxed ? null : matCost(u, lvl);
-  const have = mat ? (g.stock[mat.id] || 0) : 0;
-  /* X3: the Drill's last rung also wants a named key, checked and spent
-     alongside whatever matCost already asks for rather than instead of it. */
-  const keyMat = maxed ? null : capstoneCost(u, lvl);
-  const keyHave = keyMat ? (g.stock[keyMat.id] || 0) : 0;
-  const short = (!!mat && have < mat.need) || (!!keyMat && keyHave < keyMat.need);
-
-  const row = document.createElement('div');
-  row.className = 'up';
-  const label = u.tiers ? u.name + ' — ' + u.tiers[lvl] : u.name;
-  /* The requirement line names the depth as well as the mineral, because
-     "6 Emerald" is only actionable if you know emerald starts at 78 m. */
-  const def = mat ? DEF[mat.id] : null;
-  const matLine = mat && def
-    ? '<div class="upmat' + (have < mat.need ? ' short' : '') + '">' +
-      '<span class="dot" style="background:#' + def.color.toString(16).padStart(6, '0') + '"></span>' +
-      mat.need + ' ' + def.name + ' · you have ' + have +
-      (have < mat.need && isOre(def) ? ' · from ' + def.min + ' m' : '') + '</div>'
-    : '';
-  const keyDef = keyMat ? DEF[keyMat.id] : null;
-  const keyLine = keyMat && keyDef
-    ? '<div class="upmat' + (keyHave < keyMat.need ? ' short' : '') + '">' +
-      '<span class="dot" style="background:#' + keyDef.color.toString(16).padStart(6, '0') + '"></span>' +
-      keyMat.need + ' ' + keyDef.name + ' · you have ' + keyHave +
-      (keyHave < keyMat.need && isOre(keyDef) ? ' · from ' + keyDef.min + ' m' : '') + '</div>'
-    : '';
-  row.innerHTML =
-    '<div class="upinfo"><div class="upname">' + label + '</div>' +
-    '<div class="upeff">Lv ' + lvl + '/' + u.max + ' · ' + u.effect(lvl) + (maxed ? '' : ' → ' + u.effect(lvl + 1)) + '</div>' +
-    (capped
-      ? '<div class="upmat short">The rig will not take another at this depth' +
-        (nextStep ? ' · past ' + nextStep + ' m it will' : '') + '</div>'
-      : '') +
-    matLine + keyLine + '</div>';
-  const btn = document.createElement('button');
-  btn.className = 'buy';
-  btn.textContent = maxed ? 'MAX'
-    : capped ? (nextStep ? nextStep + ' m' : 'HELD')
-    : '◈ ' + c.toLocaleString();
-  btn.disabled = maxed || capped || g.credits < c || short;
-  btn.onclick = () => {
-    if (g.credits < c || maxed || capped || short) return;
-    g.credits -= c;
-    if (mat) g.stock[mat.id] = have - mat.need;
-    if (keyMat) g.stock[keyMat.id] = keyHave - keyMat.need;
-    g.up[u.key]++;
-    if (u.key === 'tank') g.fuel = padFuel();
-    if (u.key === 'scan') lamp.distance = S.light();
-    if (u.key === 'drill') setDrillTier(g.up.drill);
-    /* Every upgrade may bolt something on, not just the drill. */
-    setUpgradeHardware(g.up);
-    sfx.buy();
-    save(); buildShop(); updateHUD();
-    flash('rgba(120,255,200,.25)', 160);
-  };
-  row.appendChild(btn);
-  ui.shopCard.appendChild(row);
+/* Buying a level: spend, fit, and show it being fitted. */
+export function buyLine(u: Upgrade) {
+  const st = buyState(u);
+  if (!st.ok) return;
+  g.credits -= st.cost;
+  for (const m of st.keys) g.stock[m.id] = (g.stock[m.id] || 0) - m.need;
+  g.up[u.key]++;
+  if (u.key === 'tank') g.fuel = padFuel();
+  if (u.key === 'scan') lamp.distance = S.light();
+  if (u.key === 'drill') setDrillTier(g.up.drill);
+  setUpgradeHardware(g.up);
+  sfx.buy();
+  hap.buy();
+  boltOn(u.key);
+  save(); buildShop(); updateHUD();
 }
 
 /* `buildSupplies` is gone with the grid it built.

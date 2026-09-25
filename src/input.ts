@@ -18,9 +18,10 @@ import { ANCHOR_COUNT } from './sim/vaults';
 import { MAP_TILE, WORLD_DEPTH, regionName, regionAt } from './sim/region';
 import { W } from './sim/config';
 import { shoreUp } from './collapse';
-import { mustEl, ui, atSurface, buildShop, buildCard, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, retireHint, buildBallast, updateHUD } from './ui';
-import { dockShip, undockShip, pickBay, selectBay, selectedBay, resizeStation,
-         stepAisle, stepBay, paintAisleBar, markSeen } from './station';
+import { mustEl, ui, atSurface, buildShop, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, buildBallast, updateHUD,
+         selectSystem, stepSystem, stepCard, confirmCard } from './ui';
+import { dockShip, undockShip, resizeStation, turnShip, pickPart } from './station';
+import { UPGRADES } from './sim/config';
 import type { Dir } from './types';
 import { autopilot, hardReset, useSupply, fireBomb, fireLaser, packHere } from './actions';
 import { sfx, audioInit, setAudio, setVolume, audioFocus, audioState } from './audio';
@@ -149,7 +150,6 @@ ui.btnShop.onclick = () => {
      machine on the deck is wearing exactly the hardware it will undock with. */
   dockShip();
   document.body.classList.add('docked');
-  selectBay(null);
   buildShop();
   /* Un-hidden BEFORE the camera is framed, and that order is load-bearing.
 
@@ -164,11 +164,6 @@ ui.btnShop.onclick = () => {
 function closeShop() {
   panelClosed('shop');
   sfx.ui();
-  /* What has been seen is settled on the way OUT, not on the way in. Marking
-     it at the door would fire the "open on the new aisle" beat and then
-     immediately forget it had, so a player who docked and undocked without
-     looking would never get the reveal at all. */
-  markSeen();
   undockShip();
   document.body.classList.remove('docked');
   ui.shop.classList.add('hidden');
@@ -176,75 +171,47 @@ function closeShop() {
 }
 mustEl('shopClose').onclick = closeShop;
 
-/* Taps fall through the shop's transparent stage onto the bay behind it, so
-   this is a raycast into the station scene rather than a click handler on a
-   row. Tapping the floor deselects, because a room you cannot tap out of has
-   quietly become a menu again.
+/* ---------- the fitting bay, round seventeen AN ----------
 
-   On `document` rather than on the shop element. It was on #shop and relied on
-   the event bubbling up from the stage, which worked and then did not - the
-   kind of thing that costs an hour and buys nothing. The id check below is what
-   actually scopes this, so where it is listening does not need to be clever. */
-/* ---------- walking the aisles ----------
+   A drag on the stage turns the ship on its lift; a tap on the ship opens the
+   system of the part it landed on. Only the stage turns the ship - a drag that
+   starts on the rack scrolls the rack and nothing else, so the two can never
+   blur into one gesture. Resolved on the way UP, because a turn and a tap
+   start identically. */
+const TAP_PX = 10;
+let dragX = 0, dragY = 0, lastX = 0, dragging = false, moved = 0;
+document.addEventListener('pointerdown', (e) => {
+  if (g.mode !== 'shop') return;
+  const t = e.target as HTMLElement;
+  if (t.id !== 'shop' && t.id !== 'shopStage') return;
+  dragX = lastX = e.clientX; dragY = e.clientY; dragging = true; moved = 0;
+});
+document.addEventListener('pointermove', (e) => {
+  if (g.mode !== 'shop' || !dragging) return;
+  turnShip(e.clientX - lastX);
+  moved = Math.max(moved, Math.abs(e.clientX - dragX), Math.abs(e.clientY - dragY));
+  lastX = e.clientX;
+});
+document.addEventListener('pointerup', (e) => {
+  if (g.mode !== 'shop' || !dragging) return;
+  dragging = false;
+  if (moved > TAP_PX) return;
+  const key = pickPart(e.clientX, e.clientY);
+  const u = key ? UPGRADES.find((x) => x.key === key) : null;
+  if (u) { sfx.ui(); selectSystem(u.system); }
+});
 
-   Three ways in, and that is the point rather than belt and braces. The
-   research is blunt about gesture-only navigation: hidden affordances cost
-   about 21% of task completion and roughly half the discoverability, and this
-   room has already shipped one control that looked tappable and did nothing.
-   So the arrows are the real control, the dots say where you are, and the
-   swipe is the one that feels good once you have found it.
-
-   The threshold is 42 px and the vertical guard is what stops it firing on a
-   tap that drifted. Both measured against the thumb rather than chosen: a tap
-   on this phone wanders about 8 px, and 42 is comfortably outside that while
-   still being a flick rather than a drag. */
-const SWIPE_PX = 42;
-let swipeX = 0, swipeY = 0, swiping = false;
-
-mustEl('aisleL').onclick = () => { if (stepAisle(-1)) { sfx.ui(); retireHint(); } };
-mustEl('aisleR').onclick = () => { if (stepAisle(1)) { sfx.ui(); retireHint(); } };
-
-/* Up and down walk the cases in this aisle. The card follows the selection,
-   so the description he asked for comes for free - it is the same card a tap
-   builds. */
-function walkBay(dir: number) {
-  if (!stepBay(dir)) return;
-  sfx.ui();
-  retireHint();
-  buildCard();
-  paintAisleBar();
-}
-mustEl('bayU').onclick = () => walkBay(-1);
-mustEl('bayD').onclick = () => walkBay(1);
-
-/* The confirm. The card's own primary button IS the confirm - it carries the
-   price and greys itself when the thing cannot be bought - so this presses
-   that rather than adding a second control that does the same job, which is
-   the "two ways to do one thing" fault the plinths already taught this room.
-   Returns whether anything happened, so a key press that confirms nothing
-   does not make a sound. */
-function confirmSelected(): boolean {
-  /* Two classes, because an upgrade row and a supply row build different
-     buttons - and a confirm that knew only one of them silently did nothing
-     on every upgrade in the game, which is what the verification pass found. */
-  const btn = ui.shopCard.querySelector('button.buy, button.cbuy') as HTMLButtonElement | null;
-  if (!btn || btn.disabled) return false;
-  btn.click();
-  return true;
-}
-
-/* ---------- the room, from the keyboard ----------
-
-   The same four directions and the same confirm, for a desk session and for
-   anybody who cannot hit a 40 px arrow. Gated on the mode so the arrows that
-   fly the ship and the arrows that walk the shop are never both live. */
+/* The bay from the keyboard: left and right walk the systems, up and down the
+   cards, Enter or Space presses the picked card's own buy button. Gated on the
+   mode so the arrows that fly the ship and the arrows that walk the bay are
+   never both live. */
 const SHOP_KEYS: Record<string, () => void> = {
-  ArrowLeft: () => { if (stepAisle(-1)) { sfx.ui(); retireHint(); } },
-  ArrowRight: () => { if (stepAisle(1)) { sfx.ui(); retireHint(); } },
-  ArrowUp: () => walkBay(-1),
-  ArrowDown: () => walkBay(1),
-  Enter: () => { if (confirmSelected()) sfx.ui(); },
-  ' ': () => { if (confirmSelected()) sfx.ui(); }
+  ArrowLeft: () => { sfx.ui(); stepSystem(-1); },
+  ArrowRight: () => { sfx.ui(); stepSystem(1); },
+  ArrowUp: () => stepCard(-1),
+  ArrowDown: () => stepCard(1),
+  Enter: () => { if (confirmCard()) sfx.ui(); },
+  ' ': () => { if (confirmCard()) sfx.ui(); }
 };
 window.addEventListener('keydown', (e) => {
   if (g.mode !== 'shop') return;
@@ -254,36 +221,6 @@ window.addEventListener('keydown', (e) => {
   fn();
 });
 
-document.addEventListener('pointerdown', (e) => {
-  if (g.mode !== 'shop') return;
-  const t = e.target as HTMLElement;
-  /* only taps that landed on the stage itself, not on the tray or the header */
-  if (t.id !== 'shop' && t.id !== 'shopStage' && t.id !== 'shopHint') return;
-  swipeX = e.clientX; swipeY = e.clientY; swiping = true;
-});
-
-document.addEventListener('pointerup', (e) => {
-  if (g.mode !== 'shop' || !swiping) return;
-  swiping = false;
-  const dx = e.clientX - swipeX, dy = e.clientY - swipeY;
-  /* A swipe, and the vertical guard so a thumb sliding down the screen does
-     not change department. */
-  if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(dy) * 1.4) {
-    /* Drag LEFT to walk right, the way a map or a carousel moves - the content
-       follows the finger rather than the camera doing. */
-    if (stepAisle(dx < 0 ? 1 : -1)) { sfx.ui(); retireHint(); }
-    return;
-  }
-  /* Not a swipe: it is a tap, and taps pick a case. Resolved on the way UP
-     rather than on the way down, because the two gestures start identically
-     and deciding on pointerdown would select a case every time you swiped
-     past one. */
-  const hit = pickBay(e.clientX, e.clientY);
-  if (hit === selectedBay()) return;
-  selectBay(hit);
-  if (hit) sfx.ui();
-  buildCard();
-});
 function closeManifest() { panelClosed('manifest'); sfx.ui(); ui.manifest.classList.add('hidden'); g.mode = 'play'; }
 mustEl('btnManifest').onclick = () => {
   if (g.mode !== 'play') return;

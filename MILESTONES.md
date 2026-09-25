@@ -715,7 +715,7 @@ is in `journal/legacy-plan.md`.
       briefs: economy, balance
       design: ## Round seventeen, the shop and the minerals
 
-- [ ] **AN The fitting bay, the only purchase screen.** Top 60%: the ship on a lift as a
+- [x] **AN The fitting bay, the only purchase screen.** Top 60%: the ship on a lift as a
       rotatable model, dimmed under anything drawn over it. A strip of six system icons at 56dp
       or more that also lights when a part of the ship is tapped. A bottom sheet with the chosen
       system as a scrolling rack of cards (price, key slots filled from the bank, one plain

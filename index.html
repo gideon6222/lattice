@@ -650,72 +650,61 @@
   body.docked #hud, body.docked #actions, body.docked #ctrl,
   body.docked #kit, body.docked #ord, body.docked #cluster{display:none;}
   .screen.room > *{pointer-events:auto;}
-  /* The hint sits in the middle of the stage, which is the one band of the
-     room with nothing in it: the gap between the wall rack and the counter.
-     At the bottom it lay across the counter plates and at the top it lay
-     across the aisle's neon sign, and both of those are things it is asking
-     you to look at. */
-  /* The hint sits at the TOP of the stage, in the strip between the aisle bar
-     and the department's sign. It has been at the bottom (across the counter
-     plates) and in the middle (across the rack) and both of those are things it
-     is asking you to look at; this is the one band of the room that is empty at
-     every station. It also goes away for good once a swipe has landed - see
-     `hintSeen` in input.ts. */
-  .stage{flex:1 1 auto; pointer-events:none; display:flex; align-items:flex-start;
-    justify-content:center; padding-top:4px;}
-  .hintline{
-    font-size:10.5px; letter-spacing:.16em; color:var(--dim); opacity:.85;
-    text-shadow:0 2px 10px #000; transition:opacity var(--t-base) var(--ease);
-  }
-  .hintline.gone{opacity:0;}
-  /* The tray carries everything you can actually touch, held to the bottom
-     third so the room stays the thing you are looking at. */
+  /* ---------- the fitting bay, round seventeen AN ----------
+
+     Top: the ship on its lift, drawn by the 3D room behind a transparent
+     stage. Then six system icons, then the chosen system as a scrolling rack
+     of cards in the bottom sheet, where the thumb rests (Hoober's thumb zone).
+     The sheet is opaque, so nothing in the room ever shows through a card. */
+  .stage{flex:1 1 auto; pointer-events:none; min-height:36vh;}
   .tray{
-    flex:0 0 auto; background:linear-gradient(180deg,rgba(9,14,22,0) 0%,rgba(9,14,22,.92) 14%,#070b12 100%);
-    padding:4px 14px calc(env(safe-area-inset-bottom,0px) + 10px);
+    flex:0 0 auto; display:flex; flex-direction:column;
+    /* A FIXED height, not a max: a tray that grows with its cards moves the
+       strip and the ship every time a system is picked. */
+    height:44vh;
+    background:#070b12; border-top:1px solid var(--line);
+    padding:0 0 calc(env(safe-area-inset-bottom,0px));
   }
-  /* The card RESERVES its tallest height rather than growing into it.
-
-     Measured: it is 92 px empty and 123 px with a two-line consumable blurb and
-     a buy button, and the room is framed against the tray ONCE when the shop
-     opens. So picking anything grew the tray by 31 px and quietly covered the
-     bottom 31 px of the room - which is where the supplies drawer is. Reserving
-     the space costs an empty strip under an unpicked card and keeps the room
-     still, and a still room is worth more than thirty pixels.
-
-     `resizeStation` also re-runs when the tray's height changes at all, so if
-     a future blurb ever runs to three lines the framing corrects itself instead
-     of silently clipping. Both, because the reserve is the one that stops it
-     happening and the re-frame is the one that stops it mattering. */
-  .card{min-height:124px; margin-bottom:6px;}
-  /* Supplies were a third of the screen as a stacked list. In here they are
-     three chips on one line: they are consumables with a count and a price and
-     nothing else to say, and the room should keep the space. */
-  /* A GRID, not a row. This was a flex row when there were three supplies and
-     it stayed one when there were six, so every label ellipsised to
-     "Coola...", "Overd...", "Bulwa..." - the same "words are cut off" fault as
-     the display plates, in a different place. Three across and two down gives
-     each chip twice the width and no ellipsis. */
-  .tray #supplies{display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:8px;}
-  .tray #supplies .counter{display:none;}
-  .tray #supplies .up{
-    flex:1 1 0; display:block; text-align:center; padding:7px 4px; min-width:0;
-    border:1px solid var(--line); background:rgba(255,255,255,.03); border-radius:10px;
+  .systems{
+    flex:0 0 auto; display:flex; justify-content:space-between; gap:4px;
+    padding:6px 8px; background:linear-gradient(180deg,rgba(7,11,18,0),#070b12 60%);
   }
-  .tray #supplies .upinfo{display:block; min-width:0;}
-  .tray #supplies .upname{font-size:11px; font-weight:700; letter-spacing:.03em; white-space:nowrap;
-    overflow:hidden; text-overflow:ellipsis;}
-  .tray #supplies .upeff{display:none;}
-  .tray #supplies .buy{margin:4px auto 0; padding:4px 8px; font-size:10.5px;}
-  .card .cname{font-size:15px; font-weight:800; letter-spacing:.04em;}
-  .card .ceff{color:var(--dim); font-size:11.5px; line-height:1.55; margin-top:3px;}
-  .card .crow{display:flex; align-items:center; gap:10px; margin-top:8px;}
-  .card .cbuy{
-    flex:1 1 auto; border:1px solid #2a5570; background:rgba(63,224,255,.14); color:var(--cyan);
-    border-radius:11px; padding:11px 12px; font-size:12px; font-weight:800; letter-spacing:.08em;
+  .sysb{
+    flex:1 1 0; min-width:0; height:56px; border-radius:12px; padding:4px 2px 3px;
+    border:1px solid var(--line); background:rgba(255,255,255,.035); color:var(--dim);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    font-size:clamp(7.5px, 2.2vw, 9.5px); font-weight:800; letter-spacing:.02em; overflow:hidden;
   }
-  .card .cbuy[disabled]{opacity:.42; border-color:var(--line); color:var(--dim); background:rgba(255,255,255,.03);}
-  .card .cempty{color:var(--dim); font-size:12px; padding:26px 0 0; text-align:center; letter-spacing:.06em;}
+  .sysb svg{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8;}
+  .sysb.on{color:var(--cyan); border-color:#2a5570; background:rgba(63,224,255,.12);}
+  .sysb .pip{width:6px; height:6px; border-radius:50%; background:var(--amber); display:none;}
+  .sysb.can .pip{display:block;}
+  .rack{flex:1 1 auto; overflow-y:auto; overscroll-behavior:contain; padding:6px 12px 8px;}
+  .bcard{
+    border:1px solid var(--line); border-radius:13px; padding:10px 12px; margin-bottom:8px;
+    background:rgba(255,255,255,.03);
+  }
+  .bcard.sel{border-color:#2a5570; background:rgba(63,224,255,.06);}
+  .bcard.dim{opacity:.62;}
+  .bhead{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .bname{font-size:14.5px; font-weight:800; letter-spacing:.03em;}
+  .blvl{font-size:11px; color:var(--dim); white-space:nowrap;}
+  .bwhat{font-size:12px; color:var(--ink); opacity:.86; line-height:1.45; margin-top:3px;}
+  .beff{font-size:11.5px; color:var(--dim); margin-top:3px;}
+  .beff b{color:var(--cyan); font-weight:700;}
+  .bkeys{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;}
+  .bkey{font-size:11px; padding:3px 8px; border-radius:20px; border:1px solid var(--line);
+    display:flex; align-items:center; gap:5px;}
+  .bkey.short{border-color:#6b3a2a; color:#ffb08a;}
+  .bkey i{width:8px; height:8px; border-radius:50%; display:inline-block;}
+  .bnote{font-size:11px; color:#ffb08a; margin-top:5px;}
+  .bbuy{
+    width:100%; margin-top:8px; min-height:44px; border-radius:11px;
+    border:1px solid #2a5570; background:rgba(63,224,255,.14); color:var(--cyan);
+    font-size:13px; font-weight:800; letter-spacing:.08em;
+  }
+  .bbuy[disabled]{opacity:.42; border-color:var(--line); color:var(--dim); background:rgba(255,255,255,.03);}
+  .rack .bsub{font-size:10px; letter-spacing:.16em; color:var(--dim); margin:10px 2px 6px;}
   .screen.hidden{display:none;}
 
   /* The painted window, its grille and the scrolling shelf list all lived
@@ -751,57 +740,6 @@
   .shopsub{font-size:10.5px; letter-spacing:.1em; color:var(--dim); margin-top:3px;}
   .shopcred{font-size:15px; font-weight:800; color:var(--amber); white-space:nowrap;}
 
-  /* ---------- the aisle bar ----------
-
-     The dots only now (Y11 moved the arrows out - see .shopnav below). The
-     diegetic half is the neon sign over each bay, in the same color; these
-     dots mirror it so the two are obviously the same information seen twice.
-     A readout, not a control, so it stays up here where it is easy to glance
-     at even though that is a hard place to reach with a thumb.
-
-     A dot per station, lit for the one you are standing in, dimmed to almost
-     nothing for a department with no stock yet - which in the first hour is
-     ORDNANCE, every device of which has to be dug out of the ground. A dark
-     dot is a promise. A missing one is nothing. */
-  .aislebar{
-    flex:0 0 auto; display:flex; align-items:center; justify-content:center;
-    padding:7px 10px 8px;
-    background:linear-gradient(180deg,rgba(9,13,20,.82),rgba(9,13,20,0));
-  }
-  #aisles{display:flex; justify-content:center; gap:7px;}
-  #aisles .dot{
-    width:7px; height:7px; border-radius:50%; background:var(--c,#7f8ea8);
-    opacity:.34; transition:opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
-  }
-  /* The lit dot gets a halo of its own color, which is the flat-UI version of
-     what the fitting in the room is doing. */
-  #aisles .dot.on{opacity:1; transform:scale(1.5); box-shadow:0 0 9px 2px var(--c,#7f8ea8);}
-  #aisles .dot.off{opacity:.1;}
-  #aisles .dot.pump{--c:#b8863c; border-radius:2px;}
-
-  /* ---------- the shop nav ----------
-
-     Y11, moved down from the header: "redesign the shops...one-thumb
-     portrait, thumb-reach zones." The four arrows are the real control (the
-     dots above only say where you are, and the diegetic sign in the room says
-     what it is) and a control belongs where a thumb already rests. Sitting
-     just above the tray puts it in the same reachable third as UNDOCK and the
-     buy button, rather than in the header a stretched thumb used to have to
-     find. aisleL/R (bigger jump, between departments) flank bayU/D (smaller
-     jump, between cases in one), same grouping the header had, just lower. */
-  .shopnav{
-    flex:0 0 auto; display:flex; align-items:center; justify-content:center;
-    gap:12px; padding:6px 16px 4px;
-  }
-  .arw{
-    flex:0 0 auto; width:40px; height:40px; border-radius:11px;
-    border:1px solid var(--line); background:rgba(255,255,255,.04);
-    color:var(--ink); font-size:22px; line-height:1; font-weight:700;
-    transition:opacity var(--t-fast) var(--ease);
-  }
-  /* Greyed rather than removed: an arrow that vanishes would shift its
-     neighbours under a thumb already lined up on one of them. */
-  .arw.gone{opacity:.18; pointer-events:none;}
   .screen #upgrades, .screen #supplies{padding:0 16px;}
   /* A counter reads as a label riveted to the bulkhead: a short bright rule
      before the name, a long dim one after it. */
@@ -1498,43 +1436,24 @@
 <div id="shop" class="screen room hidden">
   <div class="shopbar">
     <div class="shoptitle">
-      <div class="shopname">OUTFITTER</div>
-      <div class="shopsub">DOCK 04 &middot; <span id="shopPlanet">&mdash;</span></div>
+      <div class="shopname" id="shopName">FITTING BAY</div>
+      <div class="shopsub" id="shopSub">THE PAD</div>
     </div>
     <div class="shopcred">&#9672; <span id="shopCredits">0</span></div>
     <button class="x" data-for="shopClose" aria-label="Close">&times;</button>
   </div>
 
-  <!-- The dots, on their own: WHERE you are, not a control - a readout can
-       live wherever it reads best. The arrows that MOVE you used to hang here
-       too; they are in .shopnav now, at the bottom, because a control has to
-       live where a thumb already is instead. -->
-  <div class="aislebar">
-    <div id="aisles"></div>
-  </div>
+  <!-- Round seventeen, AN: the fitting bay. The ship stands on its lift in
+       the stage; a drag on it turns it, a tap on a part opens that part's
+       system. pointer-events:none, so a tap lands on the bay behind it. -->
+  <div class="stage" id="shopStage"></div>
 
-  <!-- pointer-events:none, so a tap lands on the bay behind it -->
-  <div class="stage" id="shopStage"><div class="hintline" id="shopHint">SWIPE TO WALK THE AISLES</div></div>
+  <!-- Six systems, 56 px each, in the reachable third. -->
+  <div class="systems" id="systems" role="tablist"></div>
 
-  <!-- Y11: "redesign the shops completely...one-thumb portrait, thumb-reach
-       zones." These four arrows used to sit in the header, which on a phone
-       this tall is the hardest third of the screen to reach one-handed - the
-       title screen learned the same lesson first (see its own note on the
-       menu sitting at the bottom). Same buttons, same job, moved down next to
-       everything else in here you can actually touch. -->
-  <div class="shopnav">
-    <button id="aisleL" class="arw" aria-label="previous aisle">&#8249;</button>
-    <button id="bayU" class="arw" aria-label="previous case">&#9650;</button>
-    <button id="bayD" class="arw" aria-label="next case">&#9660;</button>
-    <button id="aisleR" class="arw" aria-label="next aisle">&#8250;</button>
-  </div>
-
-  <!-- The supplies grid is gone from here. They are crates in a drawer under
-       the counter now: found by opening caches, and bought by pulling the
-       drawer open. A shorter tray also gives the room back 120 px of screen,
-       which the framing picks up on its own because it measures. -->
+  <!-- The chosen system's lines as a scrolling rack of cards. -->
   <div class="tray">
-    <div id="shopCard" class="card"></div>
+    <div id="rack" class="rack"></div>
     <div class="undock"><button id="shopClose" class="wide">UNDOCK</button></div>
   </div>
 </div>

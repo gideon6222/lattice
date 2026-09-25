@@ -91,81 +91,32 @@ async function holdSeam(
   }
 }
 
-/* Tap a display case in the Outfitter, the way a thumb would.
+/* Open the system a line or supply belongs to and return its card.
 
-   The shop is a 3D room now, so there is no row to click: the case has to be
-   found in the scene, projected to screen, and hit with a real pointer event at
-   those coordinates. That is more work than clicking a list item and it is
-   worth it - it exercises the actual path, raycast and all, which is the part
-   that can break.
-
-   Needs ?debug for the scene handles. */
-async function tapBay(page: Page, key: string) {
-  /* A tap only means anything while docked; without this a shop that failed to
-     open shows up as "the card is empty", which points at the wrong thing. */
-  await expect(page.locator('#shop'), 'the Outfitter is not open').not.toHaveClass(/hidden/);
-  const r = await page.evaluate((k) => {
+   Round seventeen, AN: the shop is the fitting bay - six system icons and a
+   rack of cards - so a thumb picks a system and presses a card's own button.
+   This does exactly that, with a real click on the icon, and hands back the
+   card so a spec asserts on the thing a player reads. Needs ?debug for the
+   key-to-system table. */
+async function tapBay(page: Page, key: string): Promise<Locator> {
+  await expect(page.locator('#shop'), 'the bay is not open').not.toHaveClass(/hidden/);
+  const sys = await page.evaluate((k) => {
     const w = (window as any).__cw;
-    const bay = w.bays.find((b: any) => b.key === k);
-    if (!bay) return { err: 'no case for ' + k };
-    /* Walk to the aisle it is in first.
-
-       The shop is four departments and only one is in the room at a time, so a
-       case in ORDNANCE is not merely off screen from RIG - it is not in the
-       scene at all, and its world position is wherever it was last parked. The
-       glide is run out on the tick seam rather than waited for. */
-    const up = w.upgradeOf ? w.upgradeOf(k) : null;
-    if (up) {
-      const want = w.aisleOf(k);
-      if (want > 0 && want !== w.currentAisle()) { w.goAisle(want); w.advance(2); }
-    }
-    if (!bay.group.visible) return { err: k + ' is not stocked, so it has no case in the room' };
-    const p = bay.group.getWorldPosition(new w.camera.position.constructor());
-    p.project(w.stationCamera);
-    const x = Math.round((p.x * 0.5 + 0.5) * window.innerWidth);
-    const y = Math.round((-p.y * 0.5 + 0.5) * window.innerHeight);
-    const el = document.elementFromPoint(x, y);
-    if (!el) return { err: 'nothing at ' + x + ',' + y };
-    const before = { mode: w.g.mode, sel: w.selectedBay() };
-    /* Down AND up, at the same point.
-
-       A tap and a swipe start identically, so the shop decides which one it
-       was on the way UP: anything that moved more than 42 px sideways walks to
-       the next aisle and anything else picks a case. A test that only sends
-       pointerdown is sending half a gesture and gets neither. */
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y }));
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x, clientY: y }));
-    w.advance(0.3);
-    return { at: x + ',' + y, on: el.id || el.className, picked: w.pickBay(x, y),
-             selected: w.selectedBay(), before };
+    const u = w.upgradeOf(k);
+    return u ? u.system : w.SUPPLY_SYSTEM[k];
   }, key);
-  expect(r.err, String(r.err)).toBeUndefined();
-  expect(r.selected, 'tapped "' + key + '" at ' + r.at + ' over "' + r.on +
-    '"; raycast said "' + r.picked + '"; before=' + JSON.stringify(r.before)).toBe(key);
+  expect(sys, key + ' belongs to no system').toBeTruthy();
+  await page.locator('.sysb[data-sys="' + sys + '"]').click();
+  const card = page.locator('#rack .bcard[data-key="' + key + '"]');
+  await expect(card, key + ' has no card in ' + sys).toHaveCount(1);
+  await card.scrollIntoViewIfNeeded();
+  return card;
 }
 
-/* Open the drawer, pick a crate, press BUY. The whole path a thumb takes, so a
-   spec asserting "a supply can be bought" is asserting that and not that a
-   function exists. */
+/* Buy a supply the way a thumb does: its system, then its card's button. */
 async function buyKit(page: Page, key: string) {
-  await page.evaluate((k) => {
-    const w = (window as any).__cw;
-    if (!w.drawerOpen()) w.roomDrawer().setOpen(true);
-    /* No `advance()` here, and that is not tidiness.
-
-       `advance` calls `stopClock()` and never gives it back, which is fine for
-       a spec that drives every remaining step itself and fatal for one that
-       then holds a d-pad in real time - the game simply stops, with the mode
-       still 'play' and the key still held, which is about as misleading as a
-       symptom gets. It cost a run to find and it is the trap already written
-       down beside `startClock` in loop.ts.
-
-       Nothing here needs time to pass: the selection is set directly rather
-       than raycast, so the drawer's slide does not have to have finished. */
-    w.selectBay(k);
-    w.buildShop();
-  }, key);
-  await page.locator('#shopCard .cbuy').click();
+  const card = await tapBay(page, key);
+  await card.locator('button.bbuy').click();
 }
 
 const num = async (loc: Locator) =>
@@ -412,50 +363,28 @@ test('the shop, manifest and pause menu all open', async ({ page }) => {
      during the fetch is testing the fetch, not the shop. */
   await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
 
-  /* The Outfitter is a room: one display case per upgrade, and the ship itself
-     reparented onto the deck. Asserting the case COUNT is the equivalent of the
-     old row count - it catches an upgrade that stops being reachable. */
-  const bays = await page.evaluate(() => (window as any).__cw.bays.length);
-  /* Against the number of upgrades, not against a literal. The literal said 10
-     and the message said "every upgrade needs a case to stand in", which are
-     two different claims - and when the shop went from ten upgrades to fifteen
-     it failed for the wrong reason and would have been fixed by editing the
-     number. The property is the one worth keeping: an upgrade with no case is
-     an upgrade nobody can buy. */
-  const upgrades = await page.evaluate(() => (window as any).__cw.upgradeCount);
-  expect(bays, 'every upgrade needs a case to stand in').toBe(upgrades);
-  expect(upgrades, 'the shop is empty').toBeGreaterThan(5);
-  /* Nothing picked yet, so the card is empty and the hint is showing. */
-  await expect(page.locator('#shopHint')).not.toHaveClass(/gone/);
+  /* Round seventeen, AN: the fitting bay. Every line on the shelf has a card
+     in exactly one system - a line with no card is a line nobody can buy. */
+  const onShelf: string[] = await page.evaluate(() => (window as any).__cw.shelfKeys());
+  const carded: string[] = [];
+  for (const sys of ['drill', 'hold', 'engines', 'hull', 'sensors', 'ordnance']) {
+    await page.locator('.sysb[data-sys="' + sys + '"]').click();
+    carded.push(...await page.locator('#rack .bcard').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.key || '')));
+  }
+  for (const k of onShelf) expect(carded.filter((c) => c === k).length, k + ' has ' + carded.filter((c) => c === k).length + ' cards').toBe(1);
+  expect(onShelf.length, 'the shop is empty').toBeGreaterThan(4);
 
-  /* Tapping a case fills the card - and a sealed one still says why. */
-  await tapBay(page, 'drill');
-  await expect(page.locator('#shopCard')).toContainText('Drill Bit');
-  await expect(page.locator('#shopHint')).toHaveClass(/gone/);
-  /* THE sealed case, not a named one. The shelf only stocks what you can buy
-     plus the single next thing you cannot - so 'auto' at 65 m is simply not in
-     the room on a fresh save, and naming it here asserted a layout rather than
-     the property. The property is that whatever teaser IS shown explains
-     itself, because that one case is the entire reason to go deeper. */
+  /* A card says what the line does, and a sealed one still says why. */
+  const drill = await tapBay(page, 'drill');
+  await expect(drill).toContainText('Drill Bit');
+  await expect(drill).toContainText('Cuts rock faster');
   const sealed = await page.evaluate(() => (window as any).__cw.sealedKey());
-  expect(sealed, 'nothing on the shelf is sealed, so there is no reason to go deeper')
-    .toBeTruthy();
-  await tapBay(page, sealed as string);
-  await expect(page.locator('#shopCard'), 'a sealed case must say what unlocks it')
+  expect(sealed, 'nothing on the shelf is sealed, so there is no reason to go deeper').toBeTruthy();
+  await expect(await tapBay(page, sealed as string), 'a sealed card must say what unlocks it')
     .toContainText('Sealed until');
-
-  /* The supplies are not on this screen at all any more.
-
-     They were a row of chips in the tray, asserted here by count. They are
-     crates in a drawer under the counter now - found by opening caches rather
-     than bought from the first minute - so the assertion that matters is that
-     the grid is GONE, and that one case exists per supply ready to be revealed
-     as each is found. Asserted against the real count for the same reason as
-     the cases above: a literal goes stale the day the kit changes size. */
+  /* No drawer, no aisles: a supply is found first and then sits in its system. */
   await expect(page.locator('#supplies')).toHaveCount(0);
-  const supplies = await page.evaluate(() => (window as any).__cw.supplyCount);
-  const crates = await page.evaluate(() => (window as any).__cw.kitCases.length);
-  expect(crates, 'every consumable needs a crate to appear in').toBe(supplies);
+  await expect(page.locator('#aisles')).toHaveCount(0);
   await page.locator('#shopClose').dispatchEvent('click');
 
   await page.locator('#btnManifest').dispatchEvent('click');
@@ -812,11 +741,11 @@ test('a supply can be bought at the pad and spent underground', async ({ page })
   await page.locator('#btnShop').dispatchEvent('click');
   await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
   await buyKit(page, 'coolant');
-  await expect(page.locator('#shopCard')).toContainText('Coolant Flush');
-  await expect(page.locator('#shopCard')).toContainText('1/2');
+  await expect(page.locator('#rack .bcard[data-key="coolant"]')).toContainText('Coolant Flush');
+  await expect(page.locator('#rack .bcard[data-key="coolant"]')).toContainText('1/2');
   await buyKit(page, 'cell');
-  await expect(page.locator('#shopCard')).toContainText('Fuel Cell');
-  await expect(page.locator('#shopCard')).toContainText('1/3');
+  await expect(page.locator('#rack .bcard[data-key="cell"]')).toContainText('Fuel Cell');
+  await expect(page.locator('#rack .bcard[data-key="cell"]')).toContainText('1/3');
   await page.locator('#shopClose').dispatchEvent('click');
 
   /* hidden at the pad, because the pad already refuels and cools for free */
@@ -1236,9 +1165,8 @@ test('an upgrade past the free tier needs minerals, not just credits', async ({ 
   await enterGame(page);
 
   await page.locator('#btnShop').dispatchEvent('click');
-  await tapBay(page, 'cool');
-  const card = page.locator('#shopCard');
-  const buy = card.locator('button');
+  let card = await tapBay(page, 'cool');
+  let buy = card.locator('button.bbuy');
 
   /* half a million credits and it is still refused */
   await expect(card).toContainText('Cooling Rig');
@@ -1250,7 +1178,8 @@ test('an upgrade past the free tier needs minerals, not just credits', async ({ 
     .toContainText('from 210 m');
 
   /* levels inside the free tier are still pure credits */
-  await tapBay(page, 'drill');
+  card = await tapBay(page, 'drill');
+  buy = card.locator('button.bbuy');
   await expect(card).toContainText('Drill Bit');
   await expect(card.locator('.upmat')).toHaveCount(0);
   await expect(buy).toBeEnabled();
@@ -1275,13 +1204,13 @@ test('an upgrade past the free tier needs minerals, not just credits', async ({ 
      gesture assertions below still mean what they say. */
   await enterGame(page);
   await page.locator('#btnShop').dispatchEvent('click');
-  await tapBay(page, 'cool');
-  await expect(card, 'the tap should have selected the Cooling Rig case')
+  card = await tapBay(page, 'cool');
+  await expect(card, 'the tap should have opened the Cooling Rig card')
     .toContainText('Cooling Rig');
 
   await expect(card.locator('.upmat')).not.toHaveClass(/short/);
-  await expect(card.locator('button')).toBeEnabled();
-  await card.locator('button').click();
+  await expect(card.locator('button.bbuy')).toBeEnabled();
+  await card.locator('button.bbuy').click();
 
   /* bought: the level went up and the minerals were actually spent */
   await expect(card).toContainText('Lv 4/7');
@@ -1712,12 +1641,12 @@ test('hardware bought in the Outfitter is on the ship you undock with', async ({
   expect(await tanksOn(), 'a stock ship carries no tanks').toBe(0);
 
   await page.locator('#btnShop').dispatchEvent('click');
-  await tapBay(page, 'tank');
-  await expect(page.locator('#shopCard')).toContainText('Fuel Tank');
+  const tankCard = await tapBay(page, 'tank');
+  await expect(tankCard).toContainText('Fuel Tank');
 
   /* Buy up to the level where the first pair appears. */
   for (let i = 0; i < 4; i++) {
-    const btn = page.locator('#shopCard button');
+    const btn = page.locator('#rack .bcard[data-key="tank"] button.bbuy');
     if (await btn.isDisabled()) break;
     await btn.click();
     await page.evaluate(() => (window as any).__cw.advance(0.2));
@@ -1730,9 +1659,8 @@ test('hardware bought in the Outfitter is on the ship you undock with', async ({
   const dockedTanks = await page.evaluate(() => {
     const w = (window as any).__cw;
     let found = -1;
-    /* bays[0].group.parent IS the station scene, which is where the ship is
-       parented while docked */
-    w.bays[0].group.parent.traverse((o: any) => {
+    /* The station scene is where the ship is parented while docked. */
+    w.stationScene.traverse((o: any) => {
       if (o.isInstancedMesh && o.geometry.type === 'CylinderGeometry' &&
           o.instanceMatrix.count === 4) found = o.count;
     });
@@ -2156,62 +2084,63 @@ test('the HUD stays off the screen while the intro and the title are up', async 
    passed. Projected centres said every case was on screen while two of five
    plates hung over the edges, so this asserts the PLATE's bounding box rather
    than the group's origin. */
-test('the shop is four aisles, and you can walk between them', async ({ page }) => {
+test('a drag on the ship turns it, a drag on the rack scrolls it, never both', async ({ page }) => {
+  /* Round seventeen, AN, and Fable's line on it: one screen doing three jobs
+     (a model you turn, a strip, a scrolling rack) is where a thumb feels a
+     control drift. So the stage turns the ship and nothing else, and the rack
+     scrolls and nothing else. */
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.best.depth = 300; w.g.credits = 1e6;
+    for (const k of ['magnet', 'survey', 'receiver', 'drone', 'auto', 'bomb', 'laser']) {
+      if (!w.g.found.includes(k)) w.g.found.push(k);
+    }
+  });
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
   await page.locator('#btnShop').dispatchEvent('click');
-  await expect(page.locator('#shop')).not.toHaveClass(/hidden/);
   await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
+  await page.evaluate(() => (window as any).__cw.advance(0.2));
 
-  /* The dots are the visible half of the navigation, and they are the half
-     that must exist - a swipe with no affordance is a shop most people only
-     ever see one quarter of. One per station, the forecourt included. */
-  const dots = await page.locator('#aisles .dot').count();
-  const stations = await page.evaluate(() => (window as any).__cw.AISLE_COUNT);
-  expect(dots, 'a dot per station, or the aisle bar has drifted from the room').toBe(stations);
-
-  const start = await page.evaluate(() => (window as any).__cw.currentAisle());
-
-  /* The arrow, which is the control that does not have to be discovered. */
-  await page.locator('#aisleR').dispatchEvent('click');
-  await page.evaluate(() => (window as any).__cw.advance(2));
-  const afterArrow = await page.evaluate(() => ({
-    aisle: (window as any).__cw.currentAisle(),
-    camX: (window as any).__cw.stationCamera.position.x
-  }));
-  expect(afterArrow.aisle, 'the right arrow did not walk to the next aisle').toBeGreaterThan(start);
-
-  /* And the camera actually WENT there, rather than an index changing under a
-     shop that stayed exactly where it was. */
-  const wantX = await page.evaluate((i) => (window as any).__cw.stationXOf(i), afterArrow.aisle);
-  expect(Math.abs(afterArrow.camX - wantX),
-    'the aisle changed but the camera did not move to it').toBeLessThan(0.2);
-
-  /* The swipe: a drag past the threshold on the stage, walking back the way we
-     came. */
-  const before = afterArrow.aisle;
+  /* The stage: a sideways drag turns the ship. */
+  const yaw0 = await page.evaluate(() => (window as any).__cw.shipYaw());
   await page.evaluate(() => {
     const el = document.getElementById('shopStage')!;
-    const y = window.innerHeight * 0.35;
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 60, clientY: y }));
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: 260, clientY: y }));
-    (window as any).__cw.advance(2);
+    const y = window.innerHeight * 0.3;
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 80, clientY: y }));
+    for (let x = 80; x <= 240; x += 20) document.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: x, clientY: y }));
+    document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: 240, clientY: y }));
+    (window as any).__cw.advance(0.05);
   });
-  const afterSwipe = await page.evaluate(() => (window as any).__cw.currentAisle());
-  expect(afterSwipe, 'dragging right did not walk back an aisle').toBeLessThan(before);
+  const yaw1 = await page.evaluate(() => (window as any).__cw.shipYaw());
+  expect(Math.abs(yaw1 - yaw0), 'a drag on the stage did not turn the ship').toBeGreaterThan(0.5);
 
-  /* A short drag is a TAP, not a swipe. The two gestures start identically and
-     this is the line between them. */
-  const held = await page.evaluate(() => {
+  /* The rack: the engines system has the most cards; scrolling it moves the
+     rack and leaves the ship exactly where it was. */
+  await page.locator('.sysb[data-sys="engines"]').click();
+  const rack = page.locator('#rack');
+  const before = await page.evaluate(() => (window as any).__cw.shipYaw());
+  await rack.hover();
+  await page.mouse.wheel(0, 600);
+  await page.waitForTimeout(150);
+  expect(await rack.evaluate((e) => e.scrollTop), 'the rack did not scroll').toBeGreaterThan(0);
+  expect(await page.evaluate(() => (window as any).__cw.shipYaw()), 'scrolling the rack turned the ship').toBeCloseTo(before, 3);
+
+  /* A tap on a part of the ship opens that part's system. The drill bit is
+     the one part every ship has. */
+  await page.locator('.sysb[data-sys="hold"]').click();
+  const hit = await page.evaluate(() => {
     const w = (window as any).__cw;
-    const at = w.currentAisle();
+    const p = w.bit.getWorldPosition(new w.Vec3Ctor());
+    p.project(w.stationCamera);
+    const x = (p.x * 0.5 + 0.5) * window.innerWidth, y = (-p.y * 0.5 + 0.5) * window.innerHeight;
     const el = document.getElementById('shopStage')!;
-    const y = window.innerHeight * 0.35;
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 180, clientY: y }));
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: 196, clientY: y }));
-    w.advance(1);
-    return { was: at, now: w.currentAisle() };
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y }));
+    document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x, clientY: y }));
+    return { picked: w.pickPart(x, y), sys: w.baySystem() };
   });
-  expect(held.now, 'a 16 px drag changed aisle; that is a tap, not a swipe').toBe(held.was);
+  expect(hit.picked, 'the tap on the drill bit hit no part').toBe('drill');
+  expect(hit.sys, 'tapping the drill bit did not open the DRILL system').toBe('drill');
 });
 
 test('the Outfitter will not sell a device that has not been dug up', async ({ page }) => {
@@ -2242,103 +2171,21 @@ test('the Outfitter will not sell a device that has not been dug up', async ({ p
     expect(shelf, k + ' is sold at the shop and is missing from the shelf').toContain(k);
   }
 
-  /* ORDNANCE is entirely devices, so its aisle has nothing in it and the walk
-     refuses to stop there. */
-  const ord = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    const i = w.aisleOf('bomb');
-    return { i, stocked: w.aisleStocked(i) };
-  });
-  expect(ord.stocked, 'the ORDNANCE aisle has stock before anything has been found').toBe(false);
+  /* ORDNANCE is entirely devices, so its rack has nothing to sell yet. */
+  await page.locator('.sysb[data-sys="ordnance"]').click();
+  await expect(page.locator('#rack .bcard'), 'ORDNANCE sells something before anything has been found').toHaveCount(0);
 
-  /* Now dig one up, and the whole aisle lights. */
+  /* Now dig one up, and the card is there. */
   const after = await page.evaluate(() => {
     const w = (window as any).__cw;
     w.grantFind('bomb');
     w.buildShop();
-    return { stocked: w.aisleStocked(w.aisleOf('bomb')), shelf: w.shelfKeys() };
+    return w.shelfKeys();
   });
-  expect(after.stocked, 'finding a charge did not light the ORDNANCE aisle').toBe(true);
-  expect(after.shelf, 'a found charge is still not on the shelf').toContain('bomb');
+  expect(after, 'a found charge is still not on the shelf').toContain('bomb');
+  await expect(page.locator('#rack .bcard[data-key="bomb"]'), 'finding a charge did not give ORDNANCE its card').toHaveCount(1);
 });
 
-test('every case is fully inside the frame, plate and all', async ({ page }) => {
-  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
-  await page.evaluate(() => {
-    const w = (window as any).__cw;
-    w.g.credits = 9e6;
-    w.g.best.depth = 300;
-    for (const k of ['magnet', 'survey', 'bomb', 'laser', 'auto', 'drone', 'reactor']) {
-      if (!w.g.found.includes(k)) w.g.found.push(k);
-    }
-    w.g.px = w.START_X; w.g.pd = -1;
-    w.advance(0.5);
-  });
-  await page.locator('#btnShop').dispatchEvent('click');
-  await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
-
-  const bad: string[] = [];
-  const n = await page.evaluate(() => (window as any).__cw.AISLE_COUNT);
-  for (let i = 1; i < n; i++) {
-    const rows = await page.evaluate((i) => {
-      const w = (window as any).__cw;
-      w.goAisle(i);
-      w.advance(2);
-      w.stationScene.updateMatrixWorld(true);
-      w.stationCamera.updateMatrixWorld(true);
-      /* The band the player can actually SEE: under the aisle bar and above
-         the tray. Composing into the whole canvas is the fault this measures,
-         and it is the one he reported. */
-      const bar = document.querySelector('#shop .aislebar')!;
-      const tray = document.querySelector('#shop .tray')!;
-      const top = bar.getBoundingClientRect().bottom;
-      const bot = tray.getBoundingClientRect().top;
-      const out: any[] = [];
-      for (const b of w.bays) {
-        if (!b.group.visible) continue;
-        /* The PLATE's own corners, not the group's origin. A centre inside the
-           frame says nothing at all about a 136 px wide plate hanging off it,
-           which is exactly how two cases per aisle shipped half off the edge
-           while every measured number said they were fine. */
-        const box = new w.Box3Ctor().setFromObject(b.plate);
-        let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-        for (const cx of [box.min.x, box.max.x]) {
-          for (const cy of [box.min.y, box.max.y]) {
-            for (const cz of [box.min.z, box.max.z]) {
-              const p = new w.Vec3Ctor(cx, cy, cz).project(w.stationCamera);
-              const sx = (p.x * 0.5 + 0.5) * window.innerWidth;
-              const sy = (-p.y * 0.5 + 0.5) * window.innerHeight;
-              x0 = Math.min(x0, sx); x1 = Math.max(x1, sx);
-              y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
-            }
-          }
-        }
-        out.push({ key: b.key, x0: Math.round(x0), x1: Math.round(x1),
-                   y0: Math.round(y0), y1: Math.round(y1),
-                   W: window.innerWidth, top: Math.round(top), bot: Math.round(bot) });
-      }
-      return out;
-    }, i);
-    for (const r of rows) {
-      /* A margin, not a boundary. Flush with the edge passes an `x > 0` test
-         and still reads as a plate somebody forgot to finish. */
-      const M = 6;
-      if (r.x0 < M || r.x1 > r.W - M) bad.push(r.key + ' runs off the side (' + r.x0 + '..' + r.x1 + ' of ' + r.W + ')');
-      if (r.y1 > r.bot) bad.push(r.key + ' runs under the tray (' + r.y1 + ' past ' + r.bot + ')');
-      if (r.y0 < r.top) bad.push(r.key + ' runs under the aisle bar (' + r.y0 + ' above ' + r.top + ')');
-    }
-  }
-  expect(bad.join('; '), 'a case is not fully on screen').toBe('');
-});
-
-/* Digging a device out of the ground, end to end.
-
-   The headline feature of round six, and everything above it is unit-tested on
-   the pure side: that the crate is somewhere legal, that the shelf refuses to
-   stock what has not been found. What none of that proves is that a crate is
-   actually REACHABLE in a running game and that breaking one does the three
-   things it is supposed to - fit the device, say what it does without pausing,
-   and put the row in the shop. */
 test('a sealed crate in the rock fits the device and stocks the shop', async ({ page }) => {
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
@@ -2419,12 +2266,13 @@ test('a sealed crate in the rock fits the device and stocks the shop', async ({ 
   expect(shelf, 'the device was found and the shop still will not sell a rung').toContain(where.key);
 });
 
-/* ---------- the drawer under the counter ----------
+/* ---------- supplies, once found, sit in the system they serve ----------
 
    Playtest: *"a secret display case at the bottom of the screen pops open and
    shows all of the upgrades you have collected and lets you purchase the
-   upgrades there."* */
-test('the drawer opens, holds only what you have found, and sells it', async ({ page }) => {
+   upgrades there."* Round seventeen, AN: the drawer is gone; a supply you have
+   held is a card in its system, and one you have never held is not shown. */
+test('a supply sits in its system once found, and nowhere before', async ({ page }) => {
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
   await page.evaluate(() => {
     const w = (window as any).__cw;
@@ -2435,139 +2283,14 @@ test('the drawer opens, holds only what you have found, and sells it', async ({ 
     document.getElementById('btnShop')!.click();
   });
   await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
-
-  /* Shut to begin with. A drawer that is already open when you walk up is a
-     shelf, and a shelf is what this replaced. */
-  expect(await page.evaluate(() => (window as any).__cw.drawerOpen())).toBe(false);
-
-  /* Only the two that have ever been held are in it. */
-  const shown = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    return w.kitCases.filter((c: any) => c.group.visible).map((c: any) => c.key);
-  });
-  expect(shown.sort()).toEqual(['cell', 'patch']);
-
-  /* Open it by tapping the handle, the way a thumb does. */
-  const opened = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    /* The CAMERA too, not only the scene.
-
-       The station camera is not a child of the station scene, so
-       `scene.updateMatrixWorld()` does not touch it - and `project()` reads the
-       camera's own matrixWorldInverse. Updating only the scene gave a
-       projection 97 px off, which put the drawer handle inside the tray and
-       made the tap land on the card. It works in the game because rendering a
-       frame updates the camera; it only bites a test that projects without
-       drawing. */
-    w.stationScene.updateMatrixWorld(true);
-    w.stationCamera.updateMatrixWorld(true);
-    const h = w.roomDrawer().hit[1];
-    const p = h.getWorldPosition(new w.Vec3Ctor()).project(w.stationCamera);
-    const x = Math.round((p.x * 0.5 + 0.5) * window.innerWidth);
-    const y = Math.round((-p.y * 0.5 + 0.5) * window.innerHeight);
-    const el = document.elementFromPoint(x, y);
-    if (!el) return { err: 'nothing at ' + x + ',' + y };
-    const tray = document.querySelector('#shop .tray')!.getBoundingClientRect();
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y }));
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x, clientY: y }));
-    w.advance(3);
-    return { open: w.drawerOpen(), on: el.id || el.className,
-             at: x + ',' + y, tray: Math.round(tray.top), H: window.innerHeight,
-             vis: w.roomDrawer().group.visible, aisle: w.currentAisle() };
-  });
-  expect(opened.err, String(opened.err)).toBeUndefined();
-  expect(opened.open, 'tapping the handle at ' + opened.at + ' hit "' + opened.on +
-    '"; tray starts at ' + opened.tray + ' of ' + opened.H +
-    '; drawer visible=' + opened.vis + ' aisle=' + opened.aisle).toBe(true);
-
-  /* Every crate in it is inside the band the player can see. This is the
-     assertion the two-rows-of-three version failed: the rows overlapped each
-     other AND ran under the tray, and only a bounding box says so. */
-  const bad = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    w.stationScene.updateMatrixWorld(true);
-    w.stationCamera.updateMatrixWorld(true);
-    const top = document.querySelector('#shop .aislebar')!.getBoundingClientRect().bottom;
-    const bot = document.querySelector('#shop .tray')!.getBoundingClientRect().top;
-    const out: string[] = [];
-    for (const c of w.kitCases) {
-      if (!c.group.visible) continue;
-      const b = new w.Box3Ctor().setFromObject(c.group);
-      let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-      for (const cx of [b.min.x, b.max.x]) {
-        for (const cy of [b.min.y, b.max.y]) {
-          for (const cz of [b.min.z, b.max.z]) {
-            const p = new w.Vec3Ctor(cx, cy, cz).project(w.stationCamera);
-            const sx = (p.x * 0.5 + 0.5) * window.innerWidth;
-            const sy = (-p.y * 0.5 + 0.5) * window.innerHeight;
-            x0 = Math.min(x0, sx); x1 = Math.max(x1, sx);
-            y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
-          }
-        }
-      }
-      if (x0 < 4 || x1 > window.innerWidth - 4) {
-        out.push(c.key + ' off the side (' + Math.round(x0) + '..' + Math.round(x1) + ')');
-      }
-      if (y1 > bot) out.push(c.key + ' under the tray (' + Math.round(y1) + ' past ' + Math.round(bot) + ')');
-      if (y0 < top) out.push(c.key + ' above the band');
-    }
-    return out;
-  });
-  expect(bad.join('; '), 'a crate in the drawer is not on screen').toBe('');
-
-  /* Tap one, and the card offers it. */
-  const picked = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    w.stationScene.updateMatrixWorld(true);
-    w.stationCamera.updateMatrixWorld(true);
-    const c = w.kitCases.find((k: any) => k.key === 'cell');
-    const p = c.group.getWorldPosition(new w.Vec3Ctor()).project(w.stationCamera);
-    const x = Math.round((p.x * 0.5 + 0.5) * window.innerWidth);
-    const y = Math.round((-p.y * 0.5 + 0.5) * window.innerHeight);
-    const el = document.elementFromPoint(x, y)!;
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y }));
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x, clientY: y }));
-    w.advance(0.3);
-    return w.selectedBay();
-  });
-  expect(picked, 'tapping a crate did not select it').toBe('cell');
-  await expect(page.locator('#shopCard')).toContainText('Fuel Cell');
-
-  /* And buying works, out of the drawer. */
+  await page.locator('.sysb[data-sys="hull"]').click();
+  await expect(page.locator('#rack .bcard[data-key="patch"]')).toHaveCount(1);
+  await expect(page.locator('#rack .bcard[data-key="coolant"]'), 'a supply never held is on sale').toHaveCount(0);
+  await page.locator('.sysb[data-sys="engines"]').click();
+  await expect(page.locator('#rack .bcard[data-key="cell"]')).toHaveCount(1);
   const before = await page.evaluate(() => (window as any).__cw.g.kit.cell);
-  await page.locator('#shopCard .cbuy').click();
-  const after = await page.evaluate(() => (window as any).__cw.g.kit.cell);
-  expect(after, 'buying from the drawer did nothing').toBe(before + 1);
-
-  /* A tap on nothing shuts it, and drops the selection with it - the card must
-     not keep offering something that is no longer on screen.
-
-     NOT a second tap on the handle, which was the first design and does not
-     survive the drawer opening: the handle swings down and forward with the
-     flap, which on a portrait phone puts it under the tray. The control that
-     opens a drawer cannot also be the one that shuts it when opening it is
-     what moves it out of reach. */
-  const shut = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    const el = document.getElementById('shopStage')!;
-    const x = Math.round(window.innerWidth * 0.5);
-    /* Y11 moved the aisle arrows out of the aisle bar and down into
-       .shopnav, which shrank the bar and let the room's own framing fill the
-       space that freed up - so a FIXED 22% down the screen is no longer
-       guaranteed to be the empty strip it used to be; it now lands on a case.
-       Measured fresh instead, the same way the frame tests above do: just
-       under the aisle bar is the one band of the room that stays empty at
-       every station regardless of how the bar above it is sized. */
-    const barBottom = document.querySelector('#shop .aislebar')!.getBoundingClientRect().bottom;
-    const y = Math.round(barBottom + 14);
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y }));
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x, clientY: y }));
-    w.advance(3);
-    return { open: w.drawerOpen(), sel: w.selectedBay(), mode: w.g.mode, at: x + ',' + y };
-  });
-  expect(shut.open, 'the drawer did not shut; tapped ' + shut.at +
-    ' in mode ' + shut.mode).toBe(false);
-  expect(shut.sel, 'shutting the drawer left a crate selected').toBe(null);
+  await page.locator('#rack .bcard[data-key="cell"] button.bbuy').click();
+  expect(await page.evaluate(() => (window as any).__cw.g.kit.cell)).toBe(before + 1);
 });
 
 test('a supply cache hands over something new, and the Outfitter stocks it', async ({ page }) => {
@@ -2604,18 +2327,14 @@ test('a supply cache hands over something new, and the Outfitter stocks it', asy
   expect(got.head, 'a consumable was announced as a device').toBe('NEW SUPPLY');
   expect(got.mode, 'the discovery paused the game').toBe('play');
 
-  /* And now it is in the drawer. */
+  /* And now it is on sale, in the system it serves. */
   await page.evaluate(() => {
     const w = (window as any).__cw;
     w.g.credits = 9e6; w.g.px = w.START_X; w.g.pd = -1; w.advance(0.5);
     document.getElementById('btnShop')!.click();
   });
   await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
-  const shown = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    return w.kitCases.filter((c: any) => c.group.visible).map((c: any) => c.key);
-  });
-  expect(shown, 'the consumable was found and the drawer is still empty').toEqual(got.kit);
+  await tapBay(page, got.kit![0]);
 });
 
 /* ---------- round seven: running dry kills you ----------
@@ -4191,57 +3910,32 @@ test('the Outfitter is drivable with arrows and a confirm, not only with a thumb
   await page.locator('#btnShop').dispatchEvent('click');
   await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
 
-  /* Nothing picked yet. The first press picks an end rather than doing
-     nothing - a control whose first press is a no-op reads as broken. */
-  expect(await page.evaluate(() => (window as any).__cw.selectedBay())).toBeNull();
-  await page.locator('#bayD').dispatchEvent('click');
-  const first = await page.evaluate(() => (window as any).__cw.selectedBay());
-  expect(first, 'DOWN selected nothing at all').not.toBeNull();
+  /* Round seventeen, AN: the fitting bay. Left and right walk the six
+     systems, up and down the cards in the rack, and Enter presses the picked
+     card's own buy button - the same button a thumb presses. */
+  const key = (k: string) => page.evaluate((kk) =>
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: kk, bubbles: true })), k);
+  expect(await page.evaluate(() => (window as any).__cw.baySystem())).toBe('drill');
+  await key('ArrowRight');
+  expect(await page.evaluate(() => (window as any).__cw.baySystem()), 'RIGHT did not walk to the next system').toBe('hold');
+  await key('ArrowLeft');
+  expect(await page.evaluate(() => (window as any).__cw.baySystem())).toBe('drill');
 
-  /* And the card follows the selection, with the description he asked for. */
-  await expect(page.locator('#shopCard')).toContainText('Lv');
+  /* The picked card is marked, and DOWN moves the mark. */
+  await key('ArrowRight'); await key('ArrowRight');   // ENGINES, the longest rack
+  await expect(page.locator('#rack .bcard.sel')).toHaveCount(1);
+  const first = await page.locator('#rack .bcard.sel').getAttribute('data-key');
+  await key('ArrowDown');
+  const second = await page.locator('#rack .bcard.sel').getAttribute('data-key');
+  expect(second, 'DOWN did not move to another card').not.toBe(first);
+  await key('ArrowUp');
+  expect(await page.locator('#rack .bcard.sel').getAttribute('data-key'), 'UP did not come back').toBe(first);
 
-  await page.locator('#bayD').dispatchEvent('click');
-  const second = await page.evaluate(() => (window as any).__cw.selectedBay());
-  expect(second, 'DOWN did not move to another case').not.toBe(first);
-  await page.locator('#bayU').dispatchEvent('click');
-  expect(await page.evaluate(() => (window as any).__cw.selectedBay()),
-    'UP did not come back to where DOWN started').toBe(first);
-
-  /* The arrows walk the SAME list a tap picks from, in room order, so the two
-     ways of choosing cannot disagree about what "next" means. */
-  const keys: string[] = await page.evaluate(() => (window as any).__cw.selectableKeys());
-  expect(keys.length, 'nothing is selectable in a stocked aisle').toBeGreaterThan(1);
-  expect(keys.indexOf(second) - keys.indexOf(first),
-    'DOWN did not move exactly one case along the shelf').toBe(1);
-
-  /* At the end of the shelf the arrow greys rather than wrapping: wrapping a
-     linear shelf is how a player loses track of where they are standing. */
-  for (let i = 0; i < keys.length + 2; i++) await page.locator('#bayD').dispatchEvent('click');
-  expect(await page.evaluate(() => (window as any).__cw.selectedBay())).toBe(keys[keys.length - 1]);
-  await expect(page.locator('#bayD')).toHaveClass(/gone/);
-
-  /* The confirm buys the selected thing, and it is the card's own button - so
-     it carries the price and refuses when the price cannot be paid. */
-  await page.locator('#bayU').dispatchEvent('click');
-  const buying = await page.evaluate(() => {
-    const cw = (window as any).__cw;
-    const key = cw.selectedBay();
-    return { key, before: cw.g.up[key] || 0 };
-  });
-  await page.locator('#shopCard button.buy, #shopCard button.cbuy').first().dispatchEvent('click');
-  const after = await page.evaluate((k) => (window as any).__cw.g.up[k as string] || 0, buying.key);
-  expect(after, 'the confirm did not buy the selected upgrade').toBe(buying.before + 1);
-
-  /* And the keyboard drives the same room: Enter is the same confirm. */
-  const byKey = await page.evaluate(() => {
-    const cw = (window as any).__cw;
-    const key = cw.selectedBay();
-    const before = cw.g.up[key] || 0;
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    return { before, after: cw.g.up[key] || 0 };
-  });
-  expect(byKey.after, 'Enter is not the confirm').toBe(byKey.before + 1);
+  /* Enter buys the picked card. */
+  const before = await page.evaluate((k) => (window as any).__cw.g.up[k as string] || 0, first);
+  await key('Enter');
+  const after = await page.evaluate((k) => (window as any).__cw.g.up[k as string] || 0, first);
+  expect(after, 'Enter did not buy the picked card').toBe(before + 1);
 });
 
 test('focus loss pauses the audio context and coming back resumes it', async ({ page }) => {
@@ -4448,51 +4142,6 @@ test('a thumb that drifts off the key is still holding it, and sliding hands ove
 
   await page.mouse.up();
   expect(await held(), 'lifting the thumb did not stop the ship').toBe(null);
-});
-
-/* ---------- the shop's empty card says something once the hint retires ----------
-
-   `buildCard` left the card slot deliberately blank while the floating
-   "SWIPE TO WALK THE AISLES" hint was up, so the same sentence would not be on
-   one screen twice. Correct - and it expires. `retireHint` puts the hint away
-   for good on the first walk and remembers it in `localStorage`, so from the
-   second visit onward the hint is gone AND the slot is blank: 124 px of empty
-   under the room with nothing anywhere saying what to do. The `.cempty` rule
-   in the stylesheet had been styled for a sentence nobody ever wrote. */
-test('the shop tells you what to do after the hint has retired, and never twice at once', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
-  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
-
-  const openShop = async () => {
-    await page.locator('#btnShop').dispatchEvent('click');
-    await expect(page.locator('#shop')).not.toHaveClass(/hidden/);
-    await page.waitForTimeout(400);
-  };
-  const hintUp = () => page.locator('#shopHint').evaluate((e) => !e.classList.contains('gone'));
-  const cardText = () => page.locator('#shopCard').innerText();
-
-  /* First visit: the floating hint carries it, so the card stays quiet. */
-  await openShop();
-  expect(await hintUp(), 'the floating hint was not up on a first visit').toBe(true);
-  expect((await cardText()).trim(),
-    'the card spoke while the floating hint was also up - the same sentence twice on one screen')
-    .toBe('');
-
-  /* Retire the hint the way a player does - by walking an aisle - rather than
-     by calling the function, so the wiring from the arrow to the retirement is
-     part of what this asserts. */
-  await page.locator('#aisleR').click();
-  await page.waitForTimeout(300);
-  await page.locator('#shopClose').dispatchEvent('click');
-  await page.waitForTimeout(300);
-  await openShop();
-
-  expect(await hintUp(), 'the hint came back after being retired').toBe(false);
-  expect((await cardText()).trim().length,
-    'the hint has retired and the card is still blank, so nothing on this screen says what to do')
-    .toBeGreaterThan(0);
 });
 
 /* ---------- the screen does not sleep mid-descent ----------
@@ -5465,4 +5114,66 @@ test('every sheet scrolls to its last item at the phone size', async ({ page }) 
     await page.locator(s.last).dispatchEvent('click');
     await expect(page.locator(s.panel)).toHaveClass(/hidden/);
   }
+});
+
+/* ---------- Round seventeen, AN: the fitting bay's receipts ---------- */
+
+test('the bay: open it, reach the last card of the longest rack, buy in two taps, leave by the X', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.credits = 1e6; w.g.best.depth = 300;
+    for (const k of ['magnet', 'survey', 'receiver', 'drone', 'auto', 'bomb', 'laser']) if (!w.g.found.includes(k)) w.g.found.push(k);
+    for (const k of ['coolant', 'patch', 'cell', 'overdrive', 'bulwark', 'pulse']) if (!w.g.foundKit.includes(k)) w.g.foundKit.push(k);
+  });
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  await page.locator('#btnShop').dispatchEvent('click');
+  await expect(page.locator('#shop')).not.toHaveClass(/hidden/);
+
+  /* The longest rack, found rather than named. */
+  let longest = '', most = 0;
+  for (const sys of ['drill', 'hold', 'engines', 'hull', 'sensors', 'ordnance']) {
+    await page.locator('.sysb[data-sys="' + sys + '"]').click();
+    const n = await page.locator('#rack .bcard').count();
+    if (n > most) { most = n; longest = sys; }
+  }
+  await page.locator('.sysb[data-sys="' + longest + '"]').click();
+  const last = page.locator('#rack .bcard').last();
+  await last.scrollIntoViewIfNeeded();
+  const box = await last.boundingBox();
+  expect(box, 'the last card has no box').toBeTruthy();
+  expect(box!.y + box!.height, 'the last card of ' + longest + ' cannot be scrolled onto the screen').toBeLessThanOrEqual(781);
+
+  /* Two taps: a system, then a card's button. */
+  const before = await page.evaluate(() => (window as any).__cw.g.up.thrust);
+  await page.locator('.sysb[data-sys="engines"]').click();
+  await page.locator('#rack .bcard[data-key="thrust"] button.bbuy').click();
+  expect(await page.evaluate(() => (window as any).__cw.g.up.thrust), 'two taps did not fit a level').toBe(before + 1);
+
+  /* The strip and the rack never sit over the ship: the ship's lowest point on
+     screen is above the strip. */
+  const overlap = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    const b = new w.Box3Ctor().setFromObject(w.player);
+    const bottom = new w.Vec3Ctor(b.getCenter(new w.Vec3Ctor()).x, b.min.y, b.getCenter(new w.Vec3Ctor()).z);
+    bottom.project(w.stationCamera);
+    const y = (-bottom.y * 0.5 + 0.5) * window.innerHeight;
+    return { shipBottom: y, strip: document.getElementById('systems')!.getBoundingClientRect().top };
+  });
+  expect(overlap.shipBottom, 'the ship reaches down behind the system strip').toBeLessThanOrEqual(overlap.strip + 2);
+
+  await page.locator('#shop button.x').click();
+  await expect(page.locator('#shop')).toHaveClass(/hidden/);
+  expect(await page.evaluate(() => (window as any).__cw.g.mode)).toBe('play');
+});
+
+test('every line has a real part on the ship, and none is a placeholder', async ({ page }) => {
+  /* The old shop showed six lines as a plain steel cube - the object that
+     breaks the illusion. The bay shows the ship, so every line bolts on a part
+     of its own. */
+  const got = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    return { parts: w.partKeys() as string[], lines: w.UPGRADES.map((u: any) => u.key) as string[] };
+  });
+  for (const k of got.lines) expect(got.parts, k + ' has no part on the ship').toContain(k);
 });

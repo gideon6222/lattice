@@ -2807,6 +2807,37 @@ spends most of tier 2 hunting it. That is the "wall, not a hunt" the research wa
 it is AL's first target - every key a home and at least four pockets - with credits made to bind
 in tier 2 again by cutting the geodes that still carry the money.
 
+### AN: the fitting bay
+
+Built 2026-09-25. The walked gas station is gone - aisles, cases re-sorted by price, the
+supplies drawer, the dots, the four arrows and the swipe hint - and so is 750 lines of
+`station.ts` that drove them. The shop is one screen: the ship on its lift in the top of the
+frame (drag the stage to turn it; it drifts back into a slow turntable when left alone), six
+system icons at 56 px in the reachable third (DRILL, HOLD, ENGINES, HULL, SENSORS, ORDNANCE),
+and the chosen system as a scrolling rack of cards in a fixed-height sheet. Each card says in
+one sentence what the line does (`WHAT` in config.ts), shows the number going from and to,
+names the keys it wants and how many you hold, and carries its own FIT button with the price.
+Two taps from an open bay to a new level. A found device is a card like any other; one never
+found is not shown. Supplies are cards in the system they serve (`SUPPLY_SYSTEM`). A tap on a
+part of the ship opens its system; a drag on the stage turns the ship and a drag on the rack
+scrolls the rack, never both. Buying swells the new part and leans the camera in, with the
+buy haptic. The keyboard drives it too: left and right for systems, up and down for cards,
+Enter to fit. The header says where you are - THE PAD or GATE n - not a vestigial planet name.
+
+**Every line has its own part on the ship.** Eight lines had none and six showed a plain
+steel cube in the old room: hull plates, the magnet's coil, the survey's probe, the receiver's
+whip antenna, the drone, the autopilot's beacon, the charge rack and the laser's barrel are
+now real geometry in the ship's materials, one or two meshes each so a fully fitted ship stays
+inside the draw-call budget (the budget e2e still passes). Found on the way: the ship lives on
+its own light layer, and a raycaster only sees layer 0, so a tap on the ship hit nothing until
+the pick ray was told to see every layer.
+
+Receipts: e2e tests that open the bay, reach the last card of the longest rack at 360x780,
+fit a level in two taps, find the ship clear of the strip, and leave by the X; that a stage
+drag turns the ship, a rack scroll does not, and a tap on the drill bit opens DRILL; that every
+line has a part on the ship. The room's aisle geometry is still built by `stationroom.ts`, out
+of the camera's view; AO rebuilds the rooms around the same lift and retires it there.
+
 ### Fable's second review, after the research, and what it changed
 
 - **One wrongness colour, defined once.** Hollow Knight's Infection works because orange

@@ -1487,4 +1487,44 @@ export const CAPSTONE_MAT: Partial<Record<UpgradeKey, MatCost>> = {
 export const capstoneCost = (u: Upgrade, lvl: number): MatCost =>
   lvl + 1 === u.max ? (CAPSTONE_MAT[u.key] ?? null) : null;
 
+/* ---------- the fitting bay's systems, round seventeen AN ----------
+
+   Six icons, in the order a player reaches for them. Sixteen rows became six
+   systems (HEAT folded into HULL so the strip fits six icons at 56 px on a
+   360 px-wide phone). Each supply sits in the system it serves, so there is no
+   drawer and no second place to look. */
+export const SYSTEMS = [
+  { key: 'drill', name: 'DRILL' },
+  { key: 'hold', name: 'HOLD' },
+  { key: 'engines', name: 'ENGINES' },
+  { key: 'hull', name: 'HULL' },
+  { key: 'sensors', name: 'SENSORS' },
+  { key: 'ordnance', name: 'ORDNANCE' }
+] as const;
+export type SystemKey = typeof SYSTEMS[number]['key'];
+
+export const SUPPLY_SYSTEM: Record<string, SystemKey> = {
+  coolant: 'hull', patch: 'hull', bulwark: 'hull', cell: 'engines', overdrive: 'drill', pulse: 'sensors'
+};
+
+/* One plain sentence per line, for the card. His words about the old shop:
+   "im not sure what the different options do" - so each says what it DOES for
+   you, and the before-to-after number sits beside it. */
+export const WHAT: Record<string, string> = {
+  drill: 'Cuts rock faster.',
+  laser: 'Cuts a straight line of rock, sealed stone included.',
+  cargo: 'Carries more back from every run.',
+  magnet: 'Pulls dropped ore to you from a distance.',
+  thrust: 'Flies faster, up and down the shaft.',
+  tank: 'Holds more fuel. The top rungs make every cell cheaper to cut.',
+  auto: 'Flies you home on its own, cheaply.',
+  hull: 'More hull between you and heat, gas and falls.',
+  cool: 'Shields the hull from the heat deep down.',
+  drone: 'Mends the hull slowly while you are underground.',
+  scan: 'Your lamp reaches further, and you see more of the rock.',
+  survey: 'Shows ore glowing through solid rock near you.',
+  receiver: 'Hears an unbroken Anchor near you. How near, never which way.',
+  bomb: 'Blows open a patch of rock around what you face.'
+};
+
 export const START_X = Math.floor(W / 2);
