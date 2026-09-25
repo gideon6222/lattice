@@ -2700,6 +2700,38 @@ He answered two questions the same day: **the last gate moves down onto the Vaul
   a one-per-visit item, the Hades Wretched Broker pattern, so reaching a gate is a reason
   in itself.
 
+### AA: the ladder, measured
+
+`npm run campaign` (`tools/campaign.mjs`, model in `tools/campaign-model.mjs`) plays the
+campaign from nothing on the pure layer: mine at whichever of seven shafts pays best per second,
+sell, buy the cheapest rung the shelf allows, and go and get the cheapest survivable goal (a
+device crate, an Anchor, a ready core, the Vault). First reading, 2026-09-25, the ladder as it
+stood before AC:
+
+| Tier | Ends | Runs | Game-minutes | At minute |
+|---|---|---|---|---|
+| 0 (0-113 m) | gate 0 opens | 9 | 7.5 | 7.5 |
+| 1 (113-226 m) | gate 1 opens | 9 | 10.0 | 17.5 |
+| 2 (226-339 m) | gate 2 opens | 23 | 25.5 | 43.0 |
+| 3 (339 m-the Vault) | the Vault | 1 | 2.2 | 45.2 |
+
+**A floor, never a forecast.** The studio's own lessons say it: a perfect, zero-latency scripted
+player winning is evidence that the ladder is fair to a perfect player, not that it is easy, and
+this one never hesitates, never explores and always knows where everything is. His session
+times replace it tier by tier when he plays.
+
+What the reading says: tier 2 is where the time goes - nineteen of its twenty-three runs are
+mining until the ship can survive the heat at 281 m to fetch the laser, which every Anchor of the
+tier needs. Tier 3 is two minutes of flying to the Vault, the empty last quarter the audit
+named, and the reason AC moves the last gate down. Two things the probe hit on the way that are
+the game's and not the probe's: Rustmoor's scar at 42-44 m is an uncuttable plug two columns
+from the pad, and Cryon's scar sits in the same column as tier 1's core (49), so a straight
+shaft to the core is blocked at 47 m. Neither strands a player - both route round - but a core
+column running through an Anchor's remnant is worth avoiding when AC re-places things.
+
+The secrets probe now opens the gates above each leg and stops at the one below it; it had been
+digging straight through barriers.
+
 ### Fable's second review, after the research, and what it changed
 
 - **One wrongness colour, defined once.** Hollow Knight's Infection works because orange

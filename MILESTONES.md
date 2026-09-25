@@ -660,7 +660,7 @@ is in `journal/legacy-plan.md`.
 
 ### Round seventeen: the ladder, finished (2026-09-25)
 
-- [ ] **AA Measure the ladder.** A campaign probe on the pure layer (rebuilt from
+- [x] **AA Measure the ladder.** A campaign probe on the pure layer (rebuilt from
       `tools/econ.mjs`, which still thinks the world is 13 columns wide) plays the ladder:
       mines, buys, breaks each tier's Anchors and core, respects barriers, and prints
       game-minutes and runs per tier; the secrets probe stops at a closed barrier. After it, a per-tier table exists in DESIGN.md that every later retune argues

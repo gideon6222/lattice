@@ -77,19 +77,28 @@ function probe(ox) {
   const gaps = [];
 
   for (const cap of TIERS) {
+    /* The gates above this leg are open and the one at its floor is not: a
+       probe that digs through a closed barrier measures a game that does not
+       exist (round seventeen, AA). */
+    const leg = TIERS.indexOf(cap);
+    H.g.ground.gates = [];
+    for (let t = 0; t < Math.min(leg, H.GATE_COUNT); t++) H.g.ground.gates.push(t);
     const step = Math.max(1, Math.round((cap - shaft) / RUNS_PER_TIER));
     for (let r = 0; r < RUNS_PER_TIER; r++) {
       const target = Math.min(cap, shaft + step);
       const hit = { relic: 0, find: 0, wreck: 0, cache: 0 };
 
       /* down: extend the shaft if this run reaches new ground */
+      let reached = shaft;
       for (let d = shaft + 1; d <= target; d++) {
         const b = H.blockAt(ox, d);
+        if (b && b.hard === Infinity && !b.ghost) break;
+        reached = d;
         if (!b) continue;
         const k = kindOf(b);
         if (k) hit[k]++;
       }
-      shaft = Math.max(shaft, target);
+      shaft = Math.max(shaft, reached);
 
       /* work a corridor at the bottom until the hold would be full, the same
          alternating-side widening econ.mjs uses */
@@ -99,7 +108,7 @@ function probe(ox) {
         for (const dd of [shaft, shaft - 1]) {
           if (dd < 1) continue;
           const b = H.blockAt(ox + x * side, dd);
-          if (!b) continue;
+          if (!b || (b.hard === Infinity && !b.ghost)) continue;
           weight += b.wt || 0;
           const k = kindOf(b);
           if (k) hit[k]++;
