@@ -56,6 +56,8 @@ import type { UpgradeKey } from '../types';
 
 export interface Find {
   key: UpgradeKey;
+  /* The seed slot the device's crate is placed with. Fixed per device; see findAt. */
+  slot: number;
   /* What the banner says at the moment it comes out of the rock. One line,
      present tense, what it DOES - not what it is made of. The research is
      consistent that the fiction does the explaining and the shop row needs no
@@ -71,9 +73,9 @@ export interface Find {
 
 /* Ordered shallowest first, which is also the order they are met. */
 export const FINDS: Find[] = [
-  { key: 'magnet',  below: 20,
+  { key: 'magnet', slot: 1,  below: 20,
     blurb: 'Pulls loose ore toward the ship instead of making you fetch it.' },
-  { key: 'bomb',    below: 40,
+  { key: 'bomb', slot: 2,    below: 40,
     blurb: 'Breaks a pocket of cells at once. Runs on the power meter.' },
   /* 48 m, between the bomb and the Deep Survey.
 
@@ -87,17 +89,15 @@ export const FINDS: Find[] = [
      be arriving after the problem it solves has been suffered through. Deep
      enough that the FIRST descent is still unguided, which is the one descent
      that should be. */
-  { key: 'receiver', below: 48,
+  { key: 'receiver', slot: 3, below: 48,
     blurb: 'Hears an intact Anchor through rock. How near, never which way.' },
-  { key: 'survey',  below: 62,
+  { key: 'survey', slot: 4,  below: 62,
     blurb: 'Reads ore through solid rock, so you can dig at something.' },
-  { key: 'reactor', below: 70,
-    blurb: 'More power, and it comes back faster. Both weapons run off it.' },
-  { key: 'drone',   below: 78,
+  { key: 'drone', slot: 6,   below: 78,
     blurb: 'Mends the hull slowly while you are underground.' },
-  { key: 'auto',    below: 190,
+  { key: 'auto', slot: 7,    below: 190,
     blurb: 'Flies you back to the surface on its own, and cheaply.' },
-  { key: 'laser',   below: 260,
+  { key: 'laser', slot: 8,   below: 260,
     blurb: 'Cuts a straight shaft ahead of you. Expensive in power.' }
 ];
 
@@ -168,7 +168,12 @@ export function findsOn(_leg: number, coreDepthHere: number, found: string[]): F
 export const TIER_ROWS = 4;
 
 export function findAt(f: Find, leg: number, coreDepthHere: number): { x: number; d: number } {
-  const i = FINDS.indexOf(f) + 1;
+  /* The device's own fixed slot, never its place in the list: round
+     seventeen cut the Reactor Core's crate, and an index-based seed moved the
+     Drone, the Autopilot and the Cutting Laser along with it (the laser went
+     from 281 m to 320 m). A seed is part of the world and must not move when a
+     neighbour leaves. */
+  const i = f.slot;
   const lo = Math.max(1, f.below);
   const band = coreDepthHere / TIER_ROWS;
   const tier = Math.min(TIER_ROWS - 1, Math.floor(f.below / band));

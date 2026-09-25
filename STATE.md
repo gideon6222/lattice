@@ -6,8 +6,9 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## What still does not exist
 
-- **Minerals are not ingredients.** Selling also banks them, geodes carry the economy, caches
-  hand out more rare ore than the rock holds (AK, AL, AM).
+- **Keys have no homes yet.** They are ingredients now, but they sit where the old ore roll put
+  them: magmite is thin, so tier 2 runs 43 game-minutes on the probe (it was 29) (AL).
+- **A key find is not an event yet** beyond the old rare-find banner (AM).
 - **The shop is the old walked gas station**, the same at every gate (AN, AO). Back and the X
   work in the browser; on the installed app it has not been pressed yet (AB).
 - **The store listing's mineral and shop paragraphs are pre-overhaul**, and the whole listing
@@ -17,17 +18,18 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## Next three milestones
 
-Done 2026-09-25: **AD, the old spine retired** - the intro, title, descriptions and listing say
-the ladder; dead feed code, the old long-play probe and two dead film scenarios are gone; every
-scenario films clean, and `test/spine.test.mjs` keeps "light nine Anchors" out of anything a
-player reads. Before it, **AC**: the last gate is the Vault's door at 398 m. **AB** is live and
-waits on one press of Android back in the shop on his phone.
+Done 2026-09-25: **AK, minerals become ingredients.** Money sells; keys bank and never sell, are
+never in a cache, and are what every line asks for past its first band. Scrubber and Reactor Core
+cut and refunded. Probe: tier 0 bought on credits, tier 1 on both, tier 2 on keys - but tier 2 is
+now 43 minutes because magmite is thin, which AL fixes. Before it: **AD** retired the old spine,
+**AC** made the last gate the Vault's door. **AB** is live and waits on one press of Android back
+in the shop on his phone.
 
-1. **AK** - minerals become ingredients: keys you bank and never sell.
-2. **AN** - the fitting bay replaces the walked shop.
-3. **AL** - where minerals sit: homes, pockets, and a look of their own.
+1. **AN** - the fitting bay replaces the walked shop.
+2. **AL** - where minerals sit: homes, pockets, a look of their own; tier 2 back under 30 min.
+3. **AM** - a key find is an event, and the Sensors line makes it a hunt.
 
-Then AM, AO, AE, AF, AH, AI, AJ, Z2, V0.
+Then AO, AE, AF, AH, AI, AJ, Z2, V0.
 
 ## Phone readings
 

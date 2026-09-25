@@ -86,7 +86,7 @@
       "gold": 100
     },
     "planet": 0,
-    "value": 162000
+    "value": 66000
   },
   {
     "cargo": {
@@ -95,7 +95,7 @@
       "gold": 100
     },
     "planet": 1,
-    "value": 162000
+    "value": 66000
   },
   {
     "cargo": {
@@ -104,7 +104,7 @@
       "gold": 100
     },
     "planet": 2,
-    "value": 162000
+    "value": 66000
   },
   {
     "cargo": {
@@ -113,7 +113,7 @@
       "gold": 100
     },
     "planet": 3,
-    "value": 162000
+    "value": 66000
   },
   {
     "cargo": {
@@ -163,7 +163,7 @@
       "copper": 25
     },
     "planet": 0,
-    "value": 36000
+    "value": 1000
   },
   {
     "cargo": {
@@ -173,7 +173,7 @@
       "copper": 25
     },
     "planet": 1,
-    "value": 36000
+    "value": 1000
   },
   {
     "cargo": {
@@ -183,7 +183,7 @@
       "copper": 25
     },
     "planet": 2,
-    "value": 36000
+    "value": 1000
   },
   {
     "cargo": {
@@ -193,6 +193,6 @@
       "copper": 25
     },
     "planet": 3,
-    "value": 36000
+    "value": 1000
   }
 ]

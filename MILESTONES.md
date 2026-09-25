@@ -700,7 +700,7 @@ is in `journal/legacy-plan.md`.
       briefs: first-minute, store
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AK Minerals become ingredients.** MONEY (copper, iron, silver, gold, geodes, lodes)
+- [x] **AK Minerals become ingredients.** MONEY (copper, iron, silver, gold, geodes, lodes)
       sells; KEYS (amethyst, emerald, ruby, magmite, coreite, umbrite, Solmarrow) ride in the
       hold by weight, are banked on docking and never sell, and a hull loss takes only the hold,
       never the bank. Rungs 1-3 of a line cost credits only; each later band asks for the keys

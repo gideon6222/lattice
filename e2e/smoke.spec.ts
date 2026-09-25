@@ -932,7 +932,9 @@ test('ore left behind is picked up by flying back through it', async ({ page }) 
       planet: 0, credits: 0, shards: 0,
       up: { drill: 8, cargo: 0, thrust: 4, tank: 8, cool: 9, scan: 4, scrub: 0, auto: 0 },
       kit: { coolant: 0, patch: 0, cell: 0 }, stock: {}, rubble: [],
-      drops: { '5,44': 'amethyst', '4,44': 'gold' },
+      /* Two golds: amethyst is a key since round seventeen (AK) and is worth
+         nothing at the pad, so it could not show up in the haul. */
+      drops: { '5,44': 'gold', '4,44': 'gold' },
       best: { depth: 300, haul: 0 },
       dug, cargo: {}, weight: 0, px: 6, pd: 44
     }));
@@ -956,7 +958,7 @@ test('ore left behind is picked up by flying back through it', async ({ page }) 
       .poll(() => page.evaluate(() => Number(
         (document.querySelector('#haul') as HTMLElement).innerText.replace(/[^0-9]/g, ''))),
         { timeout: DEEP_ENOUGH })
-      .toBeGreaterThan(1900);
+      .toBeGreaterThan(1200);
   });
 
   /* Amethyst is 1400 and gold 660, so anything over 1900 means BOTH drops were
@@ -1048,7 +1050,10 @@ test('the charge and the laser spend power and clear the ground', async ({ page 
     for (let d = 0; d <= 48; d++) dug.push('6,' + d);
     localStorage.setItem('coreward.v2', JSON.stringify({
       planet: 0, credits: 0, shards: 0,
-      up: { drill: 2, cargo: 5, thrust: 1, tank: 6, cool: 0, scan: 3, scrub: 0, auto: 0, bomb: 2, laser: 2 },
+      /* bomb 1: past its first level the charge carries power of its own (the
+         Reactor Core's, round seventeen AK) and recharges faster, which would
+         make the exact power readings below race the trickle. */
+      up: { drill: 2, cargo: 5, thrust: 1, tank: 6, cool: 0, scan: 3, auto: 0, bomb: 1, laser: 2 },
       kit: { coolant: 0, patch: 0, cell: 0 }, stock: {}, rubble: [], drops: {},
       best: { depth: 120, haul: 0 }, charge: 4,
       dug, cargo: {}, weight: 0, px: 6, pd: 47
@@ -1239,7 +1244,8 @@ test('an upgrade past the free tier needs minerals, not just credits', async ({ 
   await expect(card).toContainText('Cooling Rig');
   await expect(buy).toBeDisabled();
   await expect(card.locator('.upmat')).toHaveClass(/short/);
-  await expect(card.locator('.upmat')).toContainText('2 Magmite');
+  /* Round seventeen, AK: magmite is a deep key, asked for one a rung. */
+  await expect(card.locator('.upmat')).toContainText('1 Magmite');
   await expect(card.locator('.upmat'), 'a requirement you cannot meet must say where to go')
     .toContainText('from 210 m');
 
@@ -1279,7 +1285,7 @@ test('an upgrade past the free tier needs minerals, not just credits', async ({ 
 
   /* bought: the level went up and the minerals were actually spent */
   await expect(card).toContainText('Lv 4/7');
-  await expect(card.locator('.upmat')).toContainText('you have 1');
+  await expect(card.locator('.upmat')).toContainText('you have 2');
 
   /* and the vault reflects it */
   await page.locator('#shopClose').dispatchEvent('click');
@@ -2228,11 +2234,11 @@ test('the Outfitter will not sell a device that has not been dug up', async ({ p
   await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
 
   const shelf = await page.evaluate(() => (window as any).__cw.shelfKeys());
-  for (const k of ['laser', 'bomb', 'auto', 'magnet', 'survey', 'drone', 'reactor']) {
+  for (const k of ['laser', 'bomb', 'auto', 'magnet', 'survey', 'drone']) {
     expect(shelf, k + ' is on the shelf of a player who has never found one').not.toContain(k);
   }
   /* And the eight that ARE sold are all there, or the gate has eaten the shop. */
-  for (const k of ['drill', 'cargo', 'thrust', 'tank', 'scan', 'scrub', 'hull', 'cool']) {
+  for (const k of ['drill', 'cargo', 'thrust', 'tank', 'scan', 'hull', 'cool']) {
     expect(shelf, k + ' is sold at the shop and is missing from the shelf').toContain(k);
   }
 

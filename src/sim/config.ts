@@ -1082,12 +1082,12 @@ export function callReach(level: number): number {
 }
 
 export const UPGRADES: Upgrade[] = [
-  { key: 'drill',  name: 'Drill Bit',     base: 340, mul: 1.55, max: 9, mat: 'iron', group: 'rig', unlock: 0,
+  { key: 'drill',  name: 'Drill Bit',     base: 340, mul: 1.55, max: 9, keys: ['amethyst', 'coreite'], system: 'drill', group: 'rig', unlock: 0,
     tiers: ['Steel', 'Tungsten', 'Carbide', 'Diamond', 'Ionized', 'Plasma', 'Graviton', 'Singularity', 'Starbreaker', 'Godcore'],
     effect: (l: number) => 'Power ' + (1 + l * 0.95).toFixed(2) + 'x' },
-  { key: 'cargo',  name: 'Cargo Hold',    base: 320, mul: 1.55, max: 9, mat: 'copper', group: 'rig', unlock: 0,
+  { key: 'cargo',  name: 'Cargo Hold',    base: 320, mul: 1.55, max: 9, keys: ['emerald', 'ruby'], system: 'hold', group: 'rig', unlock: 0,
     effect: (l: number) => (45 + l * 10) + ' kg' },
-  { key: 'thrust', name: 'Thrusters',     base: 300, mul: 1.55, max: 9, mat: 'silver', group: 'rig', unlock: 0,
+  { key: 'thrust', name: 'Thrusters',     base: 300, mul: 1.55, max: 9, keys: ['amethyst', 'magmite'], system: 'engines', group: 'rig', unlock: 0,
     effect: (l: number) => (3.0 + l * 0.7).toFixed(1) + ' cells/s' },
   /* Priced against the depth where running dry actually strands you, not
      against the first haul.
@@ -1095,8 +1095,9 @@ export const UPGRADES: Upgrade[] = [
      The Scanner moved from amethyst at 56 m to copper at 4: amethyst is below
      every heat line and the scanner is an opening-kit row. See HEAT_FRACTION
      for why the line itself moved rather than the tank's mineral. */
-  { key: 'tank',   name: 'Fuel Tank',     base: 1100, mul: 1.55, max: 9, mat: 'silver', group: 'survival', unlock: 0,
-    effect: (l: number) => (90 + l * 40) + ' fuel' },
+  { key: 'tank',   name: 'Fuel Tank',     base: 1100, mul: 1.55, max: 9, keys: ['emerald', 'magmite'], system: 'engines', group: 'survival', unlock: 0,
+    effect: (l: number) => (90 + l * 40) + ' fuel' +
+      (tankSave(l) > 0 ? ' · ' + Math.round(tankSave(l) * 100) + '% less fuel per cell' : '') },
   /* The expensive one, and the ladder you save for.
 
      Unlocked at 78 m rather than 55, which is emerald's own depth: the row now
@@ -1105,26 +1106,14 @@ export const UPGRADES: Upgrade[] = [
      a rig that could not be paid for - two gates on one thing, and one of them
      pointing at nothing. The design it protects is unchanged: you still have to
      survive inside the heat to buy the thing that answers it. */
-  { key: 'cool',   name: 'Cooling Rig',   base: 6000, mul: 1.5, max: 7, mat: 'magmite', group: 'survival', unlock: 226,
+  { key: 'cool',   name: 'Cooling Rig',   base: 6000, mul: 1.5, max: 7, keys: ['magmite', 'coreite'], system: 'hull', group: 'survival', unlock: 226,
     effect: (l: number) => Math.round(Math.min(0.72, l * 0.09) * 100) + '% heat shield' },
   /* The effect line names the framing as well as the lamp, because the
      framing is now the part the player actually feels. */
-  { key: 'scan',   name: 'Scanner Array', base: 700, mul: 1.55, max: 9, mat: 'copper', group: 'instruments', unlock: 0,
+  { key: 'scan',   name: 'Scanner Array', base: 700, mul: 1.55, max: 9, keys: ['emerald', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
     effect: (l: number) => (8 + l * 2.4).toFixed(0) + 'm light · ' +
       Math.round(zoomForScan(l) * 100) + '% view' },
-  /* Tow Insurance stood here. It insured against an outcome that no longer
-     exists - running dry kills you now - so it is gone rather than repriced,
-     and everybody who bought a level gets their credits back on load.
-
-     The Scrubber takes its place on the same counter and on the axis this
-     round is about. The Drill buys speed and never efficiency (see
-     fuelPerCell), which leaves nothing in the game that makes a cell of rock
-     cheaper - so this is it, and it is the only thing that does it. Capped at
-     0.4 so the deepest rock never becomes free: a ladder that ends the
-     constraint is the fault this round exists to fix. */
-  { key: 'scrub',  name: 'Scrubber',      base: 4400, mul: 1.5, max: 8, mat: 'emerald', group: 'survival', unlock: 113,
-    effect: (l: number) => Math.round(scrubSave(l) * 100) + '% less fuel per cell cut' },
-  { key: 'auto',   name: 'Autopilot',     base: 4900, mul: 1.55, max: 6, mat: 'ruby', group: 'instruments', unlock: 113,
+  { key: 'auto',   name: 'Autopilot',     base: 4900, mul: 1.55, max: 6, keys: ['ruby', 'magmite'], system: 'engines', group: 'instruments', unlock: 113,
     effect: (l: number) => (l === 0 ? 'Not installed' : (0.55 - (l - 1) * 0.075).toFixed(2) + ' fuel per meter') },
 
   /* ---------- ordnance ----------
@@ -1137,14 +1126,16 @@ export const UPGRADES: Upgrade[] = [
      Gated so neither arrives before the player has felt the problem it solves.
      The charge at 40 m, about where hard rock starts costing real time; the
      laser at 90 m, where a shaft is long enough that cutting one is a job. */
-  { key: 'bomb',   name: 'Seismic Charge', base: 3000, mul: 1.6, max: 3, mat: 'iron', group: 'ordnance', unlock: 0,
-    effect: (l) => (l === 0 ? 'Not installed' : bombCells(l) + ' cells around the target') },
+  { key: 'bomb',   name: 'Seismic Charge', base: 3000, mul: 1.6, max: 3, system: 'ordnance', group: 'ordnance', unlock: 0,
+    effect: (l) => (l === 0 ? 'Not installed' : bombCells(l) + ' cells around the target' +
+      (ordnancePower(l, 0) > 0 ? ' · +' + ordnancePower(l, 0) + ' power' : '')) },
   /* Ruby, not silver. Silver starts at 22 m and the laser unseals at 90, so
      the mineral gate was doing nothing at all behind the depth gate - one of
      the two was decoration. Ruby lives at 105 m, which puts both gates in the
      same neighbourhood, and a ruby laser is the better fiction anyway. */
-  { key: 'laser',  name: 'Cutting Laser',  base: 12500, mul: 1.6, max: 5, mat: 'coreite', group: 'ordnance', unlock: 226,
-    effect: (l) => (l === 0 ? 'Not installed' : laserRange(l) + ' cells straight ahead') },
+  { key: 'laser',  name: 'Cutting Laser',  base: 12500, mul: 1.6, max: 5, keys: ['magmite', 'coreite'], system: 'drill', group: 'ordnance', unlock: 226,
+    effect: (l) => (l === 0 ? 'Not installed' : laserRange(l) + ' cells straight ahead' +
+      (ordnancePower(0, l) > 0 ? ' · +' + ordnancePower(0, l) + ' power' : '')) },
 
   /* ---------- the second wave ----------
 
@@ -1157,13 +1148,13 @@ export const UPGRADES: Upgrade[] = [
      "the deep is chewing me up" was always a consumable, never a rig. Gated at
      45 m and on iron, both cheap, because this is the one that makes the
      middle of the game survivable rather than the end of it. */
-  { key: 'hull',   name: 'Hull Plating',   base: 3700, mul: 1.5, max: 9, mat: 'amethyst', group: 'survival', unlock: 113,
+  { key: 'hull',   name: 'Hull Plating',   base: 3700, mul: 1.5, max: 9, keys: ['amethyst', 'coreite'], system: 'hull', group: 'survival', unlock: 113,
     effect: (l: number) => (100 + l * 25) + ' hull' },
 
   /* SALVAGE MAGNET. Ore dropped when the hold filled has to be re-approached
      one cell at a time, which is the least interesting minute in the game.
      Radius, not automation: you still have to go back for it. */
-  { key: 'magnet', name: 'Salvage Magnet', base: 1200, mul: 1.5, max: 6, mat: 'copper', group: 'rig', unlock: 0,
+  { key: 'magnet', name: 'Salvage Magnet', base: 1200, mul: 1.5, max: 6, keys: ['emerald', 'ruby'], system: 'hold', group: 'rig', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Pulls drops from ' + (0.8 + l * 0.55).toFixed(1) + ' cells') },
 
   /* DEEP SURVEY. Distinct from the Scanner, which is light and framing: this
@@ -1171,7 +1162,7 @@ export const UPGRADES: Upgrade[] = [
      buried Jump Drive component, which is the thing the goal most needs a way
      to find - a component you can only locate by digging the whole world is a
      goal made of patience. */
-  { key: 'survey', name: 'Deep Survey',    base: 3600, mul: 1.55, max: 5, mat: 'gold', group: 'instruments', unlock: 0,
+  { key: 'survey', name: 'Deep Survey',    base: 3600, mul: 1.55, max: 5, keys: ['amethyst', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Reads ore ' + (2 + l * 1.6).toFixed(1) + ' m through rock') },
 
   /* LATTICE RECEIVER. The other instrument, and the one that answers a question
@@ -1206,25 +1197,29 @@ export const UPGRADES: Upgrade[] = [
      Magnet at 20 for 1200. The depth a device is buried at and the depth its
      row opens at are one fact (INDEX.md rule 10b), and the other six devices
      already agree that way. */
-  { key: 'receiver', name: 'Lattice Receiver', base: 3500, mul: 1.5, max: 5, mat: 'gold', group: 'instruments', unlock: 0,
+  { key: 'receiver', name: 'Lattice Receiver', base: 3500, mul: 1.5, max: 5, keys: ['amethyst', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Hears an intact Anchor ' + callReach(l) + ' m off') },
 
   /* REPAIR DRONE. Turns a bad run into a long one instead of a tow. Slow on
      purpose - it must never make heat survivable, only recoverable, so it is
      an order of magnitude under what soak takes at depth. */
-  { key: 'drone',  name: 'Repair Drone',   base: 4400, mul: 1.5, max: 5, mat: 'amethyst', group: 'survival', unlock: 113,
-    effect: (l: number) => (l === 0 ? 'Not installed' : '+' + (l * 0.55).toFixed(2) + ' hull/s underground') },
-
-  /* REACTOR. Ordnance had two rungs and no ladder of its own: both weapons ran
-     off a meter nothing could improve, so the answer to "I want to use these
-     more" was to stop using them. */
-  { key: 'reactor', name: 'Reactor Core',  base: 4000, mul: 1.5, max: 5, mat: 'gold', group: 'ordnance', unlock: 0,
-    effect: (l: number) => (l === 0 ? 'Not installed' : '+' + l + ' power · ' + (1 + l * 0.35).toFixed(2) + 'x recharge') }
+  { key: 'drone',  name: 'Repair Drone',   base: 4400, mul: 1.5, max: 5, keys: ['emerald', 'magmite'], system: 'hull', group: 'survival', unlock: 113,
+    effect: (l: number) => (l === 0 ? 'Not installed' : '+' + (l * 0.55).toFixed(2) + ' hull/s underground') }
 ];
-/* What the Scrubber saves, as a fraction of a cell's fuel cost. Named rather
-   than inlined because state.ts and the effect line must agree, and two places
-   computing the same curve is two places to get it wrong. */
-export const scrubSave = (l: number) => Math.min(0.4, l * 0.05);
+/* What the Fuel Tank's upper rungs save, as a fraction of a cell's fuel cost.
+   Round seventeen, AK: the Scrubber was cut (an invisible multiplier on a row
+   of its own) and its job folded into the tank's top three rungs, so the line
+   that decides how far you can go also decides what a cell costs to cut.
+   Capped at 0.3 so the deepest rock never becomes free. Named rather than
+   inlined because state.ts and the effect line must agree. */
+export const tankSave = (l: number) => Math.min(0.3, Math.max(0, l - 6) * 0.1);
+
+/* The power the Reactor Core used to sell, folded into the two weapons that
+   spend it (round seventeen, AK: the Reactor was an invisible multiplier on a
+   row of its own). A charge past its first level and a laser past its second
+   each carry a cell of their own. */
+export const ordnancePower = (bomb: number, laser: number) =>
+  Math.max(0, bomb - 1) + Math.max(0, laser - 2);
 
 export const costOf = (u: Upgrade, lvl: number) => Math.round(u.base * Math.pow(u.mul, lvl));
 
@@ -1263,7 +1258,6 @@ export const bombRadius = (l: number) => l + 1;              /* 2, 3, 4 */
 export const bombCells = (l: number) => { const r = bombRadius(l); return 2 * r * r + 2 * r + 1; };
 export const laserRange = (l: number) => 3 + l * 2;          /* 5, 7, 9 */
 
-export const MAT_FROM_LEVEL = 4;
 /* What state a shop case is in, and what its plate should say.
 
    Pure, and separate from the room that draws it, because this is the part with
@@ -1416,40 +1410,46 @@ export function shelfStock(bestDepth: number, found: string[] = []): Upgrade[] {
   return sealed.length ? open.concat(sealed[0]) : open;
 }
 
+/* ---------- keys, round seventeen AK ----------
+
+   His ask of 2026-09-25: *"I want it to be rebalanced, so it feels like they
+   are key ingredients you are trying to find."* The measured reason the first
+   rarity pass did not land was that selling paid credits AND banked the ore, so
+   a mineral was a free tally of where you had been, never something you chose
+   to keep; and that recipes asked for copper and silver in bulk while a vein of
+   coreite finished a recipe.
+
+   So minerals are two kinds. MONEY sells at the pad and is never asked for.
+   KEYS are banked when you dock, never sold, and are what a line asks for past
+   its first band. Every reference game with a special material keeps it out of
+   the sell pool (SteamWorld Dig's orbs, Deep Rock's crafting minerals, Dome
+   Keeper's cobalt): a key you could sell is a key a desperate player sells the
+   run before the gate that needs it. */
+export const KEY_ORES = ['amethyst', 'emerald', 'ruby', 'magmite', 'coreite', 'umbrite', 'solmarrow'];
+export const isKey = (id: string) => KEY_ORES.includes(id);
+
+/* Which band a level belongs to: 0, 1 or 2, the same steps the shelf's level
+   cap takes at the barriers (`levelCap`), so a band opens exactly when the
+   gate that opens it does. */
+export function keyBand(u: Upgrade, level: number): number {
+  const steps = 3;
+  for (let s = 0; s < steps; s++) if (level <= Math.ceil((u.max * (s + 1)) / steps)) return s;
+  return steps - 1;
+}
+
+/* Two of the common keys a rung, one of the deep ones. The supply check lives
+   in `test/keys.test.mjs`: every key's whole ask has to sit well under what
+   the rock holds, because a key is a thing you hunt, never a thing you farm. */
+const KEY_EACH = (id: string) => (id === 'magmite' || id === 'coreite' ? 1 : 2);
+
 export const matCost = (u: Upgrade, lvl: number): MatCost => {
   const buying = lvl + 1;
-  if (buying < MAT_FROM_LEVEL) return null;
-  /* Grows by one a rung, not two.
-
-     Round seven halved how much ore is in the ground, which doubled every
-     mineral gate without anybody choosing to. Measured: maxing the tree wanted
-     72 iron, and at iron's own depth that is about sixteen hundred-cell runs
-     of doing nothing but looking - which is a grind, not a gate. The gate is
-     supposed to say "you have to have BEEN somewhere", and one visit says that
-     as well as three do. */
-  /* Grows by one a rung and stops at four.
-
-     Round seven halved how much ore is in the ground, which doubled every
-     mineral gate without anybody choosing to - maxing the tree wanted 72 iron,
-     about sixteen hundred-cell runs of nothing but looking. The gate is meant
-     to say "you have to have BEEN somewhere", and a fourth trip says that no
-     better than the first three. The cap is what keeps the top of a ladder a
-     purchase rather than an expedition. */
-  /* The cap depends on how much of the mineral is in the ground.
-
-     Round eight made this bite. The Cooling Rig has to be built from something
-     below the heat line - that is the design that makes you survive a heat run
-     before you can buy heat protection - and below the line there is nothing
-     but the rare tier. At a flat cap of four, maxing the rig wanted 21 magmite
-     at 0.78 finds per hundred cells: about 27 hundred-cell runs of doing
-     nothing but looking, which is a grind wearing a gate's clothes.
-
-     So a common mineral is asked for in fours and a rare one in twos. The gate
-     still says "you have to have BEEN somewhere"; it just stops charging the
-     deep minerals as if they were copper. */
-  const ore = DEF[u.mat];
-  const cap = ore && (ore as Ore).chance >= 0.02 ? 4 : 2;
-  return { id: u.mat, need: Math.min(cap, 2 + (buying - MAT_FROM_LEVEL)) };
+  const band = keyBand(u, buying);
+  if (band === 0 || !u.keys) return null;
+  /* A capstone asks for its own key instead (see CAPSTONE_MAT), never both. */
+  if (buying === u.max && CAPSTONE_MAT[u.key]) return null;
+  const id = u.keys[band - 1];
+  return { id, need: KEY_EACH(id) };
 };
 
 /* Everything a tree will ever ask for, used to grandfather old saves and to
@@ -1477,7 +1477,11 @@ export const matTotalFor = (u: Upgrade, throughLevel: number) => {
    the only upgrade already named as an ending, which is the one place in the
    tree a literal legendary find belongs. */
 export const CAPSTONE_MAT: Partial<Record<UpgradeKey, MatCost>> = {
-  drill: { id: 'solmarrow', need: 1 }
+  drill: { id: 'solmarrow', need: 1 },
+  /* Round seventeen, AK: umbrite was needed by nothing. It is the last rung of
+     the two lines that keep you alive deep, where it lives. */
+  hull: { id: 'umbrite', need: 1 },
+  cool: { id: 'umbrite', need: 1 }
 };
 
 export const capstoneCost = (u: Upgrade, lvl: number): MatCost =>

@@ -141,12 +141,16 @@ test('a Solmarrow shortfall reads as short even with every other mineral banked'
   assert.equal(ok.state, 'ready', 'exactly one Solmarrow must be enough to flip it');
 });
 
-test('no other upgrade has been given a key by accident', () => {
+test('only the named lines end on a capstone key', () => {
+  /* Round seventeen, AK: X3 named only the Drill; the Hull and the Cooling Rig
+     now end on umbrite, which nothing asked for before. Anything else ending
+     on a capstone is an accident. */
+  const named = new Set(['drill', 'hull', 'cool']);
   for (const u of H.UPGRADES) {
-    if (u.key === 'drill') continue;
     for (let lvl = 0; lvl < u.max; lvl++) {
-      assert.equal(H.capstoneCost(u, lvl), null,
-        `${u.key} lv${lvl} asks for a capstone key, and X3 named only the Drill`);
+      const c = H.capstoneCost(u, lvl);
+      if (!named.has(u.key)) assert.equal(c, null, `${u.key} lv${lvl + 1} asks for a capstone key`);
+      else if (lvl + 1 === u.max) assert.ok(c, `${u.key} has no capstone at its last level`);
     }
   }
 });

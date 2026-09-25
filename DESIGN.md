@@ -2778,6 +2778,35 @@ are deleted; the rest build states the ladder can reach, and all twenty-five fil
 `test/spine.test.mjs` reads every string a player sees and fails on nine as the goal or "light"
 as the verb.
 
+### AK: minerals become ingredients
+
+Built 2026-09-25. Money (copper, iron, silver, gold, geodes, lodes) sells at the pad and nothing
+else about it is kept; keys (amethyst, emerald, ruby, magmite, coreite, umbrite, Solmarrow) are
+banked when you dock, never sold, worth nothing on the haul readout, and never handed out by a
+cache - a cache's mineral prize pays out as credits. A line's first band is credits only, its
+second band asks for one key and its third for a deeper one (`keyBand`, the same steps the level
+cap takes at the barriers), two of a common key a rung and one of magmite or coreite; the Drill
+ends on Solmarrow and the Hull and the Cooling Rig on umbrite, which nothing asked for before.
+The Cooling Rig's first key is magmite, from inside the heat zone, so the heat run still comes
+before the heat protection. The Scrubber and the Reactor Core are cut - invisible multipliers on
+rows of their own - and refunded in full on load; the Fuel Tank's top three rungs carry the
+fuel-per-cell saving and the two weapons carry the power. Every line now names one of the six
+systems the fitting bay will show.
+
+`test/keys.test.mjs` pins the shape: every key asked for, the rock holding at least 2.5x each
+key's whole ask, no key sold or cached, the first band free of keys, a capstone never asking for
+two. One fault found on the way: the device crates were seeded by their place in the list, so
+cutting the Reactor's crate moved the Drone, the Autopilot and the Cutting Laser (281 m to 320
+m); each device now has a fixed seed slot and they are back where they were.
+
+**The probe, and what it says AL has to fix.** Keys changed the ladder's shape exactly as asked:
+tier 0 is bought on credits (7 purchases waited on credits, none on keys), tier 1 on both (6 and
+7), tier 2 on keys alone (12). But tier 2 now takes 42.5 game-minutes against 29.4 before, the
+Vault at minute 74 against 48: magmite, the heat-zone key, is thin in the rock and the probe
+spends most of tier 2 hunting it. That is the "wall, not a hunt" the research warned about, and
+it is AL's first target - every key a home and at least four pockets - with credits made to bind
+in tier 2 again by cutting the geodes that still carry the money.
+
 ### Fable's second review, after the research, and what it changed
 
 - **One wrongness colour, defined once.** Hollow Knight's Infection works because orange

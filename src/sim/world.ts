@@ -1,4 +1,4 @@
-import { W, START_X, ORES, DEF, baseRock, coreDepth, hardMult, valueMult,
+import { W, START_X, ORES, DEF, isKey, baseRock, coreDepth, hardMult, valueMult,
          GEODE, GAS, CACHE, BLOOM, BLOOM_MAX, LODE, SALVAGE, RUBBLE, RUBBLE_HARD, SEAM, SEAM_CHANCE, TREMOR_SAFE_RADIUS,
          RELIC_COLOR, RELIC_HOST, relicAt, relicFor,
          CAVE_MIN_DEPTH, caveChanceOn, gasChanceOn, geodeChanceOn, SUPPLIES, traitOf,
@@ -720,7 +720,9 @@ export const haulValue = () => {
     /* And a count that is not a real number contributes nothing rather than
        turning the whole haul into NaN, which the HUD then prints. Found by the
        test below rather than by a player, which is the right order. */
-    if (def && Number.isFinite(n)) v += n * def.value;
+    /* A key is banked, never sold (round seventeen, AK), so it is worth
+       nothing at the pad - and the haul readout says so. */
+    if (def && Number.isFinite(n) && !isKey(k)) v += n * def.value;
   }
   return Math.round(v * valueM());
 };
@@ -766,7 +768,10 @@ export function cachePrize(x: number, d: number): CachePrize {
   if (r < 0.86) {
     /* the deepest three minerals this depth can hold, so a deep cache is
        worth more than a shallow one without needing a separate table */
-    const reachable = ORES.filter((o) => o.min <= d);
+    /* Money only (round seventeen, AK): the measured caches handed out more
+       coreite than the rock held and the legendary key as a toast. A key has
+       to be found in the rock, or it is not a thing you hunt. */
+    const reachable = ORES.filter((o) => o.min <= d && !isKey(o.id));
     const pick = reachable.slice(0, 3);
     const o = (pick.length ? pick : reachable)[Math.floor(r2 * Math.max(1, pick.length)) % Math.max(1, pick.length)];
     if (!o) return { kind: 'credits', n: 500 };

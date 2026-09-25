@@ -1,5 +1,5 @@
 import { regionAt, MAP_TILE, WORLD_DEPTH, tilesSeen } from './region';
-import { HULL_MAX, SAVE_KEY, OLD_KEY, START_X, W, UPGRADES, SUPPLIES, ORES, matTotalFor, scrubSave, costOf, traitAt,
+import { HULL_MAX, SAVE_KEY, OLD_KEY, START_X, W, UPGRADES, SUPPLIES, ORES, matTotalFor, tankSave, ordnancePower, matCost, costOf, traitAt,
          bombRadius, laserRange, traitOf, TRAIT_OF, TRAITS, coreDepth,
          valueMult , OVERDRIVE_MULT, PULSE_REACH} from './config';
 import { CHARGE_MAX } from './feel';
@@ -122,8 +122,8 @@ export const g: {
   planet: 0, credits: 0,
   world: 0, trait: 'stable', coreOff: 0, rich: 1,
   won: false,
-  up: { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, scrub: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, reactor: 0, receiver: 0 },
+  up: { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, auto: 0, bomb: 0, laser: 0,
+    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0 },
   kit: { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 },
   dug: new Set<string>(),
   rubble: new Set<string>(),
@@ -182,7 +182,7 @@ export const S = {
      whole point of charging fuel per cell is that the constraint survives the
      ladder. At the cap, 0.6 * 0.92 leaves 55% of the list price, which is a
      real upgrade and not an exemption. */
-  cellFuel: () => (1 - scrubSave(g.up.scrub)) * (relic('rights') ? 0.92 : 1),
+  cellFuel: () => (1 - tankSave(g.up.tank)) * (relic('rights') ? 0.92 : 1),
   autoRate: () => (g.up.auto === 0 ? 0 : 0.55 - (g.up.auto - 1) * 0.075),
   bombR: () => bombRadius(g.up.bomb) * (worldTrait().blastR ?? 1),
   laserLen: () => laserRange(g.up.laser),
@@ -206,8 +206,10 @@ export const S = {
   repair: () => g.up.drone * 0.55,
   /* Ordnance had no ladder of its own; both weapons ran off a meter nothing
      could improve. */
-  powerExtra: () => g.up.reactor,
-  rechargeMult: () => 1 + g.up.reactor * 0.35
+  /* The Reactor Core was cut in round seventeen (AK); its power is carried by
+     the two weapons that spend it. */
+  powerExtra: () => ordnancePower(g.up.bomb, g.up.laser),
+  rechargeMult: () => 1 + ordnancePower(g.up.bomb, g.up.laser) * 0.35
 };
 
 /* A save written before minerals existed has no stock, and its owner has
@@ -218,8 +220,10 @@ export const S = {
 export function grandfatherStock(): Cargo {
   const out: Cargo = {};
   for (const u of UPGRADES) {
-    const owed = matTotalFor(u, g.up[u.key]);
-    if (owed) out[u.mat] = (out[u.mat] || 0) + owed;
+    for (let l = 0; l < g.up[u.key]; l++) {
+      const m = matCost(u, l);
+      if (m) out[m.id] = (out[m.id] || 0) + m.need;
+    }
   }
   return out;
 }
@@ -440,13 +444,26 @@ export function load() {
          no `tow` to find. */
       const towed = (s.up && typeof s.up.tow === 'number') ? s.up.tow : 0;
       if (towed > 0) {
-        const tow = { key: 'scrub' as UpgradeKey, base: 1500, mul: 1.5 };
+        const tow = { base: 1500, mul: 1.5 };
         let back = 0;
         for (let l = 0; l < towed; l++) back += Math.round(tow.base * Math.pow(tow.mul, l));
         g.credits += back;
         R.refund = back;
       }
       delete (g.up as Record<string, number>).tow;
+
+      /* Round seventeen, AK: the Scrubber and the Reactor Core were cut, the
+         same way Tow Insurance was - every credit spent on either comes back,
+         once, read off the RAW save, and the keys are dropped so it cannot be
+         paid twice. Their work lives on in the Fuel Tank's top rungs and in the
+         two weapons. */
+      for (const [k, base, mul] of [['scrub', 4400, 1.5], ['reactor', 4000, 1.5]] as const) {
+        const had = (s.up && typeof s.up[k] === 'number') ? s.up[k] : 0;
+        let back = 0;
+        for (let l = 0; l < had; l++) back += Math.round(base * Math.pow(mul, l));
+        if (back) { g.credits += back; R.refund = (R.refund || 0) + back; }
+        delete (g.up as Record<string, number>)[k];
+      }
 
       /* Devices, and the grandfather clause that has to come with them.
 

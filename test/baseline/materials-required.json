@@ -1,212 +1,127 @@
 {
-  "fromLevel": 4,
   "perUpgrade": [
     {
       "key": "drill",
-      "mat": "iron",
-      "mineralDepth": 16,
-      "steps": [
-        null,
-        null,
-        null,
-        {
-          "id": "iron",
-          "need": 2
-        },
-        {
-          "id": "iron",
-          "need": 3
-        },
-        {
-          "id": "iron",
-          "need": 4
-        },
-        {
-          "id": "iron",
-          "need": 4
-        },
-        {
-          "id": "iron",
-          "need": 4
-        },
-        {
-          "id": "iron",
-          "need": 4
-        }
+      "keys": [
+        "amethyst",
+        "coreite"
       ],
-      "total": 21
-    },
-    {
-      "key": "cargo",
-      "mat": "copper",
-      "mineralDepth": 3,
       "steps": [
         null,
         null,
         null,
         {
-          "id": "copper",
+          "id": "amethyst",
           "need": 2
         },
         {
-          "id": "copper",
-          "need": 3
+          "id": "amethyst",
+          "need": 2
         },
         {
-          "id": "copper",
-          "need": 4
+          "id": "amethyst",
+          "need": 2
         },
         {
-          "id": "copper",
-          "need": 4
+          "id": "coreite",
+          "need": 1
         },
         {
-          "id": "copper",
-          "need": 4
+          "id": "coreite",
+          "need": 1
         },
-        {
-          "id": "copper",
-          "need": 4
-        }
+        null
       ],
-      "total": 21
-    },
-    {
-      "key": "thrust",
-      "mat": "silver",
-      "mineralDepth": 30,
-      "steps": [
-        null,
-        null,
-        null,
+      "capstone": [
         {
-          "id": "silver",
-          "need": 2
-        },
-        {
-          "id": "silver",
-          "need": 3
-        },
-        {
-          "id": "silver",
-          "need": 4
-        },
-        {
-          "id": "silver",
-          "need": 4
-        },
-        {
-          "id": "silver",
-          "need": 4
-        },
-        {
-          "id": "silver",
-          "need": 4
-        }
-      ],
-      "total": 21
-    },
-    {
-      "key": "tank",
-      "mat": "silver",
-      "mineralDepth": 30,
-      "steps": [
-        null,
-        null,
-        null,
-        {
-          "id": "silver",
-          "need": 2
-        },
-        {
-          "id": "silver",
-          "need": 3
-        },
-        {
-          "id": "silver",
-          "need": 4
-        },
-        {
-          "id": "silver",
-          "need": 4
-        },
-        {
-          "id": "silver",
-          "need": 4
-        },
-        {
-          "id": "silver",
-          "need": 4
-        }
-      ],
-      "total": 21
-    },
-    {
-      "key": "cool",
-      "mat": "magmite",
-      "mineralDepth": 210,
-      "steps": [
-        null,
-        null,
-        null,
-        {
-          "id": "magmite",
-          "need": 2
-        },
-        {
-          "id": "magmite",
-          "need": 2
-        },
-        {
-          "id": "magmite",
-          "need": 2
-        },
-        {
-          "id": "magmite",
-          "need": 2
+          "id": "solmarrow",
+          "need": 1
         }
       ],
       "total": 8
     },
     {
-      "key": "scan",
-      "mat": "copper",
-      "mineralDepth": 3,
+      "key": "cargo",
+      "keys": [
+        "emerald",
+        "ruby"
+      ],
       "steps": [
         null,
         null,
         null,
         {
-          "id": "copper",
+          "id": "emerald",
           "need": 2
         },
         {
-          "id": "copper",
-          "need": 3
+          "id": "emerald",
+          "need": 2
         },
         {
-          "id": "copper",
-          "need": 4
+          "id": "emerald",
+          "need": 2
         },
         {
-          "id": "copper",
-          "need": 4
+          "id": "ruby",
+          "need": 2
         },
         {
-          "id": "copper",
-          "need": 4
+          "id": "ruby",
+          "need": 2
         },
         {
-          "id": "copper",
-          "need": 4
+          "id": "ruby",
+          "need": 2
         }
       ],
-      "total": 21
+      "capstone": [],
+      "total": 12
     },
     {
-      "key": "scrub",
-      "mat": "emerald",
-      "mineralDepth": 130,
+      "key": "thrust",
+      "keys": [
+        "amethyst",
+        "magmite"
+      ],
+      "steps": [
+        null,
+        null,
+        null,
+        {
+          "id": "amethyst",
+          "need": 2
+        },
+        {
+          "id": "amethyst",
+          "need": 2
+        },
+        {
+          "id": "amethyst",
+          "need": 2
+        },
+        {
+          "id": "magmite",
+          "need": 1
+        },
+        {
+          "id": "magmite",
+          "need": 1
+        },
+        {
+          "id": "magmite",
+          "need": 1
+        }
+      ],
+      "capstone": [],
+      "total": 9
+    },
+    {
+      "key": "tank",
+      "keys": [
+        "emerald",
+        "magmite"
+      ],
       "steps": [
         null,
         null,
@@ -217,31 +132,107 @@
         },
         {
           "id": "emerald",
-          "need": 3
+          "need": 2
         },
         {
           "id": "emerald",
-          "need": 4
+          "need": 2
         },
         {
-          "id": "emerald",
-          "need": 4
+          "id": "magmite",
+          "need": 1
         },
         {
-          "id": "emerald",
-          "need": 4
+          "id": "magmite",
+          "need": 1
+        },
+        {
+          "id": "magmite",
+          "need": 1
         }
       ],
-      "total": 17
+      "capstone": [],
+      "total": 9
+    },
+    {
+      "key": "cool",
+      "keys": [
+        "magmite",
+        "coreite"
+      ],
+      "steps": [
+        null,
+        null,
+        null,
+        {
+          "id": "magmite",
+          "need": 1
+        },
+        {
+          "id": "magmite",
+          "need": 1
+        },
+        {
+          "id": "coreite",
+          "need": 1
+        },
+        null
+      ],
+      "capstone": [
+        {
+          "id": "umbrite",
+          "need": 1
+        }
+      ],
+      "total": 3
+    },
+    {
+      "key": "scan",
+      "keys": [
+        "emerald",
+        "ruby"
+      ],
+      "steps": [
+        null,
+        null,
+        null,
+        {
+          "id": "emerald",
+          "need": 2
+        },
+        {
+          "id": "emerald",
+          "need": 2
+        },
+        {
+          "id": "emerald",
+          "need": 2
+        },
+        {
+          "id": "ruby",
+          "need": 2
+        },
+        {
+          "id": "ruby",
+          "need": 2
+        },
+        {
+          "id": "ruby",
+          "need": 2
+        }
+      ],
+      "capstone": [],
+      "total": 12
     },
     {
       "key": "auto",
-      "mat": "ruby",
-      "mineralDepth": 168,
+      "keys": [
+        "ruby",
+        "magmite"
+      ],
       "steps": [
         null,
         null,
-        null,
         {
           "id": "ruby",
           "need": 2
@@ -251,46 +242,59 @@
           "need": 2
         },
         {
-          "id": "ruby",
-          "need": 2
+          "id": "magmite",
+          "need": 1
+        },
+        {
+          "id": "magmite",
+          "need": 1
         }
       ],
+      "capstone": [],
       "total": 6
     },
     {
       "key": "bomb",
-      "mat": "iron",
-      "mineralDepth": 16,
+      "keys": null,
       "steps": [
         null,
         null,
         null
       ],
+      "capstone": [],
       "total": 0
     },
     {
       "key": "laser",
-      "mat": "coreite",
-      "mineralDepth": 258,
+      "keys": [
+        "magmite",
+        "coreite"
+      ],
       "steps": [
         null,
         null,
-        null,
         {
-          "id": "coreite",
-          "need": 2
+          "id": "magmite",
+          "need": 1
+        },
+        {
+          "id": "magmite",
+          "need": 1
         },
         {
           "id": "coreite",
-          "need": 2
+          "need": 1
         }
       ],
-      "total": 4
+      "capstone": [],
+      "total": 3
     },
     {
       "key": "hull",
-      "mat": "amethyst",
-      "mineralDepth": 95,
+      "keys": [
+        "amethyst",
+        "coreite"
+      ],
       "steps": [
         null,
         null,
@@ -301,124 +305,132 @@
         },
         {
           "id": "amethyst",
-          "need": 3
+          "need": 2
         },
         {
           "id": "amethyst",
-          "need": 4
+          "need": 2
         },
         {
-          "id": "amethyst",
-          "need": 4
+          "id": "coreite",
+          "need": 1
         },
         {
-          "id": "amethyst",
-          "need": 4
+          "id": "coreite",
+          "need": 1
         },
+        null
+      ],
+      "capstone": [
         {
-          "id": "amethyst",
-          "need": 4
+          "id": "umbrite",
+          "need": 1
         }
       ],
-      "total": 21
+      "total": 8
     },
     {
       "key": "magnet",
-      "mat": "copper",
-      "mineralDepth": 3,
+      "keys": [
+        "emerald",
+        "ruby"
+      ],
       "steps": [
         null,
         null,
-        null,
         {
-          "id": "copper",
+          "id": "emerald",
           "need": 2
         },
         {
-          "id": "copper",
-          "need": 3
+          "id": "emerald",
+          "need": 2
         },
         {
-          "id": "copper",
-          "need": 4
+          "id": "ruby",
+          "need": 2
+        },
+        {
+          "id": "ruby",
+          "need": 2
         }
       ],
-      "total": 9
+      "capstone": [],
+      "total": 8
     },
     {
       "key": "survey",
-      "mat": "gold",
-      "mineralDepth": 64,
+      "keys": [
+        "amethyst",
+        "ruby"
+      ],
       "steps": [
         null,
         null,
-        null,
         {
-          "id": "gold",
+          "id": "amethyst",
           "need": 2
         },
         {
-          "id": "gold",
-          "need": 3
+          "id": "amethyst",
+          "need": 2
+        },
+        {
+          "id": "ruby",
+          "need": 2
         }
       ],
-      "total": 5
+      "capstone": [],
+      "total": 6
     },
     {
       "key": "receiver",
-      "mat": "gold",
-      "mineralDepth": 64,
+      "keys": [
+        "amethyst",
+        "ruby"
+      ],
       "steps": [
         null,
         null,
-        null,
         {
-          "id": "gold",
+          "id": "amethyst",
           "need": 2
         },
         {
-          "id": "gold",
-          "need": 3
+          "id": "amethyst",
+          "need": 2
+        },
+        {
+          "id": "ruby",
+          "need": 2
         }
       ],
-      "total": 5
+      "capstone": [],
+      "total": 6
     },
     {
       "key": "drone",
-      "mat": "amethyst",
-      "mineralDepth": 95,
+      "keys": [
+        "emerald",
+        "magmite"
+      ],
       "steps": [
         null,
         null,
-        null,
         {
-          "id": "amethyst",
+          "id": "emerald",
           "need": 2
         },
         {
-          "id": "amethyst",
-          "need": 3
-        }
-      ],
-      "total": 5
-    },
-    {
-      "key": "reactor",
-      "mat": "gold",
-      "mineralDepth": 64,
-      "steps": [
-        null,
-        null,
-        null,
-        {
-          "id": "gold",
+          "id": "emerald",
           "need": 2
         },
         {
-          "id": "gold",
-          "need": 3
+          "id": "magmite",
+          "need": 1
         }
       ],
+      "capstone": [],
       "total": 5
     }
   ]

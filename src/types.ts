@@ -123,8 +123,8 @@ export interface Block {
 }
 
 export type UpgradeKey =
-  | 'drill' | 'cargo' | 'thrust' | 'tank' | 'cool' | 'scan' | 'scrub' | 'auto'
-  | 'bomb' | 'laser' | 'hull' | 'magnet' | 'survey' | 'drone' | 'reactor'
+  | 'drill' | 'cargo' | 'thrust' | 'tank' | 'cool' | 'scan' | 'auto'
+  | 'bomb' | 'laser' | 'hull' | 'magnet' | 'survey' | 'drone'
   | 'receiver';
 
 export type SupplyKey = 'coolant' | 'patch' | 'cell' | 'overdrive' | 'bulwark' | 'pulse';
@@ -200,10 +200,13 @@ export interface Upgrade {
   /* only the drill has named tiers */
   tiers?: string[];
   effect: (l: number) => string;
-  /* The mineral this upgrade is built out of, required from MAT_FROM_LEVEL up.
-     Its depth is the real gate: you cannot buy the thing until you have been
-     where it lives. */
-  mat: string;
+  /* The two KEYS this line is built from, one per band past the first (round
+     seventeen, AK): levels in the first band cost credits only, the second
+     band asks for keys[0] and the third for keys[1]. A key is a mineral you
+     bank and never sell. Absent on a line no key gates. */
+  keys?: [string, string];
+  /* Which of the six systems of the ship it belongs to (the fitting bay, AN). */
+  system: 'drill' | 'hold' | 'engines' | 'hull' | 'sensors' | 'ordnance';
   /* Which counter of the Outfitter this sits on. */
   group: 'rig' | 'survival' | 'instruments' | 'ordnance';
   /* Deepest metre ever reached before this appears on the shelf at all. Zero

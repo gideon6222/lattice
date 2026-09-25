@@ -1,6 +1,6 @@
 import { panelOpened, panelClosed } from './closestack';
 import * as THREE from 'three';
-import { W, HULL_MAX, DEF, isOre, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf, LODE_COLLAPSE, WAKE_CLOSES, WAKE_TRIES } from './sim/config';
+import { W, HULL_MAX, DEF, isOre, isKey, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf, LODE_COLLAPSE, WAKE_CLOSES, WAKE_TRIES } from './sim/config';
 import { clamp, key, stream } from './sim/util';
 import { FIND_OF } from './sim/finds';
 import { hap } from './haptics';
@@ -12,7 +12,7 @@ import { abilityFor } from './sim/ability';
 import { hintAt } from './sim/hints';
 import { scarHere, repairable, repairRoom, packScar } from './sim/repair';
 import { vaultOpen } from './sim/vaults';
-import { g, S, save, checkpoint, coreM, worldTrait, resetGround, cutGround, padFuel, salePayout, addMark, resetSeen, revealVault, docked } from './sim/state';
+import { g, S, save, checkpoint, coreM, valueM, worldTrait, resetGround, cutGround, padFuel, salePayout, addMark, resetSeen, revealVault, docked } from './sim/state';
 import { blockAt, haulValue, findRoute, planCollapse, cachePrize, findHere } from './sim/world';
 import { R } from './sim/runtime';
 import { lamp } from './scene';
@@ -71,8 +71,22 @@ export function stopDigging() {
 }
 
 export function sell() {
+  /* Keys first, and they are BANKED, never sold (round seventeen, AK): a key
+     is an ingredient you keep for the rung that needs it. Before the early
+     return, or a hold of nothing but keys would be thrown away. */
+  let banked = 0;
+  for (const k in g.cargo) {
+    if (!isKey(k)) continue;
+    g.stock[k] = (g.stock[k] || 0) + g.cargo[k];
+    banked += g.cargo[k];
+    delete g.cargo[k];
+  }
   const v = haulValue();
-  if (v <= 0) { g.cargo = {}; g.weight = 0; return; }
+  if (v <= 0) {
+    g.cargo = {}; g.weight = 0;
+    if (banked) { toast(banked + ' key' + (banked === 1 ? '' : 's') + ' banked'); hap.buy(); save(); }
+    return;
+  }
   /* The ground's own trait and the clean-run bonus come out of the price
      before the assay relics add theirs. */
   const paid = Math.round(salePayout(v) * S.saleBonus());
@@ -91,17 +105,13 @@ export function sell() {
     g.best.haul = v;
     if (!first) { toast('Best haul yet · ◈ ' + v.toLocaleString()); sfx.record(); }
   }
-  /* The pad pays for the ore AND keeps the minerals on your account. It is not
-     a second payment: the upgrades that want minerals want them on top of a
-     credit price, so what this really records is where you have been. Rock is
-     not banked - nothing is ever built out of dirt. */
-  for (const k in g.cargo) {
-    if (DEF[k] && isOre(DEF[k])) g.stock[k] = (g.stock[k] || 0) + g.cargo[k];
-  }
+  /* Money is sold and nothing else about it is kept: it is asked for by no
+     rung (round seventeen, AK - it used to be paid for AND banked, which made
+     every mineral a free tally rather than a choice). */
   g.cargo = {}; g.weight = 0;
   sfx.sell();
   hap.buy();
-  toast(debrief(paid));
+  toast(debrief(paid) + (banked ? '  ·  ' + banked + ' key' + (banked === 1 ? '' : 's') + ' banked' : ''));
   save();
 }
 
@@ -427,8 +437,11 @@ export function grantCache(x: number, d: number, from = 'Supply cache') {
       toast('Supply cache \u00b7 ' + sup.name);
     }
   } else if (p.kind === 'mineral') {
-    g.stock[p.id] = (g.stock[p.id] || 0) + p.n;
-    toast('Supply cache \u00b7 ' + p.n + ' ' + DEF[p.id].name);
+    /* Round seventeen, AK: a cache only ever holds money ore now, and money
+       is asked for by no rung, so it pays out as what it is worth. */
+    const worth = Math.round(p.n * DEF[p.id].value * valueM());
+    g.credits += worth;
+    toast('Supply cache · ' + p.n + ' ' + DEF[p.id].name + ' · ◈ ' + worth.toLocaleString());
   } else {
     g.credits += p.n;
     toast('Supply cache \u00b7 \u25c8 ' + p.n.toLocaleString());
@@ -615,8 +628,8 @@ export function showEvent(title: string, bodyTxt: string, btnTxt: string, cb: ()
 export function hardReset() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_KEY); } catch (e) { /* ignore */ }
   g.planet = 0; g.credits = 0;
-  g.up = { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, scrub: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, reactor: 0, receiver: 0 };
+  g.up = { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, auto: 0, bomb: 0, laser: 0,
+    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0 };
   g.kit = { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 };
   g.stock = {};
   g.relics = []; g.relicsTaken = [];

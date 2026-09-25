@@ -1,4 +1,4 @@
-import { HULL_MAX, DEF, isOre, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
+import { HULL_MAX, DEF, isOre, isKey, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
 import { setGauges, setFuelReserve } from './gauges';
 import { clamp } from './sim/util';
 import { flashScale } from './motion';
@@ -448,8 +448,12 @@ export function buildManifest() {
     row.innerHTML =
       '<span class="dot" style="background:#' + o.color.toString(16).padStart(6, '0') + '"></span>' +
       '<div class="upinfo"><div class="upname">' + o.name + ' <span class="mult">x' + n + '</span></div>' +
-      '<div class="upeff">' + (n * o.wt).toFixed(1) + ' kg · ' + Math.round(o.value * vm).toLocaleString() + ' each</div></div>' +
-      '<div class="val">◈ ' + Math.round(n * o.value * vm).toLocaleString() + '</div>';
+      (isKey(k)
+        /* Round seventeen, AK: a key is banked at the pad, never sold. */
+        ? '<div class="upeff">' + (n * o.wt).toFixed(1) + ' kg · a key, kept at the pad, never sold</div></div>' +
+          '<div class="val">KEY</div>'
+        : '<div class="upeff">' + (n * o.wt).toFixed(1) + ' kg · ' + Math.round(o.value * vm).toLocaleString() + ' each</div></div>' +
+          '<div class="val">◈ ' + Math.round(n * o.value * vm).toLocaleString() + '</div>');
     ui.manifestRows.appendChild(row);
   }
   ui.manifestTotal.textContent = '◈ ' + haulValue().toLocaleString();

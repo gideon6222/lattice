@@ -140,13 +140,31 @@ export function makeCampaign(H) {
     }
     g.cargo = trip.cargo; g.weight = trip.weight;
     g.px = START; g.pd = -1;
+    /* As `sell()` does since round seventeen (AK): money is sold, keys are
+       banked and never sold. */
     const value = Math.round(H.salePayout(H.haulValue()) * S.saleBonus());
-    for (const k in trip.cargo) if (H.isOre(H.DEF[k])) g.stock[k] = (g.stock[k] || 0) + trip.cargo[k];
+    for (const k in trip.cargo) if (H.isKey(k)) g.stock[k] = (g.stock[k] || 0) + trip.cargo[k];
     g.cargo = {}; g.weight = 0;
     g.credits += value;
     return value;
   }
 
+  const PRIORITY = ['cool', 'tank', 'drill', 'hull', 'thrust', 'laser'];
+  /* What each rung was last waiting on before it was bought: its credits, or
+     its key. Round seventeen, AK's receipt: keys should hold back the rungs
+     past each gate, and credits should still hold back the rest. */
+  const waiting = {};
+  const waitedOn = { credits: 0, key: 0 };
+  function noteWaits() {
+    for (const u of H.shelfStock(g.best.depth, g.found)) {
+      const lvl = g.up[u.key] || 0;
+      if (lvl >= Math.min(u.max, H.levelCap(u, g.best.depth))) continue;
+      const needKey = [H.matCost(u, lvl), H.capstoneCost(u, lvl)].some((m) => m && (g.stock[m.id] || 0) < m.need);
+      const needCred = H.costOf(u, lvl) > g.credits;
+      if (needKey && !needCred) waiting[u.key + lvl] = 'key';
+      else if (needCred && !needKey) waiting[u.key + lvl] = 'credits';
+    }
+  }
   function buyAll() {
     const bought = [];
     for (;;) {
@@ -155,14 +173,22 @@ export function makeCampaign(H) {
         const lvl = owned(u);
         if (lvl >= Math.min(u.max, H.levelCap(u, g.best.depth))) return false;
         if (H.costOf(u, lvl) > g.credits) return false;
-        const mc = H.matCost(u, lvl);
-        return !mc || (g.stock[mc.id] || 0) >= mc.need;
+        return [H.matCost(u, lvl), H.capstoneCost(u, lvl)].every((m) => !m || (g.stock[m.id] || 0) >= m.need);
       });
       if (!shelf.length) return bought;
-      const u = shelf.sort((a, b) => H.costOf(a, owned(a)) - H.costOf(b, owned(b)))[0];
+      /* Reach first, then comfort. With keys scarce (round seventeen, AK) the
+         cheapest-first policy spent the probe's first emerald on the hold and
+         the scanner and never on the tank that was blocking the next Anchor -
+         the same mistake no player makes twice. Within a priority, cheapest. */
+      const rank = (u) => { const i = PRIORITY.indexOf(u.key); return i < 0 ? PRIORITY.length : i; };
+      const u = shelf.sort((a, b) => rank(a) - rank(b) || H.costOf(a, owned(a)) - H.costOf(b, owned(b)))[0];
       const lvl = owned(u);
+      const w = waiting[u.key + lvl];
+      if (w) waitedOn[w]++;
       const mc = H.matCost(u, lvl);
       if (mc) g.stock[mc.id] -= mc.need;
+      const cap = H.capstoneCost(u, lvl);
+      if (cap) g.stock[cap.id] -= cap.need;
       g.credits -= H.costOf(u, lvl);
       g.up[u.key] = lvl + 1;
       bought.push(u.key + ' ' + (lvl + 1));
@@ -208,8 +234,27 @@ export function makeCampaign(H) {
      pad, straight into Rustmoor's scar at 42 m, and mined an empty column for
      eighty runs - a policy bug that looked exactly like a balance problem. */
   const MINE_XS = [-24, -16, -8, 2, 10, 18, 26].map((o) => START + o).filter((x) => x >= 1 && x < H.W - 1);
+  /* The keys some rung on the shelf is waiting for right now - a rung the cap
+     allows, whose credits are in reach or close, held back by a key. Round
+     seventeen, AK: keys never sell, so a probe that mined for credits alone
+     sat on 280,000 of them unable to buy a tank level for want of two emerald.
+     A player hunts the key, so the probe values a wanted key well above its
+     weight in money. */
+  const KEY_WANT = 4000;
+  function wantedKeys() {
+    const want = {};
+    for (const u of H.shelfStock(g.best.depth, g.found)) {
+      const lvl = g.up[u.key] || 0;
+      if (lvl >= Math.min(u.max, H.levelCap(u, g.best.depth))) continue;
+      for (const m of [H.matCost(u, lvl), H.capstoneCost(u, lvl)]) {
+        if (m && (g.stock[m.id] || 0) < m.need) want[m.id] = true;
+      }
+    }
+    return want;
+  }
   function bestMine() {
     let best = null;
+    const want = wantedKeys();
     for (const mx of MINE_XS) {
       for (let d = 6; d < H.WORLD_DEPTH; d += 6) {
         const trip = price(mx, d, true);
@@ -217,8 +262,9 @@ export function makeCampaign(H) {
         if (!trip.ok) continue;
         const saved = { cargo: g.cargo, weight: g.weight };
         g.cargo = trip.cargo; g.weight = trip.weight; g.px = START; g.pd = -1;
-        const value = H.salePayout(H.haulValue());
+        let value = H.salePayout(H.haulValue());
         g.cargo = saved.cargo; g.weight = saved.weight;
+        for (const k in trip.cargo) if (want[k]) value += trip.cargo[k] * KEY_WANT;
         const rate = value / Math.max(1, trip.t);
         if (!best || rate > best.rate) best = { d, trip, rate };
       }
@@ -266,11 +312,14 @@ export function makeCampaign(H) {
             minutes: +((secs - s.secs) / 60).toFixed(1),
             atMinute: +(secs / 60).toFixed(1),
             credits: g.credits,
-            drill: g.up.drill, tank: g.up.tank, cool: g.up.cool, hull: g.up.hull
+            drill: g.up.drill, tank: g.up.tank, cool: g.up.cool, hull: g.up.hull,
+            waitedOnCredits: waitedOn.credits, waitedOnKeys: waitedOn.key
           });
+          waitedOn.credits = 0; waitedOn.key = 0;
           tierStart.push({ run: runs, secs });
         }
       } else sinceProgress++;
+      noteWaits();
       const bought = buyAll();
       if (bought.length) sinceProgress = 0;
       if (sinceProgress > stallRuns) { note('stalled: ' + stallRuns + ' runs with nothing new'); break; }

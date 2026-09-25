@@ -40,37 +40,33 @@
       "Power 8.60x",
       "Power 9.55x"
     ],
-    "mat": "iron",
     "mats": [
       null,
       null,
       null,
       {
-        "id": "iron",
+        "id": "amethyst",
         "need": 2
       },
       {
-        "id": "iron",
-        "need": 3
+        "id": "amethyst",
+        "need": 2
       },
       {
-        "id": "iron",
-        "need": 4
+        "id": "amethyst",
+        "need": 2
       },
       {
-        "id": "iron",
-        "need": 4
+        "id": "coreite",
+        "need": 1
       },
       {
-        "id": "iron",
-        "need": 4
+        "id": "coreite",
+        "need": 1
       },
-      {
-        "id": "iron",
-        "need": 4
-      }
+      null
     ],
-    "matTotal": 21
+    "matTotal": 8
   },
   "cargo": {
     "name": "Cargo Hold",
@@ -102,37 +98,36 @@
       "125 kg",
       "135 kg"
     ],
-    "mat": "copper",
     "mats": [
       null,
       null,
       null,
       {
-        "id": "copper",
+        "id": "emerald",
         "need": 2
       },
       {
-        "id": "copper",
-        "need": 3
+        "id": "emerald",
+        "need": 2
       },
       {
-        "id": "copper",
-        "need": 4
+        "id": "emerald",
+        "need": 2
       },
       {
-        "id": "copper",
-        "need": 4
+        "id": "ruby",
+        "need": 2
       },
       {
-        "id": "copper",
-        "need": 4
+        "id": "ruby",
+        "need": 2
       },
       {
-        "id": "copper",
-        "need": 4
+        "id": "ruby",
+        "need": 2
       }
     ],
-    "matTotal": 21
+    "matTotal": 12
   },
   "thrust": {
     "name": "Thrusters",
@@ -164,37 +159,36 @@
       "8.6 cells/s",
       "9.3 cells/s"
     ],
-    "mat": "silver",
     "mats": [
       null,
       null,
       null,
       {
-        "id": "silver",
+        "id": "amethyst",
         "need": 2
       },
       {
-        "id": "silver",
-        "need": 3
+        "id": "amethyst",
+        "need": 2
       },
       {
-        "id": "silver",
-        "need": 4
+        "id": "amethyst",
+        "need": 2
       },
       {
-        "id": "silver",
-        "need": 4
+        "id": "magmite",
+        "need": 1
       },
       {
-        "id": "silver",
-        "need": 4
+        "id": "magmite",
+        "need": 1
       },
       {
-        "id": "silver",
-        "need": 4
+        "id": "magmite",
+        "need": 1
       }
     ],
-    "matTotal": 21
+    "matTotal": 9
   },
   "tank": {
     "name": "Fuel Tank",
@@ -222,41 +216,40 @@
       "250 fuel",
       "290 fuel",
       "330 fuel",
-      "370 fuel",
-      "410 fuel",
-      "450 fuel"
+      "370 fuel · 10% less fuel per cell",
+      "410 fuel · 20% less fuel per cell",
+      "450 fuel · 30% less fuel per cell"
     ],
-    "mat": "silver",
     "mats": [
       null,
       null,
       null,
       {
-        "id": "silver",
+        "id": "emerald",
         "need": 2
       },
       {
-        "id": "silver",
-        "need": 3
+        "id": "emerald",
+        "need": 2
       },
       {
-        "id": "silver",
-        "need": 4
+        "id": "emerald",
+        "need": 2
       },
       {
-        "id": "silver",
-        "need": 4
+        "id": "magmite",
+        "need": 1
       },
       {
-        "id": "silver",
-        "need": 4
+        "id": "magmite",
+        "need": 1
       },
       {
-        "id": "silver",
-        "need": 4
+        "id": "magmite",
+        "need": 1
       }
     ],
-    "matTotal": 21
+    "matTotal": 9
   },
   "cool": {
     "name": "Cooling Rig",
@@ -284,29 +277,25 @@
       "54% heat shield",
       "63% heat shield"
     ],
-    "mat": "magmite",
     "mats": [
       null,
       null,
       null,
       {
         "id": "magmite",
-        "need": 2
+        "need": 1
       },
       {
         "id": "magmite",
-        "need": 2
+        "need": 1
       },
       {
-        "id": "magmite",
-        "need": 2
+        "id": "coreite",
+        "need": 1
       },
-      {
-        "id": "magmite",
-        "need": 2
-      }
+      null
     ],
-    "matTotal": 8
+    "matTotal": 3
   },
   "scan": {
     "name": "Scanner Array",
@@ -338,67 +327,6 @@
       "27m light · 121% view",
       "30m light · 122% view"
     ],
-    "mat": "copper",
-    "mats": [
-      null,
-      null,
-      null,
-      {
-        "id": "copper",
-        "need": 2
-      },
-      {
-        "id": "copper",
-        "need": 3
-      },
-      {
-        "id": "copper",
-        "need": 4
-      },
-      {
-        "id": "copper",
-        "need": 4
-      },
-      {
-        "id": "copper",
-        "need": 4
-      },
-      {
-        "id": "copper",
-        "need": 4
-      }
-    ],
-    "matTotal": 21
-  },
-  "scrub": {
-    "name": "Scrubber",
-    "base": 4400,
-    "mul": 1.5,
-    "max": 8,
-    "tiers": null,
-    "costs": [
-      4400,
-      6600,
-      9900,
-      14850,
-      22275,
-      33413,
-      50119,
-      75178,
-      112767
-    ],
-    "effects": [
-      "0% less fuel per cell cut",
-      "5% less fuel per cell cut",
-      "10% less fuel per cell cut",
-      "15% less fuel per cell cut",
-      "20% less fuel per cell cut",
-      "25% less fuel per cell cut",
-      "30% less fuel per cell cut",
-      "35% less fuel per cell cut",
-      "40% less fuel per cell cut"
-    ],
-    "mat": "emerald",
     "mats": [
       null,
       null,
@@ -409,22 +337,26 @@
       },
       {
         "id": "emerald",
-        "need": 3
+        "need": 2
       },
       {
         "id": "emerald",
-        "need": 4
+        "need": 2
       },
       {
-        "id": "emerald",
-        "need": 4
+        "id": "ruby",
+        "need": 2
       },
       {
-        "id": "emerald",
-        "need": 4
+        "id": "ruby",
+        "need": 2
+      },
+      {
+        "id": "ruby",
+        "need": 2
       }
     ],
-    "matTotal": 17
+    "matTotal": 12
   },
   "auto": {
     "name": "Autopilot",
@@ -450,11 +382,9 @@
       "0.25 fuel per meter",
       "0.18 fuel per meter"
     ],
-    "mat": "ruby",
     "mats": [
       null,
       null,
-      null,
       {
         "id": "ruby",
         "need": 2
@@ -464,8 +394,12 @@
         "need": 2
       },
       {
-        "id": "ruby",
-        "need": 2
+        "id": "magmite",
+        "need": 1
+      },
+      {
+        "id": "magmite",
+        "need": 1
       }
     ],
     "matTotal": 6
@@ -485,10 +419,9 @@
     "effects": [
       "Not installed",
       "13 cells around the target",
-      "25 cells around the target",
-      "41 cells around the target"
+      "25 cells around the target · +1 power",
+      "41 cells around the target · +2 power"
     ],
-    "mat": "iron",
     "mats": [
       null,
       null,
@@ -514,25 +447,27 @@
       "Not installed",
       "5 cells straight ahead",
       "7 cells straight ahead",
-      "9 cells straight ahead",
-      "11 cells straight ahead",
-      "13 cells straight ahead"
+      "9 cells straight ahead · +1 power",
+      "11 cells straight ahead · +2 power",
+      "13 cells straight ahead · +3 power"
     ],
-    "mat": "coreite",
     "mats": [
       null,
       null,
-      null,
       {
-        "id": "coreite",
-        "need": 2
+        "id": "magmite",
+        "need": 1
+      },
+      {
+        "id": "magmite",
+        "need": 1
       },
       {
         "id": "coreite",
-        "need": 2
+        "need": 1
       }
     ],
-    "matTotal": 4
+    "matTotal": 3
   },
   "hull": {
     "name": "Hull Plating",
@@ -564,7 +499,6 @@
       "300 hull",
       "325 hull"
     ],
-    "mat": "amethyst",
     "mats": [
       null,
       null,
@@ -575,26 +509,23 @@
       },
       {
         "id": "amethyst",
-        "need": 3
+        "need": 2
       },
       {
         "id": "amethyst",
-        "need": 4
+        "need": 2
       },
       {
-        "id": "amethyst",
-        "need": 4
+        "id": "coreite",
+        "need": 1
       },
       {
-        "id": "amethyst",
-        "need": 4
+        "id": "coreite",
+        "need": 1
       },
-      {
-        "id": "amethyst",
-        "need": 4
-      }
+      null
     ],
-    "matTotal": 21
+    "matTotal": 8
   },
   "magnet": {
     "name": "Salvage Magnet",
@@ -620,25 +551,27 @@
       "Pulls drops from 3.5 cells",
       "Pulls drops from 4.1 cells"
     ],
-    "mat": "copper",
     "mats": [
       null,
       null,
-      null,
       {
-        "id": "copper",
+        "id": "emerald",
         "need": 2
       },
       {
-        "id": "copper",
-        "need": 3
+        "id": "emerald",
+        "need": 2
       },
       {
-        "id": "copper",
-        "need": 4
+        "id": "ruby",
+        "need": 2
+      },
+      {
+        "id": "ruby",
+        "need": 2
       }
     ],
-    "matTotal": 9
+    "matTotal": 8
   },
   "survey": {
     "name": "Deep Survey",
@@ -662,21 +595,23 @@
       "Reads ore 8.4 m through rock",
       "Reads ore 10.0 m through rock"
     ],
-    "mat": "gold",
     "mats": [
       null,
       null,
-      null,
       {
-        "id": "gold",
+        "id": "amethyst",
         "need": 2
       },
       {
-        "id": "gold",
-        "need": 3
+        "id": "amethyst",
+        "need": 2
+      },
+      {
+        "id": "ruby",
+        "need": 2
       }
     ],
-    "matTotal": 5
+    "matTotal": 6
   },
   "receiver": {
     "name": "Lattice Receiver",
@@ -700,21 +635,23 @@
       "Hears an intact Anchor 82 m off",
       "Hears an intact Anchor 96 m off"
     ],
-    "mat": "gold",
     "mats": [
       null,
       null,
-      null,
       {
-        "id": "gold",
+        "id": "amethyst",
         "need": 2
       },
       {
-        "id": "gold",
-        "need": 3
+        "id": "amethyst",
+        "need": 2
+      },
+      {
+        "id": "ruby",
+        "need": 2
       }
     ],
-    "matTotal": 5
+    "matTotal": 6
   },
   "drone": {
     "name": "Repair Drone",
@@ -738,56 +675,20 @@
       "+2.20 hull/s underground",
       "+2.75 hull/s underground"
     ],
-    "mat": "amethyst",
     "mats": [
       null,
       null,
-      null,
       {
-        "id": "amethyst",
+        "id": "emerald",
         "need": 2
       },
       {
-        "id": "amethyst",
-        "need": 3
-      }
-    ],
-    "matTotal": 5
-  },
-  "reactor": {
-    "name": "Reactor Core",
-    "base": 4000,
-    "mul": 1.5,
-    "max": 5,
-    "tiers": null,
-    "costs": [
-      4000,
-      6000,
-      9000,
-      13500,
-      20250,
-      30375
-    ],
-    "effects": [
-      "Not installed",
-      "+1 power · 1.35x recharge",
-      "+2 power · 1.70x recharge",
-      "+3 power · 2.05x recharge",
-      "+4 power · 2.40x recharge",
-      "+5 power · 2.75x recharge"
-    ],
-    "mat": "gold",
-    "mats": [
-      null,
-      null,
-      null,
-      {
-        "id": "gold",
+        "id": "emerald",
         "need": 2
       },
       {
-        "id": "gold",
-        "need": 3
+        "id": "magmite",
+        "need": 1
       }
     ],
     "matTotal": 5

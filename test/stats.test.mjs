@@ -39,7 +39,7 @@ test('derived stats are unchanged across the full upgrade range', () => {
   out.fuelCap = sweep('tank', 9, () => H.S.fuelCap());
   out.shield = sweep('cool', 9, () => H.S.shield());
   out.light = sweep('scan', 9, () => H.S.light());
-  out.cellFuel = sweep('scrub', 8, () => H.S.cellFuel());
+  out.cellFuel = sweep('tank', 9, () => H.S.cellFuel());
   out.autoRate = sweep('auto', 6, () => H.S.autoRate());
   /* Drill used to be the one stat with two inputs - level, and permanent Core
      Shards from planets you had destroyed. The shards went with the cores in
@@ -182,185 +182,40 @@ test('the trait table and its assignment are unchanged', () => {
   });
 });
 
-/* ---------- the material economy ----------
+/* ---------- the key economy, round seventeen AK ----------
 
-   Credits alone made the upgrade ladder a grind against one number: any ore at
-   any depth bought any upgrade, so WHERE you dug never mattered. Past level
-   three each upgrade also wants the mineral it is built out of, and that
-   mineral's depth is the real gate. These tests are about the gate landing
-   where the design intends rather than about the numbers themselves. */
+   Past its first band a line asks for KEYS - minerals banked and never sold -
+   one key for its second band and a deeper one for its third. These are about
+   the gate landing where the design intends; the supply side lives in
+   keys.test.mjs. */
 
-test('every upgrade is built out of a real, reachable mineral', () => {
+test('every key a line asks for is a real key, and its second is deeper', () => {
   for (const u of H.UPGRADES) {
-    const def = H.DEF[u.mat];
-    assert.ok(def, u.key + ' names a mineral that does not exist: ' + u.mat);
-    assert.ok(H.isOre(def), u.key + ' is built out of ' + u.mat + ', which is rock');
-    /* Reachable on the world where the row UNLOCKS, not on the first world.
-       M5 ended leg 0 at 58 m, so emerald at 78 and ruby at 105 are below it -
-       and so are the rows they belong to, which unlock at 55, 65 and 90 m and
-       cannot be opened on leg 0 either. The claim that matters is that by the
-       time a row is buyable, the mineral it wants exists above that world's
-       core. */
-    let leg = 0;
-    while (leg < 40 && H.coreDepth(leg) <= (u.unlock || 0)) leg++;
-    assert.ok(def.min < H.coreDepth(leg),
-      u.key + ' unlocks at ' + (u.unlock || 0) + ' m, first reachable on leg ' + leg +
-      ' whose core is at ' + H.coreDepth(leg) + ' m, but needs ' + u.mat + ' from ' + def.min + ' m');
-  }
-});
-
-test('the opening hour is untouched, and requirements ramp after it', () => {
-  for (const u of H.UPGRADES) {
-    for (let lvl = 0; lvl < H.MAT_FROM_LEVEL - 1; lvl++)
-      assert.equal(H.matCost(u, lvl), null,
-        u.key + ' wants materials to reach level ' + (lvl + 1) + ', inside the free tier');
-    assert.ok(H.matCost(u, H.MAT_FROM_LEVEL - 1),
-      u.key + ' should start wanting materials at level ' + H.MAT_FROM_LEVEL);
-
-    /* Ramps and then PLATEAUS, which is round seven's change and is deliberate.
-
-       The requirement used to grow by two a rung for ever. With half as much
-       ore in the ground that turned the top of a ladder into an expedition -
-       measured, maxing the tree wanted 72 iron, about sixteen hundred-cell runs
-       of nothing but looking. It grows by one and stops at four now. What still
-       has to hold is that it never goes BACKWARDS and that it does grow at
-       least once, because a flat requirement from the first rung is not a ramp
-       at all. */
-    let prev = 0, grew = 0;
-    for (let lvl = H.MAT_FROM_LEVEL - 1; lvl < u.max; lvl++) {
-      const m = H.matCost(u, lvl);
-      assert.equal(m.id, u.mat, u.key + ' changed mineral mid-ladder');
-      assert.ok(m.need >= prev, u.key + ' requirement fell at level ' + (lvl + 1));
-      if (m.need > prev) grew++;
-      prev = m.need;
+    if (!u.keys) continue;
+    for (const k of u.keys) {
+      assert.ok(H.DEF[k] && H.isOre(H.DEF[k]), u.key + ' asks for ' + k + ', which is not an ore');
+      assert.ok(H.isKey(k), u.key + ' asks for ' + k + ', which is money, not a key');
     }
-    /* A ramp is only possible where the cap leaves room for one. A rare
-       mineral is capped at two and starts at two, so the Cooling Rig's
-       requirement is flat by design - see matCost. What still must hold is
-       that it never falls, which is asserted above for every row. */
-    const cap = H.DEF[u.mat].chance >= 0.02 ? 4 : 2;
-    if (u.max > H.MAT_FROM_LEVEL && cap > 2)
-      assert.ok(grew >= 2, u.key + ' requirement never ramps, it is flat from the first rung');
+    assert.ok(H.DEF[u.keys[1]].min >= H.DEF[u.keys[0]].min,
+      u.key + "'s third band asks for " + u.keys[1] + ' from ' + H.DEF[u.keys[1]].min +
+      ' m, shallower than its second band, ' + u.keys[0]);
   }
 });
 
-/* THE one that carries the design. */
-test('the Cooling Rig is gated behind a mineral inside the heat zone', () => {
+/* THE one that carries the design, carried over from the old material gate. */
+test('the Cooling Rig is gated behind a key from inside the heat zone', () => {
   const cool = H.UPGRADES.find((u) => u.key === 'cool');
-  const mat = H.DEF[cool.mat];
-  /* Measured on the world where the row actually opens, not on leg 0. M5 made
-     the heat line a fraction of each world's core, so "inside the heat zone"
-     is a different metre on every leg and the claim has to be made against the
-     leg that can buy it. */
-  let leg = 0;
-  while (leg < 40 && H.coreDepth(leg) <= cool.unlock) leg++;
-  const heat = H.heatDepth(leg), core = H.coreDepth(leg);
-  assert.ok(mat.min > heat,
-    'cooling must be bought with a mineral from below the heat line of leg ' + leg + ' (' + heat +
-    ' m), so a heat run has to happen BEFORE the heat protection - ' + cool.mat + ' starts at ' + mat.min);
-  const into = (mat.min - heat) / (core - heat);
-  assert.ok(into < 0.6,
-    cool.mat + ' at ' + mat.min + ' m is ' + Math.round(into * 100) + '% of the way from the heat ' +
-    'line to the core on leg ' + leg + ' - that far in, the gate is a wall');
-
-  /* Nothing that a player needs before the heat zone may demand a mineral
-     from inside it. The exemptions are the things you buy BECAUSE you go
-     deep - the rig itself, the autopilot, and the laser, which does not even
-     appear on the shelf until 90 m. */
-  /* Deep Survey joined this list with M5. It exists to find ore through rock
-     at depth and it unlocks at 35 m, which on leg 0 is past the heat line at
-     32 - it is bought BECAUSE you go deep, exactly like the other three. */
-  /* Three rows left this list in round eight, and they left it because they
-     no longer need it. The exemption is for rows that ask for a mineral from
-     INSIDE the heat zone; the heat line moved from 38 m to 199 m when the
-     world became one 452-metre planet, and gold at 64 and amethyst at 95 are
-     both comfortably above it now. Deep Survey, the Repair Drone and the
-     Reactor Core pass the plain rule, so they are held to it. */
-  /* Round fifteen, Y9/Y10: AUTOPILOT left this set, and it is a design change
-     rather than a test being edged out of the way.
-
-     The set means "you buy this because you go deep", and the shop is cut by
-     the barriers now. Three rows wanted to be deep-game and the ore ladder
-     cannot carry three: magmite, coreite and umbrite are rare enough that the
-     "maxing everything" ceiling of twelve hundred-cell runs allows one row
-     each, and umbrite allows three units against the Cutting Laser's four. So
-     one of the three had to come up, and the Autopilot is the one that was
-     never really about depth - it is a convenience on the climb home, it is
-     found at 205 m rather than bought, and at tier 1 with ruby it is priced
-     against ground the player has already been over.
-
-     `cool` and `laser` stay: a heat shield you can buy before meeting heat and
-     a laser you can buy before the sealed halls are both the failure this set
-     exists to name. */
-  const deepOnly = new Set(['cool', 'laser']);
-  for (const u of H.UPGRADES) {
-    if (deepOnly.has(u.key)) continue;
-    assert.ok(H.DEF[u.mat].min < H.heatDepth(0),
-      u.key + ' demands a heat run for ' + u.mat + ', but it is not a deep-game upgrade');
-  }
-  for (const key of deepOnly) {
-    const u = H.UPGRADES.find((x) => x.key === key);
-    /* Exempt means "you buy it because you go deep", and the honest test of
-       that is the row's own unlock against the heat line of leg 0, not a fixed
-       55 m written when the heat line was a fixed 70. */
-    assert.ok(u.unlock >= H.heatDepth(0) * 0.9,
-      key + ' is exempt from the heat-run rule but unseals at ' + u.unlock +
-      ' m, above the leg 0 heat line at ' + H.heatDepth(0));
-  }
-});
-
-test('the mineral gates climb in the same order as the upgrades matter', () => {
-  /* Cargo and drill are what a new player buys first, so they must ask for the
-     shallowest things. Autopilot is the last luxury and asks for the deepest. */
-  const depthOf = (key) => H.DEF[H.UPGRADES.find((u) => u.key === key).mat].min;
-  /* Stated as two groups rather than one chain. The chain was cargo, drill,
-     thrust, tank, scan, cool, auto, and it broke the moment the Scanner moved
-     to copper - which is the RIGHT place for an opening-kit row to sit, so the
-     test was wrong rather than the table. What actually matters is that
-     everything you need to start comes from above the heat line, and
-     everything you buy because you went deep comes from below it. */
-  const open = H.UPGRADES.filter((u) => (u.unlock || 0) === 0);
-  const deep = ['cool', 'auto', 'laser'];
-  const heat = H.heatDepth(0);
-  for (const u of open) {
-    assert.ok(depthOf(u.key) < heat,
-      u.key + ' is an opening row but wants ' + u.mat + ' from ' + depthOf(u.key) +
-      ' m, below the leg 0 heat line at ' + heat);
-  }
-  const deepestOpen = Math.max(...open.map((u) => depthOf(u.key)));
-  for (const k of deep) {
-    assert.ok(depthOf(k) > deepestOpen,
-      k + ' wants ' + depthOf(k) + ' m, no deeper than the opening kit at ' + deepestOpen);
-  }
-  /* And within the opening kit the very first two are still the shallowest. */
-  assert.ok(depthOf('cargo') <= depthOf('drill'));
-  assert.ok(depthOf('drill') <= depthOf('thrust'));
-});
-
-test('maxing everything is a lot of digging but not a wall', () => {
-  const need = {};
-  for (const u of H.UPGRADES) need[u.mat] = (need[u.mat] || 0) + H.matTotalFor(u, u.max);
-
-  for (const [id, n] of Object.entries(need)) {
-    const ore = H.DEF[id];
-    assert.ok(n >= 2, id + ' is asked for only ' + n + ' times - the gate is decorative');
-    /* Expected finds per hundred cells dug at or below the mineral's depth.
-       Anything needing more than a few runs' worth stops being a gate and
-       becomes a grind. */
-    const perHundredCells = ore.chance * 100;
-    const runsWorth = n / perHundredCells;
-    assert.ok(runsWorth < 12,
-      'maxing everything needs ' + n + ' ' + id + ', about ' + runsWorth.toFixed(1) +
-      ' hundred-cell runs of nothing but looking for it');
-  }
+  assert.ok(H.DEF[cool.keys[0]].min > H.heatDepth(0),
+    'cooling must be bought with a key from below the heat line (' + H.heatDepth(0) +
+    ' m), so a heat run happens BEFORE the heat protection - ' + cool.keys[0] + ' starts at ' + H.DEF[cool.keys[0]].min);
 });
 
 test('material requirements are unchanged', () => {
   assertGolden('materials-required', {
-    fromLevel: H.MAT_FROM_LEVEL,
     perUpgrade: H.UPGRADES.map((u) => ({
-      key: u.key, mat: u.mat, mineralDepth: H.DEF[u.mat].min,
+      key: u.key, keys: u.keys || null,
       steps: Array.from({ length: u.max }, (_, l) => H.matCost(u, l)),
+      capstone: Array.from({ length: u.max }, (_, l) => H.capstoneCost(u, l)).filter(Boolean),
       total: H.matTotalFor(u, u.max)
     }))
   });
@@ -368,22 +223,13 @@ test('material requirements are unchanged', () => {
 
 test('an old save is grandfathered exactly, never over-granted', () => {
   const before = { ...H.g.up };
-  H.g.up.cool = 6; H.g.up.drill = 9; H.g.up.cargo = 2; H.g.up.auto = 0;
+  H.g.up.cool = 6; H.g.up.drill = 3; H.g.up.cargo = 2; H.g.up.auto = 0;
   const stock = H.grandfatherStock();
-
   const cool = H.UPGRADES.find((u) => u.key === 'cool');
-  assert.equal(stock[cool.mat], H.matTotalFor(cool, 6),
-    'a level 6 rig must be granted exactly the six levels it already paid for');
-  assert.equal(stock.copper, undefined,
-    'level 2 never cost materials, so nothing is owed for it');
-  assert.equal(stock.ruby, undefined, 'an uninstalled autopilot owes nothing');
-
-  /* and the grant leaves nothing over for the NEXT level */
-  const spentThrough6 = H.matTotalFor(cool, 6);
-  const nextLevel = H.matCost(cool, 6);
-  assert.ok(stock[cool.mat] - spentThrough6 === 0 && nextLevel.need > 0,
-    'grandfathering must not pay for a level the player has not bought');
-
+  let owed = {};
+  for (let l = 0; l < 6; l++) { const m = H.matCost(cool, l); if (m) owed[m.id] = (owed[m.id] || 0) + m.need; }
+  for (const k of Object.keys(owed)) assert.equal(stock[k], owed[k], 'a level 6 rig must be granted exactly the ' + k + ' it already paid for');
+  assert.equal(stock.emerald, undefined, 'level 2 cargo and level 3 drill never cost a key, so nothing is owed');
   Object.assign(H.g.up, before);
 });
 
@@ -542,13 +388,12 @@ test('every upgrade has a counter and a sensible unlock depth', () => {
        just sits where the ladder now does. */
     assert.ok(u.unlock >= 0 && u.unlock < H.coreDepth(4),
       u.key + ' unlocks at ' + u.unlock + ' m, which is past the core of leg 4 at ' + H.coreDepth(4));
-    /* Anything gated has to be gated ABOVE the depth where its own mineral
-       lives, or the shelf unseals at the exact moment you could already
-       afford it and the gate has done nothing. */
-    if (u.unlock > 0)
-      assert.ok(u.unlock <= H.DEF[u.mat].min + 30,
-        u.key + ' unseals at ' + u.unlock + ' m but wants ' + u.mat + ' from ' +
-        H.DEF[u.mat].min + ' m, so one of the two gates is doing nothing');
+    /* Round seventeen, AK: the old rule tied a row's unlock to the depth of
+       the one mineral it was built from. Keys are asked for by band now, and a
+       band opens with its barrier (keys.test.mjs), so each row is held to the
+       six systems of the fitting bay instead. */
+    assert.ok(['drill', 'hold', 'engines', 'hull', 'sensors', 'ordnance'].includes(u.system),
+      u.key + ' belongs to no system of the ship: ' + u.system);
   }
   /* the opening kit has to be big enough to make a first run possible */
   const open = H.UPGRADES.filter((u) => u.unlock === 0);
@@ -716,24 +561,28 @@ test('the second wave of upgrades each answer something the first ten cannot', (
      through and get nothing from teaches them to stop reading the signs - and
      the inverse, a level-0 effect that already does something, means the first
      purchase buys nothing you did not have. */
-  for (const k of ['magnet', 'survey', 'drone', 'reactor']) {
+  for (const k of ['magnet', 'survey', 'drone', 'bomb', 'laser']) {
     H.g.up[k] = 0;
   }
   assert.equal(H.S.magnetR(), 0, 'the magnet pulls before it is bought');
   assert.equal(H.S.surveyM(), 0, 'the survey reads before it is bought');
   assert.equal(H.S.repair(), 0, 'the drone repairs before it is bought');
-  assert.equal(H.S.powerExtra(), 0, 'the reactor adds power before it is bought');
-  assert.equal(H.S.rechargeMult(), 1, 'the reactor speeds recharge before it is bought');
+  assert.equal(H.S.powerExtra(), 0, 'the weapons add power before they are bought');
+  assert.equal(H.S.rechargeMult(), 1, 'the weapons speed recharge before they are bought');
 
-  for (const k of ['magnet', 'survey', 'drone', 'reactor']) {
+  for (const k of ['magnet', 'survey', 'drone']) {
     H.g.up[k] = 1;
   }
   assert.ok(H.S.magnetR() > 0.5, 'the first level of the magnet does nothing worth the price');
   assert.ok(H.S.surveyM() > 1, 'the first level of the survey does nothing worth the price');
   assert.ok(H.S.repair() > 0, 'the first level of the drone does nothing');
-  assert.ok(H.S.powerExtra() >= 1 && H.S.rechargeMult() > 1, 'the first reactor does nothing');
+  /* Round seventeen, AK: the Reactor Core was cut and its power carried by
+     the two weapons, a charge past its first level and a laser past its
+     second. */
+  H.g.up.bomb = 2;
+  assert.ok(H.S.powerExtra() >= 1 && H.S.rechargeMult() > 1, 'a second charge level carries no power');
 
-  for (const k of ['hull', 'magnet', 'survey', 'drone', 'reactor']) H.g.up[k] = 0;
+  for (const k of ['hull', 'magnet', 'survey', 'drone', 'bomb', 'laser']) H.g.up[k] = 0;
 });
 
 test('the repair drone can never outpace the heat it is meant to survive', () => {
