@@ -24,7 +24,8 @@ test('the intro still says what you are looking for', () => {
      "five" on its own and went on passing for three days after W9 deleted the
      five things it counted. */
   const all = H.CAPTIONS.map((c) => c.text).join(' ').toLowerCase();
-  const n = H.ANCHOR_COUNT;
+  /* Round seventeen, AD: the ladder's number, three to a barrier. */
+  const n = H.ANCHORS_PER_GATE;
   const count = new RegExp('\\b(' + words[n] + '|' + n + ')\\b');
 
   assert.ok(count.test(all), 'the intro never says there are ' + n + ' Anchors, so the goal has no shape');

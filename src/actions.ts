@@ -973,7 +973,7 @@ export function vaultReached() {
      one, and changing the words there would go stale against the code that
      explains it. */
   showEvent('THE VAULT',
-    'Nine Anchors, and the center is open. Every core gave the same reason on ' +
+    'The last core, and the center is open. Every core gave the same reason on ' +
     'the way down: releasing it was the kind thing to do. It was never energy. ' +
     'The cores were one thing, held apart, and every one you broke let more of ' +
     'it out - it has been here the whole time, and it is not finished with this planet ' +

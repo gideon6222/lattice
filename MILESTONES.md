@@ -692,7 +692,7 @@ is in `journal/legacy-plan.md`.
       briefs: level-design, stakes, balance
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AD Retire the old spine.** Intro captions, Anchor and centre cards, the store listing
+- [x] **AD Retire the old spine.** Intro captions, Anchor and centre cards, the store listing
       and release notes say the ladder, not "light nine"; Ballast-feed leftovers go (dead
       `feed` path, stale panel lines); film scenarios that build impossible states (`breach`,
       `claim`, `act2`, `act3`) are rebuilt on the ladder or removed. Receipt: a grep test

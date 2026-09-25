@@ -15,7 +15,7 @@ import { sfx, audioState, audioVolume } from './audio';
 import CREDITS_MD from '../assets/CREDITS.md?raw';
 import { summarise, mergeLog, loadLog, type Row } from './sim/telemetry';
 import { R } from './sim/runtime';
-import { feedValue, ballastDrain, unrestBand, UNREST_BANDS, ballastStarted,
+import { ballastDrain, unrestBand, UNREST_BANDS, ballastStarted,
          BALLAST_SAFE, BALLAST_SHORE_COST, BALLAST_LOW } from './sim/unrest';
 import { regionName, regionAt } from './sim/region';
 import { hasAbility } from './sim/ability';
@@ -298,9 +298,8 @@ export function updateHUD() {
   ui.cargoTxt.textContent = g.weight.toFixed(1) + ' / ' + S.cargoCap() + ' KG';
   const isDocked = docked() && g.mode === 'play';
   /* Round fifteen, Y8. The shop opens at the pad AND at any open gate's
-     station - the Ballast and the seal below stay `isDocked` alone, since
-     feeding and repairing the planet are still the pad's and the scar's own
-     jobs. */
+     station - the Ballast panel and the seal below stay `isDocked` alone,
+     since reading the planet is the pad's job and repairing it the scar's. */
   ui.btnShop.style.display = shopHere() && g.mode === 'play' ? '' : 'none';
   /* The Ballast button carries its own alarm. It is the only place the
      campaign's state reaches the HUD, and it only does so when there is
@@ -737,16 +736,15 @@ export function buildCredits() {
 
    The one screen where the campaign is a decision rather than a reading.
 
-   It opens at the pad only, because feeding it is a pad action and because the
-   two bars on it are the sort of thing that would rot into wallpaper if they
+   It opens at the pad only, because the two bars on it are the sort of thing
+   that would rot into wallpaper if they
    were on the HUD while you dig. `CRAFT.md`: a HUD is a claim about what the
    player should be thinking about, and what they should be thinking about
    underground is fuel and the way home.
 
-   The list is BANKED ore and not the hold. That is the tension the whole
-   system exists for: everything here is something the Outfitter also wants,
-   so feeding the planet is paid for out of upgrades. Rock is not on the list -
-   rock does not hold a planet down. */
+   Round seventeen, AD: it used to list banked ore to feed it with. Repair is
+   packing a scar now (Y7), so what is left is the reading and where the work
+   is. */
 export function buildBallast() {
   const s = g.ground;
   const u = worldUnrest();
@@ -835,7 +833,6 @@ export function buildBallast() {
     ? '<div class="upeff" style="padding:10px 0">Nothing to pack it with yet. ' +
       'The Ballast is filled at the Anchors, and you have not broken one.</div>'
     : '<div class="upeff" style="padding:10px 0">Fill it at a scar. Carry ore ' +
-      'down to an Anchor you broke and pack it into the hole - it is worth ' +
-      'three times what tipping it in here ever was, and it settles the ground ' +
-      'around it. ' + broken + ' of them are open to you.</div>';
+      'down to an Anchor you broke and pack it into the hole, and it settles ' +
+      'the ground around it. ' + broken + ' of them are open to you.</div>';
 }

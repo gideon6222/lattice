@@ -2764,6 +2764,20 @@ the per-id count shifts are only those two rows. The frozen golden did not need 
 laser), then 1.5 min to cut through the door into the Vault - the Vault at minute 48.2, and no
 empty tier left.
 
+### AD: the old spine retired
+
+Built 2026-09-25. The collection's words went with its mechanisms: the intro's middle lines are
+"Three Anchors under every barrier. / Break them, and the way down opens."; the title line, the
+page's own description and the store's short description say "break" and never "light nine";
+the store listing's campaign and "planet notices" paragraphs describe the ladder (the mineral
+and shop paragraphs wait for AK and AN, and the whole listing goes back to him before V0, since
+he approved the old one on 2026-09-19). The dead `feed()` path and its test, the Ballast panel's
+feeding lines and the old long-play probe (`tools/longplay.mjs`, superseded by AA's campaign
+probe) are gone. The breach and Claim film scenarios filmed mechanics that no longer exist and
+are deleted; the rest build states the ladder can reach, and all twenty-five film clean.
+`test/spine.test.mjs` reads every string a player sees and fails on nine as the goal or "light"
+as the verb.
+
 ### Fable's second review, after the research, and what it changed
 
 - **One wrongness colour, defined once.** Hollow Knight's Infection works because orange

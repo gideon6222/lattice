@@ -4943,7 +4943,7 @@ test('the page describes itself for a shared link, and names an icon for iOS', a
      two places describing one game is exactly where they drift apart. If the
      listing is reworded, this fails and says so. */
   expect(await meta('meta[property="og:description"]'))
-    .toBe('Dig down, light nine Anchors, and open the center of a dead world.');
+    .toBe('Dig down, break what holds each barrier, and open the center of a dead world.');
 });
 
 /* ---------- losing the GPU ----------

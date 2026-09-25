@@ -97,12 +97,14 @@ export interface Caption {
 /* Three lines, and the first one waits: the hall has to be seen before it is
    captioned, or the words are describing a picture the player has not had.
    Mystery is withholding the explanation, not the goal - a player still
-   leaves knowing there are nine, that they are spread across one world, and
-   that lighting them opens something. */
+   leaves knowing that Anchors hold the barriers, that there are three to a
+   barrier, and that breaking them opens the way down. Round seventeen, AD: it
+   said "nine Anchors... break all nine, and the center opens", the old spine
+   of a collection that ended at the centre. */
 export const CAPTIONS: Caption[] = [
   { at: 3.6, secs: 3.2, text: 'Whoever cut these halls is gone.' },
-  { at: 16.0, secs: 4.4, text: 'Nine Anchors, buried across one world.' },
-  { at: 22.6, secs: 4.8, text: 'Break all nine, and the center opens.' }
+  { at: 16.0, secs: 4.4, text: 'Three Anchors under every barrier.' },
+  { at: 22.6, secs: 4.8, text: 'Break them, and the way down opens.' }
 ];
 
 /* The one sound, and when. sfx.rumble has a 1.6 s attack - "you hear it

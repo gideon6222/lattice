@@ -17,7 +17,6 @@ import { openMap, wireMap } from './mapui';
 import { ANCHOR_COUNT } from './sim/vaults';
 import { MAP_TILE, WORLD_DEPTH, regionName, regionAt } from './sim/region';
 import { W } from './sim/config';
-import { feed } from './sim/unrest';
 import { shoreUp } from './collapse';
 import { mustEl, ui, atSurface, buildShop, buildCard, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, retireHint, buildBallast, updateHUD } from './ui';
 import { dockShip, undockShip, pickBay, selectBay, selectedBay, resizeStation,
@@ -387,8 +386,8 @@ mustEl('btnPause').onclick = () => {
        planet does not have worlds broken or routes to plot. */
     '<div class="up"><div class="upinfo"><div class="upname">The Lattice</div>' +
     '<div class="upeff">' + (g.ground.lit.length >= ANCHOR_COUNT
-      ? (g.won ? 'All nine, and the center is behind you' : 'All nine. The center is open')
-      : 'Anchors broken, of nine') + '</div></div>' +
+      ? (g.won ? 'Every Anchor, and the center is behind you' : 'Every Anchor broken')
+      : 'Anchors broken') + '</div></div>' +
     '<div class="val">' + g.ground.lit.length + ' / ' + ANCHOR_COUNT + '</div></div>' +
     '<div class="up"><div class="upinfo"><div class="upname">Survey</div>' +
     '<div class="upeff">How much of the planet you have had a lamp on</div></div>' +

@@ -64,7 +64,7 @@ export const SCENES = {
     setup: `
       __cw.g.credits = 9e6; __cw.g.best.depth = 300;
       for (const k of ['iron','copper','silver','gold','amethyst','emerald','ruby']) __cw.g.stock[k] = 99;
-      __cw.g.px = 6; __cw.g.pd = -1;
+      __cw.g.px = __cw.START_X; __cw.g.pd = -1;
       __cw.advance(0.5);
       document.getElementById('btnShop').click();
     `,
@@ -116,7 +116,7 @@ export const SCENES = {
     enter: true,
     setup: `
       __cw.g.credits = 800; __cw.g.best.depth = 8;
-      __cw.g.px = 6; __cw.g.pd = -1;
+      __cw.g.px = __cw.START_X; __cw.g.pd = -1;
       __cw.advance(0.5);
       document.getElementById('btnShop').click();
     `,
@@ -148,57 +148,6 @@ export const SCENES = {
     step: `
       __i++;
       __show(__w[__i % __w.length]);
-      __cw.advance(SECS);
-    `
-  },
-
-  /* The breach: the core goes and the world starts closing from the bottom.
-     Eight frames over the first half of the clock, which is where the grade
-     moves fastest. */
-  breach: {
-    secs: 5,
-    frames: 8,
-    enter: true,
-    setup: `
-      __cw.stopClock();
-      __cw.g.up.thrust = 4; __cw.g.up.tank = 9; __cw.g.up.cool = 9; __cw.g.up.drill = 8;
-      __cw.g.best.depth = 300;
-      const core = __cw.coreM();
-      const dug = [];
-      for (let d = 0; d <= core - 1; d++) for (let x = 5; x <= 7; x++) dug.push(x + ',' + d);
-      __cw.g.dug = new Set(dug);
-      __cw.g.px = 6; __cw.g.pd = core - 2;
-      __cw.resetBlocks();
-      __cw.beginBreach();
-      __cw.advance(0.2);
-    `,
-    step: `
-      /* climbing, so the frames show the front rising behind the ship */
-      __cw.R.held = 'up';
-      __cw.advance(SECS);
-    `
-  },
-
-  /* The Claim, from intact to wrecked. Four frames because damage is shown as
-     a lean and a settle, and a lean is only legible against the one before it. */
-  claim: {
-    secs: 0.15,
-    frames: 4,
-    enter: true,
-    setup: `
-      window.__lv = [100, 70, 35, 0];
-      window.__i = 0;
-      window.__show = (v) => {
-        __cw.g.px = 6; __cw.g.pd = -1;
-        __cw.g.claim.refinery = v; __cw.g.claim.derrick = v; __cw.g.claim.shed = v;
-        __cw.g.claim.strain = (100 - v) / 100;
-        __cw.advance(0.3);
-      };
-      __show(__lv[0]);
-    `,
-    step: `
-      __i++;
-      __show(__lv[__i % __lv.length]);
       __cw.advance(SECS);
     `
   },
@@ -291,8 +240,10 @@ export const SCENES = {
       for (let d = 0; d <= 40; d++) dug.push('6,' + d);
       __cw.g.dug = new Set(dug);
       __cw.g.px = 6; __cw.g.pd = 18;
-      /* The wake: five Anchors lit is where act two begins. */
-      __cw.g.ground.lit = [0, 1, 2, 3, 4];
+      /* The wake is the first core's since round seventeen: act two begins
+         with tier 0's three Anchors broken and its gate open. */
+      __cw.g.ground.lit = [0, 1, 2];
+      __cw.g.ground.gates = [0];
       __cw.g.ground.woke = true;
       __cw.advance(0.3);
     `,
@@ -377,7 +328,7 @@ export const SCENES = {
       __cw.g.seen = seen;
       __cw.g.ground.lit = [2, 7, 10];
       __cw.g.best.depth = 400;
-      __cw.g.px = 6; __cw.g.pd = -1;
+      __cw.g.px = __cw.START_X; __cw.g.pd = -1;
       __cw.advance(0.4);
       document.getElementById('btnMap').click();
       __cw.advance(0.4);
@@ -594,6 +545,7 @@ export const SCENES = {
       __cw.g.dug = new Set(dug);
       __cw.g.px = 6; __cw.g.pd = 18;
       __cw.g.ground.lit = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+      __cw.g.ground.gates = [0, 1, 2];
       __cw.g.ground.woke = true;
       /* The Vault has been opened and the card read. The planet is quiet now. */
       __cw.g.won = true;
@@ -643,6 +595,7 @@ export const SCENES = {
       for (let x = VX - 5; x <= VX + 5; x++) for (let d = VD - 6; d <= VD; d++) dug.push(x + ',' + d);
       __cw.g.dug = new Set(dug);
       __cw.g.ground.lit = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+      __cw.g.ground.gates = [0, 1, 2];
       __cw.g.px = VX; __cw.g.pd = VD - 3;
       __cw.resetBlocks();
       __cw.advance(0.3);

@@ -132,18 +132,6 @@ test('feeding prefers deep ore without making shallow ore pointless', () => {
   assert.equal(H.feedable('copper'), true);
 });
 
-test('a feed never overflows, and never silently eats more than it can hold', () => {
-  const s = fresh();
-  s.ballast = 0.95;
-  const gained = H.feed(s, 'solmarrow', 5);
-  assert.ok(s.ballast <= 1, 'the Ballast went over full');
-  assert.ok(Math.abs(gained - 0.05) < 1e-9,
-    `it reported taking ${gained} into 0.05 of room`);
-  /* The caller uses the return to decide what to charge, so a full tank has to
-     report zero rather than a small lie. */
-  assert.equal(H.feed(s, 'copper', 10), 0);
-});
-
 /* ---------- collapse ---------- */
 
 test('a collapse can never take the pad, the ship, or ground already down', () => {

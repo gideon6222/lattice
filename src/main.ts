@@ -29,7 +29,7 @@ import { grantFind, grantCache, coreBroken, vaultReached } from './actions';
 import { openPanels } from './closestack';
 import { openMap, closeMap, mapView, mapPan, mapSetView, draw as mapDraw } from './mapui';
 import { landCollapse, closeGround, shoreUp } from './collapse';
-import { collapseTarget, lightAnchor, wake, WAKE_AT, isAwake, feed, feedValue, MAX_COLLAPSED, newGround } from './sim/unrest';
+import { collapseTarget, lightAnchor, wake, WAKE_AT, isAwake, MAX_COLLAPSED, newGround } from './sim/unrest';
 import { depthTier, gateDepth, gateAnchors, gateReady, GATE_COUNT, coreColumn } from './sim/gate';
 import { ABILITIES, abilityFor, hasAbility } from './sim/ability';
 import { secretsHeard } from './sim/secrets';
@@ -245,9 +245,9 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* So a test can assert one case per upgrade against the real number
        rather than against a literal that goes stale. */
     upgradeCount: UPGRADES.length, supplyCount: SUPPLIES.length,
-    /* The shop and the Ballast as pure calls, so a long-play probe can buy and
-       feed the way the panels do without driving a 3D room with a pointer. */
-    UPGRADES, costOf, matCost, feed, feedValue,
+    /* The shop as pure calls, so a long-play probe can buy the way the panel
+       does without driving a 3D room with a pointer. */
+    UPGRADES, costOf, matCost,
     /* What is actually on the shelf right now, so a test can ask for "the
        sealed case" rather than naming one that may not be stocked. */
     /* Force a full terrain rebuild - for looking at a world's ground without

@@ -544,16 +544,6 @@ export function collapse(s: GroundState, region: number): void {
   s.collapses++;
 }
 
-/* Feed it. Returns how much of the feed the Ballast could actually take, so
-   the caller can refuse to spend ore into a full tank. */
-export function feed(s: GroundState, id: string, n: number): number {
-  const room = 1 - s.ballast;
-  if (room <= 0 || n <= 0) return 0;
-  const gain = Math.min(room, feedValue(id) * n);
-  s.ballast = clamp01(s.ballast + gain);
-  s.fed += n;
-  return gain;
-}
 
 /* Shore up the oldest fallen region, if the Ballast can pay for it. Returns
    the region reopened, or -1. */
