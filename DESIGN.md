@@ -2618,6 +2618,109 @@ later round arguing for a rate change is arguing against a number instead of a m
 the hints are what makes "always more" true without the rate itself needing to move.
 
 
+## Round seventeen: the ladder, finished
+
+His ask of 2026-09-25: go through every request since the barrier change, find what should
+be improved or redesigned, plan it, check with Fable, research, check again, then build.
+Three read-only audits of the code (mechanics against his words, pacing tier by tier,
+presentation against his repeated complaints) and Fable's first review shaped what follows.
+He answered two questions the same day: **the last gate moves down onto the Vault**, and
+**the ending shows the light leaving, not a creature**.
+
+### What the audits found, in the order a player meets it
+
+1. **Two door moments.** The Vault opens on the ninth ANCHOR ("THE CENTER IS OPEN") while
+   barrier 3 still stands; then core 3; then the Vault. His answer was "the last gate
+   should be the door", and the old spine is still the one that opens it.
+2. **The old spine lives beside the new one.** Nine amber pips and a Vault diamond on the
+   HUD, captions that say "break all nine and the center opens", the fifth-Anchor wake as
+   a second escalation next to the per-core drain, Ballast-feeding leftovers, a store
+   listing about lighting nine Anchors, film scenarios for states that can no longer occur.
+3. **The story contradicts itself.** Every Anchor broken REDUCES the drain by a quarter and
+   its card says the planet "holds harder", the opposite of "you are slowly allowing the
+   world to break".
+4. **Readouts stand in for the world.** Integrity speeding up per core is a number; hint 2
+   says the rock "runs warmer" and heat never reads the gates; repair is a SEAL button and a
+   "+X%" toast and the scar never changes; the save point is silent; an ability is a line
+   in a card.
+5. **The barrier and the core are drawn as ore.** Both go through the ore pipeline in
+   colours beside amethyst and gold, so the forcefield reads as uncuttable amethyst and the
+   inviting core as a gold nugget. Neither emits light. All three tiers look identical, so
+   nothing turns from inviting to sinister.
+6. **No guidance.** Touching a barrier says nothing; a core appearing is not an event and
+   neither is on the map.
+7. **The gate shop is the pad's shop.** Same room and shelf (stock keys on best depth), a
+   fuel pump that does nothing there, a vestigial planet name in the header. "New skills in
+   deeper shops" was never built, and nothing new is stocked after 226 m.
+8. **Abilities land in the wrong place.** The Call only answers in regions whose Anchor is
+   broken, so it says nothing about the tier it arrives in. Sink cannot pass sealed stone.
+9. **The deepest quarter is empty.** 339-452 m has no Anchors, core, hint, hazard or stock.
+10. **No back button.** Nothing handles Android back in a fullscreen PWA, so back leaves the
+   app over any panel, and no panel has an X. About 30 readouts on the late-game HUD.
+11. **Nothing measures the ladder.** The long-play probe predates the gates, and the econ and
+   secrets probes walk straight through barriers.
+
+### Decisions
+
+- **The last gate is the Vault's door (his pick).** Gate 3 moves from 339 m down to sit on
+  the Vault; tier 2 becomes 226 m to the door, which also brings the relic and Solmarrow
+  inside a tier that has Anchors. Core 3's break opens the Vault and nothing else does.
+  Core 3 gives the door, not an ability, so the abilities reshuffle: **the Hollow at core 1,
+  the Call at core 2** (and it answers for unbroken regions, so it points somewhere the
+  player has not been), and **Sink leaves the core list to become the first skill a gate
+  shop sells** - which is where "new skills in deeper shops" finally gets built.
+- **Breaking an Anchor makes the planet worse.** The per-Anchor relief is removed; each
+  Anchor adds a step to the drain the first core starts, and the cards stop saying "holds".
+  The fifth-Anchor wake stops being its own system and folds into the first core's "the
+  ground starts to go".
+- **The story blames one thing: the cores are what you let out.** Every caption, card and
+  hint says the same thing, and the Vault card was brought in line in Z1.
+- **The ending shows the light leaving (his pick).** No creature model. The spent cores have
+  stayed lit all game; at the Vault their light leaves the scars one by one and gathers at
+  the center, the planet goes dark from the center upward, and the sky over the pad takes
+  the core's colour. This is Shadow of the Colossus's inversion - the light the player read
+  as good turns out to be the thing itself - and it uses only lights, the lightmap's
+  darkening and the camera, so it can be filmed and proven.
+- **The core's glow is a real light; its menace is the dark around it.** The lightmap only
+  ever darkens (Engineering reference), so a core is a PointLight from a fixed pool that is
+  toggled by intensity, never added or removed (three.js compiles the light count into the
+  shader, so changing it recompiles every material), and the propagated light dims around
+  it tier by tier. The forcefield is one additive, depth-write-off ShaderMaterial strip per
+  barrier (fresnel edge, scrolling noise), one draw call each. Both need a GPU reading
+  before and after, since these are the first lights the world has ever had.
+- **Back closes the top panel.** One close stack: each panel that opens pushes a history
+  entry and registers what closes it; back pops the top panel and does nothing more; on the
+  bare HUD back falls through. CloseWatcher is the newer primitive for this and is used
+  where Chrome has it, with the history stack as the fallback, because the research found
+  an open report that a TWA and an installed PWA do not agree on back.
+- **Repair shows in the rock.** PowerWash Simulator's lesson: split the job into pieces that
+  each visibly finish. A scar refills in stages, cracks closing and violet dimming, and the
+  "+X%" toast goes.
+- **A deeper shop sells what the pad never will.** One skill per gate shop (Sink first) plus
+  a one-per-visit item, the Hades Wretched Broker pattern, so reaching a gate is a reason
+  in itself.
+
+### Fable's second review, after the research, and what it changed
+
+- **One wrongness colour, defined once.** Hollow Knight's Infection works because orange
+  belongs to nothing else. The core's light is that colour, held in one constant, and the
+  pips, the scar and the gate room borrow it; nothing else may use it. A test greps for it.
+- **The barrier's look lives in its rails.** Additive fresnel and scrolling noise is the
+  stock asset-pack forcefield, and his one line about this game's look was "cartoonie".
+  The emitter rails are real geometry with the ship's rock-and-metal treatment; the field
+  between them is thin and reads as heat shimmer.
+- **Back is only proven on the phone.** A desktop test can prove the close stack pops; only
+  the installed app can prove Android back reaches it rather than killing the game. AB's
+  receipt carries a phone reading, the stack is the only way any panel opens (so AG's room
+  cannot miss it), and every panel must scroll to its last item.
+- **The HUD slims without losing what decides a surfacing.** Credits and haul stay; only
+  duplicates fold. Anything more waits for his word after he plays it.
+- **AG, the gate station, moved into the shop overhaul** he asked for the same day (the
+  fitting bay and the gate vendors), so it is planned there rather than twice.
+- **The probe's minutes are a floor.** A probe never hesitates, so AA's table is a lower
+  bound that his own session times replace.
+
+
 ---
 
 # Engineering reference

@@ -657,3 +657,87 @@ is in `journal/legacy-plan.md`.
       V0.
       briefs: phone
       design: ## Round sixteen: closing Fable's review
+
+### Round seventeen: the ladder, finished (2026-09-25)
+
+- [ ] **AA Measure the ladder.** A campaign probe on the pure layer (rebuilt from
+      `tools/econ.mjs`, which still thinks the world is 13 columns wide) plays the ladder:
+      mines, buys, breaks each tier's Anchors and core, respects barriers, and prints
+      game-minutes and runs per tier; the secrets probe stops at a closed barrier. After it, a per-tier table exists in DESIGN.md that every later retune argues
+      against - a lower bound, since a probe never hesitates, replaced tier by tier by his
+      own times when he plays it. Receipt: the probe's own printed table, and a test that a
+      probe cannot walk through a closed barrier.
+      briefs: balance, testing
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AB Back closes the top panel, every panel has an X, and every panel scrolls.** One
+      close stack is the only way a panel opens (event card, map, pause, manifest, Ballast,
+      shop, and any panel added later): Android back pops the top panel and does nothing
+      more, and on the bare HUD it falls through. An X at thumb reach on every panel.
+      Receipt: an e2e test that opens the shop, fires history.back(), and finds it closed
+      and the page alive; a test that every panel-open goes through the stack; an e2e scroll
+      of the shop at 1080x2340 that reaches its last item; and one phone reading on the
+      installed app (shop open, back pressed, the HUD still running) in STATE.md.
+      briefs: menu, web
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AC The last gate is the Vault's door.** Gate 3 moves onto the Vault; core 3's break
+      opens it and nothing else does; the ninth Anchor opens nothing. Abilities reshuffle:
+      the Hollow at core 1, the Call at core 2 answering for unbroken regions too, Sink
+      leaves the core list for the gate shop (AG). Each Anchor broken steps the drain up
+      instead of down, the cards stop saying "holds", and the fifth-Anchor wake folds into
+      the first core. The pip row becomes this tier's three Anchors. Receipt: tests
+      (the ninth Anchor opens nothing, core 3 opens the Vault, the drain rises per Anchor),
+      AA's table rerun with three rows.
+      briefs: level-design, stakes, balance
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AD Retire the old spine.** Intro captions, Anchor and centre cards, the store listing
+      and release notes say the ladder, not "light nine"; Ballast-feed leftovers go (dead
+      `feed` path, stale panel lines); film scenarios that build impossible states (`breach`,
+      `claim`, `act2`, `act3`) are rebuilt on the ladder or removed. Receipt: a grep test
+      that no player text says "nine" as an objective, and every scenario films clean.
+      briefs: first-minute, store
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AE The barrier and the core become objects, and the drain shows in the world.** The
+      core's light is the one wrongness colour, defined once; the pip row, the scar and the
+      gate room take it from that constant and nothing else uses it. The barrier's look lives
+      in two emitter rails, real geometry with the ship's rock-and-metal treatment; the field
+      between them is thin and reads as heat shimmer, not a ribbon. Each core is a real light
+      from a fixed pool that grows darker and more alive tier by tier while the lightmap dims
+      around it; spent cores stay lit. Touching a barrier says what opens it; a core
+      appearing is an event and a map mark. Per core, the heat line rises, dust and tremor
+      step up, and the three hints become things seen near the cores. Receipt: a grep test
+      that the colour's value lives in one file; a film of core 1 and core 3 and a still of
+      a barrier on approach, with the Mobile renderer; a GPU reading before and after.
+      briefs: rendering, lighting, web, feel
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AF Repair shows in the rock.** A scar refills in stages, cracks closing and its
+      glow dimming as it is packed; the "+X%" toast goes; SEAL and every Ballast readout (the pad's
+      sight glass, the shop's wall gauge) stay hidden until the first core. Receipt: a test
+      that the scar's stage follows the packing, and a film.
+      briefs: mechanic-design, feel
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AH The ending: the light leaves.** At the Vault the light of every spent core leaves
+      its scar and gathers at the center, the planet goes dark from the center upward, and
+      the sky over the pad takes the core's colour; a short card follows, never before.
+      Receipt: a film of the whole ending with the Mobile renderer.
+      briefs: lighting, rendering, stakes
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AI Always more, inside every tier.** One visible sign per Anchor broken, in one
+      wrongness colour used nowhere else, spreading from details to mass to air; two of tier
+      0's six buried devices move deeper. Receipt: the secrets probe per tier, rerun.
+      briefs: level-design
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AJ A slimmer HUD, nothing lost.** The depth line folds into the region chip and the
+      three timed supplies sit behind one button; credits and haul stay, since they decide
+      when to surface. Receipt: the readout count before and after, a screenshot at
+      1080x2340, and after his first phone session on it, the readout he missed or his word
+      that none was, in STATE.md.
+      briefs: hud
+      design: ## Round seventeen: the ladder, finished
