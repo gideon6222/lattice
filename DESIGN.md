@@ -2969,7 +2969,7 @@ readout he missed, or that none was.
 
 ### AP: the surface sky shows
 
-Built 2026-09-26, on his answer that morning ("Show the real sky"). The tunnel haze now uses
+Built 2026-09-25, on his answer that evening ("Show the real sky"). The tunnel haze now uses
 custom blending: it adds colour and leaves the canvas's alpha alone. It covers the screen, and
 plain AdditiveBlending also added its alpha, which made the whole canvas opaque. So the sky
 gradient `loop.ts` has always computed (dawn, night, each planet's colours) now shows over the

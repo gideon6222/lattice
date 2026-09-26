@@ -648,7 +648,7 @@ is in `journal/legacy-plan.md`.
       briefs: level-design
       design: ## Round sixteen: closing Fable's review
 
-- [x] **AP The surface sky shows.** His answer of 2026-09-26: show the real sky. The tunnel
+- [x] **AP The surface sky shows.** His answer of 2026-09-25: show the real sky. The tunnel
       haze was additive in alpha as well as colour and covered the screen, so the canvas was
       opaque and the sky gradient (dawn, the planet's colours) never showed; the haze now adds
       colour only. The world's backdrop covers the whole depth, so the Vault does not show sky
@@ -657,9 +657,25 @@ is in `journal/legacy-plan.md`.
       briefs: rendering, lighting
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AQ Tier 2 has more in it.** His answer of 2026-09-26: plan more for tier 2 (113 to
-      226 m), which the secrets probe has quiet on three runs in four. Planned, checked with
-      Fable, then built. Receipt: the secrets probe per tier, with tier 2 under half quiet.
+- [ ] **AQ Tier 2 has more in it: a vein room and cysts.** His answer of 2026-09-25: plan more
+      for tier 2 (113 to 226 m). Checked with Fable the same day, whose changes are taken: measure
+      first, split by kind; the room and the cysts before any cache change; cysts readable before
+      committing. After it, tier 2 holds a vein room and six to eight cysts - sealed air pockets
+      each holding a cache, inside a shell drawn as a distinct dense rock (the band's hardness
+      times four) that shows a slow bite when drilled, with the Sensors naming any key inside and
+      the Hollow showing the void; a player gets in by drilling (a trip) or by Sink (hull). Proven
+      by the secrets probe printing its strict count split by kind plus a "met anything" count
+      with keys and lodes, the census showing the room and the cysts with tier 2's caches still
+      at 37, a test that every cyst is enclosed and holds a cache, a film of one cyst drilled,
+      sunk into and passed by, and a GPU reading at a shell no worse than the tier's.
+      briefs: level-design, feel
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AR Tier 2's caches, sized after AQ.** Tier 2's cache chance rises on its own seed so the
+      census reads about 32, 45, 51, 38 and never makes tier 2 the richest tier, and the secrets
+      probe shows tier 2 under half quiet on the strict count with caches supplying less than
+      half of the drop. Proven by the probe's per-kind split and a golden diff touching only
+      cache cells in rows 113 to 226.
       briefs: level-design
       design: ## Round seventeen: the ladder, finished
 

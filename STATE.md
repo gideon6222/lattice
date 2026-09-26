@@ -18,12 +18,12 @@ into tier 1. Built, not ticked: **AJ, a slimmer HUD.** Depth sits in the region 
 is stacked so nothing runs off a phone, and the timed three sit behind one TIMED button. It
 ticks on his word after a phone session. **AB** waits on one press of Android back.
 
-AM to AJ were pushed live on 2026-09-26. **AP** (his answer): the real sky shows now; the haze
+AM to AJ were pushed live on 2026-09-25. **AP** (his answer): the real sky shows now; the haze
 had made the canvas opaque.
 
-1. **AQ** - more in tier 2, planned and checked with Fable first (his answer).
-2. **Z2** - a real phone read, which also closes AB and AJ.
-3. **V0** - the store, when he says.
+1. **AQ** - a vein room and six to eight cysts in tier 2 (his ask; Fable's changes taken).
+2. **AR** - tier 2's caches, sized after AQ from the probe's per-kind split.
+3. **Z2** - a real phone read, which also closes AB and AJ. Then V0, when he says.
 
 ## Phone readings
 
