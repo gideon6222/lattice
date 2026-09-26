@@ -3,6 +3,7 @@ import { W, START_X, ORES, DEF, isKey, baseRock, coreDepth, hardMult, valueMult,
          RELIC_COLOR, RELIC_HOST, relicAt, relicFor,
          CAVE_MIN_DEPTH, caveChanceOn, gasChanceOn, geodeChanceOn, SUPPLIES, traitOf,
          VEIN_W, VEIN_H, VEIN_CELLS, VEIN_R, VEIN_WOBBLE_LO, VEIN_WOBBLE_HI, VEIN_REACH_MAX } from './config';
+import { cystPlan, cystsBuilding, CYST_LO, CYST_HI, CYST_HARD } from './cysts';
 import { scarStage, SCAR_STAGES } from './repair';
 import { WRONGNESS } from './wrongness';
 import { key, mixHex, rnd } from './util';
@@ -568,6 +569,25 @@ export function blockAt(x: number, d: number): Block | null {
     }
   }
 
+  /* A cyst (round seventeen, AQ): sealed air in a dense shell, tier 2 only,
+     holding a cache and usually a key. Its shell is its own rock, drawn apart
+     from the band, and four times harder; its key cell falls through to the
+     key pocket below. See sim/cysts.ts. */
+  if (d >= CYST_LO && d <= CYST_HI && !cystsBuilding()) {
+    const c = cystPlan(cystGround).cells.get(x + ',' + d);
+    if (c === 'air') return null;
+    if (c === 'shell') {
+      const band = baseRock(d, 0, x);
+      return { id: 'cystshell', name: 'Dense Shell', color: 0x3b4a5c, glow: 0.06,
+               hard: band.hard * hm * CYST_HARD, wt: 0, value: 0, spoil: true };
+    }
+    if (c === 'cache') {
+      return { id: CACHE.id, name: CACHE.name, color: CACHE.color, host: CACHE.host, glow: CACHE.glow,
+               shards: CACHE.shards, tone: CACHE.tone, hard: CACHE.hard * hm, wt: CACHE.wt,
+               value: CACHE.value, ore: true, cache: true };
+    }
+  }
+
   /* A key pocket (round seventeen, AL). Keys no longer roll out of the ore
      ladder: each is a fixed set of small seeded pockets, most in one home
      region, so the map can point at a key and no single find finishes a band
@@ -999,3 +1019,26 @@ export function findRoute() {
   route.reverse();
   return route.length > 1 ? route : null;
 }
+
+/* What a cyst may be placed on: ground as the generator made it, nobody's
+   digging in it and nothing collapsed, and nothing another feature holds - so
+   the plan is a property of the seed and never of a save. Swapped and restored
+   as the Survey's sweep does, for the same reason. */
+function cystGround(x: number, d: number): { ok: boolean } {
+  const dug = g.dug, collapsed = g.ground.collapsed;
+  g.dug = new Set();
+  g.ground.collapsed = [];
+  try {
+    if (vaultMap().has(x + ',' + d)) return { ok: false };
+    const b = blockAt(x, d);
+    return { ok: !!b && Number.isFinite(b.hard) && !b.relic && !b.find && !b.salvage && !b.cache && !b.key };
+  } finally {
+    g.dug = dug;
+    g.ground.collapsed = collapsed;
+  }
+}
+
+/* The cysts on this world. Callers outside the world ask here, never
+   `cystPlan` directly: the plan is built once and cached, so whoever asks
+   first decides what ground it is placed on. */
+export function cystsOnWorld() { return cystPlan(cystGround).cysts; }

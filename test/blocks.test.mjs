@@ -44,6 +44,8 @@ const ALL_IDS = [
      is the only one that enters the hold, which is why it is the only one with
      a DEF row. */
   'hulk', 'derelictlamp', H.SALVAGE.id,
+  /* Round seventeen, AQ: a cyst's shell - see the overwriter note below. */
+  'cystshell',
   /* Round fifteen's tier gates. One id, because a barrier is one thing in two
      states and the shut one is the only state that exists as a block - an open
      gate is simply absent. */
@@ -273,6 +275,13 @@ const OVERWRITERS = new Set([
      guards the rooms, and the reason to keep the wrecks out of the pool is the
      world staying where the player left it, not this assertion. */
   'hulk', 'derelictlamp', H.SALVAGE.id,
+  /* Round seventeen, AQ: a cyst's shell. Placed by sim/cysts.ts on its own
+     seed offsets (1401 up), only on cells the generator made and nothing else
+     holds, and only in tier 2 - so it replaces the cells it lands on and
+     cannot move the ore stream. Its air is '(empty)' and its cache is a
+     cache, both already on this list. The tier-2 vein room is a room, stamped
+     after every other room and dropped whole if it would touch one. */
+  'cystshell',
   /* Round fifteen's tier gates, and the narrow claim again: a barrier is
      stamped at three FIXED depths before anything else in blockAt can answer,
      so it replaces the cell it lands on and can change no other. The ore

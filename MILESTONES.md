@@ -657,7 +657,7 @@ is in `journal/legacy-plan.md`.
       briefs: rendering, lighting
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AQ Tier 2 has more in it: a vein room and cysts.** His answer of 2026-09-25: plan more
+- [x] **AQ Tier 2 has more in it: a vein room and cysts.** His answer of 2026-09-25: plan more
       for tier 2 (113 to 226 m). Checked with Fable the same day, whose changes are taken: measure
       first, split by kind; the room and the cysts before any cache change; cysts readable before
       committing. After it, tier 2 holds a vein room and six to eight cysts - sealed air pockets

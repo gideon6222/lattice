@@ -63,6 +63,17 @@ function kindOf(b) {
   return null;
 }
 
+/* Round seventeen, AQ: what the strict count does not see. Since AL most of a
+   tier's things to find are keys and lodes, and since AQ tier 2 has cysts;
+   counted apart so the strict number cannot be won by relabelling. */
+function extraOf(b) {
+  if (b.key) return 'key';
+  if (b.lode) return 'lode';
+  if (b.id === 'cystshell') return 'cyst';
+  return null;
+}
+const EXTRA = () => ({ key: 0, lode: 0, cyst: 0 });
+
 function digTime(b) {
   return (b.hard * H.DIG_BASE) / H.S.drill();
 }
@@ -87,6 +98,7 @@ function probe(ox) {
     for (let r = 0; r < RUNS_PER_TIER; r++) {
       const target = Math.min(cap, shaft + step);
       const hit = { relic: 0, find: 0, wreck: 0, cache: 0 };
+      const extra = EXTRA();
 
       /* down: extend the shaft if this run reaches new ground */
       let reached = shaft;
@@ -97,6 +109,8 @@ function probe(ox) {
         if (!b) continue;
         const k = kindOf(b);
         if (k) hit[k]++;
+        const e = extraOf(b);
+        if (e) extra[e]++;
       }
       shaft = Math.max(shaft, reached);
 
@@ -112,6 +126,8 @@ function probe(ox) {
           weight += b.wt || 0;
           const k = kindOf(b);
           if (k) hit[k]++;
+          const e = extraOf(b);
+          if (e) extra[e]++;
         }
         side = -side;
         if (side === 1) x++;
@@ -121,7 +137,8 @@ function probe(ox) {
       const met = hit.relic + hit.find + hit.wreck + hit.cache;
       for (const k of Object.keys(totals)) totals[k] += hit[k];
       if (met > 0) { gaps.push(sinceLast); sinceLast = 0; } else { sinceLast++; }
-      runs.push({ tier: TIERS.indexOf(cap) + 1, depth: shaft, met, ...hit });
+      runs.push({ tier: TIERS.indexOf(cap) + 1, depth: shaft, met, any: met + extra.key + extra.lode + extra.cyst,
+                  ...hit, x: extra });
     }
   }
   return { ox, runs, totals, gaps, trailingQuiet: sinceLast };
@@ -165,6 +182,11 @@ console.log('=== by tier ===');
 for (let t = 1; t <= TIERS.length; t++) {
   const tr = allRuns.filter((r) => r.tier === t);
   const q = tr.filter((r) => r.met === 0).length;
+  const qa = tr.filter((r) => r.any === 0).length;
+  const kinds = { relic: 0, find: 0, wreck: 0, cache: 0 }, ex = EXTRA();
+  for (const r of tr) { for (const k of Object.keys(kinds)) kinds[k] += r[k]; for (const k of Object.keys(ex)) ex[k] += r.x[k]; }
   console.log(`tier ${t} (to ${TIERS[t - 1]} m): ${tr.length} runs, ${q} quiet ` +
               `(${Math.round(q / tr.length * 100)}%), median met/run: ${med(tr.map((r) => r.met))}`);
+  console.log(`    strict by kind ${JSON.stringify(kinds)}; also met ${JSON.stringify(ex)}; ` +
+              `quiet counting everything: ${qa} (${Math.round(qa / tr.length * 100)}%)`);
 }

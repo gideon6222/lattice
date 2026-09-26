@@ -21,9 +21,14 @@ ticks on his word after a phone session. **AB** waits on one press of Android ba
 AM to AJ were pushed live on 2026-09-25. **AP** (his answer): the real sky shows now; the haze
 had made the canvas opaque.
 
-1. **AQ** - a vein room and six to eight cysts in tier 2 (his ask; Fable's changes taken).
-2. **AR** - tier 2's caches, sized after AQ from the probe's per-kind split.
-3. **Z2** - a real phone read, which also closes AB and AJ. Then V0, when he says.
+Done: **AQ.** Tier 2 has its own vein room and seven cysts: sealed air in dense rock, each with a
+cache, four with a key, reached by drilling or by Sink. Counting keys and lodes, tier 2 was never
+empty (29% quiet); the old probe could not see them. The campaign probe's Vault moved from 55.8
+to 62 minutes, all of it the cysts in its fixed mining columns.
+
+1. **AR** - tier 2's caches. Cysts already took the census to 44 of the ~45 planned, so AR may
+   only need confirming.
+2. **Z2** - a real phone read, which also closes AB and AJ. Then V0, when he says.
 
 ## Phone readings
 

@@ -2980,6 +2980,53 @@ Underground nothing changes, because the backdrop plane is opaque behind the roc
 ending's own sky plane (AH) stays: it turns the sky violet over whatever the gradient is doing at
 that time of day.
 
+### AQ: tier 2 has more in it, a vein room and cysts
+
+Built 2026-09-25, on his ask ("plan more for tier 2"), with Fable's review taken in full.
+
+**Measure first.** The secrets probe prints its strict count split by kind, plus what it also met
+(keys, lodes, cyst shells) and a quiet share counting everything. Before any change, tier 2 was
+quiet on 73% strict but only 29% counting everything, the best of any tier. Its hunt since AL is
+keys, and the probe could not see them.
+
+**Tier 2's own vein room.** It is placed after every other room, on its own seed (1451), and
+dropped whole if it would touch one. It sits at (38, 169).
+
+**Cysts** (`src/sim/cysts.ts`, seed 1401 up). There are seven in tier 2, four of them built
+around a key pocket. Each is a 3 by 2 air pocket holding a cache, inside a one-cell shell of
+Dense Shell: a rock of its own colour, four times the band's hardness, cut stone with no weight.
+Three ways to meet one:
+- **Drill through the shell.** The bite is slow and visible.
+- **Sink through it.** Sink is sold at the first gate, and the hull pays.
+- **Fly past.** The Hollow shows the void and the Sensors name the key.
+
+A cyst is placed only on ground the generator made and nothing else holds, judged on an undug
+world. A test proves the plan is the seed, not the save. Everything outside the world asks
+`cystsOnWorld()`: the plan is cached, and a caller that built it with a dummy ground function
+cached an empty one. That was found in the film.
+
+**The golden,** diff read by id per planet (the legend letters all shifted, since a new id sorts
+into the middle):
+- 98 shell cells, 7 caches, and the air inside the cysts
+- the room's 32 worked stone and 7 geodes
+- no key count changed
+- the rest were the rock and ore cells those replaced
+
+**Receipts:**
+- **Census, tier 2:** 44 caches (the natural roll still 37, plus 7 in cysts), 98 shell cells, 31
+  geodes.
+- **Probe:** tier 2 is 72% quiet on the strict count, since blind shafts rarely break into a
+  sealed pocket; it met cyst shells 41 times, and counting everything tier 2 is quiet on 27%.
+- **GPU at a shell:** 68 draw calls (barrier 72, a shallow dig 55), 30,800 triangles.
+- **Tests and film:** `test/cysts.test.mjs`; `npm run film cyst`.
+
+**The campaign probe now reaches the Vault at 62 game-minutes, 6.2 later.** Cysts are the whole
+of it: 55.9 without them, 60.2 with cysts but no keys inside, and no change between a shell at
+three and four times. The cysts sit in the probe's seven fixed mining columns, where a shell or an
+air pocket replaces ore-bearing rock. A player routes around a cyst and the probe does not, so
+this is recorded as measured and not tuned away. His phone play says whether tier 2 now costs
+too much time.
+
 ### AK: minerals become ingredients
 
 Built 2026-09-25. Money (copper, iron, silver, gold, geodes, lodes) sells at the pad and nothing

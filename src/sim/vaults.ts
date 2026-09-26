@@ -560,7 +560,33 @@ export function vaultPlan(): Placed[] {
       break;
     }
   }
+  /* Round seventeen, AQ: tier 2's own vein room. Tiers 1, 3 and 4 each held
+     one from the wild pool and tier 2 held none, so it is placed here - after
+     everything, on its own seed, and dropped whole rather than clipped if it
+     would touch a room, exactly like a wreck. So it can only take cells the
+     generator made, and nothing placed before it moves. */
+  for (let t = 0; t < TIER2_ROOM_TRIES; t++) {
+    const s = tier2RoomAt(t);
+    if (out.some((o) =>
+      Math.abs(o.x - s.x) < (vaultW(o.vault) + vaultW(s.vault)) / 2 + 1 &&
+      Math.abs(o.d - s.d) < (vaultH(o.vault) + vaultH(s.vault)) / 2 + 1)) continue;
+    out.push(s);
+    break;
+  }
   return out;
+}
+
+export const TIER2_ROOM_TRIES = 24;
+const TIER2_SEED = 1451;
+/* Inside tier 2 (113 to 226 m) with a clear row either side of each barrier. */
+export function tier2RoomAt(t: number): Placed {
+  const lo = 113 + Math.ceil(VAULT_H / 2) + 2, hi = 226 - Math.ceil(VAULT_H / 2) - 2;
+  const xPad = VAULT_W / 2 + 1;
+  return {
+    x: Math.round(xPad + rnd(t * 29 + 5, t * 13 + 1, TIER2_SEED) * (W - 1 - xPad * 2)),
+    d: Math.round(lo + rnd(t * 11 + 7, t * 31 + 3, TIER2_SEED + 1) * (hi - lo)),
+    vault: VEIN_ROOM
+  };
 }
 
 export function vaultCells(): Map<string, string> {

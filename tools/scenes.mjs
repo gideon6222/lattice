@@ -746,6 +746,42 @@ export const SCENES = {
     `
   },
 
+  /* Round seventeen, AQ. One cyst met three ways: drilled into through its
+     shell (frames 1-5, the slow bite), sunk into with Sink (6-10, the hull
+     paying), and flown past (11-14). */
+  cyst: {
+    secs: 0.6,
+    frames: 15,
+    enter: true,
+    setup: `
+      window.__CY = { n: 0 };
+      __CY.reset = (x) => {
+        const c = __cw.cystsOnWorld()[1];
+        const X = c.x0 + 2, D = c.d0 - 1;
+        const dug = [];
+        for (let d = 1; d <= D; d++) dug.push(X + ',' + d);
+        for (let xx = X - 6; xx <= X + 6; xx++) for (let d = D - 2; d <= D; d++) dug.push(xx + ',' + d);
+        __cw.g.dug = new Set(dug);
+        __cw.g.ground.gates = [0]; __cw.g.skills = ['sink'];
+        __cw.g.up.drill = 4; __cw.g.up.scan = 4; __cw.g.hull = __cw.S.hullCap();
+        __cw.g.px = x === undefined ? X : x; __cw.g.pd = D;
+        __cw.R.vx = 0; __cw.R.vy = 0; __cw.R.digging = null; __cw.R.held = null; __cw.R.sinkHeld = false;
+        __cw.resetBlocks();
+        __cw.advance(1.5);
+        __CY.X = X;
+      };
+      __CY.reset();
+    `,
+    step: `
+      __CY.n++;
+      if (__CY.n === 6) { __CY.reset(); document.getElementById('abSink').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); }
+      if (__CY.n === 11) { document.getElementById('abSink').dispatchEvent(new PointerEvent('pointerup', { bubbles: true })); __CY.reset(__CY.X - 6); }
+      if (__CY.n < 6) __cw.R.held = 'down';
+      if (__CY.n >= 11) __cw.R.held = 'right';
+      __cw.advance(SECS);
+    `
+  },
+
   gatebays: {
     secs: 0.6,
     frames: 5,
