@@ -1,7 +1,8 @@
 import * as THREE from 'three';
+import { WRONGNESS, wrongSigns } from './sim/wrongness';
 import { beginGrowth, addGrowth, finishGrowth } from './growth';
 import { W, baseRock } from './sim/config';
-import { key } from './sim/util';
+import { key, mixHex } from './sim/util';
 import { WINDOW_ROWS, WINDOW_COLS } from './streamwindow';
 import { g } from './sim/state';
 import { R } from './sim/runtime';
@@ -406,6 +407,8 @@ function rebuild() {
   markLightDirty();
   for (const p of pools.values()) { p.bodies = 0; p.details = 0; }
   oreGlows.length = 0;
+  /* How far the broken Anchors show in the rock (round seventeen, AI). */
+  const signs = wrongSigns(g.ground.lit.length);
   beginGrowth();
 
   const v = R.eye || g;
@@ -447,8 +450,26 @@ function rebuild() {
         placeCell(px, py, x, d);
         scratch.updateMatrix();
         pool.body.setMatrixAt(pool.bodies, scratch.matrix);
-        pool.body.setColorAt(pool.bodies, scratchColor.setHex(shade(tintRock(b.color, regionAt(x, d)), jit * ao)));
+        pool.body.setColorAt(pool.bodies, scratchColor.setHex(shade(
+          signs.mass > 0 ? mixHex(tintRock(b.color, regionAt(x, d)), WRONGNESS, signs.mass)
+                         : tintRock(b.color, regionAt(x, d)), jit * ao)));
         pool.bodies++;
+
+        /* Round seventeen, AI: the first Anchors broken show as violet flecks
+           in plain rock - never on a seam, whose flecks are a tell for ore and
+           must keep meaning that. Its own roll, so no other decoration moves. */
+        if (!b.seam && signs.detail > 0 && rnd(x + 211, d + 97, 0) < signs.detail) {
+          for (let f = 0; f < 2 && pool.details < pool.detail.instanceMatrix.count; f++) {
+            const r1 = rnd(x + 5 + f * 7, d + 211, 0), r2 = rnd(x + 17, d + 3 + f * 11, 0);
+            scratch.position.set(px + (r1 - 0.5) * 0.62, py + (r2 - 0.5) * 0.62, 0.52);
+            scratch.rotation.set(r1 * 3, r2 * 3, r1 * 2);
+            scratch.scale.set(1.3, 1.3, 1.3);
+            scratch.updateMatrix();
+            pool.detail.setMatrixAt(pool.details, scratch.matrix);
+            pool.detail.setColorAt(pool.details, scratchColor.setHex(shade(WRONGNESS, 1.5 * ao)));
+            pool.details++;
+          }
+        }
 
         /* Flecks belong to seams and only to seams now.
 

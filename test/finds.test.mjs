@@ -57,7 +57,10 @@ test('the one world buries four crates at a time, shallowest first, and every de
      a deliberate constant with its own literal-valued test below, and widening
      it because a device was added is exactly the casual change that test exists
      to stop. What moves instead is which four are showing. */
-  assert.deepEqual(on.map((f) => f.key), ['magnet', 'bomb', 'receiver', 'survey']);
+  /* Round seventeen, AI moved the Charge to 125 m, so the fourth crate an
+     empty hand sees is now the Charge in tier 1 rather than the Survey's
+     neighbour in tier 0. */
+  assert.deepEqual(on.map((f) => f.key), ['magnet', 'receiver', 'survey', 'bomb']);
   for (const f of on) {
     assert.ok(f.below < core,
       f.key + ' is buried at ' + f.below + ' m on a world whose core is at ' + core);

@@ -13,22 +13,18 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## Next three milestones
 
-Done 2026-09-25: **AH, the ending.** At the Vault:
-- the light of every spent core gathers at the center and goes out
-- a cut to the pad, and the dark rises over it
-- the sky turns the core's colour, then the card
+Done 2026-09-25: **AI.** Each Anchor broken adds one violet sign, spreading from flecks in the
+rock to the rock itself to the air. The Charge and the Repair Drone moved into tier 1. The secrets
+probe barely moved: tier 2 is still quiet on 73% of runs.
 
-Found: the surface sky gradient has never shown (the haze makes the canvas opaque). It is his
-call whether to fix it.
+Before it: **AH** the ending, **AF** repair in the rock, **AE** barrier and core, **AO** gate
+vendors, **AM** the key find. AM to AI are not pushed yet. Two questions for him: whether the
+surface sky should show again (the haze has hidden it), and whether tier 2 needs more in it. **AB**
+waits on one press of Android back on his phone.
 
-Before it: **AF** repair in the rock, **AE** barrier and core, **AO** gate vendors, **AM** the key
-find. AM to AH are not pushed yet. **AB** waits on one press of Android back on his phone.
-
-1. **AI** - one visible sign per Anchor; two tier-0 devices move deeper.
-2. **AJ** - a slimmer HUD, nothing lost.
-3. **Z2** - a real phone read.
-
-Then V0.
+1. **AJ** - a slimmer HUD, nothing lost.
+2. **Z2** - a real phone read.
+3. **V0** - the store, when he says.
 
 ## Phone readings
 

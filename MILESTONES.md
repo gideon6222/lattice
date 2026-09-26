@@ -782,7 +782,7 @@ is in `journal/legacy-plan.md`.
       briefs: lighting, rendering, stakes
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AI Always more, inside every tier.** One visible sign per Anchor broken, in one
+- [x] **AI Always more, inside every tier.** One visible sign per Anchor broken, in one
       wrongness colour used nowhere else, spreading from details to mass to air; two of tier
       0's six buried devices move deeper. Receipt: the secrets probe per tier, rerun.
       briefs: level-design

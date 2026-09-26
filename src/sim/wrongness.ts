@@ -37,3 +37,25 @@ export function coreLook(t: number) {
     dim: 0.22 + 0.14 * t
   };
 }
+
+/* ---------- one sign per Anchor broken. Round seventeen, AI ----------
+
+   Every Anchor broken puts one more visible thing into the world, in this
+   colour and no other, and the signs SPREAD: the first three are details (a
+   violet fleck in a share of the plain rock), the next three are the mass (the
+   rock itself leaning violet), the last three are the air (the tunnel haze
+   taking the colour). So a player who has broken four sees the rock change,
+   and one who has broken seven breathes it. Each step is small; all nine are
+   not subtle. The first numbers (4% of cells, 5% a step of mass) were checked
+   by eye at 0, 3 and 6 broken and could not be found; these can. */
+export function wrongSigns(broken: number) {
+  const n = Math.max(0, Math.min(9, Math.floor(broken)));
+  return {
+    /* Share of plain rock cells carrying a fleck. */
+    detail: 0.08 * Math.min(n, 3),
+    /* How far the rock's own colour mixes toward the wrongness. */
+    mass: 0.07 * Math.max(0, Math.min(n, 6) - 3),
+    /* How far the haze mixes toward it. */
+    air: 0.1 * Math.max(0, Math.min(n, 9) - 6)
+  };
+}

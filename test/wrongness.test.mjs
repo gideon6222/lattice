@@ -40,9 +40,10 @@ test('only the core, the scar, the pip, the gate room and the map wear it', () =
      constant and nothing else uses it." These are the files that do: the core
      light and its block, the scar's block and its bursts, the map's scar and
      core marks, the pip (via --wrong in main.ts) and the gate room's band. */
-  /* loop.ts since AH: the sky over the pad takes the core's colour at the end. */
+  /* loop.ts since AH: the sky over the pad takes the core's colour at the end.
+     blocks.ts and loop.ts since AI: the rock and the air show each Anchor broken. */
   const allowed = new Set(['src/barrier.ts', 'src/sim/world.ts', 'src/actions.ts', 'src/mapui.ts',
-    'src/main.ts', 'src/stationroom.ts', 'src/sim/wrongness.ts', 'src/loop.ts']);
+    'src/main.ts', 'src/stationroom.ts', 'src/sim/wrongness.ts', 'src/loop.ts', 'src/blocks.ts']);
   const users = files('src').filter((f) => /from '\.{1,2}\/(sim\/)?wrongness'/.test(readFileSync(f, 'utf8')))
     .map((f) => f.split(String.fromCharCode(92)).join('/'));
   for (const u of users) assert.ok(allowed.has(u), u + ' wears the wrongness colour');
@@ -86,4 +87,18 @@ test('the hints are seen near a spent core', () => {
   assert.equal(H.spentCoreNear(H.coreColumn(t), H.gateDepth(t) - 2, [t]), t);
   assert.equal(H.spentCoreNear(H.coreColumn(t), H.gateDepth(t) - 20, [t]), -1);
   assert.equal(H.spentCoreNear(H.coreColumn(t), H.gateDepth(t) - 2, []), -1);
+});
+
+test('every Anchor broken adds one visible step, spreading from details to mass to air', () => {
+  let prev = H.wrongSigns(0);
+  assert.deepEqual(prev, { detail: 0, mass: 0, air: 0 });
+  for (let n = 1; n <= 9; n++) {
+    const cur = H.wrongSigns(n);
+    const grew = ['detail', 'mass', 'air'].filter((k) => cur[k] > prev[k] + 1e-9);
+    assert.equal(grew.length, 1, n + ' Anchors broken changed ' + grew.length + ' signs, not one');
+    const want = n <= 3 ? 'detail' : n <= 6 ? 'mass' : 'air';
+    assert.equal(grew[0], want, 'Anchor ' + n + ' showed in the ' + grew[0] + ', not the ' + want);
+    prev = cur;
+  }
+  assert.ok(H.wrongSigns(9).mass < 0.25 && H.wrongSigns(9).air < 0.35, 'the rock or the air stopped reading as itself');
 });

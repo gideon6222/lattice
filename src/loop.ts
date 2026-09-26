@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { stepBarriers, setSkyTurn } from './barrier';
 import { endingAt, END_LIFT, type EndFrame } from './sim/ending';
-import { WRONGNESS, wrongDarker } from './sim/wrongness';
+import { WRONGNESS, wrongDarker, wrongSigns } from './sim/wrongness';
 import { ambienceTick } from './sim/ambience';
 import { FIND_COLOR } from './sim/finds';
 import { W, HULL_MAX, DIG_BASE, DEF, SUPPLY_OF, DROP_MIN_VALUE, RELIC_COLOR, relicFor,
@@ -1328,7 +1328,10 @@ export function tick(raw: number, draw = true) {
      shift at constant gain moves nothing that argument is about. */
   const actHaze = R.shipShown ? mixHex(pal.haze, 0xff6a28, hot * 0.8)
                               : mixHex(pal.haze, EYE_LAMP_COLOR, 0.85);
-  setHazeColor(act.tint > 0 ? mixHex(actHaze, act.color, act.tint) : actHaze);
+  /* And the last Anchors broken show in the air (round seventeen, AI). */
+  const airSign = wrongSigns(g.ground.lit.length).air;
+  const hazeNow = act.tint > 0 ? mixHex(actHaze, act.color, act.tint) : actHaze;
+  setHazeColor(airSign > 0 ? mixHex(hazeNow, WRONGNESS, airSign) : hazeNow);
   setHazeGain(R.lampLevel);
   setParallaxTint(act.tint > 0 ? mixHex(pal.para, act.color, act.tint) : pal.para);
   /* ambient warms too, so the rock itself is lit hot rather than just fogged */

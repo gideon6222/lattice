@@ -75,8 +75,6 @@ export interface Find {
 export const FINDS: Find[] = [
   { key: 'magnet', slot: 1,  below: 20,
     blurb: 'Pulls loose ore toward the ship instead of making you fetch it.' },
-  { key: 'bomb', slot: 2,    below: 40,
-    blurb: 'Breaks a pocket of cells at once. Runs on the power meter.' },
   /* 48 m, between the bomb and the Deep Survey.
 
      FINDS is ordered shallowest-first and `finds.test.mjs` asserts a player
@@ -93,7 +91,16 @@ export const FINDS: Find[] = [
     blurb: 'Hears an intact Anchor through rock. How near, never which way.' },
   { key: 'survey', slot: 4,  below: 62,
     blurb: 'Reads ore through solid rock, so you can dig at something.' },
-  { key: 'drone', slot: 6,   below: 78,
+  /* Round seventeen, AI: the Charge and the Repair Drone moved out of tier 0
+     (from 40 m and 78 m) into tier 1. Tier 0 buried five of the seven
+     devices and tier 1 almost nothing, and the secrets probe had tier 1 quiet
+     on three runs in four: the first dives were full of things to find and
+     the second tier, where the game should be widening, was empty. The first
+     dive still has the Magnet, the Receiver and the Deep Survey. Their slots
+     are their own, so no other device moves. */
+  { key: 'bomb', slot: 2,    below: 125,
+    blurb: 'Breaks a pocket of cells at once. Runs on the power meter.' },
+  { key: 'drone', slot: 6,   below: 150,
     blurb: 'Mends the hull slowly while you are underground.' },
   { key: 'auto', slot: 7,    below: 190,
     blurb: 'Flies you back to the surface on its own, and cheaply.' },

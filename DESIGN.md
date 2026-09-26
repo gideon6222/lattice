@@ -2907,6 +2907,44 @@ Receipts: `test/ending.test.mjs` (the card comes last, the order of gather, dark
 motes' ends, the cut through black); the Vault e2e (no card while the light leaves, the ship not
 flyable, the camera home after STAY); `npm run film vaultend`, the whole ending.
 
+### AI: always more, inside every tier
+
+Built 2026-09-25.
+
+**One sign per Anchor broken** (`wrongSigns` in `src/sim/wrongness.ts`), in the wrongness
+colour. Each Anchor adds exactly one step, and the steps spread outward:
+- **Anchors 1 to 3, details.** Plain rock carries violet flecks, two a cell, in 8%, 16% and 24%
+  of cells. Never on a seam, because a seam's flecks are the tell for ore.
+- **Anchors 4 to 6, mass.** The rock's own colour mixes 7% more toward violet a step.
+- **Anchors 7 to 9, air.** The tunnel haze mixes 10% more a step.
+
+The first numbers (4% of cells, 5% of mass a step) were checked by eye at 0, 3 and 6 broken and
+could not be found. A test asserts that each Anchor changes exactly one sign, in that order.
+**Watch on the phone:** amethyst (a060ff) and umbrite (9d7bff) are near the wrongness violet
+(8a5ad0). The keys glow and are crystal fans that the Sensors chip names; the flecks are dull,
+unlit chips. If he mistakes one for the other, the flecks change shape before anything else does.
+
+**Two devices moved deeper.** The Charge went from 40 m to 125 m and the Repair Drone from 78 m
+to 150 m, out of tier 0 (which buried five of the seven) into tier 1 (which buried almost
+nothing). Their slots are their own, so nothing else moved. The `blocks` golden changed exactly
+two cells a planet (the Charge's old cell back to rock, its new cell a crate), diff read, and was
+re-recorded. With an empty hand the four crates showing are now the Magnet, Receiver, Survey and
+Charge.
+
+**The probes, rerun.** Secrets, quiet runs per tier:
+
+| tier | before | after |
+|---|---|---|
+| 1 | 76% | 77% |
+| 2 | 73% | 73% |
+| 3 | 52% | 52% |
+| 4 | 47% | 47% |
+
+Unchanged. The probe drills five fixed shafts and meets caches (120 of 126 things met), so one
+relocated crate rarely crosses them. Tier 2 feeling empty needs more in it than two crates, and
+this milestone does not claim otherwise. The campaign probe now reaches the Vault at 55.8
+game-minutes (was 54.7); core 1 falls at 6.4.
+
 ### AK: minerals become ingredients
 
 Built 2026-09-25. Money (copper, iron, silver, gold, geodes, lodes) sells at the pad and nothing
