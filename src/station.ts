@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { renderer, scene as gameScene, SHIP_LAYER } from './scene';
 import { player, rig, flames, setUpgradeHardware, fitImportedHardware } from './ship';
 import { loadShipParts } from './shipparts';
-import { loadStationProps, buildRoom, stationX, FORECOURT, type Room } from './stationroom';
+import { loadStationProps, buildRoom, LIFT_X, LIFT_Z, type Room } from './stationroom';
 import { g } from './sim/state';
 
 /* The Outfitter, as a room you are standing in.
@@ -218,6 +218,8 @@ export function resizeStation() {
 let room: Room | null = null;
 /* Exposed so a test can wait for the thing itself instead of a timeout. */
 export function roomReady() { return room !== null; }
+/* Which room is showing: -1 the pad, 0.. a gate, null before it is built. */
+export function roomPlace() { return room ? room.place() : null; }
 
 /* ---------- docking ---------- */
 
@@ -270,7 +272,7 @@ export function pickPart(clientX: number, clientY: number): string | null {
 /* Reparenting, not copying. three removes an object from its old parent when
    it is added to a new one, so this is the whole mechanism - and it is what
    guarantees the ship on the deck is the ship you fly out. */
-export function dockShip() {
+export function dockShip(place = -1) {
   if (docked) return;
   docked = true;
   /* First time the shop is opened, the imported hardware comes down in its own
@@ -283,21 +285,18 @@ export function dockShip() {
     room = buildRoom();
     if (room) {
       stationScene.add(room.group);
-      /* Round seventeen, AN: the supplies drawer is retired - supplies are
-         cards in the system they serve - so it is never shown. */
-      room.drawer.group.visible = false;
-      room.setAisle(FORECOURT);
+      room.setPlace(place);
     }
   });
+  /* Which room is around the lift: the pad, or the gate you docked at. */
+  if (room) room.setPlace(place);
   /* Round seventeen, AN: the fitting bay. The room stays at the forecourt,
      where the ship stands on its lift; the aisles, cases and drawer are
      retired and the rack of cards under the ship is the whole shop. */
   bayYaw = 0; bayIdle = 0;
   stationScene.add(player);
-  /* Parked at the pump on the forecourt, which is a station of its own at one
-     end of the run. This is what stops the ship standing in front of the
-     stock: they are never in the same shot any more. */
-  player.position.set(stationX(FORECOURT) - 0.1, 0.24, 0.75);
+  /* On the lift, which is the one thing every room has (round seventeen, AO). */
+  player.position.set(LIFT_X - 0.1, 0.24, LIFT_Z);
   /* Bigger than the old forecourt shot: in the bay the ship IS the shop. */
   player.scale.setScalar(1.25);
   rig.rotation.set(0, 0, 0);
@@ -318,8 +317,7 @@ export function undockShip() {
 
 export function stepStation(t: number, dt: number) {
   if (room) room.step(t, dt);
-  /* The bay stays at the forecourt, where the ship stands on its lift. */
-  const x = stationX(FORECOURT);
+  const x = LIFT_X;
   stationCamera.position.x = x;
   stationCamera.lookAt(x, CAM_AIM_Y, CAM_AIM_Z);
   /* The ship on its lift: turned by a drag on the stage, and drifting slowly

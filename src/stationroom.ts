@@ -43,7 +43,6 @@
 import * as THREE from 'three';
 import { g, worldUnrest } from './sim/state';
 import { WORLD_DEPTH } from './sim/region';
-import { GROUP_ORDER, GROUP_COLOR, GROUP_LABEL, type GroupName } from './stationsigns';
 import { SHIP_LAYER } from './scene';
 
 const PROPS = [
@@ -593,188 +592,62 @@ export function neonBar(color: number, w: number, _h = 0.05, _glow = 3.2): NeonF
 }
 
 
-/* ---------- the drawer under the counter ----------
+/* ---------- the bay, round seventeen AO ----------
 
-   Playtest: *"A secret display case at the bottom of the screen pops open and
-   shows all of the upgrades you have collected and lets you purchase the
-   upgrades there."*
+   The walked gas station is retired: no aisles, no four department counters,
+   no drawer, no pump shared by every stop. What is left is one bay - a deck, a
+   back wall with the terminal and the gauges on it, and a lift under the ship
+   - and the ROOM AROUND THE LIFT changes with where you are. The plan's line
+   is *"Gate vendors are different rooms around the same lift, never a second
+   UI"*, so the lift, the camera and every card are the same in all four and
+   only the dressing moves:
 
-   The six consumables used to be a flat grid of chips in the tray - a menu
-   that had survived the room being rebuilt around it twice, and the last piece
-   of this screen that was still a list. This is the room's own answer: a
-   drawer in the counter you are already standing at, with a brass handle, that
-   drops its front and slides a lit shelf out at you.
+     THE PAD    iron and brass, the fuel pump. The only room with a pump,
+                because it is the only place that refuels.
+     GATE 1     113 m, a chamber cut out of the rock, lamplit amber.
+     GATE 2     226 m, cold, with the violet crystal of the deep coming
+                through the walls.
+     GATE 3     398 m, the Vault's door: dark, and red with the heat.
 
-   THREE THINGS MAKE IT READ AS A DRAWER rather than as a panel that appears.
+   Each is a wall tint, an accent light, a sign and a set of props, all built
+   once and switched by visibility - a room swap costs nothing per frame. */
 
-   The front HINGES, it does not fade. A flap pivoting about its bottom edge is
-   the single motion that says "this is a thing with an inside", and it costs
-   one rotation. It is the same argument as the neon housing: the eye needs the
-   mechanism, not the result.
-
-   The shelf SLIDES OUT while the flap drops, so the two motions are visibly
-   one action with a hinge and a runner in it.
-
-   The inside is DARK UNTIL IT OPENS. A strip inside the case comes up as the
-   flap comes down, which is what makes it read as a case being opened rather
-   than as a lid being removed from a hole. It is also the one light in this
-   room that is not a department colour - warm, like something under glass.
-
-   One drawer, moved to whichever counter you are standing at, for the same
-   reason there are two roaming lights rather than eight: only one aisle is
-   ever on screen, so only one drawer can ever be reachable, and four of them
-   would be three more than anybody can open. */
-
-export interface Drawer {
-  group: THREE.Group;
-  /* Where the supply cases are parented. station.ts fills this, because the
-     room owns furniture and the shop owns stock. */
-  shelf: THREE.Group;
-  /* What a tap has to hit to open it: the handle and the flap together, which
-     is a bigger target than either and is what a thumb actually aims at. */
-  hit: THREE.Object3D[];
-  setOpen(on: boolean): void;
-  isOpen(): boolean;
-  step(dt: number): void;
-}
-
-export function makeDrawer(): Drawer {
-  const grp = new THREE.Group();
-
-  /* The flap, hinged at its bottom edge. The pivot is a group at the hinge
-     line with the panel offset up inside it - rotating a mesh about its own
-     centre would make it sink into the counter instead of falling open. */
-  const hinge = new THREE.Group();
-  /* Measured, not placed by eye. The counter front is barely a unit from the
-     lens, where one world unit is about 245 screen pixels on a 360-wide phone -
-     five times the scale of the wall behind. The first version was 3.1 units
-     wide with its crates spread over 2.3 of them, which put the outer two at
-     screen x -204 and 564 and the bottom row under the tray. Everything in
-     here is about a third of what it started as, and it is the same lesson as
-     the counter arc: distance from the lens decides the number. */
-  hinge.position.set(0, -0.92, 1.64);
-  const face = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.3, 0.06), brassMat);
-  face.position.y = 0.15;
-  hinge.add(face);
-  /* Rivets along the flap, so it is built out of the same building as the
-     wall behind it. */
-  rivetRow(hinge, -0.68, 0.05, 0.04, 1.36, 7);
-  const handle = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.055, 0.08), copperMat);
-  handle.position.set(0, 0.24, 0.06);
-  hinge.add(handle);
-  grp.add(hinge);
-
-  /* The shelf that slides out, and the case it slides out of. */
-  const box = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.26, 0.4), ironMat);
-  box.position.set(0, -0.72, 1.42);
-  grp.add(box);
-  const shelf = new THREE.Group();
-  shelf.position.set(0, -0.76, 1.42);
-  grp.add(shelf);
-
-  /* The light inside. Warm rather than any department's colour: this is the
-     one thing in the room that is under glass rather than on a wall. */
-  const lamp = neonFitting(0xffc27a, 1.4, { light: 0, radius: 0.018 });
-  lamp.position.set(0, -0.56, 1.54);
-  lamp.rotation.x = -0.7;
-  grp.add(lamp);
-  setNeon(lamp, 0);
-
-  /* A label on the flap, so a closed drawer says what it is. Without it this
-     is a brass rectangle, and a brass rectangle nobody opens is worse than the
-     grid it replaced. */
-  const label = makeLabel('SUPPLIES', 0xffd9a0);
-  label.scale.setScalar(0.72);
-  label.position.set(0, 0.12, 0.05);
-  hinge.add(label);
-
-  let open = false, t = 0;
-  return {
-    group: grp,
-    shelf,
-    hit: [face, handle],
-    isOpen() { return open; },
-    setOpen(on: boolean) { open = on; },
-    step(dt: number) {
-      /* Eased toward the target rather than tweened on a timer, the same as
-         the aisle glide: a second tap part way through simply retargets. */
-      t += ((open ? 1 : 0) - t) * Math.min(1, dt * 9);
-      if (t < 0.001) t = 0;
-      if (t > 0.999) t = 1;
-      hinge.rotation.x = t * 1.45;
-      shelf.position.z = 1.42 + t * 0.3;
-      shelf.position.y = -0.76 + t * 0.06;
-      shelf.visible = t > 0.02;
-      setNeon(lamp, t);
-      /* The label goes with the flap, and fades as the flap turns away from
-         the camera - reading a word on a surface edge-on is worse than not
-         seeing it. */
-      (label.material as THREE.MeshBasicMaterial).opacity = 1 - t;
-      (label.material as THREE.MeshBasicMaterial).transparent = true;
-    }
-  };
-}
-
-/* ---------- the room ----------
-
-   Round six: a shop you walk ALONG rather than a wall you stand at.
-
-   Playtest: *"find a way to split the upgrades into categories, that aren't
-   all shown at once ... an intuitive way to scroll or swap through upgrades."*
-
-   Four departments, each with its own bay, its own sign in its own colour and
-   its own camera station, plus a forecourt at one end where the ship is parked
-   at the pump. Swipe or tap an arrow and the camera glides to the next bay.
-   Never more than five cases in a shot, which is the sourced ceiling for how
-   many options a phone should carry at once.
-
-   THE SHIP AND THE SHELF STOP SHARING A SHOT. That is not a nicety, it is the
-   fault he reported: the ship stood at z 0.9 with nine cases on a wall at
-   z -2.15 behind it, and with a 22 degree horizontal field there is no
-   "beside the ship" in portrait to move them to. Composition fixes it; nudging
-   never could. */
-
-export const AISLE_SPAN = 4.6;
-/* Station 0 is the forecourt; 1..4 are the four departments in GROUP_ORDER. */
-export const FORECOURT = 0;
-export function stationX(i: number) { return (i - 1) * AISLE_SPAN; }
-
-export interface Bay {
-  name: GroupName;
-  sign: NeonFitting;
-  /* The lit plate over the bay carrying the department's name. Dimmed rather
-     than hidden when the department has nothing in it - a dark aisle you can
-     see is a promise, an absent one is nothing. */
-  label: THREE.Mesh;
-  setLit(on: boolean, stocked: boolean): void;
-}
+export type PlaceLook = { name: string; wall: number; accent: number; key: number };
+export const PLACE_LOOKS: PlaceLook[] = [
+  { name: 'THE PAD', wall: 0x767f8c, accent: 0x5fd6ff, key: 0xffc27a },
+  { name: 'GATE 1 · 113 M', wall: 0x7a5a3e, accent: 0xffa23a, key: 0xffb45e },
+  { name: 'GATE 2 · 226 M', wall: 0x4a5670, accent: 0xa97cff, key: 0x9fb8ff },
+  { name: 'GATE 3 · 398 M', wall: 0x4a2a26, accent: 0xff4a3a, key: 0xff8a5a }
+];
 
 export interface Room {
   group: THREE.Group;
-  bays: Bay[];
   crt: Crt;
   gauges: { g: Gauge; read: () => number }[];
-  /* The one drawer, moved to whichever counter is in frame. */
-  drawer: Drawer;
-  /* Moves the two roaming lights and the drawer to a bay. */
-  setAisle(i: number): void;
+  /* -1 the pad, 0.. the gate index. */
+  setPlace(place: number): void;
+  place(): number;
   step(t: number, dt: number): void;
 }
 
-/* Built once, the first time the shop is opened and the props have arrived.
-   Returns null if nothing loaded, and the caller keeps the old room - a
+/* The ship's lift, centred on the deck. station.ts parks the ship over it. */
+export const LIFT_X = 0, LIFT_Z = 0.75;
+
+/* Built once, the first time the bay is opened and the props have arrived.
+   Returns null if nothing loaded, and the caller keeps the bare bay - a
    missing model must never cost the player the ability to buy anything. */
 export function buildRoom(): Room | null {
   if (!props.size) return null;
-  /* The room is built once, but a counter that only ever climbs is a slow leak
-     waiting for the day something rebuilds it. */
   resetNeonLights();
   const root = new THREE.Group();
+  const LEFT = -3.4, RIGHT = 3.4;
+  /* The wall's own material, so tinting it for a gate never tints the brass
+     and iron the lift is made of. */
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: 0x767f8c, metalness: 0.55, roughness: 0.5, flatShading: true
+  });
 
-  const LEFT = stationX(0) - 2.6;
-  const RIGHT = stationX(4) + 2.6;
-
-  /* --- the deck, the length of the whole run --- */
+  /* --- the deck --- */
   for (let x = Math.floor(LEFT); x <= Math.ceil(RIGHT); x++) {
     for (let z = -2; z <= 2; z++) {
       const p = prop('floor-panel', deckMat, 1.0);
@@ -784,44 +657,25 @@ export function buildRoom(): Room | null {
     }
   }
 
-  /* --- the back wall, riveted iron with a window every few metres --- */
+  /* --- the back wall: panels on the deck and a plate above them --- */
   for (let x = Math.floor(LEFT); x <= Math.ceil(RIGHT); x++) {
-    const w = prop(Math.abs(x % 4) === 2 ? 'wall-window' : 'wall', ironMat, 1.0);
+    const w = prop(Math.abs(x % 4) === 2 ? 'wall-window' : 'wall', wallMat, 1.0);
     if (!w) continue;
     w.position.set(x, -1.35, -2.5);
     root.add(w);
   }
-  /* And a real wall ABOVE them.
-
-     The imported wall panels are one metre tall and sit on the deck, so they
-     cover y -1.35 to -0.35 - the whole of which is below the rack at 0.46 and
-     the sign at 1.4. The screenshot showed both floating in pure black with
-     nothing behind them, and worse, nothing for a light pool to LAND on, which
-     is the one thing a neon fitting needs in order to read as a light rather
-     than as a lit line. A flat plate, in the same riveted iron, is the surface
-     the whole lighting idea has been missing. */
-  const upper = new THREE.Mesh(
-    new THREE.BoxGeometry(RIGHT - LEFT, 3.6, 0.16), ironMat);
-  upper.position.set((LEFT + RIGHT) / 2, 0.55, -2.55);
+  const upper = new THREE.Mesh(new THREE.BoxGeometry(RIGHT - LEFT, 3.6, 0.16), wallMat);
+  upper.position.set(0, 0.55, -2.55);
   root.add(upper);
-  /* Seams every couple of metres, so it is a wall of panels rather than one
-     sheet - which is what stops a large flat surface reading as a backdrop. */
   for (let x = Math.floor(LEFT); x <= Math.ceil(RIGHT); x += 2) {
     const seam = new THREE.Mesh(new THREE.BoxGeometry(0.06, 3.6, 0.06), brassMat);
     seam.position.set(x, 0.55, -2.45);
     root.add(seam);
   }
-
-  /* A brass rail along the top of the wall with rivets under it. Two primitives
-     and an instanced mesh, and it is most of what makes the wall read as built
-     rather than extruded. */
-  const rail = new THREE.Mesh(
-    new THREE.BoxGeometry(RIGHT - LEFT, 0.09, 0.14), brassMat);
-  rail.position.set((LEFT + RIGHT) / 2, 1.92, -2.35);
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(RIGHT - LEFT, 0.09, 0.14), brassMat);
+  rail.position.set(0, 1.92, -2.35);
   root.add(rail);
   rivetRow(root, LEFT, 1.79, -2.3, RIGHT - LEFT, Math.round((RIGHT - LEFT) * 3));
-
-  /* --- pipe runs along the ceiling line, the length of the shop --- */
   for (let i = 0; i < Math.ceil(RIGHT - LEFT); i++) {
     const p = prop('pipe', copperMat, 1.0);
     if (!p) continue;
@@ -830,246 +684,184 @@ export function buildRoom(): Room | null {
     root.add(p);
   }
 
-  /* ---------- the four department bays ---------- */
-  const bays: Bay[] = [];
-  GROUP_ORDER.forEach((name, i) => {
-    const ax = stationX(i + 1);
-    const col = GROUP_COLOR[name];
+  /* --- the lift: the one thing every room shares --- */
+  const deckTop = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.05, 0.14, 28), ironMat);
+  deckTop.position.set(LIFT_X, -1.26, LIFT_Z);
+  root.add(deckTop);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.05, 6, 36), brassMat);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.set(LIFT_X, -1.18, LIFT_Z);
+  root.add(ring);
+  /* The lit band round the lift, in the room's accent: the colour that says
+     which counter this is before a word is read. */
+  const bandMat = new THREE.MeshBasicMaterial({ color: 0x5fd6ff, toneMapped: false });
+  const band = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.018, 4, 36), bandMat);
+  band.rotation.x = Math.PI / 2;
+  band.position.set(LIFT_X, -1.17, LIFT_Z);
+  root.add(band);
+  /* Two guide rails behind the ship, so it reads as a lift and not a plate. */
+  for (const sx of [-1.25, 1.25]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.09, 3.1, 0.09), brassMat);
+    post.position.set(LIFT_X + sx, 0.2, LIFT_Z - 0.9);
+    root.add(post);
+  }
 
-    /* The counter: a brass top on a riveted iron body. This is the "display
-       case that is also a counter" from his own brief, and the expensive stock
-       stands on it - see layout() in station.ts. */
-    const body = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.86, 0.72), ironMat);
-    body.position.set(ax, -0.92, 1.25);
-    root.add(body);
-    /* Two ribs across the front. The panel is 3.4 by 0.86 and faces the camera
-       squarely with a lamp a foot in front of it, which in the screenshot was
-       a flat washed slab with two upgrades standing on it. Something for the
-       light to break across is the whole fix. */
-    for (const ry of [-0.72, -1.12]) {
-      const rib = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.05, 0.06), brassMat);
-      rib.position.set(ax, ry, 1.62);
-      root.add(rib);
-    }
-    const top = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.86), brassMat);
-    top.position.set(ax, -0.46, 1.25);
-    root.add(top);
-    rivetRow(root, ax - 1.6, -1.26, 1.62, 3.2, 11);
-
-    /* The strip under the counter TOP, not on its front lip.
-
-       It was on the lip, which is where the drawer is, and the two landed on
-       the same sixty pixels of screen - the brass drawer front came out with a
-       bright coloured bar drawn straight through the middle of its label. This
-       is also where the light belongs on a real display counter: under the
-       glass, lighting what is standing on it, with the drawers below in the
-       dark until you open one. */
-    const lip = neonFitting(col, 2.6, { light: 0, glow: 0.42, radius: 0.02 });
-    lip.position.set(ax, -0.55, 1.71);
-    /* Applied once here, because `glow` is a scale that `setNeon` multiplies in
-       and this fitting is never dimmed by anything else. A fitting built with a
-       glow it is never told to apply is a parameter that does nothing. */
-    setNeon(lip, 1);
-    root.add(lip);
-
-    /* The wall rack behind, and the shelf the standard stock sits on. */
-    const shelf = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.07, 0.5), ironMat);
-    shelf.position.set(ax, 0.1, -2.1);
-    root.add(shelf);
-    for (const sx of [-1, 1]) {
-      const post = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.2, 0.08), brassMat);
-      post.position.set(ax + sx * 1.62, 0.95, -2.1);
-      root.add(post);
-    }
-
-    /* The sign over the bay. This is the aisle indicator, and it is a fitting
-       rather than an overlay - his note that three coloured lights in a row
-       normally mean categories was right, and this is that read made true. */
-    const sign = neonFitting(col, 2.4, { light: 0 });
-    sign.position.set(ax, 1.18, -2.28);
-    root.add(sign);
-    const label = makeLabel(GROUP_LABEL[name], col);
-    label.scale.setScalar(1.5);
-    label.position.set(ax, 0.84, -2.2);
-    root.add(label);
-
-    bays.push({
-      name, sign, label,
-      setLit(on: boolean, stocked: boolean) {
-        /* Three states, not two. The aisle you are in burns; an aisle with
-           stock you are not in idles; an aisle with NOTHING in it is dark -
-           which in the first hour is Ordnance, whose every device has to be
-           dug up. A department lighting for the first time is a better reward
-           than a row appearing in a list. */
-        setNeon(sign, !stocked ? 0.06 : on ? 1 : 0.42);
-        const lm = label.material as THREE.MeshBasicMaterial;
-        lm.transparent = true;
-        lm.opacity = !stocked ? 0.16 : on ? 1 : 0.5;
-      }
-    });
-  });
-
-  /* ---------- the forecourt ----------
-
-     Where the ship parks, and where all of the steampunk hardware is
-     concentrated: the pump, its gauges and the one Matrix terminal. Putting
-     them together rather than sprinkling them down the shop is what keeps the
-     styles from muddying - one place is the machine room, the rest is the
-     shop. */
-  const fx = stationX(FORECOURT);
-
-  /* The pump: a riveted column with a brass head and a hose to the ship. */
-  const pump = new THREE.Mesh(new THREE.BoxGeometry(0.62, 1.7, 0.5), ironMat);
-  pump.position.set(fx + 1.3, -0.5, 0.6);
-  root.add(pump);
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.34, 0.6), brassMat);
-  head.position.set(fx + 1.3, 0.5, 0.6);
-  root.add(head);
-  rivetRow(root, fx + 1.05, -0.5, 0.86, 0.5, 4);
-  /* The hose, as a torus arc. A curve would be truer and a torus is two
-     numbers - and at this distance the only thing being read is "there is
-     something connecting the pump to the ship". */
-  const hose = new THREE.Mesh(
-    new THREE.TorusGeometry(0.62, 0.035, 5, 14, Math.PI * 0.8),
-    new THREE.MeshStandardMaterial({ color: 0x1c1a18, roughness: 0.9, metalness: 0 }));
-  hose.position.set(fx + 0.95, -0.1, 0.6);
-  hose.rotation.set(0, 0, Math.PI * 0.15);
-  root.add(hose);
-
-  /* Three gauges on the wall behind the pump, reading real state. */
+  /* --- the terminal and the gauges, on the wall in every room --- */
   const gauges: { g: Gauge; read: () => number }[] = [
-    /* UNREST and BALLAST rather than STRAIN and STORE. The two readings the
-       campaign now turns on, on the wall of the one room you stand still in -
-       which is where a reading you are supposed to think about belongs, and
-       is why neither of them is on the HUD underground. */
     { g: makeGauge('UNREST'), read: () => worldUnrest() },
     { g: makeGauge('DEPTH'), read: () => Math.min(1, g.best.depth / WORLD_DEPTH) },
     { g: makeGauge('BALLAST'), read: () => g.ground.ballast }
   ];
-  /* Right of centre, with the terminal to the left of it.
-
-     Measured: at this wall's distance one world unit is about 122 screen
-     pixels on a 360-wide phone, so the terminal at fx - 1.5 spanned screen
-     x -3 to 119 - a third of it off the left edge, which the projected-centre
-     numbers passed because the centre itself was just inside. */
   gauges.forEach((gg, i) => {
-    gg.g.group.position.set(fx + 0.3 + i * 0.46, 0.72, -2.28);
+    gg.g.group.position.set(0.9 + i * 0.46, 0.72, -2.28);
     root.add(gg.g.group);
   });
   const gaugeBoard = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.62, 0.1), ironMat);
-  gaugeBoard.position.set(fx + 0.76, 0.72, -2.36);
+  gaugeBoard.position.set(1.36, 0.72, -2.36);
   root.add(gaugeBoard);
-  rivetRow(root, fx + 0.06, 0.44, -2.3, 1.4, 6);
-
-  /* The terminal. The only green in the room, and the only screen. */
+  rivetRow(root, 0.66, 0.44, -2.3, 1.4, 6);
   const crt = makeCrt(1.0, 1.25);
-  crt.mesh.position.set(fx - 0.92, 0.35, -2.28);
+  crt.mesh.position.set(-1.4, 0.35, -2.28);
   root.add(crt.mesh);
-  /* A brass bezel round it, because a screen with no housing is a sticker -
-     the same lesson the neon needed in round five. */
   const bezel = new THREE.Mesh(new THREE.BoxGeometry(1.16, 1.41, 0.12), brassMat);
-  bezel.position.set(fx - 0.92, 0.35, -2.36);
+  bezel.position.set(-1.4, 0.35, -2.36);
   root.add(bezel);
 
-  /* --- the work, dressed along the run --- */
-  const skip = prop('skip-rocks', ironMat, 0.95);
-  if (skip) { skip.position.set(fx - 1.9, -1.32, 0.9); skip.rotation.y = 0.5; root.add(skip); }
-  for (const [cx, cz, cr] of [[stationX(1) - 2.3, 0.4, -0.35], [stationX(3) + 2.2, 0.5, 0.2],
-                              [stationX(4) + 1.9, -0.3, 0.7]] as [number, number, number][]) {
-    const box = prop('container', ironMat, 0.85);
-    if (box) { box.position.set(cx, -1.32, cz); box.rotation.y = cr; root.add(box); }
+  /* --- the sign: where you are, on the wall above the lift --- */
+  const signs = PLACE_LOOKS.map((look) => {
+    const m = makeLabel(look.name, look.accent);
+    m.scale.setScalar(1.6);
+    m.position.set(0, 1.28, -2.3);
+    root.add(m);
+    return m;
+  });
+
+  /* --- each room's own dressing --- */
+  const dress: THREE.Group[] = PLACE_LOOKS.map(() => {
+    const d = new THREE.Group();
+    root.add(d);
+    return d;
+  });
+  const put = (d: THREE.Group, o: THREE.Object3D | null, x: number, y: number, z: number, ry = 0) => {
+    if (!o) return;
+    o.position.set(x, y, z);
+    o.rotation.y = ry;
+    d.add(o);
+  };
+  /* Where dressing can be SEEN. Portrait at a 46 degree field is barely three
+     units wide at the back wall and under two at the lift, so the first
+     version's props at x 2.5 were all off the edge of every screen. Everything
+     here sits inside x -1.5 to 1.5, against the wall or on the deck behind the
+     lift, where the ship does not cover it. */
+  /* The pad: the pump behind the lift, and a skip of spoil. */
+  {
+    const d = dress[0];
+    const pump = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.5, 0.4), ironMat);
+    pump.position.set(1.25, -0.6, -1.7);
+    d.add(pump);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.3, 0.5), brassMat);
+    head.position.set(1.25, 0.28, -1.7);
+    d.add(head);
+    rivetRow(d, 1.05, -0.6, -1.48, 0.4, 4);
+    const hose = new THREE.Mesh(
+      new THREE.TorusGeometry(0.5, 0.035, 5, 14, Math.PI * 0.8),
+      new THREE.MeshStandardMaterial({ color: 0x1c1a18, roughness: 0.9, metalness: 0 }));
+    hose.position.set(0.85, -0.5, -1.5);
+    hose.rotation.set(0, 0, Math.PI * 0.15);
+    d.add(hose);
+    put(d, prop('skip-rocks', ironMat, 0.8), -1.3, -1.32, -1.5, 0.5);
   }
-  for (const [rx, rz, rr] of [[stationX(2) - 2.2, 1.0, 0.4], [stationX(4) - 2.4, 1.15, -0.9]] as
-       [number, number, number][]) {
-    const r = prop('rocks', ironMat, 0.55);
-    if (r) { r.position.set(rx, -1.33, rz); r.rotation.y = rr; root.add(r); }
+  /* Gate 1: rock pressing in at both sides of the wall, and two lamps. */
+  const rockMat = new THREE.MeshStandardMaterial({
+    color: 0x6b4a32, roughness: 0.95, metalness: 0.05, flatShading: true
+  });
+  {
+    const d = dress[1];
+    put(d, prop('rocks', rockMat, 1.5), -1.4, -1.33, -1.8, 0.4);
+    put(d, prop('rocks', rockMat, 1.2), 1.4, -1.33, -1.7, -0.9);
+    put(d, prop('rocks', rockMat, 0.8), -0.9, -1.33, -1.2, 1.7);
+    const lampMat = new THREE.MeshBasicMaterial({ color: 0xffc27a, toneMapped: false });
+    for (const x of [-1.05, 1.05]) {
+      const lampM = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), lampMat);
+      lampM.position.set(x, 1.0, -2.25);
+      d.add(lampM);
+      const cage = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.012, 4, 12), brassMat);
+      cage.position.set(x, 1.0, -2.25);
+      d.add(cage);
+    }
+  }
+  /* Gate 2: crystal through the wall and the deck, lit from inside. */
+  {
+    const d = dress[2];
+    const xMat = new THREE.MeshStandardMaterial({
+      color: 0x7a5cff, emissive: 0x5a2fd0, emissiveIntensity: 0.9,
+      roughness: 0.15, metalness: 0.1, flatShading: true
+    });
+    const shard = new THREE.CylinderGeometry(0, 1, 1, 6);
+    shard.translate(0, 0.5, 0);
+    const spots: [number, number, number, number, number][] = [
+      [-1.35, -1.3, -1.7, 1.2, 0.2], [-1.05, -1.3, -1.3, 0.7, -0.3], [-1.5, -1.3, -2.1, 0.9, 0.35],
+      [1.3, -1.3, -1.8, 1.0, -0.25], [1.05, -1.3, -1.25, 0.6, 0.3], [1.45, -1.3, -2.1, 1.4, 0.1],
+      [-0.95, 1.8, -2.3, 0.55, 3.0], [0.9, 1.8, -2.3, 0.5, 2.9]
+    ];
+    for (const [x, y, z, h, tilt] of spots) {
+      const m = new THREE.Mesh(shard, xMat);
+      m.scale.set(0.16 * h, h, 0.16 * h);
+      m.position.set(x, y, z);
+      m.rotation.z = tilt;
+      d.add(m);
+    }
+  }
+  /* Gate 3: the door. Dark iron, and a red seam of heat low along the wall. */
+  {
+    const d = dress[3];
+    const seamM = new THREE.Mesh(new THREE.BoxGeometry(RIGHT - LEFT, 0.05, 0.05),
+      new THREE.MeshBasicMaterial({ color: 0xff4a3a, toneMapped: false }));
+    seamM.position.set(0, -0.3, -2.4);
+    d.add(seamM);
+    put(d, prop('container-flat', ironMat, 0.8), -1.3, -1.32, -1.6, 0.2);
+    put(d, prop('rocks', rockMat, 1.0), 1.35, -1.33, -1.6, -0.5);
   }
 
-  /* ---------- the lights that walk with you ----------
+  /* --- lights: three, in every room ---
 
-     Eight fittings and a budget of seven is a design that has already failed:
-     with one light per fitting the eighth simply never got one, which meant
-     the ORDNANCE sign was permanently unlit for no reason anybody could state.
-     Measured in the built game - eight real lights in the scene against a
-     stated ceiling of seven - rather than noticed by reading the code.
+     The key light over the lift in the room's warm, a kicker from the left so
+     the ship has an edge, and the accent on the wall behind it. Three point
+     lights against a budget of seven, the same whichever room is showing. */
+  const keyL = new THREE.PointLight(0xffc27a, 5.5, 6.0, 2);
+  keyL.position.set(0.9, 1.0, 2.0);
+  keyL.layers.enable(SHIP_LAYER);
+  root.add(keyL);
+  const kick = new THREE.PointLight(0x6fa8ff, 3.2, 5.0, 2);
+  kick.position.set(-1.5, 0.3, 1.9);
+  kick.layers.enable(SHIP_LAYER);
+  root.add(kick);
+  const accentL = new THREE.PointLight(0x5fd6ff, 4.0, 4.5, 2);
+  accentL.position.set(0, 0.4, -1.6);
+  root.add(accentL);
 
-     The fix is not a bigger budget. Only ONE aisle is ever on screen, so only
-     one aisle's fittings can be doing any lighting work: two lights, moved to
-     whichever bay the camera is at. That is two instead of eight, it is always
-     the correct two, and it is why this room can afford the lip light to be as
-     strong as it is. */
-  const lipLight = new THREE.PointLight(0xffffff, 2.1, 2.4, 2);
-  lipLight.castShadow = false;
-  root.add(lipLight);
-  const signLight = new THREE.PointLight(0xffffff, 3.6, 3.2, 2);
-  signLight.castShadow = false;
-  root.add(signLight);
-  /* The third roaming light, and the only one aimed downward: the aisle's
-     color on the deck. It walks with the other two for the same reason they
-     walk - only one aisle is ever on screen - so the wet floor costs one light
-     in the scene rather than one per aisle, and the budget above is untouched.
-
-     Sits forward of the rack and low, so the falloff puts the bright of the
-     streak near the front of the deck where the camera actually sees it and
-     lets the back of the floor stay dark. A deck lit evenly reads as a lit
-     plate; a deck with a hot streak and a dark edge reads as wet. */
-  const deckLight = new THREE.PointLight(0xffffff, 9.0, 7.0, 2);
-  deckLight.castShadow = false;
-  root.add(deckLight);
-
-  /* And one for the forecourt, which has no bay of its own but does have the
-     ship in it. Warm, filament-coloured, so the brass reads as brass: the
-     research puts two or three of the budget on practicals for exactly this. */
-  const pumpLight = new THREE.PointLight(0xffc27a, 5.5, 6.0, 2);
-  pumpLight.position.set(fx + 0.9, 1.0, 2.0);
-  pumpLight.castShadow = false;
-  pumpLight.layers.enable(SHIP_LAYER);
-  root.add(pumpLight);
-  /* A cool kicker from the other side, so the ship has a lit edge against the
-     dark wall instead of reading as a silhouette.
-
-     The room's key was cut from 3.4 to 1.35 to let the neon carry, and the
-     ship went dark with the room - which is wrong, because the ship is the one
-     object in here whose SHAPE is game state. It gets its own pair rather than
-     the room's key coming back up. */
-  const drawer = makeDrawer();
-  root.add(drawer.group);
-
-  const shipKick = new THREE.PointLight(0x6fa8ff, 3.2, 5.0, 2);
-  shipKick.position.set(fx - 1.5, 0.3, 1.9);
-  shipKick.castShadow = false;
-  shipKick.layers.enable(SHIP_LAYER);
-  root.add(shipKick);
+  let where = -1;
+  function setPlace(place: number) {
+    const i = Math.max(0, Math.min(PLACE_LOOKS.length - 1, place + 1));
+    where = i - 1;
+    const look = PLACE_LOOKS[i];
+    wallMat.color.setHex(look.wall);
+    bandMat.color.setHex(look.accent);
+    accentL.color.setHex(look.accent);
+    keyL.color.setHex(look.key);
+    signs.forEach((m, j) => { m.visible = j === i; });
+    dress.forEach((d, j) => { d.visible = j === i; });
+  }
+  setPlace(-1);
 
   return {
     group: root,
-    bays,
     crt,
     gauges,
-    drawer,
-    setAisle(i: number) {
-      /* At the forecourt the two roaming lights go dark rather than lighting
-         an aisle nobody is looking at, and the drawer goes with them - there
-         is no counter at the pump to put one in. */
-      const at = i >= 1 && i <= bays.length;
-      lipLight.visible = at;
-      signLight.visible = at;
-      deckLight.visible = at;
-      drawer.group.visible = at;
-      if (!at) { drawer.setOpen(false); return; }
-      drawer.group.position.x = stationX(i);
-      const col = GROUP_COLOR[GROUP_ORDER[i - 1]];
-      const ax = stationX(i);
-      lipLight.color.setHex(col);
-      lipLight.position.set(ax, -0.42, 1.8);
-      signLight.color.setHex(col);
-      signLight.position.set(ax, 1.1, -2.0);
-      deckLight.color.setHex(col);
-      deckLight.position.set(ax, -0.30, 1.70);
-    },
-    step(t: number, dt: number) {
+    setPlace,
+    place: () => where,
+    step(t: number) {
       crt.step(t);
-      drawer.step(dt);
       for (const gg of gauges) gg.g.set(gg.read());
     }
   };

@@ -661,5 +661,32 @@ export const SCENES = {
       __cw.advance(SECS);
       window.__KF.log = (window.__KF.log || '') + (__cw.R.keyHold ? 'L' : __cw.g.dug.has(__KF.KX + ',' + __KF.KD) ? 'c' : '.');
     `
+  },
+
+  /* Round seventeen, AO. The same bay at the pad and at each gate, one frame
+     a room: the lift, the camera and the cards are the same, the room around
+     them is not. The first frame is the models loading. Each gate opens on the system
+     holding its own counter. */
+  gatebays: {
+    secs: 0.6,
+    frames: 5,
+    enter: true,
+    setup: `
+      window.__GB = { i: -1 };
+      window.__GB.go = (t) => {
+        if (__cw.g.mode === 'shop') document.querySelector('#shop .x').click();
+        __cw.g.credits = 90000; __cw.g.best.depth = 400; __cw.g.ground.gates = [0, 1, 2];
+        __cw.g.stock.amethyst = 5; __cw.g.stock.ruby = 3; __cw.g.stock.coreite = 2;
+        if (t < 0) { __cw.g.px = __cw.START_X; __cw.g.pd = -1; }
+        else { __cw.g.px = __cw.coreColumn(t); __cw.g.pd = __cw.gateDepth(t) - 1; }
+        __cw.advance(0.3);
+        document.getElementById('btnShop').click();
+      };
+      __GB.go(-1);
+      __cw.advance(1.5);
+    `,
+    /* Frame 0 is the room's models still arriving; 1 to 4 are the pad and
+       the three gates. */
+    step: `__GB.go(__GB.i); __GB.i++; __cw.advance(SECS);`
   }
 };

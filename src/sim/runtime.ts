@@ -106,6 +106,9 @@ export const R = {
   /* The same shape, for a gate's station: which tier the ship was last at, or
      -1. Round fifteen, Y8. */
   wasAtGate: -1,
+  /* Round seventeen, AO: whether this gate visit's one key trade is spent.
+     Cleared on arriving at a gate, the same edge that writes the checkpoint. */
+  dealTaken: false,
   digging: null as Dig | null,
   /* This run's telemetry. Lives here rather than in `g` because it is reset at
      the pad and folded into the all-time totals there; only the totals are

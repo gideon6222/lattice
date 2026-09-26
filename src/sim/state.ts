@@ -299,9 +299,9 @@ export const onPad = docked;
 export const gateHere = () => gateNear(Math.round(g.px), Math.max(0, Math.round(g.pd)), g.ground.gates);
 
 /* Where the SHOP may be opened from: the pad, or any open gate's station.
-   Restocking there is priced exactly like the pad's shelf - the catalogue is
-   keyed on `g.best.depth`, not on where the ship is standing - so this is the
-   only thing that changes: where the door is. */
+   Prices are the pad's everywhere. Since round seventeen (AO) the STOCK is
+   not: a gate fits its own tier's rungs and trades one supply for a key, and
+   only the pad sells supplies for credits - see vendor.ts. */
 export const shopHere = () => docked() || gateHere() >= 0;
 
 /* ---------- the pad save ----------

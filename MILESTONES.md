@@ -747,7 +747,7 @@ is in `journal/legacy-plan.md`.
       briefs: feel, controls
       design: ## Round seventeen, the shop and the minerals
 
-- [ ] **AO Gate vendors.** Each gate is a different room around the same lift, stocked with that
+- [x] **AO Gate vendors.** Each gate is a different room around the same lift, stocked with that
       tier's rungs, Sink (a skill the pad never sells) at the first gate, one key-priced
       consumable per visit, a visible save moment, and no pump. Receipt: a test that each
       vendor's stock differs, and a screenshot per gate.

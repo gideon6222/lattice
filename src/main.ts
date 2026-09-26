@@ -12,9 +12,10 @@ import { regionAt, regionName, MAP_TILE, WORLD_DEPTH, REGION_COUNT } from './sim
 import { setMark } from './mark';
 import { syncDrops } from './drops';
 import { setDrillTier, setUpgradeHardware, rig, bit, player } from './ship';
-import { stationCamera, stationScene, roomReady, pickPart, shipYaw, turnShip } from './station';
+import { stationCamera, stationScene, roomReady, roomPlace, pickPart, shipYaw, turnShip } from './station';
 import { partKeys } from './ship';
 import { keyPockets, KEY_PLANS, keyHome, keyNear, senseRange } from './sim/keys';
+import { vendorStock } from './sim/vendor';
 import { baySystem, selectSystem, sensedKey } from './ui';
 import { el, updateHUD, audioLabels, buildShop, toast, foundBanner, buildBallast, flash } from './ui';
 import { frame, tick, advance, stopClock, startClock, clockRunning } from './loop';
@@ -197,7 +198,7 @@ if (new URLSearchParams(location.search).has('debug')) {
     },
     /* Where the way in starts, so a spec can ask rather than type a cell. */
     hallEye,
-    stationCamera, roomReady,
+    stationCamera, roomReady, roomPlace,
     /* Round seventeen, AN: the fitting bay. */
     baySystem, selectSystem, pickPart, shipYaw, turnShip, partKeys, SUPPLY_SYSTEM,
     /* The options, so a spec can assert that a slider moved a bus and that
@@ -281,6 +282,6 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* Round seventeen, AB: which panels the close stack holds, top last. */
     openPanels,
     /* Round seventeen, AL: where the keys are. */
-    keyPockets, KEY_PLANS, keyHome, detailGeometryOf, keyNear, senseRange, sensedKey, updateHUD
+    keyPockets, KEY_PLANS, keyHome, detailGeometryOf, keyNear, senseRange, sensedKey, updateHUD, vendorStock
   };
 }

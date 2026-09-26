@@ -10,7 +10,7 @@ function fmtTime(secs: number) {
   const m = Math.floor(secs / 60), r = secs % 60;
   return m + ':' + String(r).padStart(2, '0');
 }
-import { g , coreM, worldTrait, save, docked, shopHere } from './sim/state';
+import { g , coreM, worldTrait, save, docked, shopHere, gateHere } from './sim/state';
 import { haulValue } from './sim/world';
 import { R } from './sim/runtime';
 import { openMap, wireMap } from './mapui';
@@ -18,7 +18,7 @@ import { ANCHOR_COUNT } from './sim/vaults';
 import { MAP_TILE, WORLD_DEPTH, regionName, regionAt } from './sim/region';
 import { W } from './sim/config';
 import { shoreUp } from './collapse';
-import { mustEl, ui, atSurface, buildShop, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, buildBallast, updateHUD,
+import { mustEl, ui, atSurface, buildShop, openBay, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, buildBallast, updateHUD,
          selectSystem, stepSystem, stepCard, confirmCard } from './ui';
 import { dockShip, undockShip, resizeStation, turnShip, pickPart } from './station';
 import { UPGRADES } from './sim/config';
@@ -148,8 +148,10 @@ ui.btnShop.onclick = () => {
   g.mode = 'shop';
   /* Move the real ship into the station scene. Nothing is copied, so the
      machine on the deck is wearing exactly the hardware it will undock with. */
-  dockShip();
+  /* Round seventeen, AO: the room around the lift is the gate's own. */
+  dockShip(docked() ? -1 : gateHere());
   document.body.classList.add('docked');
+  openBay();
   buildShop();
   /* Un-hidden BEFORE the camera is framed, and that order is load-bearing.
 

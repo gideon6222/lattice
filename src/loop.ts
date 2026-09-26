@@ -50,7 +50,7 @@ import { hap } from './haptics';
 import { crossedMark, fadeMark } from './mark';
 import { aimRelic } from './relic';
 import { stepParallax, fadeParallax, setParallaxTint } from './parallax';
-import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner } from './ui';
+import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner, savedMoment, tickSaved } from './ui';
 import { stepGauges } from './gauges';
 import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken } from './actions';
 import { coreOpens, openGate } from './sim/gate';
@@ -875,7 +875,13 @@ export function tick(raw: number, draw = true) {
        triggered on the tier changing, the same shape as R.wasAtSurface above,
        so standing at one for a minute writes it once rather than every frame. */
     const gateNow = gateHere();
-    if (gateNow >= 0 && gateNow !== R.wasAtGate) checkpoint();
+    if (gateNow >= 0 && gateNow !== R.wasAtGate) {
+      checkpoint();
+      /* Round seventeen, AO: the save is shown, and a new visit means a new
+         key trade at this gate's counter. */
+      R.dealTaken = false;
+      savedMoment('SAVED · GATE ' + (gateNow + 1));
+    }
     R.wasAtGate = gateNow;
 
     /* The Ballast's own clock, and it only runs while the game is playing -
@@ -1109,7 +1115,7 @@ export function tick(raw: number, draw = true) {
 
   if (isDocked()) {
     stepStation(clock, raw);
-    tickToast(raw); tickFound(raw);
+    tickToast(raw); tickFound(raw); tickSaved(raw);
     updateHUD();
     stepGauges(raw);
     if (draw) renderStation();
@@ -1386,7 +1392,7 @@ export function tick(raw: number, draw = true) {
     R.shake = Math.max(0, R.shake - raw * SHAKE_DECAY);
   }
 
-  tickToast(raw); tickFound(raw);
+  tickToast(raw); tickFound(raw); tickSaved(raw);
 
   /* The surface is drawn every frame even from underground: the lean and the
      strain lamp are what the player looks for on the way up. */

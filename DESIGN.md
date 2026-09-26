@@ -2751,7 +2751,7 @@ is the gift. What moved with it:
   hold its barrier, never that anything "holds harder".
 - **Abilities.** The Hollow at core 1, the Call at core 2 - and it hears everything the ship can
   reach, not only broken regions, stopping at the next shut gate. Sink comes from no core; it
-  is a skill (`g.skills`) the gate vendors will sell (AO), and until then no save has it.
+  is a skill (`g.skills`) the first gate's vendor sells (AO).
 - **The pip row is this tier's three Anchors and its core**, starting again at each gate.
 
 **The golden diff, read before re-recording** `test/baseline/blocks.json`: on all six recorded
@@ -2908,6 +2908,45 @@ LIVES HERE", once the key's window starts above `reachableDepth(gates)`.
 Receipts: `test/sense.test.mjs`; three e2e specs (the mark and the lean and a turn ending it, no
 lean while hurt, the chip naming a key and going quiet once it is cut); `npm run film keyfind`,
 two finds of one emerald on one strip.
+
+### AO: gate vendors
+
+The bay is the same at every counter and the room around the lift is not. `stationroom.ts` lost
+its aisles, its four department counters, its drawer and `stationsigns.ts`. It now builds one
+bay: a deck, the back wall with the terminal and gauges, and a lift under the ship. There are four
+dressings switched by visibility, so a room swap costs nothing per frame:
+- the pad: iron, the pump, and cyan
+- gate 1: rock and lamps, amber
+- gate 2: crystal through the walls, violet
+- gate 3: a red seam of heat
+
+The same three point lights serve every room. The first dressing put its props at x 2.5, and all
+of them were off the edge of the screen: portrait at a 46 degree field is about three units wide
+at the back wall. Everything now sits inside x -1.5 to 1.5.
+
+The stock rules live in `src/sim/vendor.ts`, which is pure:
+- **The pad** fits every rung and is the only counter selling supplies for credits.
+- **A gate** fits every rung up to the top of the tier it opens onto, and none past it. The last
+  gate fits everything. The first version fitted only the gate's own tier band, and a player
+  arriving a rung behind found nothing on the counter to buy.
+- **Every gate** trades one supply a visit for a key the tier above it yields: a Fuel Cell for 1
+  amethyst, a Hull Patch for 1 ruby, a Bulwark Field for 1 coreite. `R.dealTaken` clears on the
+  arrival edge.
+- **The first gate** teaches Sink once, for 4,000 credits and 2 amethyst.
+
+These gate-only cards sit at the top of the rack under THIS GATE ONLY, and a gate's bay opens on
+the system holding them.
+
+The save moment: arriving at a gate writes the checkpoint as before, and now also shows a plate,
+"SAVED · GATE n", for 2.5 s of game time. The bay's header reads "GATE n · D M · SAVED HERE".
+Also found here: the heat and hull washes stayed over the bay when you docked at a hot gate, which
+turned the violet room brown. `body.docked` hides both now.
+
+Receipts: `test/vendor.test.mjs` (no two counters stock the same thing, supply and trade rules,
+Sink at the first gate only, rung bands); three e2e specs (the save plate and the gate's own room;
+Sink once, one trade a visit, no credit supplies at a gate; the pad sells supplies and never
+Sink); `npm run film gatebays`, the pad and the three gates. The campaign probe shops only at the
+pad, so its pacing is unchanged.
 
 ### Fable's second review, after the research, and what it changed
 

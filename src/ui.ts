@@ -1,5 +1,6 @@
 import { SYSTEMS, SUPPLY_SYSTEM, WHAT, shelfStock, type SystemKey } from './sim/config';
 import { keyNear, senseRange } from './sim/keys';
+import { vendorLines, sellsRung, rungBand, sellsSupplies, dealAt, SINK_GATE, SINK_PRICE, type Place } from './sim/vendor';
 import { HULL_MAX, DEF, isOre, isKey, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
 import { setGauges, setFuelReserve } from './gauges';
 import { clamp } from './sim/util';
@@ -116,6 +117,22 @@ export function tickToast(dt: number) {
   toastT -= dt;
   if (toastT <= 0) ui.toast.style.opacity = '0';
 }
+/* The save moment (round seventeen, AO). Shown for two and a half seconds on
+   game time, so the filmstrip can hold it still like the banner below. */
+let savedT = 0;
+export function savedMoment(text: string) {
+  const el = document.getElementById('savedMark');
+  if (!el) return;
+  (el.querySelector('span') as HTMLElement).textContent = text;
+  el.classList.add('on');
+  savedT = 2.5;
+}
+export function tickSaved(dt: number) {
+  if (savedT <= 0) return;
+  savedT -= dt;
+  if (savedT <= 0) document.getElementById('savedMark')?.classList.remove('on');
+}
+
 /* ---------- the discovery banner ----------
 
    Four seconds, no tap, no pause. Long enough to read nineteen words at arm's
@@ -532,6 +549,17 @@ let baySys: SystemKey = 'drill';
 /* Which card the keyboard is on - the arrows and Enter drive the bay too. */
 let bayPick = 0;
 export function baySystem(): SystemKey { return baySys; }
+/* Where the bay opens. At a gate, on the system holding that gate's own
+   counter - Sink at the first until it is learned, then the key trade - so
+   the thing only this gate sells is the first thing on screen. */
+export function openBay() {
+  const place = placeNow();
+  if (place < 0) return;
+  const d = dealAt(place);
+  const sys: SystemKey | null = place === SINK_GATE && !g.skills.includes('sink') ? 'engines'
+    : d ? SUPPLY_SYSTEM[d.supply] : null;
+  if (sys) { baySys = sys; bayPick = 0; }
+}
 export function selectSystem(k: SystemKey) {
   if (k !== baySys) bayPick = 0;
   baySys = k;
@@ -559,24 +587,52 @@ export function confirmCard(): boolean {
   return true;
 }
 
-/* The lines a system shows, in the order the table lists them: everything the
-   shelf stocks (found devices included, unfound ones not) plus its one teaser. */
+/* Where the bay is standing: the pad, or the gate the ship is docked at.
+   Round seventeen, AO: the same bay everywhere, a different counter. */
+function placeNow(): Place { return docked() ? -1 : gateHere(); }
+
+/* The lines a system shows, in the order the table lists them: what this
+   counter stocks (see vendor.ts; found devices included, unfound ones not). */
 function linesOf(sys: SystemKey): Upgrade[] {
-  return shelfStock(g.best.depth, g.found).filter((u) => u.system === sys);
+  return vendorLines(placeNow(), g.best.depth, g.found).filter((u) => u.system === sys);
 }
 function suppliesOf(sys: SystemKey): Supply[] {
+  if (!sellsSupplies(placeNow())) return [];
   return SUPPLIES.filter((sp) => SUPPLY_SYSTEM[sp.key] === sys && g.foundKit.includes(sp.key));
+}
+
+/* The gate's own two things (AO): its one key-priced supply a visit, and Sink
+   at the first gate. Each shows in the system it serves. */
+function dealIn(sys: SystemKey) {
+  const d = dealAt(placeNow());
+  return d && SUPPLY_SYSTEM[d.supply] === sys ? d : null;
+}
+function dealOk(): boolean {
+  const d = dealAt(placeNow());
+  if (!d || R.dealTaken) return false;
+  const sp = SUPPLY_OF[d.supply];
+  return g.kit[d.supply] < sp.max && (g.stock[d.key] || 0) >= d.need;
+}
+const sinkHere = (sys: SystemKey) => sys === 'engines' && placeNow() === SINK_GATE;
+function sinkOk(): boolean {
+  return !g.skills.includes('sink') && g.credits >= SINK_PRICE.credits &&
+    (g.stock[SINK_PRICE.key] || 0) >= SINK_PRICE.need;
 }
 
 /* Whether anything in a system can be bought right now - the strip's pip. */
 function canBuyIn(sys: SystemKey): boolean {
   for (const u of linesOf(sys)) if (buyState(u).ok) return true;
   for (const sp of suppliesOf(sys)) if (g.kit[sp.key] < sp.max && g.credits >= sp.cost) return true;
+  if (dealIn(sys) && dealOk()) return true;
+  if (sinkHere(sys) && sinkOk()) return true;
   return false;
 }
 
 interface BuyState {
   ok: boolean; sealed: boolean; maxed: boolean; capped: boolean; short: boolean;
+  /* This counter does not fit the next rung (AO): 'pad' when it is an earlier
+     rung the pad fits, 'deeper' when it is a later one. */
+  elsewhere: '' | 'pad' | 'deeper';
   cost: number; keys: { id: string; need: number }[]; next?: number;
 }
 function buyState(u: Upgrade): BuyState {
@@ -589,7 +645,11 @@ function buyState(u: Upgrade): BuyState {
   const short = keys.some((m) => (g.stock[m.id] || 0) < m.need);
   const cost = costOf(u, lvl);
   const next = TIER_DEPTHS.find((d) => d > g.best.depth);
-  return { ok: !sealed && !maxed && !capped && !short && g.credits >= cost, sealed, maxed, capped, short, cost, keys, next };
+  const place = placeNow();
+  const elsewhere = maxed || sellsRung(u, lvl, place) ? ''
+    : lvl < rungBand(u, place)[0] ? 'pad' : 'deeper';
+  return { ok: !sealed && !maxed && !capped && !short && !elsewhere && g.credits >= cost,
+           sealed, maxed, capped, short, elsewhere, cost, keys, next };
 }
 
 export function buildShop() {
@@ -598,7 +658,8 @@ export function buildShop() {
      in (round seventeen - the header said "DOCK 04 · VERDAX" off a vestigial
      planet field). */
   const gate = gateHere();
-  ui.shopSub.textContent = gate >= 0 ? 'GATE ' + (gate + 1) + ' · ' + gateDepth(gate) + ' M' : 'THE PAD';
+  ui.shopSub.textContent = gate >= 0 && !docked()
+    ? 'GATE ' + (gate + 1) + ' · ' + gateDepth(gate) + ' M · SAVED HERE' : 'THE PAD';
   buildStrip();
   buildRack();
   reframeIfNeeded();
@@ -623,6 +684,17 @@ const hex = (c: number) => '#' + c.toString(16).padStart(6, '0');
 function buildRack() {
   ui.rack.innerHTML = '';
   let i = 0;
+  /* The gate's own counter (AO) comes FIRST: it is the reason to stop here
+     rather than at the pad, and below the lines it sat under the fold. */
+  const deal = dealIn(baySys), sink = sinkHere(baySys);
+  if (deal || sink) {
+    const h = document.createElement('div');
+    h.className = 'bsub';
+    h.textContent = 'THIS GATE ONLY';
+    ui.rack.appendChild(h);
+    if (sink) ui.rack.appendChild(sinkCard(i++ === bayPick));
+    if (deal) ui.rack.appendChild(dealCard(deal, i++ === bayPick));
+  }
   for (const u of linesOf(baySys)) ui.rack.appendChild(upgradeCard(u, i++ === bayPick));
   const sups = suppliesOf(baySys);
   if (sups.length) {
@@ -666,7 +738,11 @@ function upgradeCard(u: Upgrade, picked: boolean): HTMLElement {
   } else {
     html += '<div class="beff">' + u.effect(lvl) + (st.maxed ? '' : ' → <b>' + u.effect(lvl + 1) + '</b>') + '</div>';
     if (st.keys.length) html += '<div class="bkeys">' + st.keys.map(keyChip).join('') + '</div>';
-    if (st.capped) {
+    if (st.elsewhere && !st.capped) {
+      const [lo, hi] = rungBand(u, placeNow());
+      html += '<div class="bnote">This gate fits levels ' + (lo + 1) + ' to ' + hi +
+        (st.elsewhere === 'pad' ? ' · the pad fits the ones before' : '') + '</div>';
+    } else if (st.capped) {
       html += '<div class="bnote">The rig will not take another at this depth' +
         (st.next ? ' · past ' + st.next + ' m it will' : '') + '</div>';
     }
@@ -677,6 +753,8 @@ function upgradeCard(u: Upgrade, picked: boolean): HTMLElement {
   btn.textContent = st.sealed ? u.unlock + ' m'
     : st.maxed ? 'FULLY FITTED'
     : st.capped ? (st.next ? 'PAST ' + st.next + ' M' : 'HELD')
+    : st.elsewhere === 'pad' ? 'FIT AT THE PAD'
+    : st.elsewhere ? 'NOT AT THIS GATE'
     : 'FIT  ◈ ' + st.cost.toLocaleString();
   btn.disabled = !st.ok;
   btn.onclick = () => buyLine(u);
@@ -705,6 +783,62 @@ function supplyCard(sp: Supply, picked: boolean): HTMLElement {
     hap.buy();
     save(); buildShop(); updateHUD();
     flash('rgba(120,255,200,.25)', 160);
+  };
+  card.appendChild(btn);
+  return card;
+}
+
+/* Sink, the skill the first gate sells (AO). Once, and then it is the ship's. */
+function sinkCard(picked: boolean): HTMLElement {
+  const owned = g.skills.includes('sink');
+  const card = document.createElement('div');
+  card.className = 'bcard' + (picked ? ' sel' : '');
+  card.dataset.key = 'sink';
+  card.innerHTML =
+    '<div class="bhead"><div class="bname">Sink</div><div class="blvl">' + (owned ? 'LEARNED' : 'A SKILL') + '</div></div>' +
+    '<div class="bwhat">Hold SINK and the ship falls straight through solid rock, paying in hull instead of time. The pad never teaches it.</div>' +
+    (owned ? '' : '<div class="bkeys">' + keyChip({ id: SINK_PRICE.key, need: SINK_PRICE.need }) + '</div>');
+  const btn = document.createElement('button');
+  btn.className = 'bbuy buy';
+  btn.textContent = owned ? 'LEARNED' : 'LEARN  ◈ ' + SINK_PRICE.credits.toLocaleString();
+  btn.disabled = !sinkOk();
+  btn.onclick = () => {
+    if (!sinkOk()) return;
+    g.credits -= SINK_PRICE.credits;
+    g.stock[SINK_PRICE.key] -= SINK_PRICE.need;
+    g.skills.push('sink');
+    sfx.buy(); hap.buy();
+    flash('rgba(169,124,255,.28)', 220);
+    toast('SINK LEARNED · hold it to fall through rock');
+    save(); buildShop(); updateHUD();
+  };
+  card.appendChild(btn);
+  return card;
+}
+
+/* The gate's one key-priced supply a visit (AO). */
+function dealCard(d: { supply: string; key: string; need: number }, picked: boolean): HTMLElement {
+  const sp = SUPPLY_OF[d.supply as keyof typeof SUPPLY_OF];
+  const held = g.kit[sp.key];
+  const card = document.createElement('div');
+  card.className = 'bcard' + (picked ? ' sel' : '');
+  card.dataset.key = 'deal-' + sp.key;
+  card.innerHTML =
+    '<div class="bhead"><div class="bname">' + sp.name + '</div><div class="blvl">' + held + '/' + sp.max + ' aboard</div></div>' +
+    '<div class="bwhat">' + sp.blurb + ' One a visit, and this gate takes keys, not credits.</div>' +
+    '<div class="bkeys">' + keyChip({ id: d.key, need: d.need }) + '</div>';
+  const btn = document.createElement('button');
+  btn.className = 'bbuy cbuy';
+  btn.textContent = R.dealTaken ? 'TAKEN THIS VISIT' : held >= sp.max ? 'HOLD IS FULL' : 'TRADE  ' + d.need + ' ' + DEF[d.key].name.toUpperCase();
+  btn.disabled = !dealOk();
+  btn.onclick = () => {
+    if (!dealOk()) return;
+    g.stock[d.key] -= d.need;
+    g.kit[sp.key]++;
+    R.dealTaken = true;
+    sfx.buy(); hap.buy();
+    flash('rgba(120,255,200,.25)', 160);
+    save(); buildShop(); updateHUD();
   };
   card.appendChild(btn);
   return card;

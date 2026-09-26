@@ -5274,3 +5274,96 @@ test('the sensors name a key in range, and go quiet once it is cut', async ({ pa
   expect(got.shown).toBe('EMERALD NEAR');
   if (got.after !== 'skip') expect(got.after).toBeNull();
 });
+
+/* ---------- round seventeen, AO: gate vendors ---------- */
+
+/* Fly to a gate's station (the edge that writes the checkpoint) and open the
+   bay there. */
+async function dockAtGate(page: Page, t: number) {
+  await page.evaluate((t) => {
+    const w = (window as any).__cw;
+    w.stopClock();
+    w.g.ground.gates = [0, 1, 2];
+    w.g.best.depth = 400;
+    w.g.px = w.coreColumn(t); w.g.pd = w.gateDepth(t) - 1;
+    w.R.vx = 0; w.R.vy = 0; w.R.held = null;
+    w.advance(0.1);
+  }, t);
+  await page.locator('#btnShop').dispatchEvent('click');
+  await expect(page.locator('#shop')).not.toHaveClass(/hidden/);
+  await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
+}
+
+test('arriving at a gate shows the save, and its bay is that gate\'s own room', async ({ page }) => {
+  await inPlay(page);
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.stopClock();
+    w.g.ground.gates = [0, 1, 2];
+    w.g.px = w.coreColumn(1); w.g.pd = w.gateDepth(1) - 1;
+    w.advance(0.1);
+  });
+  await expect(page.locator('#savedMark')).toHaveClass(/on/);
+  await expect(page.locator('#savedMark')).toContainText('GATE 2');
+  await page.locator('#btnShop').dispatchEvent('click');
+  await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
+  expect(await page.evaluate(() => (window as any).__cw.roomPlace())).toBe(1);
+  await expect(page.locator('#shopSub')).toContainText('GATE 2');
+});
+
+test('the first gate teaches Sink once, trades one supply for a key a visit, and sells no supplies for credits', async ({ page }) => {
+  await inPlay(page);
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.credits = 50000; w.g.skills = [];
+    w.g.stock.amethyst = 5; w.g.kit.cell = 0;
+    w.g.foundKit = ['coolant', 'patch', 'cell', 'overdrive', 'bulwark', 'pulse'];
+  });
+  await dockAtGate(page, 0);
+  await page.evaluate(() => (window as any).__cw.selectSystem('engines'));
+  /* No credit supplies at a gate, even with every supply found. */
+  await expect(page.locator('#rack .bbuy.cbuy', { hasText: '◈' })).toHaveCount(0);
+
+  const sink = page.locator('#rack .bcard[data-key="sink"] button.bbuy');
+  await expect(sink).toBeEnabled();
+  await sink.click();
+  const after = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    return { skills: w.g.skills.slice(), credits: w.g.credits, am: w.g.stock.amethyst };
+  });
+  expect(after.skills).toContain('sink');
+  expect(after.credits).toBe(50000 - 4000);
+  expect(after.am).toBe(3);
+  await expect(page.locator('#rack .bcard[data-key="sink"] button.bbuy')).toBeDisabled();
+
+  const deal = page.locator('#rack .bcard[data-key="deal-cell"] button.bbuy');
+  await expect(deal).toBeEnabled();
+  await deal.click();
+  expect(await page.evaluate(() => (window as any).__cw.g.kit.cell)).toBe(1);
+  expect(await page.evaluate(() => (window as any).__cw.g.stock.amethyst)).toBe(2);
+  await expect(page.locator('#rack .bcard[data-key="deal-cell"] button.bbuy')).toBeDisabled();
+
+  /* Leave, fly off the station and back: a new visit, a new trade. */
+  await page.locator('#shop .x').first().click();
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.pd -= 4; w.advance(0.1);
+  });
+  await dockAtGate(page, 0);
+  await page.evaluate(() => (window as any).__cw.selectSystem('engines'));
+  await expect(page.locator('#rack .bcard[data-key="deal-cell"] button.bbuy')).toBeEnabled();
+});
+
+test('the pad sells supplies for credits and never Sink', async ({ page }) => {
+  await inPlay(page);
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.credits = 50000; w.g.skills = []; w.g.stock.amethyst = 5;
+    w.g.foundKit = ['cell'];
+  });
+  await page.locator('#btnShop').dispatchEvent('click');
+  await expect(page.locator('#shop')).not.toHaveClass(/hidden/);
+  await page.evaluate(() => (window as any).__cw.selectSystem('engines'));
+  await expect(page.locator('#rack .bcard[data-key="sink"]')).toHaveCount(0);
+  await expect(page.locator('#rack .bcard[data-key="cell"] button.cbuy')).toBeEnabled();
+});

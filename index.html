@@ -423,6 +423,15 @@
      ninth is lit, then it is the only thing on the row still to do. */
   #anchors i.vault{width:7px; height:7px; border-radius:1px; transform:rotate(45deg); margin-left:6px;}
   #anchors i.vault.open{background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 8px rgba(63,224,255,.8);}
+  #savedMark{
+    position:absolute; left:50%; top:calc(env(safe-area-inset-top, 0px) + 92px); transform:translate(-50%, -6px);
+    display:flex; align-items:center; gap:7px; padding:5px 12px; border-radius:14px;
+    background:rgba(6,12,10,.86); border:1px solid rgba(120,255,200,.55); color:#9fffd6;
+    font-size:11px; font-weight:700; letter-spacing:.14em; white-space:nowrap;
+    opacity:0; pointer-events:none; transition:opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+  }
+  #savedMark.on{opacity:1; transform:translate(-50%, 0);}
+  #savedMark svg{width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;}
   #toast{
     position:absolute; left:0; right:0; top:47%; text-align:center; font-size:16px; font-weight:700;
     letter-spacing:.03em; color:var(--amber); opacity:0; transition:opacity var(--t-base) var(--ease); text-shadow:0 2px 10px #000;
@@ -655,6 +664,10 @@
      covered, because a depth readout over a hangar is just wrong. */
   body.docked #hud, body.docked #actions, body.docked #ctrl,
   body.docked #kit, body.docked #ord, body.docked #cluster{display:none;}
+  /* The heat and hull washes belong to the rock. Docked at a hot gate they
+     stayed on over the bay at whatever strength they had on arrival, and the
+     violet room at 226 m came out brown (round seventeen, AO). */
+  body.docked #heat, body.docked #alarm{display:none;}
   .screen.room > *{pointer-events:auto;}
   /* ---------- the fitting bay, round seventeen AN ----------
 
@@ -1287,6 +1300,9 @@
        a phone loses frames to a readout nobody is looking at. -->
   <div id="anchors" aria-label="Anchors lit"></div>
   <div id="toast"></div>
+  <!-- Round seventeen, AO: the save moment at a gate. A plate that says so,
+       because a checkpoint nobody sees being written is one nobody trusts. -->
+  <div id="savedMark" aria-live="polite"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg><span></span></div>
   <!-- The discovery banner. Deliberately NOT a modal: see #found in the CSS. -->
   <div id="found">
     <div class="fhead">DEVICE RECOVERED</div>
