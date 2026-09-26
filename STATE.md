@@ -13,18 +13,16 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## Next three milestones
 
-Done 2026-09-25: **AI.** Each Anchor broken adds one violet sign, spreading from flecks in the
-rock to the rock itself to the air. The Charge and the Repair Drone moved into tier 1. The secrets
-probe barely moved: tier 2 is still quiet on 73% of runs.
+Done 2026-09-25: **AI.** Each Anchor broken adds one violet sign; the Charge and the Drone moved
+into tier 1. Built, not ticked: **AJ, a slimmer HUD.** Depth sits in the region chip, the money
+is stacked so nothing runs off a phone, and the timed three sit behind one TIMED button. It
+ticks on his word after a phone session. **AB** waits on one press of Android back.
 
-Before it: **AH** the ending, **AF** repair in the rock, **AE** barrier and core, **AO** gate
-vendors, **AM** the key find. AM to AI are not pushed yet. Two questions for him: whether the
-surface sky should show again (the haze has hidden it), and whether tier 2 needs more in it. **AB**
-waits on one press of Android back on his phone.
+AM to AJ are not pushed yet. Two questions for him: should the surface sky show again (the haze
+has hidden it), and does tier 2 need more in it (its secrets probe is unchanged at 73% quiet)?
 
-1. **AJ** - a slimmer HUD, nothing lost.
-2. **Z2** - a real phone read.
-3. **V0** - the store, when he says.
+1. **Z2** - a real phone read, which also closes AB and AJ.
+2. **V0** - the store, when he says.
 
 ## Phone readings
 

@@ -399,7 +399,14 @@
   }
   .cargo i{background:linear-gradient(90deg,#164a63,var(--cyan)); box-shadow:0 0 12px rgba(63,224,255,.45);}
 
-  #depth{margin-top:8px; text-align:center; font-size:11.5px; letter-spacing:.16em; color:var(--dim); text-shadow:0 1px 4px #000;}
+  /* The region chip carries the depth, and the trait as a small second line
+     when there is one (round seventeen, AJ). */
+  .chip.place{line-height:1.25;}
+  .chip.place #depth{color:var(--ink); font-variant-numeric:tabular-nums;}
+  #trait{font-size:9.5px; letter-spacing:.14em; color:var(--dim);}
+  #trait:empty{display:none;}
+  .top{align-items:flex-start;}
+  .money{display:flex; flex-direction:column; align-items:flex-end; gap:5px;}
   /* The Anchor tally. Centred under the depth line on purpose: "how deep am I"
      and "how far through am I" are the two questions a glance at the top of the
      screen is asking, and they belong together.
@@ -580,6 +587,11 @@
     display:flex; flex-direction:column-reverse; gap:5px;
   }
   #kit .sup{width:52px; height:52px;}
+  #timedWrap{position:relative;}
+  #timedFly{position:absolute; left:57px; top:0; display:none; gap:5px;}
+  #kit.open #timedFly{display:flex;}
+  #supTimed .g{font-size:10px; letter-spacing:.06em;}
+  #kit.open #supTimed{border-color:#9fd8ff;}
   /* Ordnance sits on the RIGHT, directly above the d-pad, because unlike a
      supply it is aimed: what it does depends on which way you are facing, so
      it belongs under the thumb that decides that. Supplies stay on the left
@@ -1276,15 +1288,20 @@
 <div id="alarm"></div>
 
 <div id="hud">
+  <!-- Round seventeen, AJ: the depth line folded into the region chip (where
+       you are, in two numbers: which region and how deep), and the money
+       stacked on the right so the row fits a 360 px phone. It ran off the
+       right edge with the credits chip cut in half. -->
   <div class="row top">
-    <div class="chip" id="planet">—</div>
-    <div class="row">
-      <div class="chip power hidden" id="powerChip">⚡ <span id="power">4</span></div>
-      <div class="chip haul">HAUL ◈ <span id="haul">0</span></div>
+    <div class="chip place"><div><span id="planet">—</span> · <span id="depth">0 m</span></div><div id="trait"></div></div>
+    <div class="money">
       <div class="chip gold">◈ <span id="credits">0</span></div>
+      <div class="row">
+        <div class="chip power hidden" id="powerChip">⚡ <span id="power">4</span></div>
+        <div class="chip haul">HAUL ◈ <span id="haul">0</span></div>
+      </div>
     </div>
   </div>
-  <div id="depth">DEPTH 0 m</div>
   <!-- The objective, always on screen and never a sentence.
 
        Round twelve. Until 2026-09-18 nothing in the HUD named the Anchors, the
@@ -1426,12 +1443,18 @@
   <button class="sup none" id="supCoolant"><span class="g">COOL</span><span class="n">0</span></button>
   <button class="sup none" id="supPatch"><span class="g">HULL</span><span class="n">0</span></button>
   <button class="sup none" id="supCell"><span class="g">FUEL</span><span class="n">0</span></button>
-  <!-- The timed three. Same row, because they are the same kind of thing to
-       reach for; the first three undo a problem and these three buy a window,
-       and both are "spend one now". -->
-  <button class="sup none" id="supOverdrive"><span class="g">OVR</span><span class="n">0</span></button>
-  <button class="sup none" id="supBulwark"><span class="g">BWK</span><span class="n">0</span></button>
-  <button class="sup none" id="supPulse"><span class="g">PLS</span><span class="n">0</span></button>
+  <!-- The timed three, behind one button (round seventeen, AJ). The first
+       three undo a problem and are reached for in a hurry, so they stay out;
+       these three buy a window and are chosen, so one tap to open them costs
+       nothing. Six in a column ran up the screen into the MAP button. -->
+  <div id="timedWrap">
+    <button class="sup none" id="supTimed" aria-expanded="false"><span class="g">TIMED</span><span class="n">0</span></button>
+    <div id="timedFly">
+      <button class="sup none" id="supOverdrive"><span class="g">OVR</span><span class="n">0</span></button>
+      <button class="sup none" id="supBulwark"><span class="g">BWK</span><span class="n">0</span></button>
+      <button class="sup none" id="supPulse"><span class="g">PLS</span><span class="n">0</span></button>
+    </div>
+  </div>
 </div>
 
 <div id="ord">

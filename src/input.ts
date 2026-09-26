@@ -18,7 +18,7 @@ import { ANCHOR_COUNT } from './sim/vaults';
 import { MAP_TILE, WORLD_DEPTH, regionName, regionAt } from './sim/region';
 import { W } from './sim/config';
 import { shoreUp } from './collapse';
-import { mustEl, ui, atSurface, buildShop, openBay, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, buildBallast, updateHUD,
+import { mustEl, ui, atSurface, buildShop, openBay, setTimedOpen, toggleTimed, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, buildBallast, updateHUD,
          selectSystem, stepSystem, stepCard, confirmCard } from './ui';
 import { dockShip, undockShip, resizeStation, turnShip, pickPart } from './station';
 import { UPGRADES } from './sim/config';
@@ -114,8 +114,15 @@ window.addEventListener('keyup', (e) => { if (KEYS[e.key] && R.held === KEYS[e.k
    dig does, and preventDefault so the press cannot also scroll or select. */
 for (const sup of SUPPLIES) {
   const btn = mustEl('sup' + sup.key[0].toUpperCase() + sup.key.slice(1));
-  btn.addEventListener('pointerdown', (e) => { e.preventDefault(); useSupply(sup.key); });
+  btn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    useSupply(sup.key);
+    /* A timed one spent closes the row it opened from (AJ). */
+    setTimedOpen(false);
+  });
 }
+/* The TIMED button opens and closes the row of three (round seventeen, AJ). */
+mustEl('supTimed').addEventListener('pointerdown', (e) => { e.preventDefault(); sfx.ui(); toggleTimed(); });
 
 /* Ordnance. Same pointerdown treatment as the supplies - a spend should feel
    as immediate as a dig - and both refuse loudly rather than silently when

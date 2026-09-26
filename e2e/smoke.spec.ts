@@ -307,12 +307,12 @@ test('creates a WebGL context', async ({ page }) => {
 
 /* THE important one. A frozen game passes every other check in this file. */
 test('the frame loop advances', async ({ page }) => {
-  await expect(page.locator('#depth')).toContainText('DEPTH 0 m');
+  await expect(page.locator('#depth')).toHaveText('0 m');
   await holdUntil(page, 'down', async () => {
     await expect(
       page.locator('#depth'),
       'depth never changed while digging - the frame loop is not running'
-    ).not.toContainText('DEPTH 0 m', { timeout: DEEP_ENOUGH });
+    ).not.toHaveText('0 m', { timeout: DEEP_ENOUGH });
   });
 });
 
@@ -668,7 +668,7 @@ test('stays inside the draw-call budget while underground', async ({ page }) => 
      raises no pointerdown, so this cannot start the audio graph and the
      gesture assertions below still mean what they say. */
   await enterGame(page);
-  await expect(page.locator('#depth')).toContainText('DEPTH ' + (at.d - 3) + ' m');
+  await expect(page.locator('#depth')).toHaveText((at.d - 3) + ' m');
 
   const perFrame = await page.evaluate(async () => {
     const w = window as any;
@@ -947,7 +947,7 @@ test('a block remembers how far through it you were', async ({ page }) => {
   await page.goto('/?debug');
   await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
   await enterGame(page);
-  await expect(page.locator('#depth')).toContainText('DEPTH 49 m');
+  await expect(page.locator('#depth')).toHaveText('49 m');
 
   const r = await page.evaluate(() => {
     const w = (window as any).__cw;
@@ -1117,7 +1117,7 @@ test('crossing your deepest reach is announced exactly once', async ({ page }) =
     w.R.held = null;
     w.advance(0.3);
   });
-  await expect(page.locator('#depth')).toContainText(/DEPTH (1[5-9]|[2-9][0-9]) m/);
+  await expect(page.locator('#depth')).toHaveText(/^(1[5-9]|[2-9][0-9]) m$/);
 
   expect(await page.evaluate(() => (window as any).__records),
     'the record announcement must fire once, not on every frame past the line')
@@ -1389,7 +1389,7 @@ test('a ship parked off-lane still digs instead of snagging on its own shaft', a
      raises no pointerdown, so this cannot start the audio graph and the
      gesture assertions below still mean what they say. */
   await enterGame(page);
-  await expect(page.locator('#depth')).toContainText('DEPTH 40 m');
+  await expect(page.locator('#depth')).toHaveText('40 m');
 
   /* Down through the open shaft, then through the rock under it. Reaching 46
      means the ship both moved off-lane without snagging AND completed at least
@@ -5482,4 +5482,38 @@ test('a hint is seen passing a spent core, once', async ({ page }) => {
   expect(got.first).toContain(await page.evaluate(() => (window as any).__cw.HINTS?.[0] ?? 'went out instantly'));
   expect(got.shown).toBe(1);
   expect(got.again).toBe(1);
+});
+
+/* ---------- round seventeen, AJ: a slimmer HUD ---------- */
+
+test('the HUD fits a phone: nothing runs off the edge, and the timed three sit behind one button', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 });
+  await inPlay(page);
+  const got = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.stopClock();
+    w.g.px = 20; w.g.pd = 40; w.g.credits = 12345678;
+    w.g.foundKit = ['coolant', 'patch', 'cell', 'overdrive', 'bulwark', 'pulse'];
+    for (const k of w.g.foundKit) w.g.kit[k] = 1;
+    w.g.dug = new Set(Array.from({ length: 41 }, (_, i) => '20,' + i));
+    w.resetBlocks(); w.advance(0.2); w.updateHUD();
+    const vis = (id: string) => { const e = document.getElementById(id)!; return getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0; };
+    const right = Math.max(...[...document.querySelectorAll('#hud .chip')].map((e) => e.getBoundingClientRect().right));
+    const map = document.getElementById('btnMap')!.getBoundingClientRect();
+    const kitTop = Math.min(...[...document.querySelectorAll('#kit .sup')].map((e) => e.getBoundingClientRect())
+      .filter((r) => r.width > 0).map((r) => r.top));
+    return { right, vw: innerWidth, depth: document.getElementById('depth')!.textContent,
+             timed: vis('supTimed'), ovr: vis('supOverdrive'), mapBottom: map.bottom, kitTop };
+  });
+  expect(got.right, 'a HUD chip runs off the right edge').toBeLessThanOrEqual(got.vw);
+  expect(got.depth).toBe('40 m');
+  expect(got.timed).toBe(true);
+  expect(got.ovr, 'the timed three are out before they are asked for').toBe(false);
+  expect(got.kitTop, 'the supplies climb into the MAP button').toBeGreaterThan(got.mapBottom);
+
+  await page.locator('#supTimed').dispatchEvent('pointerdown');
+  await expect(page.locator('#supOverdrive')).toBeVisible();
+  await page.locator('#supOverdrive').dispatchEvent('pointerdown');
+  await expect(page.locator('#supOverdrive')).toBeHidden();
+  expect(await page.evaluate(() => (window as any).__cw.g.kit.overdrive), 'the spend did not happen').toBe(0);
 });

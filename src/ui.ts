@@ -290,16 +290,17 @@ export function updateHUD() {
      traits are a thing before it has seen one bite. */
   const tr = worldTrait();
   const here = regionName(regionAt(Math.round(g.px), Math.max(0, Math.round(g.pd))));
-  ui.planet.textContent = tr.id === 'stable'
-    ? here
-    : here + '  ·  ' + tr.name.toUpperCase();
+  ui.planet.textContent = here;
+  const traitEl = document.getElementById('trait');
+  if (traitEl) traitEl.textContent = tr.id === 'stable' ? '' : tr.name.toUpperCase();
   ui.credits.textContent = Math.floor(g.credits).toLocaleString();
   ui.haul.textContent = haulValue().toLocaleString();
   /* "CORE 452 m" was the other thing that stopped being true. The core was the
      end of a world you were passing through; the floor of the one world is
      just how deep it goes, and naming it after the thing you used to break
      there points the player at an objective that is no longer the objective. */
-  ui.depth.textContent = 'DEPTH ' + Math.max(0, Math.round(g.pd)) + ' m   /   ' + coreM() + ' m DEEP';
+  /* In the region chip since AJ; the world's full depth is on the map. */
+  ui.depth.textContent = Math.max(0, Math.round(g.pd)) + ' m';
   paintAnchorPips();
   paintCallLamp();
   paintKeyNear();
@@ -442,14 +443,34 @@ export function updateOrd() {
 
 export function updateKit() {
   const hidden = g.mode !== 'play' || atSurface();
+  let timed = 0;
   for (const b of supBtns) {
     const n = g.kit[b.sup.key];
     b.el.classList.toggle('none', n <= 0 || hidden);
     b.el.classList.toggle('idle', supplyIdle(b.sup.key));
     const count = b.el.querySelector('.n');
     if (count) count.textContent = String(n);
+    if (TIMED.includes(b.sup.key)) timed += Math.max(0, n);
+  }
+  /* The one button the timed three sit behind (AJ): there while any is aboard,
+     and closed whenever the kit is hidden or the last one is spent. */
+  const tb = el('supTimed');
+  if (tb) {
+    tb.classList.toggle('none', timed <= 0 || hidden);
+    const c = tb.querySelector('.n');
+    if (c) c.textContent = String(timed);
+    if (timed <= 0 || hidden) setTimedOpen(false);
   }
 }
+
+const TIMED = ['overdrive', 'bulwark', 'pulse'];
+export function setTimedOpen(on: boolean) {
+  const kit = el('kit'), tb = el('supTimed');
+  if (!kit || !tb) return;
+  kit.classList.toggle('open', on);
+  tb.setAttribute('aria-expanded', String(on));
+}
+export function toggleTimed() { setTimedOpen(!el('kit')?.classList.contains('open')); }
 
 export function buildManifest() {
   ui.manifestRows.innerHTML = '';

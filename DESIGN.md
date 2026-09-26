@@ -2945,6 +2945,28 @@ relocated crate rarely crosses them. Tier 2 feeling empty needs more in it than 
 this milestone does not claim otherwise. The campaign probe now reaches the Vault at 55.8
 game-minutes (was 54.7); core 1 falls at 6.4.
 
+### AJ: a slimmer HUD (built, waiting on his phone session)
+
+Built 2026-09-25. Screenshot at 1080x2340, with every supply aboard, before and after.
+
+**What was wrong:**
+- At 360 px the top row ran off the right edge, with the credits chip cut in half.
+- Six supplies stacked up the left edge into the MAP button.
+
+**What changed:**
+- **The depth line folds into the region chip:** "Verdax · 59 m", with the trait as a small
+  second line when there is one. The world's full depth is on the map.
+- **The money stacks on the right:** credits over the power chip and the haul. Credits and haul
+  both stay, since they decide when to surface.
+- **The timed three sit behind one TIMED button** carrying their total. It opens a row to its
+  right, and spending one closes the row. Coolant, Patch and Fuel stay out, because they are
+  reached for in a hurry.
+
+The screen went from 20 separate things to 18: the depth line is gone, and six supply buttons
+became four. An e2e at 360x780 asserts no chip passes the right edge, the kit stays below MAP,
+and TIMED opens, spends and closes. The box stays open until his first phone session says which
+readout he missed, or that none was.
+
 ### AK: minerals become ingredients
 
 Built 2026-09-25. Money (copper, iron, silver, gold, geodes, lodes) sells at the pad and nothing
