@@ -57,15 +57,20 @@ scene.add(rim);
    same flat grey a metre from the lamp as thirty metres down a side branch.
    Now the void immediately around the ship glows and the far end of the branch
    is black, which reads as the light travelling down the tunnel. */
+/* The full depth of the world and a margin (round seventeen, AP). It was
+   400 m tall, which the opaque haze hid for as long as the haze made the
+   whole canvas opaque; once it stopped, the Vault at 405 m showed the sky
+   through the bottom of the world. */
+const BACKDROP_H = 470;
 const backdrop = new THREE.Mesh(
-  new THREE.PlaneGeometry(60, 400),
+  new THREE.PlaneGeometry(60, BACKDROP_H),
   applyLightUnlit(new THREE.MeshBasicMaterial({ color: 0x1a1c22 }))
 );
 /* Moved back from -1.4 to make room for the parallax layers, which have to
    sit BEHIND the drifting dust (z -0.7 to -1.3) and IN FRONT of this. At -1.4
    there was a tenth of a unit to work with; the first attempt put them behind
    this plane, which is opaque, and they rendered perfectly into nothing. */
-backdrop.position.set(0, 0.5 - 200, -3.2);
+backdrop.position.set(0, 0.5 - BACKDROP_H / 2, -3.2);
 scene.add(backdrop);
 
 /* Light in the air, between the parallax layers and the terrain. Added here

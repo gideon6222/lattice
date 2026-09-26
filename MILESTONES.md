@@ -648,6 +648,21 @@ is in `journal/legacy-plan.md`.
       briefs: level-design
       design: ## Round sixteen: closing Fable's review
 
+- [x] **AP The surface sky shows.** His answer of 2026-09-26: show the real sky. The tunnel
+      haze was additive in alpha as well as colour and covered the screen, so the canvas was
+      opaque and the sky gradient (dawn, the planet's colours) never showed; the haze now adds
+      colour only. The world's backdrop covers the whole depth, so the Vault does not show sky
+      through the bottom of the world. Receipt: a shot of the pad sky and films of the intro,
+      a dig and the ending.
+      briefs: rendering, lighting
+      design: ## Round seventeen: the ladder, finished
+
+- [ ] **AQ Tier 2 has more in it.** His answer of 2026-09-26: plan more for tier 2 (113 to
+      226 m), which the secrets probe has quiet on three runs in four. Planned, checked with
+      Fable, then built. Receipt: the secrets probe per tier, with tier 2 under half quiet.
+      briefs: level-design
+      design: ## Round seventeen: the ladder, finished
+
 - [ ] **Z2 A real phone read, before V0.** Fable's review: S6's phone pass was
       desk evidence (draw calls, filmed contact sheets), never a reading taken on
       the handset, and PWA install/offline behaviour has never been checked on

@@ -614,7 +614,15 @@ export const haze = new THREE.Mesh(
         gl_FragColor = vec4(uHaze * max(0.0, v), 1.0);
       }`,
     transparent: true,
-    blending: THREE.AdditiveBlending,
+    /* Additive in COLOUR and nothing in ALPHA (round seventeen, AP). Plain
+       AdditiveBlending also added the quad's alpha, and the quad covers the
+       screen, so the canvas came out opaque everywhere and the sky gradient
+       behind it (dawn, the planet's colours) never showed: the surface sky
+       was black with stars for every player since the haze went in. */
+    blending: THREE.CustomBlending,
+    blendEquation: THREE.AddEquation,
+    blendSrc: THREE.SrcAlphaFactor, blendDst: THREE.OneFactor,
+    blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
     depthWrite: false
   })
 );

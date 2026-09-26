@@ -2967,6 +2967,19 @@ became four. An e2e at 360x780 asserts no chip passes the right edge, the kit st
 and TIMED opens, spends and closes. The box stays open until his first phone session says which
 readout he missed, or that none was.
 
+### AP: the surface sky shows
+
+Built 2026-09-26, on his answer that morning ("Show the real sky"). The tunnel haze now uses
+custom blending: it adds colour and leaves the canvas's alpha alone. It covers the screen, and
+plain AdditiveBlending also added its alpha, which made the whole canvas opaque. So the sky
+gradient `loop.ts` has always computed (dawn, night, each planet's colours) now shows over the
+pad, in the intro and on the title.
+
+Underground nothing changes, because the backdrop plane is opaque behind the rock. That plane was
+400 m tall, though, and the Vault at 405 m sat below it, so the backdrop now spans 470 m. The
+ending's own sky plane (AH) stays: it turns the sky violet over whatever the gradient is doing at
+that time of day.
+
 ### AK: minerals become ingredients
 
 Built 2026-09-25. Money (copper, iron, silver, gold, geodes, lodes) sells at the pad and nothing
