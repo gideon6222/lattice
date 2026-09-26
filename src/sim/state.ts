@@ -79,6 +79,9 @@ export const g: {
   /* Skills bought rather than handed over by a core. Round seventeen, AC:
      Sink left the core list and the gate vendors (AO) sell it. */
   skills: string[];
+  /* How many of the three hints have been seen (round seventeen, AE): each
+     is due at its core's break and shows near a spent core. */
+  hintsShown: number;
   /* Every material you have ever cut out of the rock. The first of each is an
      event; after that it is just ore. See the reveal in loop.ts. */
   seenOre: string[];
@@ -130,7 +133,7 @@ export const g: {
   px: START_X, pd: -1,
   face: 'down',
   fuel: 90, hull: HULL_MAX, soak: 0, charge: CHARGE_MAX,
-  cargo: {}, weight: 0, stock: {}, drops: {}, damage: {}, relics: [], relicsTaken: [], found: [], foundKit: [], skills: [], seenOre: [], seen: [], marks: [],
+  cargo: {}, weight: 0, stock: {}, drops: {}, damage: {}, relics: [], relicsTaken: [], found: [], foundKit: [], skills: [], hintsShown: 0, seenOre: [], seen: [], marks: [],
   log: blankLog(),
   best: { depth: 0, haul: 0, fastest: 0, worlds: 0 },
   ground: newGround(),
@@ -347,7 +350,7 @@ function stateNow(at: SaveAt): Record<string, unknown> {
     kit: g.kit, stock: g.stock, rubble: Array.from(g.rubble), best: g.best,
     drops: g.drops, damage: g.damage, charge: g.charge,
     relics: g.relics, relicsTaken: g.relicsTaken, log: g.log,
-    found: g.found, foundKit: g.foundKit, skills: g.skills, seenOre: g.seenOre, seen: g.seen,
+    found: g.found, foundKit: g.foundKit, skills: g.skills, hintsShown: g.hintsShown, seenOre: g.seenOre, seen: g.seen,
     marks: g.marks,
     ground: g.ground
   };
@@ -503,6 +506,9 @@ export function load() {
          freely, so every consumable in it counts as known. New saves write the
          list properly and this never fires for them again. */
       g.skills = Array.isArray(s.skills) ? s.skills.filter((k: unknown) => typeof k === 'string') : [];
+      /* A save from before AE heard every due hint as a toast already. */
+      g.hintsShown = typeof s.hintsShown === 'number' ? s.hintsShown
+        : Array.isArray(s.ground?.gates) ? s.ground.gates.length : 0;
       if (Array.isArray(s.foundKit)) {
         g.foundKit = s.foundKit.slice();
       } else {
@@ -761,7 +767,7 @@ export function markSeen(keys: string[]) {
 
    Deduplicated on the exact cell, because a cache re-opened by a bomb after
    the drill already took it would otherwise stack two marks on one spot. */
-export function addMark(kind: 'f' | 'c' | 'k', x: number, d: number, what = '') {
+export function addMark(kind: 'f' | 'c' | 'k' | 'o', x: number, d: number, what = '') {
   const k = kind + ',' + Math.round(x) + ',' + Math.round(d) + (what ? ',' + what : '');
   if (!g.marks.includes(k)) g.marks.push(k);
 }

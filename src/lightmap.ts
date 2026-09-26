@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GATE_COUNT } from './sim/gate';
 import { W, worldX } from './sim/config';
 import { blockAt } from './sim/world';
 import { solveVis, shiftField, castShadows, subOpts } from './sim/light';
@@ -130,8 +131,21 @@ const U = {
   /* 1 / the bounce's own reach, the floor and curve that decide how far
      glowing things stay visible through unlit rock, and the ambient the AIR in
      a tunnel keeps - which is much more than a rock face keeps */
-  uLmSoft: { value: new THREE.Vector4(1 / 14, LM_GLOW_FLOOR, LM_GLOW_POW, LM_AIR_AMBIENT) }
+  uLmSoft: { value: new THREE.Vector4(1 / 14, LM_GLOW_FLOOR, LM_GLOW_POW, LM_AIR_AMBIENT) },
+  /* Round seventeen, AE: each gate's core, as world x, world y, radius and
+     strength. A core that has appeared darkens the rock around it; strength 0
+     is a core with nothing to say. A fixed-size array for the same reason the
+     core lights are a fixed pool - the shader is compiled once. */
+  uLmCores: { value: Array.from({ length: GATE_COUNT }, () => new THREE.Vector4(0, 0, 1, 0)) }
 };
+
+/* Set by barrier.ts each frame. Darkening only: the propagated light never
+   brightens, and a core is the one thing in the world that pushes it the
+   other way on purpose. */
+export function setCoreDim(t: number, x: number, y: number, radius: number, strength: number) {
+  const c = U.uLmCores.value[t];
+  if (c) c.set(x, y, Math.max(0.001, radius), strength);
+}
 
 /* Cell-unit feel constants, converted once into the units a sub-cell solve
    needs. See subOpts in light.ts. */
@@ -308,6 +322,7 @@ const DECL = `
   uniform vec3 uLmDark;
   uniform vec3 uLmShade;
   uniform vec4 uLmSoft;
+  uniform vec4 uLmCores[${GATE_COUNT}];
 
   /* Where p sits in the light grid. */
   vec2 coreUv(vec2 p) {
@@ -444,9 +459,19 @@ const DECL = `
     return pow(min(1.0, coreReachAir(p) * uLmLamp.w), ${LM_CONTRAST.toFixed(2)});
   }
 
+  /* How much a live core takes out of the light here, 0..1. */
+  float coreDim(vec2 p) {
+    float k = 1.0;
+    for (int i = 0; i < ${GATE_COUNT}; i++) {
+      vec4 c = uLmCores[i];
+      k *= 1.0 - c.w * (1.0 - smoothstep(0.0, c.z, distance(p, c.xy)));
+    }
+    return k;
+  }
+
   float coreLit(vec2 p) {
     float fl = coreFloor(p);
-    return fl + (1.0 - fl) * coreShade(p);
+    return (fl + (1.0 - fl) * coreShade(p)) * coreDim(p);
   }
 
   /* What a GLOWING thing keeps here - emissive rock, ore crystals, haloes.

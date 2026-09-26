@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { stepBarriers } from './barrier';
 import { ambienceTick } from './sim/ambience';
 import { FIND_COLOR } from './sim/finds';
 import { W, HULL_MAX, DIG_BASE, DEF, SUPPLY_OF, DROP_MIN_VALUE, RELIC_COLOR, relicFor,
@@ -7,7 +8,7 @@ import { W, HULL_MAX, DIG_BASE, DEF, SUPPLY_OF, DROP_MIN_VALUE, RELIC_COLOR, rel
 import { clamp, key, mixHex } from './sim/util';
 import { g, S, save, coreM, valueM, worldTrait, cutGround, padFuel, markSeen, docked, addMark,
          groundTick, hereUnrest, lightHere, vaultHere, checkpoint, gateHere } from './sim/state';
-import { unrestBand, tremorScale } from './sim/unrest';
+import { unrestBand, tremorScale, coreStep } from './sim/unrest';
 import { gradeFor } from './sim/grade';
 import { landCollapse, closeGround } from './collapse';
 import { blockAt, findHere, climbCells } from './sim/world';
@@ -53,7 +54,8 @@ import { stepParallax, fadeParallax, setParallaxTint } from './parallax';
 import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner, savedMoment, tickSaved } from './ui';
 import { stepGauges } from './gauges';
 import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken } from './actions';
-import { coreOpens, openGate } from './sim/gate';
+import { coreOpens, openGate, gateAtDepth, barrierSays, spentCoreNear } from './sim/gate';
+import { HINTS } from './sim/hints';
 import { hasAbility, SINK_RATE, SINK_HULL, HOLLOW_DRAIN } from './sim/ability';
 import { drawHollow } from './hollow';
 import { sfx, setDepth, setMood, setDuck } from './audio';
@@ -115,6 +117,12 @@ export function embedded() {
 function startDig(tx: number, td: number, dir: Dir) {
   if (R.digging) return;
   const b = blockAt(tx, td);
+  /* Round seventeen, AE: the barrier answers a touch with what opens it,
+     once every few seconds so holding into it is not a stream of toasts. */
+  if (b && b.id === 'gate' && clock - barrierSaid > 4) {
+    const t = gateAtDepth(td);
+    if (t >= 0) { toast(barrierSays(t, g.ground.lit)); barrierSaid = clock; }
+  }
   if (!b || b.hard === Infinity) return;
   {
     const t = { x: tx, d: td };
@@ -138,6 +146,8 @@ let camZBoost = 0, freeze = 0, thrustLevel = 0, bank = 0;
    it was at. Read off the hull itself rather than hooked into each damage
    site, so a new hazard cannot forget to tell it. */
 let hurtClock = 99, hullWas = -1;
+/* When the barrier last said what opens it (AE). */
+let barrierSaid = -99;
 /* How long the lean holds, how far toward the cell it goes, how much closer,
    and how long after a hit it will not start. */
 const KEY_HOLD = 0.6, KEY_LEAN = 0.35, KEY_ZOOM = 1.2, KEY_HOLD_SAFE = 1;
@@ -805,7 +815,7 @@ export function tick(raw: number, draw = true) {
           R.shake = Math.max(R.shake, 0.35);
           if (Math.random() < moved * 1.4) {
             const b = blockAt(Math.round(g.px), Math.round(g.pd));
-            spray(worldX(g.px), -g.pd, b ? b.color : 0x8a5ad0, 5, 2.6, 0.5);
+            spray(worldX(g.px), -g.pd, b ? b.color : 0x7a4fd4, 5, 2.6, 0.5);
           }
         }
       }
@@ -874,6 +884,20 @@ export function tick(raw: number, draw = true) {
        exactly as free as the pad's - see the note at Y0b in DESIGN.md. Edge
        triggered on the tier changing, the same shape as R.wasAtSurface above,
        so standing at one for a minute writes it once rather than every frame. */
+    /* ---------- the hints, seen near the cores. Round seventeen, AE ----------
+
+       A hint is due at its core's break and shows the first time after that
+       the ship passes within four cells of a spent core, at least twenty
+       seconds on - so it is read on the way back past one, next to the thing
+       it is about, and never on top of the card that just closed. Each spent
+       core also carries its hint in how it burns (barrier.ts). */
+    if (g.hintsShown < g.ground.gates.length && R.worldT - R.coreBrokeT > 20 &&
+        spentCoreNear(g.px, g.pd, g.ground.gates) >= 0) {
+      const line = HINTS[g.hintsShown];
+      g.hintsShown++;
+      if (line) toast(line);
+    }
+
     const gateNow = gateHere();
     if (gateNow >= 0 && gateNow !== R.wasAtGate) {
       checkpoint();
@@ -914,7 +938,8 @@ export function tick(raw: number, draw = true) {
 
     /* soak builds while deep and bleeds off above, so staying is the gamble */
     R.worldT += dt;
-    const heatLine = heatDepth(g.planet, worldTrait());
+    /* Minus what the cores have let out (AE): each one lifts the heat line. */
+    const heatLine = heatDepth(g.planet, worldTrait()) - coreStep(g.ground.gates.length).heatRise;
     const heatSpan = coreM() - heatLine;
     g.soak = soakAfter(g.soak, g.pd, dt, worldTrait().soak || 1, heatLine);
     if (g.pd > heatLine) {
@@ -981,7 +1006,8 @@ export function tick(raw: number, draw = true) {
     const shaky = unrestBand(localUnrest) >= 2;
     const tk = tremorTick({ t: R.tremorT, warn: R.tremorWarn }, dt,
       (g.pd > tremorDepth(g.planet) || (shaky && g.pd > 4)) && !R.flight,
-      () => (TREMOR_EVERY + Math.random() * TREMOR_JITTER) / tremorScale(localUnrest));
+      () => (TREMOR_EVERY + Math.random() * TREMOR_JITTER) /
+        (tremorScale(localUnrest) * coreStep(g.ground.gates.length).tremor));
     R.tremorT = tk.t;
     R.tremorWarn = tk.warn;
     if (tk.warned) { toast('The rock is shifting'); sfx.rumble(); }
@@ -1213,8 +1239,9 @@ export function tick(raw: number, draw = true) {
      sky, the fog, the air and the distant rock below. `src/sim/grade.ts` owns
      what each act means; this file only paints it. */
   const act = gradeFor(g.ground.gates.length, g.won);
-  const hot = heatT(g.pd, heatDepth(g.planet, worldTrait()),
-                    (coreM() - heatDepth(g.planet, worldTrait())) * 0.55);
+  const rise = coreStep(g.ground.gates.length).heatRise;
+  const hot = heatT(g.pd, heatDepth(g.planet, worldTrait()) - rise,
+                    (coreM() - heatDepth(g.planet, worldTrait()) + rise) * 0.55);
   /* The sky at night is the sky at the bottom of the world: the same two
      colours depth fades it to. So night is simply "as deep as it gets", and
      dawn is the fade running the other way. */
@@ -1298,7 +1325,8 @@ export function tick(raw: number, draw = true) {
 /* The mote field. World-anchored and wrapped around the ship rather than
      parented to it - see dust.ts for why that is the whole difference between
      dust and a texture on the camera. */
-  stepDust(vx, vy, v.pd, raw, hot, pal.dust);
+  stepDust(vx, vy, v.pd, raw, hot, pal.dust, coreStep(g.ground.gates.length).dust);
+  stepBarriers(clock, v.pd);
 
   skyTick += raw;
   if (skyTick > 0.12) {

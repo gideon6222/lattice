@@ -3,6 +3,7 @@ import { W, START_X, ORES, DEF, isKey, baseRock, coreDepth, hardMult, valueMult,
          RELIC_COLOR, RELIC_HOST, relicAt, relicFor,
          CAVE_MIN_DEPTH, caveChanceOn, gasChanceOn, geodeChanceOn, SUPPLIES, traitOf,
          VEIN_W, VEIN_H, VEIN_CELLS, VEIN_R, VEIN_WOBBLE_LO, VEIN_WOBBLE_HI, VEIN_REACH_MAX } from './config';
+import { WRONGNESS } from './wrongness';
 import { key, mixHex, rnd } from './util';
 import { regionAt, REGION_COUNT } from './region';
 import { vaultCells, anchorHere, anchorPlinth, WORKED_HARD, SEALED_HARD, HULK_HARD,
@@ -206,7 +207,10 @@ export function blockAt(x: number, d: number): Block | null {
        Hard, but finite: three times the band, which is what a lit Anchor used
        to cost to move. Breaking it is the climax of a tier and it should take
        long enough to be a decision about fuel. */
-    return { id: 'darkcore', name: 'Dark Core', color: 0xffd27a, host: 0x2a1236,
+    /* Round seventeen, AE: the core's light is the one wrongness colour.
+       Still the brightest thing in the tier, still inviting; what it is lit
+       in is the colour the scars and the pip already taught. */
+    return { id: 'darkcore', name: 'Dark Core', color: WRONGNESS, host: 0x2a1236,
              glow: 1.0, shards: 10, tone: 10, ore: true, spoil: true,
              hard: baseRock(d, g.planet, x).hard * hm * 3, wt: 0, value: 0 };
   }
@@ -367,7 +371,7 @@ export function blockAt(x: number, d: number): Block | null {
          thing WAS and it is the teal the ship's own seams carry. */
       return { id: lit ? 'anchorbroken' : 'anchor',
                name: lit ? 'Anchor · broken' : 'Anchor',
-               color: lit ? 0x6a4aa0 : 0x2f6f5e, host: lit ? 0x16101f : 0x16241f,
+               color: lit ? WRONGNESS : 0x2f6f5e, host: lit ? 0x16101f : 0x16241f,
                glow: lit ? 0.26 : 0.30, shards: 10, tone: lit ? 3 : 6,
                ore: true, spoil: true, ghost: lit,
                hard: Infinity,
@@ -465,7 +469,7 @@ export function blockAt(x: number, d: number): Block | null {
            0.10 rather than 0, for worked stone's reason four rules up: at zero
            it goes black with the rock at the edge of the lamp and the hall
            reads as unfinished rather than as damaged. */
-        return { id: 'anchorscar', name: 'Scar', color: 0x5a20b8, host: 0x0c0814,
+        return { id: 'anchorscar', name: 'Scar', color: WRONGNESS, host: 0x0c0814,
                  glow: 0.10, hard: Infinity, wt: 0, value: 0, spoil: true };
       }
       /* Off the LOCAL BAND, like the rubble below it and unlike the flat

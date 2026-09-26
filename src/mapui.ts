@@ -34,6 +34,7 @@
    names you have never seen is a table of contents. The research is explicit
    that too many open hooks at once reads as confusion rather than as mystery. */
 
+import { wrongHex } from './sim/wrongness';
 import { panelOpened, panelClosed } from './closestack';
 import { g, save } from './sim/state';
 import { W, DEF, paletteOf } from './sim/config';
@@ -370,6 +371,8 @@ export function draw() {
     /* A key you cut, outlined in its own colour: the map remembers where each
        one was, which is how a home region stops being a rumour. Outlined so an
        emerald can never be read as a green FOUND diamond. */
+    /* An open core (AE): the wrongness colour, and the biggest mark there is. */
+    else if (p[0] === 'o') { diamond(x, +p[1] * s, py(md), wrongHex, 7); diamondOutline(x, +p[1] * s, py(md), '#ffffff', 9); }
     else if (p[0] === 'k') diamondOutline(x, +p[1] * s, py(md), p[3] ? '#' + (DEF[p[3]]?.color ?? 0xffffff).toString(16).padStart(6, '0') : '#ffffff', 4);
     else dot(x, +p[1] * s, py(md), '#ff8fd8', 3);
   }
@@ -424,7 +427,7 @@ export function draw() {
        core. It used to be the Anchors' own mint, which said "done" where the
        game now wants to say "gone". */
     ring(x, a.x * s, py(a.d),
-         lit ? '#8a5ad0' : anchorSealed(r) ? '#5ad0e0' : '#d8d2c0', lit);
+         lit ? wrongHex : anchorSealed(r) ? '#5ad0e0' : '#d8d2c0', lit);
   }
 
   /* ---------- the centre ----------

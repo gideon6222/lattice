@@ -46,6 +46,9 @@ export const R = {
   /* Wall-clock seconds since landing on this world, for the fastest-core
      record. Reset by arrive(); read once, when a core breaks. */
   worldT: 0,
+  /* R.worldT when the last core broke (AE), so its hint waits until the ship
+     has been away from the break and comes back past a spent core. */
+  coreBrokeT: -999,
   /* The way in, while it is running; see intro.ts. The intro's clock, or
      CONTINUE's. Null the rest of the time, exactly like `flight`. */
   intro: null as { t: number; started: boolean; done: boolean } | null,

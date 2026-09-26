@@ -35,7 +35,8 @@
 
 import { GATE_COUNT } from './gate';
 
-/* Ordered so index 0 is the first hint, delivered when the first gate opens. */
+/* Ordered so index 0 is the first hint, due when the first gate opens and
+   shown (since round seventeen, AE) the first time the ship passes a spent core. */
 export const HINTS: string[] = [
   'The core went out instantly. Nothing that dark should stop that easily.',
   'Two cores spent, and the rock past each one runs warmer than before.',

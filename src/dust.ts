@@ -159,14 +159,15 @@ let t = 0;
    so the field stays evenly spread however far the ship has flown, and no mote
    ever pops in the middle of the screen. */
 export function stepDust(px: number, py: number, depth: number, raw: number, hot: number,
-                         tint = 0xd8c4a2) {
+                         tint = 0xd8c4a2, coreDust = 1) {
   t += raw;
   mat.uniforms.uTime.value = t;
 
   /* Thicker the deeper you are. The square is what makes the bottom of a
      planet feel like it has weight in the air rather than just less light. */
   const d = Math.min(1, Math.max(0, depth / LM_DUST_RAMP));
-  const dens = 1 + (LM_DUST_DEPTH - 1) * d * d;
+  /* And thicker for every core released (round seventeen, AE). */
+  const dens = (1 + (LM_DUST_DEPTH - 1) * d * d) * coreDust;
   /* Gone in daylight, on exactly the same ramp the haze uses. The haze fades
      with `dep` in its own shader and the motes did not, which left specks
      hanging in the air above the pad on a bright surface - dust you can see

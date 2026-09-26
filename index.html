@@ -415,14 +415,16 @@
     border:1px solid var(--line); background:transparent;
     transition:background var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease), border-color var(--t-base) var(--ease);
   }
-  /* Lit is the amber the rest of the game already spends on "this is yours" -
-     the credits chip and the toast both use it - rather than a tenth colour. */
-  #anchors i.lit{background:var(--amber); border-color:var(--amber); box-shadow:0 0 6px rgba(255,200,97,.75);}
+  /* A broken Anchor and an open core are the wrongness colour, round
+     seventeen AE: they are the scar and the core, and the row is where the eye
+     first learns that the two are one thing. `--wrong` is set from the one
+     constant in src/sim/wrongness.ts at boot, so its value lives nowhere here. */
+  #anchors i.lit{background:var(--wrong); border-color:var(--wrong); box-shadow:0 0 6px var(--wrong);}
   /* The Vault is the tenth thing in the row and reads as different because it
      IS different: it is not an Anchor, it is what they open. Dimmed until the
      ninth is lit, then it is the only thing on the row still to do. */
   #anchors i.vault{width:7px; height:7px; border-radius:1px; transform:rotate(45deg); margin-left:6px;}
-  #anchors i.vault.open{background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 8px rgba(63,224,255,.8);}
+  #anchors i.vault.open{background:var(--wrong); border-color:#fff; box-shadow:0 0 9px var(--wrong);}
   #savedMark{
     position:absolute; left:50%; top:calc(env(safe-area-inset-top, 0px) + 92px); transform:translate(-50%, -6px);
     display:flex; align-items:center; gap:7px; padding:5px 12px; border-radius:14px;
@@ -605,7 +607,7 @@
   }
   .sup.ab{width:87px; height:44px; border-color:#5a3a9a;}
   .sup.ab .g{top:14px; font-size:11px;}
-  .sup.ab.on{border-color:#a97cff; box-shadow:0 0 14px rgba(138,90,208,.55);}
+  .sup.ab.on{border-color:#a97cff; box-shadow:0 0 14px rgba(169,124,255,.55);}
   .sup.ab.cold{opacity:.34;}
   body.docked #abil{display:none;}
   body.crossing #abil{display:none;}
@@ -1522,6 +1524,7 @@
       <span><i class="sq" style="background:#3fe0ff"></i>PAD</span>
       <span><i class="dia" style="background:#00ff41"></i>FOUND</span>
       <span><i class="rng"></i>ANCHOR</span>
+      <span><i class="dia" style="background:var(--wrong)"></i>CORE</span>
       <span><i class="str" style="background:#ffd98a"></i>VAULT</span>
       <span class="maphint" id="mapPct">SURVEYED 0%</span>
     </div>

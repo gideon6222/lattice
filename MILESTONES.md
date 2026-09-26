@@ -754,7 +754,7 @@ is in `journal/legacy-plan.md`.
       briefs: menu, economy
       design: ## Round seventeen, the shop and the minerals
 
-- [ ] **AE The barrier and the core become objects, and the drain shows in the world.** The
+- [x] **AE The barrier and the core become objects, and the drain shows in the world.** The
       core's light is the one wrongness colour, defined once; the pip row, the scar and the
       gate room take it from that constant and nothing else uses it. The barrier's look lives
       in two emitter rails, real geometry with the ship's rock-and-metal treatment; the field

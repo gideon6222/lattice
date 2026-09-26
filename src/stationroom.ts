@@ -40,6 +40,7 @@
    applies here, which is that a dial in the fiction showing state the player
    already has is not a duplicate HUD, it is the room knowing what you know. */
 
+import { WRONGNESS } from './sim/wrongness';
 import * as THREE from 'three';
 import { g, worldUnrest } from './sim/state';
 import { WORLD_DEPTH } from './sim/region';
@@ -846,7 +847,10 @@ export function buildRoom(): Room | null {
     where = i - 1;
     const look = PLACE_LOOKS[i];
     wallMat.color.setHex(look.wall);
-    bandMat.color.setHex(look.accent);
+    /* A gate's lift band is the wrongness colour (AE): the gates are what the
+       cores were holding shut, and the band is where that shows in the room.
+       The pad's band is its own cyan. */
+    bandMat.color.setHex(place >= 0 ? WRONGNESS : look.accent);
     accentL.color.setHex(look.accent);
     keyL.color.setHex(look.key);
     signs.forEach((m, j) => { m.visible = j === i; });

@@ -2778,6 +2778,71 @@ are deleted; the rest build states the ladder can reach, and all twenty-five fil
 `test/spine.test.mjs` reads every string a player sees and fails on nine as the goal or "light"
 as the verb.
 
+### AE: the barrier and the core become objects
+
+Built 2026-09-25.
+
+**One wrongness colour.** `src/sim/wrongness.ts` holds `WRONGNESS`, 0x8a5ad0, and nothing else
+in `src` or `index.html` spells the value. A test greps for it and allows only that file, and a
+second test lists the files allowed to import it. Four things take it:
+- the core's light and its crystal
+- the scar (a broken Anchor, its plinth, its burst and the map's mark for it)
+- the pip row, through `--wrong` set at boot: broken Anchors, and the core diamond once it is open
+- the lift band in a gate's room
+
+The core used to be warm gold. It is now the wrongness colour, and it is still the brightest
+thing in its tier.
+
+**The barrier is built.** `src/barrier.ts` draws each shut gate as:
+- two emitter rails the width of the world, in the ship's pale matte relief-textured treatment
+  and lit by the lightmap, proud of the rock face so they read as fitted to it
+- a row of lit emitters along each rail
+- a thin additive field between them that wavers upward like heat over a road
+
+blocks.ts draws the barrier's cells as the rock they run through. The first build drew nothing
+there, and the field over empty space read as a dark ribbon, which is the one look the milestone
+ruled out. To the simulation the row is still `gate`: uncuttable and in the way.
+
+**The core's light.** The pool is one PointLight, made once, and it goes each frame to the
+nearest core with something to say. The first build had one light per gate, and the reading
+counted three more lights on every lit fragment for cores that are never two on one screen.
+- **An appeared core** comes up over two seconds, then pulses. `coreLook(t)` in the pure layer
+  makes each tier darker in colour, stronger, and wider and faster in its pulse, and a test pins
+  each of those as a number.
+- **The rock around a live core goes darker.** `uLmCores` feeds `coreDim()` inside `coreLit`,
+  a darkening only, as the lightmap rule requires.
+- **A spent core stays lit,** and burns the way its hint reads: the first stutters, the second
+  runs warm, the third breathes.
+
+**Events.**
+- **Touching the barrier** names what opens it, at most every four seconds (`barrierSays`): how
+  many of this depth's Anchors still hold it, or that its core is open. It never says where.
+- **The last Anchor of a tier** gets its own card, A CORE OPENS. It puts a core mark ('o', the
+  wrongness diamond) on the map, which gains a CORE key.
+- **The hints** no longer follow the core's card. Each is due at its break and shows the first
+  time after that (at least 20 s on) that the ship passes within four cells of a spent core.
+  `g.hintsShown` is saved, and an older save counts every due hint as heard.
+
+**Per core** (`coreStep`): the heat line rises 12 m, the dust thickens by 0.35 and tremors come
+0.3 faster. On this world that moves the heat line from 199 m to 187, 175 and 163 m. The campaign
+probe prices the heat and the Vault still falls at minute 54.7. One e2e had placed a key at 179 m
+with two gates open, and the risen heat line now hurt the hull there, so the camera correctly
+refused to lean. The test now opens only the gate above the key.
+
+**GPU reading** at the barrier with its core open (360x780 at DPR 3, headless Chromium,
+software GL, both builds measured in the same session):
+
+| | draw calls a frame | triangles | programs | point lights | fps |
+|---|---|---|---|---|---|
+| before | 71 | 32,856 | 32 | 2 | 9 |
+| after | 72 | 33,514 | 35 | 3 | 9 |
+
+The underground budget test reads 68 of 150. A reading from the phone is still owed.
+
+Receipts: `test/wrongness.test.mjs`; three e2e specs (the barrier names what opens it; the last
+Anchor's card, map mark and light; a hint seen once past a spent core); `npm run film core1`,
+`npm run film core3`, and `node tools/shot.mjs barrier` for the still.
+
 ### AK: minerals become ingredients
 
 Built 2026-09-25. Money (copper, iron, silver, gold, geodes, lodes) sells at the pad and nothing

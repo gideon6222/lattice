@@ -558,3 +558,24 @@ export function shore(s: GroundState): number {
 export function canShore(s: GroundState): boolean {
   return s.collapsed.length > 0 && s.ballast >= BALLAST_SAFE;
 }
+
+/* ---------- each core makes the deep worse. Round seventeen, AE ----------
+
+   The milestone's line: per core, the heat line rises, and the dust and the
+   tremors step up. A core is released, not destroyed, and what it lets out is
+   in the rock from then on - so the planet the player climbs back through is
+   hotter, dustier and shakier than the one they came down. Stepped per core
+   rather than ramped by the clock, so each break is a visible before and after.
+
+   Twelve metres a core moves the heat line from 199 m to 187, 175 and 163 on
+   this world: by the second core the climb back to the second gate is hot for
+   longer, which is the "rock past each one runs warmer" the second hint says
+   out loud. The campaign probe prices it and the Vault still falls at the
+   same minute - the Cooling Rig covers it. */
+export const CORE_HEAT_RISE = 12;
+export const CORE_DUST_STEP = 0.35;
+export const CORE_TREMOR_STEP = 0.3;
+export function coreStep(cores: number) {
+  const c = Math.max(0, cores);
+  return { heatRise: CORE_HEAT_RISE * c, dust: 1 + CORE_DUST_STEP * c, tremor: 1 + CORE_TREMOR_STEP * c };
+}

@@ -5207,7 +5207,9 @@ async function cutKey(page: Page, hurt: boolean) {
     w.stopClock();
     const pk = w.keyPockets(0).pockets.find((p: any) => p.id === 'emerald');
     const [KX, KD] = pk.cells[0];
-    w.g.ground.gates = [0, 1];
+    /* Only the gate above it: with two open the heat line rises past this key
+       (AE), the hull takes heat and the lean rightly refuses to start. */
+    w.g.ground.gates = [0];
     w.g.up.cool = 5; w.g.hull = 9999;
     const dug: string[] = [];
     for (let d = 1; d < KD; d++) dug.push(KX + ',' + d);
@@ -5366,4 +5368,84 @@ test('the pad sells supplies for credits and never Sink', async ({ page }) => {
   await page.evaluate(() => (window as any).__cw.selectSystem('engines'));
   await expect(page.locator('#rack .bcard[data-key="sink"]')).toHaveCount(0);
   await expect(page.locator('#rack .bcard[data-key="cell"] button.cbuy')).toBeEnabled();
+});
+
+/* ---------- round seventeen, AE: the barrier and the core as objects ---------- */
+
+test('flying into the barrier says how many Anchors still hold it', async ({ page }) => {
+  await inPlay(page);
+  const said = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.stopClock();
+    const CX = w.coreColumn(0), CD = w.gateDepth(0);
+    const dug: string[] = [];
+    for (let d = 1; d < CD; d++) dug.push((CX + 2) + ',' + d);
+    w.g.dug = new Set(dug);
+    w.g.ground.lit = []; w.g.ground.gates = [];
+    w.g.px = CX + 2; w.g.pd = CD - 1;
+    w.R.vx = 0; w.R.vy = 0; w.R.digging = null;
+    w.resetBlocks();
+    w.R.held = 'down';
+    w.advance(0.3);
+    w.R.held = null;
+    return document.getElementById('toast')!.textContent;
+  });
+  expect(said).toContain('The barrier holds');
+  expect(said).toContain('3 Anchors');
+});
+
+test('the last Anchor of a tier opens its core: its own card, a map mark, and a light that comes up', async ({ page }) => {
+  await inPlay(page);
+  const before = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.stopClock();
+    w.g.ground.gates = []; w.g.marks = [];
+    const need = w.gateAnchors(0);
+    w.g.ground.lit = need.slice(0, need.length - 1);
+    w.advance(0.1);
+    return { n: w.coreLights().length, on: w.coreLevels()[0], last: need[need.length - 1] };
+  });
+  expect(before.n, 'the core light pool is one light, made once').toBe(1);
+  expect(before.on, 'a core with its Anchors still holding is lit').toBe(0);
+
+  await page.evaluate((r) => {
+    const w = (window as any).__cw;
+    w.g.ground.lit.push(r);
+    w.anchorBreaks(r);
+  }, before.last);
+  await expect(page.locator('#evTitle')).toHaveText('A CORE OPENS');
+  const after = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    document.getElementById('evBtn')!.click();
+    w.advance(3);
+    return { marks: w.g.marks.slice(), on: w.coreLevels()[0], lit: w.coreLights()[0].intensity, n: w.coreLights().length,
+             cx: w.coreColumn(0), cd: w.gateDepth(0) };
+  });
+  expect(after.marks).toContain('o,' + after.cx + ',' + after.cd);
+  expect(after.on, 'the open core gave no light').toBeGreaterThan(0);
+  expect(after.lit, 'the one light did not go to the open core').toBeGreaterThan(0);
+  expect(after.n, 'the light pool changed size').toBe(1);
+});
+
+test('a hint is seen passing a spent core, once', async ({ page }) => {
+  await inPlay(page);
+  const got = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.stopClock();
+    w.g.ground.gates = [0]; w.g.hintsShown = 0; w.R.coreBrokeT = -999;
+    const CX = w.coreColumn(0), CD = w.gateDepth(0);
+    const dug: string[] = [];
+    for (let x = CX - 3; x <= CX + 3; x++) for (let d = CD - 5; d <= CD - 1; d++) dug.push(x + ',' + d);
+    w.g.dug = new Set(dug);
+    w.g.px = CX; w.g.pd = CD - 2;
+    w.resetBlocks();
+    w.advance(0.2);
+    const first = document.getElementById('toast')!.textContent;
+    const shown = w.g.hintsShown;
+    w.advance(0.2);
+    return { first, shown, again: w.g.hintsShown };
+  });
+  expect(got.first).toContain(await page.evaluate(() => (window as any).__cw.HINTS?.[0] ?? 'went out instantly'));
+  expect(got.shown).toBe(1);
+  expect(got.again).toBe(1);
 });

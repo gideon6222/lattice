@@ -1,6 +1,7 @@
 /* Boot. Every imported module's top-level setup runs before this file's
    body, which is what the single-file version got for free by being written
    top to bottom. */
+import { wrongHex } from './sim/wrongness';
 import * as THREE from 'three';
 import { HULL_MAX, UPGRADES, SUPPLIES, ORES, ROCKS, shelfStock, tremorDepth, heatDepth, traitAt, W, START_X, CAVE_MIN_DEPTH, costOf, matCost, GROWTH_BAND, SUPPLY_SYSTEM } from './sim/config';
 import { g, S, save, load, hasSave, coreM, padRegion, worldUnrest, markSeen, onPad, docked, atSurface } from './sim/state';
@@ -24,7 +25,8 @@ import { growthCounts, growthKindAt } from './growth';
 import { buildGauges } from './gauges';
 import { lmDebug, LM_COLS } from './lightmap';
 import { sfx, busGain, audioCtxState, audioFocus } from './audio';
-import { grantFind, grantCache, coreBroken, vaultReached } from './actions';
+import { grantFind, grantCache, coreBroken, vaultReached, anchorBreaks } from './actions';
+import { coreLights, coreLevels } from './barrier';
 import { openPanels } from './closestack';
 import { openMap, closeMap, mapView, mapPan, mapSetView, draw as mapDraw } from './mapui';
 import { landCollapse, closeGround, shoreUp } from './collapse';
@@ -97,6 +99,8 @@ syncDrops();
 setDrillTier(g.up.drill);
 setUpgradeHardware(g.up);
 audioLabels();
+/* The one wrongness colour, handed to the stylesheet (round seventeen, AE). */
+document.documentElement.style.setProperty('--wrong', wrongHex);
 updateHUD();
 stampBuild();
 /* Before the boot overlay lifts, so no frame is ever drawn with bare panels. */
@@ -278,7 +282,7 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* Round sixteen, Z1: so a film scenario can fire the break and the ending
        directly, the same way other scenarios skip straight to the moment worth
        a picture rather than digging out and cutting a real core on camera. */
-    coreBroken, vaultReached,
+    coreBroken, vaultReached, anchorBreaks, coreLights, coreLevels,
     /* Round seventeen, AB: which panels the close stack holds, top last. */
     openPanels,
     /* Round seventeen, AL: where the keys are. */

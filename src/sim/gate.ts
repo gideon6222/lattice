@@ -237,3 +237,26 @@ export function gateNear(x: number, d: number, open: readonly number[]): number 
   }
   return -1;
 }
+
+/* ---------- what the barrier says when you touch it. Round seventeen, AE ----------
+
+   Flying into it used to say nothing at all: the drill stopped and the ship
+   sat there, and a wall with no answer reads as a bug. So touching it names
+   what opens it - how many of this depth's Anchors still hold it, or that its
+   core is already open in this row - and never where they are. */
+export function barrierSays(t: number, lit: readonly number[]): string {
+  const left = gateAnchors(t).filter((r) => !lit.includes(r)).length;
+  const what = t === GATE_COUNT - 1 ? "The Vault's door holds" : 'The barrier holds';
+  if (left === 0) return what + ' · its core is open in this row. Cut the core.';
+  return what + ' · ' + left + (left === 1 ? ' Anchor' : ' Anchors') +
+    ' of this depth still hold it. Break ' + (left === 1 ? 'it' : 'them') + ' and its core opens.';
+}
+
+/* The spent core within `r` cells of the ship, or -1 (AE: where the hints are
+   seen). */
+export function spentCoreNear(x: number, d: number, open: readonly number[], r = 4): number {
+  for (const t of open) {
+    if (Math.hypot(x - coreColumn(t), d - gateDepth(t)) <= r) return t;
+  }
+  return -1;
+}

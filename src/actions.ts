@@ -1,4 +1,5 @@
 import { panelOpened, panelClosed } from './closestack';
+import { WRONGNESS, wrongCss } from './sim/wrongness';
 import * as THREE from 'three';
 import { W, HULL_MAX, DEF, isOre, isKey, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf, LODE_COLLAPSE, WAKE_CLOSES, WAKE_TRIES } from './sim/config';
 import { clamp, key, stream } from './sim/util';
@@ -9,7 +10,6 @@ import { anchorAt } from './sim/vaults';
 import { wake } from './sim/unrest';
 import { coreColumn, gateDepth, gateAnchors, GATE_COUNT } from './sim/gate';
 import { abilityFor } from './sim/ability';
-import { hintAt } from './sim/hints';
 import { scarHere, repairable, repairRoom, packScar } from './sim/repair';
 import { vaultOpen } from './sim/vaults';
 import { g, S, save, checkpoint, coreM, valueM, worldTrait, resetGround, cutGround, padFuel, salePayout, addMark, resetSeen, revealVault, docked } from './sim/state';
@@ -640,7 +640,7 @@ export function hardReset() {
      lying. `g.up` was already being zeroed, so the devices came back at tier
      zero and were still on the shelf - a fresh start that had somehow already
      done the finding. Same for the kit, the mineral reveals and the map. */
-  g.found = []; g.foundKit = []; g.skills = [];
+  g.found = []; g.foundKit = []; g.skills = []; g.hintsShown = 0;
   g.seenOre = []; g.seen = []; g.marks = [];
   resetSeen();
   /* `won` deliberately SURVIVES a reset. It is not progress, it is something
@@ -727,13 +727,13 @@ export function anchorBreaks(region: number) {
      violet as the barrier and the spent core, which is the game tying three
      things together three rounds before anything explains them. */
   spray(x, y, 0x8fffc8, 200, 16, 1.6);
-  spray(x, y, 0x8a5ad0, 320, 13, 3.0);
+  spray(x, y, WRONGNESS, 320, 13, 3.0);
   spray(x, y, 0xffffff, 140, 22, 1.4);
   /* Violet now, and longer and heavier than the mint one it replaces - but
      still under .34, because the CARD is the moment and the flash is only its
      punctuation. The old version was .40 for 900 ms and was still washing the
      screen when the modal was open and being read. */
-  flash('rgba(138,90,208,.30)', 620);
+  flash(wrongCss(.30), 620);
   R.shake = Math.max(R.shake, 1.25);
   /* Not `relic()`, which is a bright chime and was the right sound for finding
      something. This is a thing coming apart. The collapse under the boom is
@@ -752,11 +752,19 @@ export function anchorBreaks(region: number) {
      drain now does the opposite of that, so the card stops saying it. */
   const tier = Math.floor(region / REGION_COLS);
   const left = gateAnchors(tier).filter((r) => !g.ground.lit.includes(r)).length;
-  showEvent('THE ANCHOR BREAKS',
+  /* Round seventeen, AE: the last Anchor of a tier opens its core, and that
+     is its own event - its own title, the core marked on the map, and in the
+     world the core's light coming up in the wrongness colour (barrier.ts). */
+  if (left === 0) {
+    addMark('o', coreColumn(tier), gateDepth(tier));
+    flash(wrongCss(.34), 700);
+  }
+  showEvent(left === 0 ? 'A CORE OPENS' : 'THE ANCHOR BREAKS',
     regionName(region) + ' gives way, and the ground here has drawn itself onto ' +
     'your map. Whatever the Anchor was holding is loose in the rock now. ' +
     (left === 0
-      ? 'Nothing is holding the barrier at ' + gateDepth(tier) + ' m shut any more.'
+      ? 'Nothing is holding the barrier at ' + gateDepth(tier) + ' m shut any more: a core has ' +
+        'opened in it, lit, and it is on your map.'
       : left === 1
         ? 'One more Anchor holds the barrier at ' + gateDepth(tier) + ' m.'
         : left + ' more Anchors hold the barrier at ' + gateDepth(tier) + ' m.') +
@@ -838,12 +846,10 @@ export function coreBroken(tier: number) {
       updateHUD();
       updateKit();
       if (first) groundStartsToGo();
-      /* Y15: one line, after the card closes rather than fighting it for the
-         screen - the toast this game already uses everywhere else for "one
-         more fact, quietly". `g.ground.gates.length` is tiers opened, which
-         is exactly this break's own count. */
-      const hint = hintAt(g.ground.gates.length);
-      if (hint) toast(hint);
+      /* The hint for this break no longer follows the card (round seventeen,
+         AE): it is due now and it is SEEN - near a spent core, on the way
+         back past one. See `spentCoreNear` and the hint check in loop.ts. */
+      R.coreBrokeT = R.worldT;
     });
   /* The way down is permanent and the state now says so. Quit here and
      CONTINUE comes back through an open gate. */
@@ -881,9 +887,9 @@ export function packHere() {
   g.weight = 0;
 
   const x = worldX(g.px), y = -g.pd;
-  spray(x, y, 0x8a5ad0, 200, 10, 2.0);
+  spray(x, y, WRONGNESS, 200, 10, 2.0);
   spray(x, y, 0x9effd4, 120, 8, 1.4);
-  flash('rgba(138,90,208,.22)', 420);
+  flash(wrongCss(.22), 420);
   R.shake = Math.max(R.shake, 0.7);
   sfx.supply();
   hap.ore();

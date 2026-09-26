@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { beginGrowth, addGrowth, finishGrowth } from './growth';
-import { W } from './sim/config';
+import { W, baseRock } from './sim/config';
 import { key } from './sim/util';
 import { WINDOW_ROWS, WINDOW_COLS } from './streamwindow';
 import { g } from './sim/state';
@@ -421,10 +421,15 @@ function rebuild() {
 
   for (let d = d0; d <= d1; d++) {
     for (let x = x0; x <= x1; x++) {
-      const b = blockAt(x, d);
+      let b = blockAt(x, d);
       if (!b) continue;
       /* the block being drilled is a real mesh; skip it here or it draws twice */
       if (digCell === key(x, d)) continue;
+      /* The barrier's row (round seventeen, AE). To the simulation it is still
+         a wall; to the eye it is the rock it runs through, with barrier.ts's
+         rails and field in front. Drawn as that rock so the field is a shimmer
+         OVER stone - with nothing behind it, it read as a dark ribbon. */
+      if (b.id === 'gate') b = baseRock(d, 0, x);
 
       const pool = poolFor(b);
       const jit = 0.76 + rnd(x + 77, d + 31, g.planet) * 0.46;

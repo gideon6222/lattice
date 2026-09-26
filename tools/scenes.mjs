@@ -406,7 +406,8 @@ export const SCENES = {
       __cw.g.up.drill = 4; __cw.g.up.scan = 3;
       __cw.g.px = CX; __cw.g.pd = CD - 3;
       __cw.resetBlocks();
-      __cw.advance(0.5);
+      /* Long enough for the core's light to finish coming up (AE). */
+      __cw.advance(2.5);
     `,
     step: `__cw.advance(SECS);`
   },
@@ -667,6 +668,56 @@ export const SCENES = {
      a room: the lift, the camera and the cards are the same, the room around
      them is not. The first frame is the models loading. Each gate opens on the system
      holding its own counter. */
+  /* Round seventeen, AE. Core 1 from the moment its last Anchor breaks:
+     the core light coming up over two seconds in the wrongness colour, the
+     rock around it going darker, and then the pulse, which is wider and
+     faster the deeper the tier. */
+  core1: {
+    secs: 0.5,
+    frames: 8,
+    enter: true,
+    setup: `
+      const T = 0;
+      const CX = __cw.coreColumn(T), CD = __cw.gateDepth(T);
+      const dug = [];
+      for (let x = CX - 4; x <= CX + 4; x++) for (let d = CD - 5; d <= CD - 1; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.gates = [0, 1, 2].slice(0, T);
+      __cw.g.ground.lit = [];
+      for (let i = 0; i <= T; i++) __cw.g.ground.lit.push(...__cw.gateAnchors(i));
+      __cw.g.up.drill = 6; __cw.g.up.scan = 5; __cw.g.up.cool = 7; __cw.g.up.hull = 9; __cw.g.hull = 9999;
+      __cw.g.px = CX + 2; __cw.g.pd = CD - 3;
+      __cw.resetBlocks();
+      __cw.advance(0.2);
+    `,
+    step: `__cw.g.hull = 9999; __cw.advance(SECS);`
+  },
+
+  /* Round seventeen, AE. Core 3 from the moment its last Anchor breaks:
+     the core light coming up over two seconds in the wrongness colour, the
+     rock around it going darker, and then the pulse, which is wider and
+     faster the deeper the tier. */
+  core3: {
+    secs: 0.5,
+    frames: 8,
+    enter: true,
+    setup: `
+      const T = 2;
+      const CX = __cw.coreColumn(T), CD = __cw.gateDepth(T);
+      const dug = [];
+      for (let x = CX - 4; x <= CX + 4; x++) for (let d = CD - 5; d <= CD - 1; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.gates = [0, 1, 2].slice(0, T);
+      __cw.g.ground.lit = [];
+      for (let i = 0; i <= T; i++) __cw.g.ground.lit.push(...__cw.gateAnchors(i));
+      __cw.g.up.drill = 6; __cw.g.up.scan = 5; __cw.g.up.cool = 7; __cw.g.up.hull = 9; __cw.g.hull = 9999;
+      __cw.g.px = CX + 2; __cw.g.pd = CD - 3;
+      __cw.resetBlocks();
+      __cw.advance(0.2);
+    `,
+    step: `__cw.g.hull = 9999; __cw.advance(SECS);`
+  },
+
   gatebays: {
     secs: 0.6,
     frames: 5,

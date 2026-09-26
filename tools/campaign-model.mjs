@@ -52,7 +52,8 @@ export function makeCampaign(H) {
 
   function heatAt(x, d) {
     const t = H.traitAt(x, Math.max(0, d));
-    const line = H.heatDepth(g.planet, t);
+    /* Lifted by every core released, as in play (round seventeen, AE). */
+    const line = H.heatDepth(g.planet, t) - H.coreStep(g.ground.gates.length).heatRise;
     return { line, span: H.coreM() - line, rise: t.soak || 1 };
   }
 
