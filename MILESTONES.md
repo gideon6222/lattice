@@ -671,11 +671,12 @@ is in `journal/legacy-plan.md`.
       briefs: level-design, feel
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AR Tier 2's caches, sized after AQ.** Tier 2's cache chance rises on its own seed so the
-      census reads about 32, 45, 51, 38 and never makes tier 2 the richest tier, and the secrets
-      probe shows tier 2 under half quiet on the strict count with caches supplying less than
-      half of the drop. Proven by the probe's per-kind split and a golden diff touching only
-      cache cells in rows 113 to 226.
+- [x] **AR Tier 2's caches, sized after AQ.** Closed on his word of 2026-09-25 ("Close AR,
+      met by cysts"). AQ's cysts took tier 2's census to 44 caches (the natural roll's 37 and one
+      in each cyst) against the ~45 this asked for, so no roll changed. The strict-probe target
+      (tier 2 under half quiet) is dropped: the probe drills blind shafts, and only flooding tier
+      2 with caches would move it - the thing Fable's review ruled out. Counting keys and lodes,
+      tier 2 is quiet on 27% of runs.
       briefs: level-design
       design: ## Round seventeen: the ladder, finished
 

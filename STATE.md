@@ -26,9 +26,10 @@ cache, four with a key, reached by drilling or by Sink. Counting keys and lodes,
 empty (29% quiet); the old probe could not see them. The campaign probe's Vault moved from 55.8
 to 62 minutes, all of it the cysts in its fixed mining columns.
 
-1. **AR** - tier 2's caches. Cysts already took the census to 44 of the ~45 planned, so AR may
-   only need confirming.
-2. **Z2** - a real phone read, which also closes AB and AJ. Then V0, when he says.
+**AR** closed on his word: the cysts met its cache target. AM to AQ are live.
+
+1. **Z2** - a real phone read, which also closes AB and AJ.
+2. **V0** - the store, when he says; its listing needs his re-read first.
 
 ## Phone readings
 
