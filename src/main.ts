@@ -27,6 +27,7 @@ import { lmDebug, LM_COLS } from './lightmap';
 import { sfx, busGain, audioCtxState, audioFocus } from './audio';
 import { grantFind, grantCache, coreBroken, vaultReached, anchorBreaks } from './actions';
 import { coreLights, coreLevels } from './barrier';
+import { END_CARD_AT } from './sim/ending';
 import { openPanels } from './closestack';
 import { openMap, closeMap, mapView, mapPan, mapSetView, draw as mapDraw } from './mapui';
 import { landCollapse, closeGround, shoreUp } from './collapse';
@@ -282,7 +283,7 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* Round sixteen, Z1: so a film scenario can fire the break and the ending
        directly, the same way other scenarios skip straight to the moment worth
        a picture rather than digging out and cutting a real core on camera. */
-    coreBroken, vaultReached, anchorBreaks, coreLights, coreLevels,
+    coreBroken, vaultReached, anchorBreaks, coreLights, coreLevels, END_CARD_AT,
     /* Round seventeen, AB: which panels the close stack holds, top last. */
     openPanels,
     /* Round seventeen, AL: where the keys are. */

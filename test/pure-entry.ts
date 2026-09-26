@@ -31,3 +31,4 @@ export * from '../src/sim/hints';
 export * from '../src/sim/keys';
 export * from '../src/sim/vendor';
 export * from '../src/sim/wrongness';
+export * from '../src/sim/ending';

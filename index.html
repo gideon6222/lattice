@@ -670,6 +670,10 @@
      stayed on over the bay at whatever strength they had on arrival, and the
      violet room at 226 m came out brown (round seventeen, AO). */
   body.docked #heat, body.docked #alarm{display:none;}
+  /* The ending has the screen to itself until its card (round seventeen, AH). */
+  body.ending #hud, body.ending #kit, body.ending #cluster, body.ending #actions,
+  body.ending #ord, body.ending #ctrl, body.ending #heat, body.ending #alarm,
+  body.ending #toast, body.ending #abil, body.ending #dry{display:none !important;}
   .screen.room > *{pointer-events:auto;}
   /* ---------- the fitting bay, round seventeen AN ----------
 

@@ -40,8 +40,9 @@ test('only the core, the scar, the pip, the gate room and the map wear it', () =
      constant and nothing else uses it." These are the files that do: the core
      light and its block, the scar's block and its bursts, the map's scar and
      core marks, the pip (via --wrong in main.ts) and the gate room's band. */
+  /* loop.ts since AH: the sky over the pad takes the core's colour at the end. */
   const allowed = new Set(['src/barrier.ts', 'src/sim/world.ts', 'src/actions.ts', 'src/mapui.ts',
-    'src/main.ts', 'src/stationroom.ts', 'src/sim/wrongness.ts']);
+    'src/main.ts', 'src/stationroom.ts', 'src/sim/wrongness.ts', 'src/loop.ts']);
   const users = files('src').filter((f) => /from '\.{1,2}\/(sim\/)?wrongness'/.test(readFileSync(f, 'utf8')))
     .map((f) => f.split(String.fromCharCode(92)).join('/'));
   for (const u of users) assert.ok(allowed.has(u), u + ' wears the wrongness colour');

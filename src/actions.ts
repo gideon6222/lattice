@@ -1,4 +1,5 @@
 import { panelOpened, panelClosed } from './closestack';
+import { END_LIFT } from './sim/ending';
 import { WRONGNESS, wrongCss } from './sim/wrongness';
 import * as THREE from 'three';
 import { W, HULL_MAX, DEF, isOre, isKey, START_X, SAVE_KEY, OLD_KEY, SUPPLY_OF, PATCH_HULL, CELL_FUEL, RUBBLE, tremorCells, DROP_MIN_VALUE, GAS_HULL_DAMAGE, GAS_SOAK, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, OVERDRIVE_SECS, OVERDRIVE_MULT, BULWARK_HITS, PULSE_SECS, tremorDepth, UPGRADES, costOf, LODE_COLLAPSE, WAKE_CLOSES, WAKE_TRIES } from './sim/config';
@@ -974,18 +975,16 @@ export function vaultReached() {
   g.won = true;
   /* The ending shot. Round twelve, V9.
 
-     Started HERE rather than when the card is dismissed, so the pull-back is
-     running behind the card while it is being read. The research's point is
-     that the ending should SHOW the world the player crossed rather than only
-     state a sentence about it, and a shot that waits for the card to close is a
-     shot most players never see - the card is the moment they look away from
-     the frame, not at it. `src/sim/feel.ts` owns the curve. */
+     Started HERE, so the pull-back frames the center while the released
+     lights arrive. The research's point is that the ending should SHOW the
+     world rather than only state a sentence about it; since round seventeen
+     (AH) the whole ending is shown first and the card comes after it.
+     `src/sim/feel.ts` owns the curve. */
   R.endShot = 0;
   const x = worldX(g.px), y = -g.pd;
   spray(x, y, 0xfff0b8, 420, 18, 3.2);
   spray(x, y, 0xffffff, 220, 26, 2.2);
-  /* Short and light, like the Anchor's. The card is the moment; a flash still
-     washing the screen while somebody is reading it is a flash nobody wants. */
+  /* Short and light, like the Anchor's: the moment is what follows it. */
   flash('rgba(255,240,184,.28)', 700);
   R.shake = Math.max(R.shake, 1.4);
   sfx.boom();
@@ -1005,6 +1004,19 @@ export function vaultReached() {
      quotes that exact clause as the reason act three grades quieter than act
      one, and changing the words there would go stale against the code that
      explains it. */
+  /* Round seventeen, AH: the card no longer comes here. The light leaves
+     first - see sim/ending.ts - and loop.ts puts the card up when it has, via
+     `endCard` below. The mode is taken off 'play' for the length of it, which
+     is what the loop's simulation and every input already ask, so nothing
+     can happen to the ship while the camera is away. */
+  R.endT = 0;
+  R.endCarded = false;
+  g.mode = 'event';
+  checkpoint();
+}
+
+/* The Vault's card, at the end of the ending (AH). */
+export function endCard() {
   showEvent('THE VAULT',
     'The last core, and the center is open. Every core gave the same reason on ' +
     'the way down: releasing it was the kind thing to do. It was never energy. ' +
@@ -1013,8 +1025,15 @@ export function vaultReached() {
     '- but it is quiet now, and it is quiet because of you.\n\n' +
     'The ground is yours. There is more of it than you have seen.',
     'STAY',
-    () => { updateHUD(); });
-  checkpoint();
+    () => {
+      /* The camera comes home to the ship and the dark lifts: the planet is
+         quiet now, not dead, and the ground is still somewhere to be. */
+      R.endT = -1;
+      R.eye = null;
+      R.endLift = END_LIFT;
+      updateHUD();
+      checkpoint();
+    });
 }
 
 

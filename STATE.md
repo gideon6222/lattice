@@ -13,17 +13,22 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## Next three milestones
 
-Done 2026-09-25: **AF, repair shows in the rock.** A scar closes in stages as it is packed,
-violet going to stone. The percentage toast is gone, and SEAL and every Ballast readout stay
-hidden until the first core. A scar no longer eats keys. Before it: **AE** the barrier and core
-as objects, **AO** gate vendors, **AM** the key find, **AL** where minerals sit (pushed live).
-AM through AF are not pushed yet. **AB** waits on one press of Android back on his phone.
+Done 2026-09-25: **AH, the ending.** At the Vault:
+- the light of every spent core gathers at the center and goes out
+- a cut to the pad, and the dark rises over it
+- the sky turns the core's colour, then the card
 
-1. **AH** - the ending: the light leaves.
-2. **AI** - one visible sign per Anchor; two tier-0 devices move deeper.
-3. **AJ** - a slimmer HUD, nothing lost.
+Found: the surface sky gradient has never shown (the haze makes the canvas opaque). It is his
+call whether to fix it.
 
-Then Z2, V0.
+Before it: **AF** repair in the rock, **AE** barrier and core, **AO** gate vendors, **AM** the key
+find. AM to AH are not pushed yet. **AB** waits on one press of Android back on his phone.
+
+1. **AI** - one visible sign per Anchor; two tier-0 devices move deeper.
+2. **AJ** - a slimmer HUD, nothing lost.
+3. **Z2** - a real phone read.
+
+Then V0.
 
 ## Phone readings
 

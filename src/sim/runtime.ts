@@ -38,6 +38,11 @@ export const R = {
      cannot shorten a shot that is read off a clock. -1 rather than 0 because 0
      is a real instant in it. */
   endShot: -1,
+  /* Round seventeen, AH: seconds into the ending, or -1; whether its card has
+     gone up; and what is left of the dark lifting once it has been read. */
+  endT: -1,
+  endCarded: false,
+  endLift: 0,
   /* Round seventeen, AM. The camera's lean toward a key the drill just cut:
      seconds left, and where it leans. Null the rest of the time. It moves the
      camera only and never the ship, and a change of direction ends it that

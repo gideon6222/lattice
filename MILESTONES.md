@@ -775,7 +775,7 @@ is in `journal/legacy-plan.md`.
       briefs: mechanic-design, feel
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AH The ending: the light leaves.** At the Vault the light of every spent core leaves
+- [x] **AH The ending: the light leaves.** At the Vault the light of every spent core leaves
       its scar and gathers at the center, the planet goes dark from the center upward, and
       the sky over the pad takes the core's colour; a short card follows, never before.
       Receipt: a film of the whole ending with the Mobile renderer.

@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import { scene } from './scene';
 import { applyLight, lmUniforms, LM_DECL_SRC, setCoreDim } from './lightmap';
-import { rockRelief } from './materials';
+import { rockRelief, glowTex } from './materials';
 import { W, worldX } from './sim/config';
 import { g } from './sim/state';
 import { GATE_COUNT, gateDepth, coreColumn, gateReady } from './sim/gate';
-import { WRONGNESS, coreLook } from './sim/wrongness';
+import { WRONGNESS, coreLook, wrongDarker } from './sim/wrongness';
+import { endingAt, moteAt } from './sim/ending';
+import { VAULT_CORE_X, VAULT_CORE_D } from './sim/vaults';
 
 /* The barrier and its core, as objects. Round seventeen, AE.
 
@@ -135,10 +137,60 @@ function build(t: number): Gate {
 }
 for (let t = 0; t < GATE_COUNT; t++) gates.push(build(t));
 
+/* ---------- the ending's motes. Round seventeen, AH ----------
+
+   The light of each released core, leaving its scar for the center. One
+   additive sprite each, made once and hidden the rest of the game. */
+const moteMat = new THREE.SpriteMaterial({
+  map: glowTex, color: WRONGNESS, transparent: true, opacity: 1,
+  blending: THREE.AdditiveBlending, depthWrite: false
+});
+/* A head and a short trail each, so a mote crossing the frame reads as a
+   streak with a direction rather than a dot. */
+const TRAIL = 6;
+const motes = gates.map(() => Array.from({ length: TRAIL }, (_, i) => {
+  const m = new THREE.Sprite(moteMat);
+  const sz = 2.6 * (1 - i / (TRAIL + 1));
+  m.scale.set(sz, sz, 1);
+  m.visible = false;
+  m.renderOrder = 4;
+  scene.add(m);
+  return m;
+}));
+/* The sky over the pad, after the Vault (AH). Its own plane rather than the
+   CSS sky gradient: the tunnel haze writes an opaque alpha over the whole
+   canvas, so that gradient has never actually shown and the sky a player
+   knows is black with stars. Invisible until the ending turns it. */
+const skyGeo = new THREE.PlaneGeometry(260, 90, 1, 1);
+{
+  const col = new Float32Array(4 * 3);
+  const top = new THREE.Color(wrongDarker(0.7)), low = new THREE.Color(WRONGNESS);
+  [top, top, low, low].forEach((c, i) => { col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b; });
+  skyGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+}
+const skyMat = new THREE.MeshBasicMaterial({
+  vertexColors: true, transparent: true, opacity: 0, depthWrite: false, fog: false
+});
+const sky = new THREE.Mesh(skyGeo, skyMat);
+sky.position.set(0, 44, -9);
+sky.renderOrder = -2;
+sky.visible = false;
+scene.add(sky);
+export function setSkyTurn(k: number) {
+  sky.visible = k > 0.001;
+  skyMat.opacity = 0.92 * k;
+}
+
+const heart = new THREE.Sprite(moteMat);
+heart.visible = false;
+heart.renderOrder = 4;
+scene.add(heart);
+
 /* Each frame. `clock` is seconds of game time; `eyeD` is the depth the
    camera is looking at, which decides which core the one light serves. */
-export function stepBarriers(clock: number, eyeD: number) {
+export function stepBarriers(clock: number, eyeD: number, endT = -1) {
   fieldMat.uniforms.uTime.value = clock;
+  const end = endT >= 0 ? endingAt(endT) : null;
   for (let t = 0; t < gates.length; t++) {
     const gt = gates[t];
     const open = g.ground.gates.includes(t);
@@ -152,7 +204,9 @@ export function stepBarriers(clock: number, eyeD: number) {
       if (t === 0) k = Math.sin(clock * 13.1) * Math.sin(clock * 3.7) > 0.93 ? 0.15 : 1;
       if (t === 2) k = 0.7 + 0.3 * Math.sin(clock * 0.9);
       gt.color = t === 1 ? 0xc0607a : WRONGNESS;
-      gt.level = 4 * k;
+      /* In the ending the light leaves the scar it has burned in, and after
+         it the scar is dark for good: the light is gone, not resting (AH). */
+      gt.level = 4 * k * (end ? 1 - end.gather : g.won ? 0 : 1);
       setCoreDim(t, gt.x, gt.y, 1, 0);
       continue;
     }
@@ -181,6 +235,27 @@ export function stepBarriers(clock: number, eyeD: number) {
   if (best) {
     light.position.set(best.x, best.y, 0.9);
     light.color.setHex(best.color);
+  }
+
+  /* The ending: the motes travel, the one light rides with them, and at the
+     center they become one light that flares and goes out. */
+  for (let t = 0; t < motes.length; t++) {
+    const on = !!end && g.ground.gates.includes(t) && end.gather < 1;
+    motes[t].forEach((m, i) => {
+      m.visible = on;
+      if (!on) return;
+      const p = moteAt(Math.max(0, endT - i * 0.05), t);
+      m.position.set(worldX(p.x), -p.d, 1.2);
+    });
+  }
+  heart.visible = !!end && end.flare > 0;
+  if (end && (end.gather < 1 || end.flare > 0)) {
+    const s = 1.4 + 5 * end.flare;
+    heart.scale.set(s, s, 1);
+    heart.position.set(worldX(VAULT_CORE_X), -VAULT_CORE_D, 1.3);
+    light.color.setHex(WRONGNESS);
+    light.position.set(worldX(VAULT_CORE_X), -VAULT_CORE_D, 1.2);
+    light.intensity = 10 * end.gather + 40 * end.flare;
   }
 }
 

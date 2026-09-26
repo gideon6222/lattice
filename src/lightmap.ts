@@ -136,8 +136,15 @@ const U = {
      strength. A core that has appeared darkens the rock around it; strength 0
      is a core with nothing to say. A fixed-size array for the same reason the
      core lights are a fixed pool - the shader is compiled once. */
-  uLmCores: { value: Array.from({ length: GATE_COUNT }, () => new THREE.Vector4(0, 0, 1, 0)) }
+  uLmCores: { value: Array.from({ length: GATE_COUNT }, () => new THREE.Vector4(0, 0, 1, 0)) },
+  /* Round seventeen, AH: the ending's dark, as the depth in metres above
+     which the world is still lit, and how dark below it. */
+  uLmEnd: { value: new THREE.Vector2(0, 0) }
 };
+
+export function setEndDark(front: number, dark: number) {
+  U.uLmEnd.value.set(front, dark);
+}
 
 /* Set by barrier.ts each frame. Darkening only: the propagated light never
    brightens, and a core is the one thing in the world that pushes it the
@@ -323,6 +330,7 @@ const DECL = `
   uniform vec3 uLmShade;
   uniform vec4 uLmSoft;
   uniform vec4 uLmCores[${GATE_COUNT}];
+  uniform vec2 uLmEnd;
 
   /* Where p sits in the light grid. */
   vec2 coreUv(vec2 p) {
@@ -466,6 +474,8 @@ const DECL = `
       vec4 c = uLmCores[i];
       k *= 1.0 - c.w * (1.0 - smoothstep(0.0, c.z, distance(p, c.xy)));
     }
+    /* The ending's dark: everything deeper than the front, going out. */
+    k *= 1.0 - uLmEnd.y * smoothstep(-3.0, 3.0, -p.y - uLmEnd.x);
     return k;
   }
 
@@ -481,7 +491,8 @@ const DECL = `
      strength, though, a vein five cells inside the mass read as clearly as one
      you were about to break into. */
   float coreGlow(vec2 p) {
-    return mix(uLmSoft.y, 1.0, pow(coreShade(p), uLmSoft.z));
+    return mix(uLmSoft.y, 1.0, pow(coreShade(p), uLmSoft.z)) *
+      (1.0 - uLmEnd.y * smoothstep(-3.0, 3.0, -p.y - uLmEnd.x));
   }
 `;
 

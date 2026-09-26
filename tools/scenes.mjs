@@ -586,9 +586,11 @@ export const SCENES = {
   /* Z1's other half: the Vault's own card, now that it names the entity
      rather than only reassuring - the same shortcut, `vaultReached` fired
      directly rather than requiring all nine Anchors dug to and lit for real. */
+  /* Round seventeen, AH: the whole ending - the lights gathering, the dark
+     climbing from the center to the pad, the sky turning, then the card. */
   vaultend: {
-    secs: 0.4,
-    frames: 4,
+    secs: 0.75,
+    frames: 16,
     enter: true,
     setup: `
       const VX = __cw.VAULT_CORE_X, VD = __cw.VAULT_CORE_D;

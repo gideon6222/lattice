@@ -3244,10 +3244,16 @@ test('the Vault opens only when the last core breaks, and the last gate is its d
     w.g.px = w.VAULT_CORE_X; w.g.pd = w.VAULT_CORE_D - 1;
     w.g.fuel = w.S.fuelCap(); w.g.hull = w.S.hullCap();
     w.advance(0.2);
-    return { won: w.g.won, mode: w.g.mode,
+    /* Round seventeen, AH: the light leaves first, and the card comes after
+       it - never before. */
+    const early = { mode: w.g.mode, open: !document.getElementById('event')!.classList.contains('hidden') };
+    w.advance(w.END_CARD_AT + 0.3);
+    return { won: w.g.won, mode: w.g.mode, early,
              title: (document.getElementById('evTitle') || {}).textContent };
   });
   expect(won.won, 'reaching the centre did not end the game').toBe(true);
+  expect(won.early.mode, 'the ending left the ship flyable while the camera was away').toBe('event');
+  expect(won.early.open, 'the card went up before the light had left').toBe(false);
   expect(won.mode, 'the ending did not stop the game to say so').toBe('event');
   expect(won.title).toMatch(/VAULT/i);
 
@@ -3262,6 +3268,14 @@ test('the Vault opens only when the last core breaks, and the last gate is its d
   expect(after.mode, 'the game ended the session rather than the errand').toBe('play');
   expect(after.won, 'winning did not stick').toBe(true);
   expect(after.coreId, 'the Vault looks exactly the same after it opened').toBe('vaultlit');
+  const home = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.advance(0.2);
+    return { eye: w.R.eye, endT: w.R.endT, ending: document.body.classList.contains('ending') };
+  });
+  expect(home.eye, 'the camera did not come home to the ship after the card').toBeNull();
+  expect(home.endT).toBe(-1);
+  expect(home.ending, 'the HUD stayed hidden after the ending').toBe(false);
 });
 
 /* The two fences on the cascade, through the real docking path.

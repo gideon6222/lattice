@@ -1,5 +1,7 @@
 import * as THREE from 'three';
-import { stepBarriers } from './barrier';
+import { stepBarriers, setSkyTurn } from './barrier';
+import { endingAt, END_LIFT, type EndFrame } from './sim/ending';
+import { WRONGNESS, wrongDarker } from './sim/wrongness';
 import { ambienceTick } from './sim/ambience';
 import { FIND_COLOR } from './sim/finds';
 import { W, HULL_MAX, DIG_BASE, DEF, SUPPLY_OF, DROP_MIN_VALUE, RELIC_COLOR, relicFor,
@@ -38,7 +40,7 @@ import {
 import { scene, camera, renderer, gameEl, amb, sun, rim, lamp, LAMP_COLOR, fog, shipKey, renderWorld } from './scene';
 import { lerpHex, worldX, crackGeo, crackMat } from './materials';
 import { meshes, syncBlocks, dropBlock, beginDig, pulseHaloes } from './blocks';
-import { updateLight, setHazeColor, setHazeGain } from './lightmap';
+import { updateLight, setHazeColor, setHazeGain, setEndDark } from './lightmap';
 import { spray, stepParticles, starMat, sunSprite } from './particles';
 import { stepDust } from './dust';
 import { leaveDrop, stepDrops } from './drops';
@@ -53,7 +55,7 @@ import { aimRelic } from './relic';
 import { stepParallax, fadeParallax, setParallaxTint } from './parallax';
 import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner, savedMoment, tickSaved } from './ui';
 import { stepGauges } from './gauges';
-import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken } from './actions';
+import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard } from './actions';
 import { coreOpens, openGate, gateAtDepth, barrierSays, spentCoreNear } from './sim/gate';
 import { HINTS } from './sim/hints';
 import { hasAbility, SINK_RATE, SINK_HULL, HOLLOW_DRAIN } from './sim/ability';
@@ -146,6 +148,8 @@ let camZBoost = 0, freeze = 0, thrustLevel = 0, bank = 0;
    it was at. Read off the hull itself rather than hooked into each damage
    site, so a new hazard cannot forget to tell it. */
 let hurtClock = 99, hullWas = -1;
+/* This frame of the ending (AH), or null. */
+let endFrame: EndFrame | null = null;
 /* When the barrier last said what opens it (AE). */
 let barrierSaid = -99;
 /* How long the lean holds, how far toward the cell it goes, how much closer,
@@ -1148,6 +1152,36 @@ export function tick(raw: number, draw = true) {
     return;
   }
 
+  /* ---------- the ending: the light leaves. Round seventeen, AH ----------
+
+     Read off one timeline in sim/ending.ts. The EYE rides it - held on the
+     center while the lights gather, then up the world just ahead of the dark
+     - which is the same seam the way in uses, so the world streams, the lamp
+     floods and the camera frames exactly as they do in play. The card goes up
+     when the timeline says, and not a frame before. */
+  let endDark = 0, endFront = 0;
+  endFrame = null;
+  if (R.endT >= 0) {
+    R.endT += raw;
+    const e = endingAt(R.endT);
+    endFrame = e;
+    /* The cut to the pad goes through black, so it reads as a cut and not
+       as the camera teleporting - on the flash layer, driven off the
+       timeline rather than a timer. */
+    ui.flash.style.background = '#000';
+    ui.flash.style.opacity = e.black.toFixed(3);
+    document.body.classList.add('ending');
+    R.eye = { px: e.eyeX, pd: e.eyeD };
+    endDark = e.dark; endFront = e.front;
+    if (e.card && !R.endCarded) { R.endCarded = true; endCard(); }
+  } else if (R.endLift > 0) {
+    document.body.classList.remove('ending');
+    R.endLift = Math.max(0, R.endLift - raw);
+    endDark = 0.88 * (R.endLift / END_LIFT);
+    endFront = -12;
+  }
+  setEndDark(endFront, endDark);
+
   /* ship transform. `v` is the EYE - the ship in play, and wherever the way
      in has put it otherwise; the world, the lamp and the camera follow the
      eye, the hull follows the ship. */
@@ -1240,7 +1274,9 @@ export function tick(raw: number, draw = true) {
      what each act means; this file only paints it. */
   const act = gradeFor(g.ground.gates.length, g.won);
   const rise = coreStep(g.ground.gates.length).heatRise;
-  const hot = heatT(g.pd, heatDepth(g.planet, worldTrait()) - rise,
+  /* The eye's depth while the ending has the camera, or the pad would be
+     painted in the heat of a ship four hundred metres under it (AH). */
+  const hot = heatT(endFrame ? v.pd : g.pd, heatDepth(g.planet, worldTrait()) - rise,
                     (coreM() - heatDepth(g.planet, worldTrait()) + rise) * 0.55);
   /* The sky at night is the sky at the bottom of the world: the same two
      colours depth fades it to. So night is simply "as deep as it gets", and
@@ -1248,6 +1284,16 @@ export function tick(raw: number, draw = true) {
   const tSky = Math.max(tDeep, 1 - R.dawn);
   const hi = lerpHex(skyHi(g.world), 0x02030a, tSky).lerp(new THREE.Color(0x2e0b05), hot * 0.8);
   const lo = lerpHex(skyLo(g.world), 0x0a0c14, tSky).lerp(new THREE.Color(0x6b1c08), hot * 0.85);
+  /* After the Vault the sky over the pad is the core's colour, for good
+     (AH): turned during the ending, and held once it is over. */
+  const skyTurn = endFrame ? endFrame.sky : g.won ? 1 : 0;
+  if (skyTurn > 0) {
+    hi.lerp(new THREE.Color(wrongDarker(0.55)), skyTurn * 0.85);
+    lo.lerp(new THREE.Color(WRONGNESS), skyTurn * 0.75);
+  }
+  /* The gradient above is behind an opaque canvas (see setSkyTurn), so the
+     sky a player actually sees turns on its own plane. */
+  setSkyTurn(skyTurn);
   /* The SKY keeps the gradual ramp; the fog does not. Fog only ever tints what
      is underground, and underground is not the colour of the horizon - at 40 m
      the old shared value was still a bright blue and was washing it over every
@@ -1326,7 +1372,7 @@ export function tick(raw: number, draw = true) {
      parented to it - see dust.ts for why that is the whole difference between
      dust and a texture on the camera. */
   stepDust(vx, vy, v.pd, raw, hot, pal.dust, coreStep(g.ground.gates.length).dust);
-  stepBarriers(clock, v.pd);
+  stepBarriers(clock, v.pd, endFrame ? R.endT : -1);
 
   skyTick += raw;
   if (skyTick > 0.12) {

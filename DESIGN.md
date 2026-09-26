@@ -2875,6 +2875,38 @@ closes one, keys are never taken); the scar e2e (no SEAL before the first core, 
 percentage in the line, the plinth drawn at a later stage after a press); `npm run film
 scarseal`.
 
+### AH: the ending, the light leaves
+
+Built 2026-09-25, on his answer of 2026-09-24 that the ending shows the light leaving and not a
+creature. One pure timeline, `src/sim/ending.ts`, about 10.4 s long. The renderer only reads it.
+
+1. **The lights gather (3 s).** Each spent core's light leaves its scar as a streak (`moteAt`:
+   fast out of the scar, slow into the center, where the camera is). The one core light rides
+   with them. The scars go dark and stay dark afterwards: the light is gone, not resting.
+2. **The flare (0.8 s).** Gathered at the center, the light flares and goes out.
+3. **The cut through black (0.3 s in, 0.9 s out).** The fade is on the timeline, not a timer. A
+   timer version was stretched across the whole filmstrip.
+4. **The dark (4.6 s).** The camera is at the pad and the dark comes up out of the ground over it
+   (`uLmEnd` darkens everything below a rising front, in `coreLit` and `coreGlow`). The first
+   version rode the camera up the world ahead of the dark and filmed four seconds of black: the
+   eye was inside solid rock, which nothing lights.
+5. **The sky (1.6 s).** The sky over the pad turns from the core's colour darkened to the core's
+   colour itself, and it stays that way after the ending.
+6. **The card.** Only now. STAY brings the camera back to the ship and lifts the dark over 4 s.
+
+For the whole ending the game is in `event` mode, so nothing can hurt the ship or move it while
+the camera is away, and `body.ending` hides the HUD, the toasts and the heat and fuel washes.
+
+**Found here, not fixed: the surface sky has never shown.** The tunnel haze is an additive
+full-screen plane that writes alpha 1, so the canvas is opaque everywhere and the CSS sky gradient
+(the dawn, the planet's colours) sits behind it unseen. The sky a player knows is black with
+stars. Fixing it would turn the surface sky blue by day, a large change nobody asked for, so the
+ending draws its sky on its own plane (`setSkyTurn` in barrier.ts). The question is his.
+
+Receipts: `test/ending.test.mjs` (the card comes last, the order of gather, dark and sky, the
+motes' ends, the cut through black); the Vault e2e (no card while the light leaves, the ship not
+flyable, the camera home after STAY); `npm run film vaultend`, the whole ending.
+
 ### AK: minerals become ingredients
 
 Built 2026-09-25. Money (copper, iron, silver, gold, geodes, lodes) sells at the pad and nothing
