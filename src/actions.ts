@@ -10,7 +10,7 @@ import { anchorAt } from './sim/vaults';
 import { wake } from './sim/unrest';
 import { coreColumn, gateDepth, gateAnchors, GATE_COUNT } from './sim/gate';
 import { abilityFor } from './sim/ability';
-import { scarHere, repairable, repairRoom, packScar } from './sim/repair';
+import { scarHere, repairable, repairRoom, packScar, scarStage, SCAR_STAGES } from './sim/repair';
 import { vaultOpen } from './sim/vaults';
 import { g, S, save, checkpoint, coreM, valueM, worldTrait, resetGround, cutGround, padFuel, salePayout, addMark, resetSeen, revealVault, docked } from './sim/state';
 import { blockAt, haulValue, findRoute, planCollapse, cachePrize, findHere } from './sim/world';
@@ -881,10 +881,21 @@ export function packHere() {
   if (!repairable(g.cargo)) { toast('Nothing in the hold the ground will take'); return; }
   if (repairRoom(g.ground) <= 0.001) { toast('The Ballast is full'); return; }
 
+  const stageWas = scarStage(g.ground.packed[region] || 0);
   const out = packScar(g.ground, region, g.cargo);
   if (out.units <= 0) return;
-  for (const id of Object.keys(out.used)) delete g.cargo[id];
-  g.weight = 0;
+  /* Only what went in comes out of the hold: keys stay aboard (AF), so the
+     weight is taken down by what was packed rather than zeroed. */
+  for (const id of Object.keys(out.used)) {
+    g.weight -= (DEF[id]?.wt || 0) * out.used[id];
+    delete g.cargo[id];
+  }
+  g.weight = Math.max(0, g.weight);
+  /* The scar is drawn from its stage, so the world is rebuilt to show it
+     closing - the repair is something you see in the rock (AF). */
+  resetBlockCache();
+  syncBlocks(true);
+  const stage = scarStage(g.ground.packed[region] || 0);
 
   const x = worldX(g.px), y = -g.pd;
   spray(x, y, WRONGNESS, 200, 10, 2.0);
@@ -893,7 +904,10 @@ export function packHere() {
   R.shake = Math.max(R.shake, 0.7);
   sfx.supply();
   hap.ore();
-  toast(out.units + ' units into the scar · Ballast +' + Math.round(out.gain * 100) + '%');
+  /* No percentage (AF): a payment's receipt is the wrong shape for a repair.
+     What changed is in the rock, and the line says which way it went. */
+  toast(stage >= SCAR_STAGES - 1 ? 'The scar closes'
+    : stage > stageWas ? 'The scar draws in' : 'The scar takes it');
   updateHUD();
   /* A large event: written where the ship stands, with the hold as it now is,
      so quitting on the way back up does not cost the trip. */

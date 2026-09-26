@@ -40,6 +40,7 @@
    applies here, which is that a dial in the fiction showing state the player
    already has is not a duplicate HUD, it is the room knowing what you know. */
 
+import { ballastStarted } from './sim/unrest';
 import { WRONGNESS } from './sim/wrongness';
 import * as THREE from 'three';
 import { g, worldUnrest } from './sim/state';
@@ -867,6 +868,8 @@ export function buildRoom(): Room | null {
     step(t: number) {
       crt.step(t);
       for (const gg of gauges) gg.g.set(gg.read());
+      /* The Ballast dial is not on the wall until the first core (AF). */
+      gauges[2].g.group.visible = ballastStarted(g.ground);
     }
   };
 }

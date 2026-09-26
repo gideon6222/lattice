@@ -3,6 +3,7 @@ import { W, START_X, ORES, DEF, isKey, baseRock, coreDepth, hardMult, valueMult,
          RELIC_COLOR, RELIC_HOST, relicAt, relicFor,
          CAVE_MIN_DEPTH, caveChanceOn, gasChanceOn, geodeChanceOn, SUPPLIES, traitOf,
          VEIN_W, VEIN_H, VEIN_CELLS, VEIN_R, VEIN_WOBBLE_LO, VEIN_WOBBLE_HI, VEIN_REACH_MAX } from './config';
+import { scarStage, SCAR_STAGES } from './repair';
 import { WRONGNESS } from './wrongness';
 import { key, mixHex, rnd } from './util';
 import { regionAt, REGION_COUNT } from './region';
@@ -369,10 +370,16 @@ export function blockAt(x: number, d: number): Block | null {
          player's eye ties the three together long before anything says they
          are tied. The unlit Anchor keeps its teal, because that is what the
          thing WAS and it is the teal the ship's own seams carry. */
+      /* Round seventeen, AF: a broken Anchor closes as its scar is packed -
+         fewer crystals breaking out of it, and less light in them, a stage at
+         a time until it is dark stone that was once violet. */
+      const st = lit ? scarStage(g.ground.packed[anchorHere(x, d)] || 0) : 0;
       return { id: lit ? 'anchorbroken' : 'anchor',
+               look: st ? 'anchorbroken' + st : undefined,
                name: lit ? 'Anchor · broken' : 'Anchor',
-               color: lit ? WRONGNESS : 0x2f6f5e, host: lit ? 0x16101f : 0x16241f,
-               glow: lit ? 0.26 : 0.30, shards: 10, tone: lit ? 3 : 6,
+               color: lit ? mixHex(WRONGNESS, 0x3a3440, st / (SCAR_STAGES - 1)) : 0x2f6f5e,
+               host: lit ? 0x16101f : 0x16241f,
+               glow: lit ? 0.26 * (1 - st / SCAR_STAGES) : 0.30, shards: lit ? 10 - st * 3 : 10, tone: lit ? 3 : 6,
                ore: true, spoil: true, ghost: lit,
                hard: Infinity,
                wt: 0, value: 0 };
@@ -469,8 +476,11 @@ export function blockAt(x: number, d: number): Block | null {
            0.10 rather than 0, for worked stone's reason four rules up: at zero
            it goes black with the rock at the edge of the lamp and the hall
            reads as unfinished rather than as damaged. */
-        return { id: 'anchorscar', name: 'Scar', color: WRONGNESS, host: 0x0c0814,
-                 glow: 0.10, hard: Infinity, wt: 0, value: 0, spoil: true };
+        /* And the plinth closes with it (AF): the violet seams go to stone. */
+        const st = scarStage(g.ground.packed[scarred] || 0);
+        return { id: 'anchorscar', look: st ? 'anchorscar' + st : undefined, name: 'Scar',
+                 color: mixHex(WRONGNESS, 0x3a3440, st / (SCAR_STAGES - 1)), host: 0x0c0814,
+                 glow: 0.10 * (1 - st / SCAR_STAGES), hard: Infinity, wt: 0, value: 0, spoil: true };
       }
       /* Off the LOCAL BAND, like the rubble below it and unlike the flat
          numbers the singletons use. A room at 300 m has to be harder than the

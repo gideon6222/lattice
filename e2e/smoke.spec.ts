@@ -3744,9 +3744,13 @@ test('the planet is repaired at a scar, on the button, and never from the pad', 
 
     w.g.ground = w.newGround();
     w.g.ground.lit = [0];
+    /* Past the first core: before it nothing drains and there is nothing to
+       seal (round seventeen, AF - checked below). */
+    w.g.ground.gates = [0]; w.g.ground.woke = true;
     w.g.ground.ballast = 0.4;
     w.g.ground.unrest[0] = 0.9;
-    w.g.cargo = { amethyst: 6 };
+    /* Silver is money; the amethyst is a key and must come home (AF). */
+    w.g.cargo = { silver: 6, amethyst: 2 };
     w.g.dug = new Set();
 
     /* On the pad, with a hold full of repair ore and a scar open somewhere in
@@ -3773,15 +3777,26 @@ test('the planet is repaired at a scar, on the button, and never from the pad', 
     w.g.cargo = held;
     settle();
 
-    const ballast0 = w.g.ground.ballast, unrest0 = w.g.ground.unrest[0];
-    document.getElementById('btnSeal')!.click();
+    /* Before the first core the button is not offered at all (AF). */
+    w.g.ground.gates = [];
     settle();
+    const beforeCore = vis();
+    w.g.ground.gates = [0];
+    settle();
+
+    const ballast0 = w.g.ground.ballast, unrest0 = w.g.ground.unrest[0];
+    const look0 = w.blockAt(a.x - 1, a.d + 1)?.look ?? null;
+    document.getElementById('btnSeal')!.click();
+    const said = document.getElementById('toast')!.textContent || '';
+    settle();
+    const look = w.blockAt(a.x - 1, a.d + 1)?.look ?? null;
 
     return {
       atPad, atScar, empty,
       ballast0, ballast: w.g.ground.ballast,
       unrest0, unrest: w.g.ground.unrest[0],
-      cargo: Object.keys(w.g.cargo).length,
+      cargo: Object.keys(w.g.cargo).filter((k) => k !== 'amethyst').length,
+      keyKept: w.g.cargo.amethyst, beforeCore, said, look0, look,
       credits0: w.g.credits, credits: w.g.credits,
       after: vis()
     };
@@ -3795,6 +3810,11 @@ test('the planet is repaired at a scar, on the button, and never from the pad', 
   expect(run.cargo, 'the ore is still in the hold, so the repair was free').toBe(0);
   expect(run.credits, 'repair charged credits').toBe(run.credits0);
   expect(run.after, 'the button is still there with nothing left to pack').toBe(false);
+  expect(run.beforeCore, 'SEAL is offered before the first core, when nothing drains').toBe(false);
+  expect(run.keyKept, 'the scar took a key').toBe(2);
+  expect(run.said, 'the repair still reads as a payment').not.toMatch(/%/);
+  expect(run.look0, 'a fresh scar is not drawn as fresh').toBeNull();
+  expect(run.look, 'the scar did not close as it was packed').toMatch(/^anchorscar[1-3]$/);
 });
 
 test('the pad has no donate buttons left on it', async ({ page }) => {

@@ -66,12 +66,13 @@ test('repair takes ore out of the hold and never credits', () => {
      that and correctly got nothing. */
   s.ballast = 0.4;
   const before = H.g.credits;
-  H.g.cargo = { amethyst: 6 };
+  /* Silver is money; the amethyst is a key and must come home (AF). */
+  H.g.cargo = { silver: 6, amethyst: 2 };
 
   const out = H.packScar(s, 0, H.g.cargo);
-  assert.ok(out.gain > 0, 'a hold of amethyst packed into a scar did nothing');
+  assert.ok(out.gain > 0, 'a hold of silver packed into a scar did nothing');
   assert.equal(out.units, 6);
-  assert.deepEqual(out.used, { amethyst: 6 }, 'it did not take what it said it took');
+  assert.deepEqual(out.used, { silver: 6 }, 'it did not take what it said it took - or it took a key');
   assert.equal(H.g.credits, before, 'repair charged credits');
   assert.ok(s.ballast > 0.4, 'the Ballast did not rise');
 });
@@ -87,7 +88,7 @@ test('one deliberate trip is a real repair, and no trip is a whole one', () => {
      doing nothing else, which is the grind round seven already recorded
      happening to the upgrade tree. */
   const CAP = 45;
-  for (const o of H.ORES) {
+  for (const o of H.ORES.filter((o) => !H.isKey(o.id))) {
     const n = Math.floor(CAP / o.wt);
     if (n <= 0) continue;
     const v = H.repairValue({ [o.id]: n });
@@ -105,7 +106,7 @@ test('you repair with whatever you are carrying, not with one farmed ore', () =>
      being a decision about what you happened to find. */
   const CAP = 45;
   const vals = H.ORES
-    .filter((o) => o.id !== 'copper')
+    .filter((o) => o.id !== 'copper' && !H.isKey(o.id))
     .map((o) => H.repairValue({ [o.id]: Math.floor(CAP / o.wt) }));
   const lo = Math.min(...vals), hi = Math.max(...vals);
   assert.ok(hi / lo < 2,
@@ -149,4 +150,29 @@ test('rock is not a repair', () => {
   assert.equal(H.repairable({ copper: 1 }), true);
   assert.equal(H.packable('stone'), false);
   assert.equal(H.packable('copper'), true);
+});
+
+test('a scar never takes a key, and a hold of keys alone cannot seal one', () => {
+  /* Round seventeen, AF. Keys are banked and spent only on the rung that asks
+     for them; a scar swallowing one was a way to lose it without being asked. */
+  for (const k of H.KEY_ORES) assert.equal(H.repairValue({ [k]: 5 }), 0, k + ' repairs the ground');
+  assert.equal(H.repairable({ ruby: 3, coreite: 1 }), false);
+});
+
+test("the scar's stage follows the packing, and a trip or two closes it", () => {
+  const s = fresh();
+  s.lit = [0];
+  s.ballast = 0;
+  assert.equal(H.scarStage(s.packed[0]), 0);
+  let last = 0, trips = 0;
+  while (H.scarStage(s.packed[0]) < H.SCAR_STAGES - 1 && trips < 10) {
+    H.packScar(s, 0, { silver: 6 });
+    const st = H.scarStage(s.packed[0]);
+    assert.ok(st >= last, 'the scar opened again as it was packed');
+    last = st; trips++;
+  }
+  assert.equal(last, H.SCAR_STAGES - 1, 'ten trips never closed the scar');
+  assert.ok(trips <= 3, 'closing one scar took ' + trips + ' trips of silver - that is a meter, not a repair');
+  /* Only its own scar. */
+  assert.equal(H.scarStage(s.packed[1] || 0), 0);
 });

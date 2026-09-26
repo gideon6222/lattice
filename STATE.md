@@ -13,23 +13,17 @@ and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
 
 ## Next three milestones
 
-Done 2026-09-25: **AE, the barrier and the core as objects.**
-- The barrier is two emitter rails with a thin heat-shimmer field.
-- Each core is lit in the one wrongness colour, which is defined once and shared only with the
-  scar, the pip row and the gate rooms.
-- The rock darkens around a live core, a core opening is an event and a map mark, and touching
-  the barrier says what opens it.
-- Heat, dust and tremors step up per core, and the hints show near spent cores.
-- The GPU cost is 1 draw call and 1 light.
+Done 2026-09-25: **AF, repair shows in the rock.** A scar closes in stages as it is packed,
+violet going to stone. The percentage toast is gone, and SEAL and every Ballast readout stay
+hidden until the first core. A scar no longer eats keys. Before it: **AE** the barrier and core
+as objects, **AO** gate vendors, **AM** the key find, **AL** where minerals sit (pushed live).
+AM through AF are not pushed yet. **AB** waits on one press of Android back on his phone.
 
-Before it: **AO** gate vendors, **AM** the key find, **AL** where minerals sit (pushed live).
-AM, AO and AE are not pushed yet. **AB** waits on one press of Android back on his phone.
+1. **AH** - the ending: the light leaves.
+2. **AI** - one visible sign per Anchor; two tier-0 devices move deeper.
+3. **AJ** - a slimmer HUD, nothing lost.
 
-1. **AF** - repair shows in the rock; SEAL and Ballast readouts hide before the first core.
-2. **AH** - the ending: the light leaves.
-3. **AI** - one visible sign per Anchor; two tier-0 devices move deeper.
-
-Then AJ, Z2, V0.
+Then Z2, V0.
 
 ## Phone readings
 

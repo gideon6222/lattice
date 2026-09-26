@@ -768,7 +768,7 @@ is in `journal/legacy-plan.md`.
       briefs: rendering, lighting, web, feel
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AF Repair shows in the rock.** A scar refills in stages, cracks closing and its
+- [x] **AF Repair shows in the rock.** A scar refills in stages, cracks closing and its
       glow dimming as it is packed; the "+X%" toast goes; SEAL and every Ballast readout (the pad's
       sight glass, the shop's wall gauge) stay hidden until the first core. Receipt: a test
       that the scar's stage follows the packing, and a film.

@@ -359,6 +359,9 @@ export interface GroundState {
   /* Units of ore fed, all time. The only thing in here that is purely a
      readout. */
   fed: number;
+  /* How much Ballast each region's scar has taken (round seventeen, AF), by
+     region. It decides how far the scar has closed - see `scarStage`. */
+  packed: number[];
   /* Whether the planet has answered.
 
      Stored rather than derived from `lit.length >= WAKE_AT`, and that is not
@@ -381,7 +384,7 @@ export function newGround(): GroundState {
   return {
     unrest: new Array(REGION_COUNT).fill(0),
     ballast: 1, lit: [], collapsed: [], pending: -1, collapses: 0, fed: 0, woke: false,
-    gates: []
+    gates: [], packed: new Array(REGION_COUNT).fill(0)
   };
 }
 
@@ -417,6 +420,9 @@ export function loadGround(raw: unknown): GroundState {
   }
   if (typeof r.collapses === 'number') s.collapses = Math.max(0, r.collapses);
   if (typeof r.fed === 'number') s.fed = Math.max(0, r.fed);
+  if (Array.isArray(r.packed)) {
+    for (let i = 0; i < REGION_COUNT; i++) s.packed[i] = Math.max(0, Number(r.packed[i]) || 0);
+  }
   s.woke = r.woke === true;
   return s;
 }

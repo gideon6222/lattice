@@ -77,7 +77,7 @@ export function detailGeometryOf(b: Block): THREE.BufferGeometry {
 }
 
 function poolFor(b: Block): Pool {
-  const existing = pools.get(b.id);
+  const existing = pools.get(b.look ?? b.id);
   if (existing) return existing;
 
   /* An ore cell is a dull host block with bright crystals in it, so the two
@@ -152,7 +152,7 @@ function poolFor(b: Block): Pool {
   scene.add(detail);
 
   const pool: Pool = { body, detail, bodies: 0, details: 0 };
-  pools.set(b.id, pool);
+  pools.set(b.look ?? b.id, pool);
   return pool;
 }
 

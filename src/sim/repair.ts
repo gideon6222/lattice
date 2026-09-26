@@ -59,7 +59,7 @@
    The test asserts that derived range rather than the constant, because the
    feed values and the hold size are both tuned numbers that will move. */
 
-import { ORES, DEF, isOre } from './config';
+import { ORES, DEF, isOre, isKey } from './config';
 import { anchorAt, ANCHOR_COUNT } from './vaults';
 import { clamp } from './util';
 import { feedValue, type GroundState } from './unrest';
@@ -99,6 +99,10 @@ export function scarHere(px: number, pd: number, lit: readonly number[]): number
 export function repairValue(cargo: Readonly<Record<string, number>>): number {
   let v = 0;
   for (const o of ORES) {
+    /* Never a key (round seventeen, AF). Keys are banked and never spent on
+       anything but the rung that asks for them; a scar that swallowed the
+       ruby the next gate wants was a way to lose one without being asked. */
+    if (isKey(o.id)) continue;
     const n = cargo[o.id] || 0;
     if (n > 0) v += feedValue(o.id) * n * REPAIR_MULT;
   }
@@ -142,10 +146,12 @@ export function packScar(
   if (value <= 0) return out;
 
   for (const o of ORES) {
+    if (isKey(o.id)) continue;
     const n = cargo[o.id] || 0;
     if (n > 0) { out.used[o.id] = n; out.units += n; }
   }
   out.gain = Math.min(room, value);
+  s.packed[region] = (s.packed[region] || 0) + out.gain;
   s.ballast = clamp(s.ballast + out.gain, 0, 1);
   s.fed += out.units;
   s.unrest[region] = Math.max(0, s.unrest[region] - REPAIR_UNREST);
@@ -165,4 +171,25 @@ export function repairRoom(s: GroundState): number {
 export function packable(id: string): boolean {
   const d = DEF[id];
   return !!d && isOre(d) && feedValue(id) > 0;
+}
+
+/* ---------- the scar closes as it is packed. Round seventeen, AF ----------
+
+   The "+X%" toast was the only thing a repair changed that a player could
+   see, and a percentage is a payment's receipt, not a repair. So the scar
+   itself closes: in stages, its violet dimming and the crystal that broke out
+   of the Anchor drawing back in, until it is dark stone. Stages rather than a
+   smooth fade because a change you can see on the next glance is one that
+   reads as caused by what you just did.
+
+   A stage is SCAR_STEP of Ballast packed into that scar. A full starting hold
+   of money ore is 0.3 to 0.5 of Ballast (measured 2026-09-25; keys no longer
+   count), so a full hold closes a scar one or two stages and a scar is healed
+   in a trip or two - a thing you finish, not a meter you feed. The first try
+   was 0.12 a stage, and the film showed one press closing a scar outright:
+   stages you never see are not stages. */
+export const SCAR_STAGES = 4;
+export const SCAR_STEP = 0.2;
+export function scarStage(packed: number): number {
+  return Math.max(0, Math.min(SCAR_STAGES - 1, Math.floor(packed / SCAR_STEP + 1e-9)));
 }

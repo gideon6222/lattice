@@ -2843,6 +2843,38 @@ Receipts: `test/wrongness.test.mjs`; three e2e specs (the barrier names what ope
 Anchor's card, map mark and light; a hint seen once past a spent core); `npm run film core1`,
 `npm run film core3`, and `node tools/shot.mjs barrier` for the still.
 
+### AF: repair shows in the rock
+
+Built 2026-09-25.
+
+**The scar closes as it is packed.** Each region keeps what its scar has taken
+(`g.ground.packed`, saved). `scarStage` turns that into four stages at 0.2 of Ballast each. Both
+the broken Anchor and the plinth are drawn by stage:
+- the violet mixes toward stone
+- the glow drops
+- the broken Anchor's crystal draws in from ten shards to one
+
+A Block's new `look` field keys the instanced pool, so one id can have four drawings and the
+simulation, the tests and the goldens still see `anchorscar` and `anchorbroken`. A full starting
+hold of money ore is 0.3 to 0.5 of Ballast, so a scar closes in a trip or two. The first step
+was 0.12, and the film showed one press closing a scar outright.
+
+**Nothing on screen reads as a payment.** The "+X%" toast is gone. The line now says which way
+the rock went: "The scar takes it", "draws in", or "closes". The SEAL button reads SEAL THE SCAR.
+
+**No readout before the first core.** SEAL, the pad's sight glass and the bay's Ballast dial are
+all hidden until then, off the same `ballastStarted` the drain and the HUD button already use.
+
+**Found on the way: a scar ate keys.** `packScar` took every ore in the hold, and since AK that
+includes keys, so sealing a scar could spend the ruby the next gate asks for. Keys are now skipped
+by `repairValue` and `packScar`. The hold's weight is taken down by what went in; it used to be
+zeroed.
+
+Receipts: `test/repair.test.mjs` (the stage follows the packing and never reopens, a trip or two
+closes one, keys are never taken); the scar e2e (no SEAL before the first core, the key kept, no
+percentage in the line, the plinth drawn at a later stage after a press); `npm run film
+scarseal`.
+
 ### AK: minerals become ingredients
 
 Built 2026-09-25. Money (copper, iron, silver, gold, geodes, lodes) sells at the pad and nothing

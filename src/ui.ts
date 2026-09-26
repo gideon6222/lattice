@@ -338,11 +338,13 @@ export function updateHUD() {
      teaches the player to ignore the row it is in. */
   const seal = el('btnSeal');
   if (seal) {
-    const at = !isDocked && g.mode === 'play' &&
+    /* Round seventeen, AF: and not before the first core. Until then the
+       Ballast is full and nothing drains it, so a scar has nothing to take.
+       No percentage on it either: what a repair does shows in the rock. */
+    const at = !isDocked && g.mode === 'play' && ballastStarted(g.ground) &&
                scarHere(Math.round(g.px), Math.round(g.pd), g.ground.lit) >= 0;
-    seal.style.display = at && repairable(g.cargo) ? '' : 'none';
-    seal.textContent = 'SEAL  +' + Math.round(
-      Math.min(repairRoom(g.ground), repairValue(g.cargo)) * 100) + '%';
+    seal.style.display = at && repairable(g.cargo) && repairRoom(g.ground) > 0.001 ? '' : 'none';
+    seal.textContent = 'SEAL THE SCAR';
   }
 
   if (g.up.auto > 0 && !atSurface() && g.mode === 'play') {

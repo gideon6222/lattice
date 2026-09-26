@@ -52,7 +52,7 @@ import { scene } from './scene';
 import { worldX, asMetal, gritTex, makeGlow } from './materials';
 import { applyLight } from './lightmap';
 import { g } from './sim/state';
-import { planetUnrest, BALLAST_SAFE } from './sim/unrest';
+import { planetUnrest, BALLAST_SAFE, ballastStarted } from './sim/unrest';
 
 const station = new THREE.Group();
 
@@ -294,6 +294,13 @@ export function updateBallast(dt: number) {
   const s = g.ground;
   const u = planetUnrest(s);
 
+  /* Round seventeen, AF: no glass until the first core. Before it the
+     Ballast is full and nothing drains it, so a level on the machine is a
+     reading about nothing - and a reading the player learns to ignore is one
+     they will still be ignoring when it starts to matter. */
+  const shown = ballastStarted(s);
+  glassTube.visible = shown;
+  fluid.visible = shown;
   /* The glass. Scaled from the bottom of the tube, so the fluid sits in it. */
   const lvl = Math.max(0.0015, s.ballast);
   fluid.scale.y = lvl;

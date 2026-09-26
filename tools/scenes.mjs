@@ -718,6 +718,32 @@ export const SCENES = {
     step: `__cw.g.hull = 9999; __cw.advance(SECS);`
   },
 
+  /* Round seventeen, AF. A scar packed three silver at a time (about one
+     stage each) until it closes: the violet going to stone and the broken Anchor's crystal
+     drawing back in, a stage a press. */
+  scarseal: {
+    secs: 0.5,
+    frames: 5,
+    enter: true,
+    setup: `
+      __cw.g.ground = __cw.newGround();
+      __cw.g.ground.lit = [0]; __cw.g.ground.gates = [0]; __cw.g.ground.woke = true;
+      __cw.g.ground.ballast = 0;
+      const a = __cw.anchorAt(0);
+      __cw.g.px = a.x; __cw.g.pd = a.d;
+      __cw.g.dug = new Set([a.x + ',' + a.d]);
+      __cw.g.up.scan = 4;
+      __cw.resetBlocks();
+      __cw.advance(0.5);
+    `,
+    step: `
+      __cw.g.cargo = { silver: 3 }; __cw.g.weight = 3 * 6;
+      __cw.advance(0.1);
+      document.getElementById('btnSeal').click();
+      __cw.advance(SECS);
+    `
+  },
+
   gatebays: {
     secs: 0.6,
     frames: 5,

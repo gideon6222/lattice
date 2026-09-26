@@ -51,6 +51,10 @@ export type Material = Ore | Rock;
    `hard` is Infinity for bedrock. */
 export interface Block {
   id: string;
+  /* Which drawing it uses, when one id has several (round seventeen, AF: a
+     scar's stages). The instanced pool is keyed on this; the id is what the
+     simulation, the tests and the goldens mean by the block. */
+  look?: string;
   name: string;
   color: number;
   hard: number;
