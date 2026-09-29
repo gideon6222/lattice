@@ -3,7 +3,7 @@ Hold down and the ship digs. Everything below you is rock until you cut it, and 
 A mining game about depth, fuel, and knowing when to turn around.
 
 THERE IS SOMETHING DOWN THERE
-Barriers cut the planet into three depths, and nothing in the ship can touch them. Three Anchors hold each one, buried in halls you have to find. Break all three and a dark core grows in the barrier, warm and inviting and the only way through. Break that and the way down opens, and something of it comes aboard the ship. The last barrier is the door of the Vault at the center. Three marks under the depth readout fill as you break a depth's Anchors, so the game never stops telling you what it wants.
+Barriers cut the planet into three depths, and nothing in the ship can touch them. Three Anchors hold each one, buried in halls you have to find. Break all three and a core lights up in the barrier, the only way through. Break that and the way down opens, and something of it comes aboard the ship. The last barrier is the door of the Vault at the center. Marks at the top of the screen fill as you break a depth's Anchors, so the game never stops telling you what it wants.
 
 DIG WHERE YOU LIKE
 There is no route. The whole face is diggable, so the shaft is whatever shape you make it, and the one you cut on the way down is the one you climb on the way back. Cutting straight is fast and cutting wide finds more.
@@ -11,24 +11,22 @@ There is no route. The whole face is diggable, so the shaft is whatever shape yo
 FUEL IS THE CLOCK
 Nothing hunts you, but the ground is not safe. Gas pockets open the hull, deep rock cooks it, and tremors close tunnels behind you. What actually limits a run is the tank, and every meter costs the same going down as coming up. Turning around with half a tank left is the correct play and it never feels like one.
 
-THE HOLD FILLS UP
-Copper near the surface, then iron, silver and gold, and further down amethyst, emerald, ruby, and things with no names you would recognize. Weight is real: a full hold climbs slower and burns more. Deciding what to leave in the rock is the decision the whole game is built on.
+MONEY AND KEYS
+Copper near the surface, then iron, silver and gold. That is money: you sell it at the pad. Deeper down are the keys: amethyst, emerald, ruby and rarer things, one crystal at a time in small pockets, each with a home region the map will name. Keys are never sold. They are what the better parts of the ship are made from, so every find is a moment and every rung of an upgrade is a hunt. Your sensors can tell you a key is near, never where.
 
 ROCK THAT IS HOLDING SOMETHING UP
-Below ninety meters you will start seeing a warm glow in the stone that is worth more than anything else down there. Cutting it pays better than any ore at that depth, and it brings the tunnel you came down in partly down behind you, so the way home is one you have to find again. Leave it and you walked past the richest thing on the descent, and you could see it the whole time. Both answers cost you something, which is the point of it.
+Deeper down you will start seeing a warm glow in the stone that is worth more than anything else down there. Cutting it pays better than any ore at that depth, and it brings the tunnel you came down in partly down behind you, so the way home is one you have to find again. Cut it or leave it, and either way it costs you, which is the point.
 
 SOMEBODY ELSE GOT HERE FIRST
-Twelve wrecked drill ships are buried across the planet, one in every region, always in the same places. You will see the shape of one in the dark before you know what it is: flat plates where the ground has none, and its own lamp still faintly lit at the end that went in first. Cut through and the hold still holds whatever that crew had dug before they stopped. It asks you for nothing. It is just a thing that happened down here before you arrived.
+Twelve wrecked drill ships are buried across the planet, one in every region, always in the same places. You will see the shape of one in the dark before you know what it is, its own lamp still faintly lit. Cut through and the hold still holds whatever that crew had dug before they stopped.
 
-THE ROCK GIVES THINGS UP
-Eight devices are buried out there and none of them is for sale. A cutting laser, a salvage magnet, a repair drone, and a receiver that hears an unlit Anchor through solid rock and tells you how near it is, never which way. You still have to choose a direction and dig it.
+SEALED IN THE ROCK
+Seven devices are buried out there and none of them is for sale, among them a cutting laser, a salvage magnet, a repair drone, and a receiver that hears an unbroken Anchor through solid rock and tells you how near it is, never which way. Deeper, pockets of air sit sealed in stone too dense to dig quickly, each holding something. Drill in slowly, or learn to sink straight through the rock and let the hull pay.
 
-SPEND IT BETWEEN RUNS
-Sell the haul at the landing pad and put it into the ship. A bigger tank, a better drill, a stronger hull, a lamp that reaches further. Each one buys depth, and depth is what the Anchors are waiting in. Every barrier you open has a shop and a save point of its own.
+THE FITTING BAY
+Sell the haul at the pad and fit it to the ship. The ship stands on its lift, and every upgrade is a card that says what it does and what it will cost you, in credits and in keys. Every barrier you open has a bay of its own, a save point, and something the pad will never sell.
 
 THE PLANET NOTICES
-Break the first core and the ground stops staying where you left it, and the planet starts to come apart. Every Anchor after that makes it come apart faster. You can patch it by packing ore into the scars the Anchors leave behind. The back half of the game is dug through a world that is moving.
+Break the first core and the ground stops staying where you left it, and the planet starts to come apart. Every Anchor you break after that shows in the rock, then in the air. You can patch it by packing ore into the scars the Anchors leave behind, and you watch them close. The back half of the game is dug through a world that is moving.
 
-Plays in the browser or installed from the store. No timer and no ads.
-
-Free. No ads, no in-app purchases, no accounts and no analytics. Your progress is saved on your device and nothing you do is sent anywhere.
+Plays in the browser or installed from the store. Free, with no wait timers, no ads, no in-app purchases, no accounts and no analytics. Your progress is saved on your device and nothing you do is sent anywhere.

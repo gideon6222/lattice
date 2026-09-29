@@ -76,7 +76,11 @@ const STATES = [
        on the surface - which is exactly what the first run of this file
        produced, four frames all reading DEPTH 0 m. `R.held` is the same seam
        filmstrip's dig and firstminute scenes drive. */
+    /* The shallow ores marked as already met: the first copper of a save
+       fires a white flash and a card on real time, and this file shoots faster
+       than either clears - the 2026-09-29 run came out washed white. */
     setup: `
+      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
       __cw.R.held = 'down';
       for (let i = 0; i < 12; i++) __cw.advance(0.5);
     `,
@@ -101,19 +105,24 @@ const STATES = [
   },
   {
     name: 'shop',
-    what: 'the between-runs shop, spending a haul',
-    /* Reached the way filmstrip's own shop scene reaches it: through the
-       button, with stock in the hold, rather than through a handle that does
-       not exist. `__cw` exposes no showShop. */
+    what: 'the fitting bay at the first gate, where Sink is sold',
+    /* Round seventeen: the walked shop is gone, and the bay at a gate is the
+       one that shows both halves - the ship on its lift, and a card the pad
+       never sells. Reached the way a player reaches it: standing at the
+       gate's station and pressing the button. */
     enter: true,
     setup: `
-      __cw.g.credits = 9e6; __cw.g.best.depth = 300;
-      for (const k of ['iron','copper','silver','gold','amethyst','emerald','ruby']) __cw.g.stock[k] = 99;
-      __cw.g.px = 6; __cw.g.pd = -1;
+      __cw.g.credits = 250000; __cw.g.best.depth = 200; __cw.g.ground.gates = [0];
+      for (const k of ['amethyst','emerald','ruby']) __cw.g.stock[k] = 6;
+      __cw.g.px = __cw.coreColumn(0); __cw.g.pd = __cw.gateDepth(0) - 1;
       __cw.advance(0.5);
       document.getElementById('btnShop').click();
-      __cw.advance(0.6);
-    `
+    `,
+    /* The room's models arrive in their own chunk the first time the bay
+       opens; a shot before they land is a ship in a black void. */
+    waitFor: `__cw.roomReady()`,
+    after: `__cw.advance(1.5)`,
+    assert: `__cw.roomPlace() === 0`
   }
 ];
 
@@ -191,6 +200,8 @@ try {
     }
 
     await page.evaluate(state.setup);
+    if (state.waitFor) await page.waitForFunction(state.waitFor, null, { timeout: 15_000 });
+    if (state.after) await page.evaluate(state.after);
 
     /* **Assert the STATE, not the picture.** Two screenshots of this game are
        never byte-identical - the stars twinkle and the lamp flickers - so a

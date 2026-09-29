@@ -2,8 +2,9 @@
 
 3D planet-mining PWA. One planet, 61 columns wide and 452 metres deep, twelve regions each
 with their own rock and rules. Fly a drill ship down, sell ore at the surface pad, buy
-upgrades, and hunt the nine ANCHORS buried across the world; the ninth opens the Vault at
-the centre, and that is the end.
+upgrades, and break the nine Anchors buried across the world, three under each of three
+barriers. Breaking a barrier's three lights its core, and breaking the core opens the way
+down. The last core is the door of the Vault at the center, and that is the end.
 
 Live: **https://gideon6222.github.io/lattice/**. Repo: github.com/gideon6222/lattice.
 Target: Samsung S26 Ultra, Chrome, portrait, installed to the home screen. Engine: `web`
