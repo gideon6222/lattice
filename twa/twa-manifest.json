@@ -21,8 +21,8 @@
                        "path":  "C:/dev/keys/upload.keystore",
                        "alias":  "upload"
                    },
-    "appVersionName":  "0.54.0",
-    "appVersionCode":  6,
+    "appVersionName":  "0.56.0",
+    "appVersionCode":  7,
     "shortcuts":  [
 
                   ],
@@ -39,7 +39,7 @@
     "isChromeOSOnly":  false,
     "isMetaQuest":  false,
     "fullScopeUrl":  "https://gideon6222.github.io/lattice/",
-    "minSdkVersion":  21,
+    "minSdkVersion":  24,
     "orientation":  "portrait",
     "fingerprints":  [
 
@@ -50,5 +50,5 @@
     "retainedBundles":  [
 
                         ],
-    "appVersion":  "0.54.0"
+    "appVersion":  "0.56.0"
 }

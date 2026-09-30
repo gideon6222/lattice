@@ -16,9 +16,23 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.55.0';
+export const VERSION = '0.56.0';
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.56.0', date: '2026-09-30', title: 'Keys, the fitting bay, and the sound of rock',
+    notes: [
+      'Minerals are two things now. Copper, iron, silver and gold are money: you sell them at the pad. Amethyst, emerald, ruby and the rarer ones are keys: one crystal at a time in small pockets, never sold, and the better parts of the ship are made from them.',
+      'Every key you cut is a moment: it flashes in its own color, the camera leans in, and the map marks it. Your sensors can tell you a key is near, never where.',
+      'The shop is a fitting bay. The ship stands on its lift, and every upgrade is a card that says what it does and what it costs, in credits and in keys. Two taps fit a level.',
+      'Every barrier you open has a bay of its own, a save point, and something the pad will never sell. The first one sells Sink.',
+      'The barriers and cores are things in the rock now, with their own light and heat. The last core is the door of the Vault, and the ending shows the light leaving.',
+      'Deep in the second tier, pockets of air sit sealed in dense rock, each holding a cache. Drill in slowly, or sink straight through and let the hull pay.',
+      'Scars you pack with ore close as you watch, and every Anchor you break leaves a sign in the rock and then in the air.',
+      'The sky over the pad shows, the HUD is slimmer, and Android back closes the top panel instead of the game.',
+      'Every sound is new: real recordings of rock, stones, air and machinery, their highs kept quiet over a deep warm body. The drill runs on a motor that labors in harder rock.'
+    ]
+  },
   {
     version: '0.55.0', date: '2026-09-19', title: 'The descent is a ladder now',
     notes: [

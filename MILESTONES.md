@@ -393,10 +393,14 @@ His words: "Can you improve the sounds in the game. They seem too cartoony"
       (more: journal/legacy-plan.md)
       design: # The Play listing
 
-- [ ] **V0 The Play store, this version.** *(HELD BY HIM, 2026-09-18: "I will
+- [x] **V0 The Play store, this version.** *(HELD BY HIM, 2026-09-18: "I will
       hold off on adding anything to the play store for now." The box stays open
       and unticked because the work is not done, not because it is blocked - and
       (more: journal/legacy-plan.md)
+      **Shipped 2026-09-30** on his word ("ship it for internal testing on the play store"):
+      7 (0.56.0) is live on the internal track, the v0.54.0 bundle having been refused for
+      its minimum SDK of 21 (Play's automatic protection wants 24). Rebuilt by
+      tools/twa.ps1 at minSdk 24, signed with the upload key, uploaded through the Console.
       briefs: store
       design: # Round twelve: the world gets a voice — ## Milestones
 

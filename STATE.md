@@ -6,20 +6,23 @@ cartoony (DESIGN.md, "Round eighteen: the sound of things").
 
 ## What still does not exist
 
-- **The game on Google Play.** V0 is shipping now to the internal track, on his word of
-  2026-09-30. Production waits on his own click.
-- **A studio phone reading.** The desk launches games by Android package, which the Play
-  install gives Lattice for the first time, so Z2's perf number can be taken after it.
+- **A reviewed app on Play.** 7 (0.56.0) is live on the internal track (2026-09-30), so testers
+  see a temporary name until Google reviews the app; "Send app for review" is greyed out in
+  the Console, waiting on something the Console does not name.
+- **Web builds in the studio.** `studio ship` and `studio deliver` do not build the TWA, and
+  this repo has no signing or Play secrets, so the listing-sync workflow cannot run either.
+  The bundle is built by tools/twa.ps1 and uploaded by hand.
+- **A studio phone reading.** Possible now that Play installs `com.gideon.lattice` (Z2).
 
 ## Next three milestones
 
-Done 2026-09-30: **AU**, the sounds he settled on: real CC0 recordings of rock, stones, air and
-a machine, their highs kept quiet over a deep synthesized body, levelled for a phone speaker.
-His word: "That sounds great." Also done on his word from the phone: AB and AJ.
+Done 2026-09-30: **V0**, the internal track (tester link
+https://play.google.com/apps/internaltest/4701290322801317660), and **AU**, the sounds he
+settled on ("That sounds great").
 
-1. **V0** - the internal track, then whatever the Console still asks for.
-2. **Z2** - the desk's perf reading, once the Play build is on the phone.
-3. Whatever he finds playing the Play build.
+1. **Z2** - the desk's perf reading, once he installs from the tester link.
+2. Whatever he finds playing the Play build.
+3. Past internal: his click, and Google's review.
 
 ## Phone readings
 
