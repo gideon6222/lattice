@@ -24,7 +24,7 @@ import { installPanelGrain } from './grain';
 import { growthCounts, growthKindAt } from './growth';
 import { buildGauges } from './gauges';
 import { lmDebug, LM_COLS } from './lightmap';
-import { sfx, busGain, audioCtxState, audioFocus } from './audio';
+import { sfx, busGain, audioCtxState, audioFocus, sfxLoaded } from './audio';
 import { grantFind, grantCache, coreBroken, vaultReached, anchorBreaks } from './actions';
 import { coreLights, coreLevels } from './barrier';
 import { END_CARD_AT } from './sim/ending';
@@ -209,7 +209,7 @@ if (new URLSearchParams(location.search).has('debug')) {
     baySystem, selectSystem, pickPart, shipYaw, turnShip, partKeys, SUPPLY_SYSTEM,
     /* The options, so a spec can assert that a slider moved a bus and that
        focus loss actually paused the context rather than just ducking it. */
-    busGain, audioCtxState, audioFocus,
+    busGain, audioCtxState, audioFocus, sfxLoaded,
     /* The scene itself, so the framing harness can project a world position
        into screen pixels and count the lights that are actually in it. */
     stationScene,

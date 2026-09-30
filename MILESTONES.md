@@ -130,7 +130,7 @@ is in `journal/legacy-plan.md`.
 
 His words: "Can you improve the sounds in the game. They seem too cartoony"
 
-- [ ] **AS Rewards sound like things, not tunes.** Picking up ore, finding a key, opening a
+- [x] **AS Rewards sound like things, not tunes.** Picking up ore, finding a key, opening a
       cache, a relic, a record, selling, fitting an upgrade and spending a supply stop being
       triangle-wave arpeggios. Each becomes a struck or handled object (stone, crystal, metal,
       a latch, a relay), pre-rendered offline by a script in the repo into small mono files,
@@ -140,7 +140,7 @@ His words: "Can you improve the sounds in the game. They seem too cartoony"
       briefs: audio
       design: ## Round eighteen: the sound of things
 
-- [ ] **AT Machinery and warnings sound like a ship.** The drill, cutting and cracking rock,
+- [x] **AT Machinery and warnings sound like a ship.** The drill, cutting and cracking rock,
       thrusters, the laser, the alarm, dropping ore and the UI tap move off bare sawtooth and
       square beeps onto layered mechanical sounds: motor, grit, servo, relay. What answers the
       game's state as it changes (the drill's pitch with hardness) stays synthesized at

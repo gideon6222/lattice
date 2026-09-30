@@ -33,7 +33,7 @@ interface Graph {
   dangerGain: GainNode;    /* a high tremolo that cuts the murk: get out */
 }
 
-type Drill = { src: AudioBufferSourceNode; osc: OscillatorNode; gain: GainNode };
+type Drill = { src: AudioBufferSourceNode; osc: OscillatorNode; gain: GainNode; extra: AudioScheduledSourceNode[] };
 
 let graph: Graph | null = null;
 
@@ -298,6 +298,55 @@ export function audioInit() {
 
   A.nextT = ctx.currentTime + 0.2;
   A.timer = setInterval(tick, 160);
+  loadBank(ctx);
+}
+
+/* ============ sounds rendered offline: round eighteen ============
+
+   His words, 2026-09-29: *"Can you improve the sounds in the game. They seem
+   too cartoony."* Every reward here used to be an oscillator playing a musical
+   interval, which is the sound of a game show. The one-shots are now rendered
+   offline by `tools/sfx.py` as struck and handled objects (a noise transient
+   over inharmonic decaying partials, in one shared small room) and played from
+   buffers, a random take each time with a little pitch spread, so no two plays
+   are alike (DESIGN.md, "Round eighteen: the sound of things").
+
+   The synthesized recipes below each `play()` stay as the fallback for the
+   moment before a buffer has decoded, and for a build with no files at all. */
+const BANK: Record<string, AudioBuffer[]> = {};
+
+async function loadBank(ctx: AudioContext) {
+  const base = './sfx/';
+  let man: Record<string, number>;
+  try { man = await (await fetch(base + 'sfx.json')).json(); } catch { return; }
+  await Promise.all(Object.entries(man).flatMap(([name, n]) =>
+    Array.from({ length: n }, async (_, i) => {
+      try {
+        const bytes = await (await fetch(base + name + '-' + i + '.ogg')).arrayBuffer();
+        const buf = await ctx.decodeAudioData(bytes);
+        (BANK[name] ||= []).push(buf);
+      } catch { /* that take is missing; the others, or the fallback, cover it */ }
+    })));
+}
+
+/* How many sounds have at least one take decoded, for the spec that proves the
+   files are really played rather than the fallbacks. */
+export function sfxLoaded(): string[] { return Object.keys(BANK).filter((k) => BANK[k].length > 0); }
+
+/* Play one take of a rendered sound. False when it has none yet, so the caller
+   falls through to its synthesized version. */
+function play(name: string, rate = 1, gain = 1, delay = 0): boolean {
+  const G = live();
+  const takes = BANK[name];
+  if (!G || !takes || !takes.length) return false;
+  const src = G.ctx.createBufferSource();
+  src.buffer = takes[Math.floor(Math.random() * takes.length)];
+  src.playbackRate.value = rate * (0.96 + Math.random() * 0.08);
+  const gn = G.ctx.createGain();
+  gn.gain.value = gain;
+  src.connect(gn); gn.connect(G.sfxBus);
+  src.start(G.ctx.currentTime + delay);
+  return true;
 }
 
 /* ============ the score ============
@@ -496,11 +545,13 @@ function noiseBurst(G: Graph, t: number, dur: number, cutoff: number, peak: numb
 
 export const sfx = {
   chip(hard: number) {
+    if (play('chip', 1.08 - Math.min(0.25, hard * 0.015), 0.8)) return;
     const G = live();
     if (!G) return;
     noiseBurst(G, G.ctx.currentTime, 0.09, 900 - Math.min(600, hard * 40) + Math.random() * 200, 0.35);
   },
   crack(hard: number) {
+    if (play('crack', 1.05 - Math.min(0.2, hard * 0.012))) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -511,6 +562,8 @@ export const sfx = {
      defends with (tone || 1) and (tone || 0), so the signature was the thing
      that was lying. */
   collect(tone?: number) {
+    /* deeper ore is denser: a touch lower and heavier, never a higher note */
+    if (play('ore', 1.04 - Math.min(8, tone || 0) * 0.02)) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -520,12 +573,14 @@ export const sfx = {
     if ((tone || 0) >= 5) blip(G, base * 2, t + 0.1, 0.26, 'sine', 0.18);
   },
   sell() {
+    if (play('sell')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
     [0, 4, 7, 12].forEach((s, i) => blip(G, semi(392, s), t + i * 0.07, 0.3, 'triangle', 0.24));
   },
   buy() {
+    if (play('fit')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -533,11 +588,13 @@ export const sfx = {
     blip(G, 784, t + 0.07, 0.18, 'square', 0.14);
   },
   ui() {
+    if (play('ui', 1, 0.8)) return;
     const G = live();
     if (!G) return;
     noiseBurst(G, G.ctx.currentTime, 0.05, 2200, 0.16, 'highpass');
   },
   alarm() {
+    if (play('alarm')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -564,6 +621,7 @@ export const sfx = {
      the hiss says something was released, the rising interval says it helped.
      Deliberately the inverse shape of gas(), which hisses then falls. */
   supply() {
+    if (play('supply')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -622,6 +680,7 @@ export const sfx = {
   /* A personal best. A clean rising fifth with a bright tail - short, so it
      never competes with whatever else is happening when it lands. */
   record() {
+    if (play('record')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -641,6 +700,7 @@ export const sfx = {
   /* Something left behind. A short dull knock - deliberately unrewarding,
      because this is the sound of not being able to carry it. */
   drop() {
+    if (play('drop')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -674,6 +734,7 @@ export const sfx = {
      are used in the same moment for different reasons and have to be
      distinguishable without looking. */
   laser() {
+    if (play('laser')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -697,6 +758,7 @@ export const sfx = {
      the rarest event: a shimmer, then a slow major chord that arrives rather
      than hits. Nothing else here takes two seconds. */
   relic() {
+    if (play('discovery')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -718,7 +780,16 @@ export const sfx = {
     });
   },
 
+  /* A key: a crystal struck clean, ringing and slowly beating. The one reward
+     allowed a hint of pitch, because it is the rare promise. Falls back to the
+     relic's chord. */
+  key() {
+    if (play('key')) return;
+    sfx.relic();
+  },
+
   cache() {
+    if (play('cache')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -735,6 +806,7 @@ export const sfx = {
   },
 
   gas() {
+    if (play('gas')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
@@ -750,12 +822,18 @@ export const sfx = {
     o.start(t); o.stop(t + 1.0);
   },
   thrust() {
+    if (play('thrust')) return;
     const G = live();
     if (!G) return;
     const t = G.ctx.currentTime;
     noiseBurst(G, t, 0.7, 1400, 0.3, 'lowpass');
     blip(G, 140, t, 0.5, 'sawtooth', 0.1);
   },
+  /* The drill, synthesized live because its grind answers the rock's hardness
+     as it changes. Round eighteen: the bare 48 Hz sawtooth read as a buzzer, so
+     the motor is now filtered down to a body you feel more than hear, and the
+     grind is two noise layers whose level wanders on two slow, unrelated
+     wobbles, so it chatters like a bit in stone instead of holding one note. */
   digStart(hard: number) {
     const G = live();
     if (!G || A.drill) return;
@@ -763,23 +841,49 @@ export const sfx = {
     const t = ctx.currentTime;
     const src = ctx.createBufferSource();
     src.buffer = G.noise; src.loop = true;
+    src.playbackRate.value = 0.9 + Math.random() * 0.2;
     const f = ctx.createBiquadFilter();
     f.type = 'bandpass';
-    f.frequency.value = 700 - Math.min(450, hard * 32);
-    f.Q.value = 4;
+    f.frequency.value = 620 - Math.min(380, hard * 28);
+    f.Q.value = 1.6;
+    const grit = ctx.createBufferSource();
+    grit.buffer = G.noise; grit.loop = true;
+    grit.loopStart = 0.7; grit.playbackRate.value = 1.3;
+    const gf = ctx.createBiquadFilter();
+    gf.type = 'highpass';
+    gf.frequency.value = 2400;
+    const gg = ctx.createGain();
+    gg.gain.value = 0.05;
+    const chatter = ctx.createGain();
+    chatter.gain.value = 0.7;
+    const wobbles: OscillatorNode[] = [];
+    for (const [hz, depth] of [[7.3 + hard * 0.3, 0.25], [2.9, 0.18]] as const) {
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = hz * (0.9 + Math.random() * 0.2);
+      const amt = ctx.createGain();
+      amt.gain.value = depth;
+      lfo.connect(amt); amt.connect(chatter.gain);
+      lfo.start(t);
+      wobbles.push(lfo);
+    }
     const o = ctx.createOscillator();
     o.type = 'sawtooth';
-    o.frequency.value = 48 + hard * 3;
+    o.frequency.value = 36 + hard * 2;
+    const ol = ctx.createBiquadFilter();
+    ol.type = 'lowpass';
+    ol.frequency.value = 160;
     const og = ctx.createGain();
-    og.gain.value = 0.05;
+    og.gain.value = 0.09;
     const gn = ctx.createGain();
     gn.gain.setValueAtTime(0.0001, t);
-    gn.gain.exponentialRampToValueAtTime(0.22, t + 0.06);
-    src.connect(f); f.connect(gn);
-    o.connect(og); og.connect(gn);
+    gn.gain.exponentialRampToValueAtTime(0.24, t + 0.08);
+    src.connect(f); f.connect(chatter);
+    grit.connect(gf); gf.connect(gg); gg.connect(chatter);
+    chatter.connect(gn);
+    o.connect(ol); ol.connect(og); og.connect(gn);
     gn.connect(G.sfxBus);
-    src.start(t); o.start(t);
-    A.drill = { src: src, osc: o, gain: gn };
+    src.start(t); grit.start(t); o.start(t);
+    A.drill = { src: src, osc: o, gain: gn, extra: [grit, ...wobbles] };
   },
   digStop() {
     const G = graph;
@@ -790,7 +894,7 @@ export const sfx = {
     d.gain.gain.cancelScheduledValues(t);
     d.gain.gain.setValueAtTime(Math.max(0.0001, d.gain.gain.value), t);
     d.gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-    try { d.src.stop(t + 0.12); d.osc.stop(t + 0.12); } catch (e) { /* already stopped */ }
+    try { d.src.stop(t + 0.12); d.osc.stop(t + 0.12); for (const x of d.extra) x.stop(t + 0.12); } catch (e) { /* already stopped */ }
   }
 };
 

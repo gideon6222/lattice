@@ -677,7 +677,7 @@ export function tick(raw: number, draw = true) {
             const hex = '#' + b.color.toString(16).padStart(6, '0');
             flash(hex + '55', 360);
             spray(worldX(R.digging.x), -R.digging.d, b.color, 120, 9, 2.2);
-            sfx.relic();
+            sfx.key();
             hap.key();
             addMark('k', R.digging.x, R.digging.d, b.id);
             toast(b.name.toUpperCase() + ' · KEY · ' + (g.cargo[b.id] || 0) + ' aboard');

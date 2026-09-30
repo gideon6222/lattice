@@ -15,6 +15,7 @@ Anything imported from now on is appended by that script automatically.
 | 2026-09-10 | ambientCG | gravel normal map, 384×384 WebP | CC0 | `src/textures/gravel-normal.webp` |
 | 2026-09-10 | ambientCG | gravel roughness map, 384×384 WebP | CC0 | `src/textures/gravel-rough.webp` |
 | 2026-09-06 | Google Fonts | Chakra Petch, weights 500 and 700 | OFL-1.1 | `public/fonts/chakrapetch-*.woff2` |
+| 2026-09-29 | own work, rendered by `tools/sfx.py` | the one-shot sounds, 43 takes of 16 sounds, mono Opus | own work | `public/sfx/` |
 
 **The planet normal map is gone**, with the space scene it dressed: the way in
 plays in the game's own world now (v0.33.0), and the file was deleted in the

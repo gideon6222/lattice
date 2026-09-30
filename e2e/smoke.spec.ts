@@ -4017,6 +4017,23 @@ test('focus loss pauses the audio context and coming back resumes it', async ({ 
   expect(states.back, 'the audio never came back').toBe('running');
 });
 
+test('the rendered sounds load after the first touch, so the game plays them and not the old beeps', async ({ page }) => {
+  /* Round eighteen. His words, 2026-09-29: "Can you improve the sounds in the
+     game. They seem too cartoony." The one-shots are files now, and each falls
+     back to its old synthesized beep until its file decodes - so a missing
+     file, a wrong path or a codec the browser cannot read would put every
+     cartoon sound back with nothing failing. This is what would notice. */
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  await page.locator('#dpad .k[data-dir=left]').click();
+  await page.waitForFunction(() => (window as any).__cw.sfxLoaded().length >= 16, null, { timeout: 15_000 })
+    .catch(() => {});
+  const got: string[] = await page.evaluate(() => (window as any).__cw.sfxLoaded());
+  for (const name of ['ore', 'key', 'discovery', 'cache', 'record', 'sell', 'fit', 'supply',
+                      'chip', 'crack', 'drop', 'ui', 'alarm', 'thrust', 'laser', 'gas']) {
+    expect(got, name + ' never decoded, so it still plays the old synthesized sound').toContain(name);
+  }
+});
+
 test('growth is a thing on the rock: seated, per cell, and it does not pop', async ({ page }) => {
   /* Playtest, 2026-09-13: *"There are also some glitches with the plant and
      frost texture that pop in randomly."*

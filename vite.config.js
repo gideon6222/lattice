@@ -99,7 +99,10 @@ export default defineConfig({
         /* glb joins the list: the imported ship hardware lives in public/models and
            an installed app that could not fetch it offline would silently lose
            the parts it had already paid for. */
-        globPatterns: ['**/*.{js,css,html,svg,webmanifest,woff2,webp,glb}'],
+        /* ogg and json: the rendered sounds of round eighteen and their list. An
+           installed app offline would otherwise fall back to the old synthesized
+           beeps without saying so. */
+        globPatterns: ['**/*.{js,css,html,svg,webmanifest,woff2,webp,glb,ogg,json}'],
         /* the sourcemap is ~2 MB and only devtools ever asks for it */
         globIgnores: ['**/*.map'],
         navigateFallback: 'index.html',

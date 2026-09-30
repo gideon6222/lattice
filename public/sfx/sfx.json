@@ -1,0 +1,18 @@
+{
+ "ore": 4,
+ "key": 3,
+ "discovery": 2,
+ "cache": 2,
+ "record": 2,
+ "sell": 2,
+ "fit": 3,
+ "supply": 2,
+ "chip": 5,
+ "crack": 4,
+ "drop": 3,
+ "ui": 4,
+ "alarm": 1,
+ "thrust": 2,
+ "laser": 2,
+ "gas": 2
+}

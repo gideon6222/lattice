@@ -1,35 +1,32 @@
 # State
 
-Moved onto the studio 2026-09-22. Rounds one to sixteen shipped (`journal/legacy-plan.md` has
-the full history). Round seventeen is planned and building: the ladder finished, and the shop
-and the minerals overhauled (DESIGN.md, "Round seventeen", both sections).
+Moved onto the studio 2026-09-22. Rounds one to seventeen shipped (`journal/legacy-plan.md` has
+the early history). Round eighteen is his ask of 2026-09-29, that the sounds stop being
+cartoony (DESIGN.md, "Round eighteen: the sound of things").
 
 ## What still does not exist
 
 - **Back and the X work in the browser**; on the installed app they have not been pressed yet (AB).
-- **The store listing's mineral and shop paragraphs are pre-overhaul**, and the whole listing
-  needs his read again before V0.
-- **The Play listing is not live**, held by his own word since 2026-09-18 (V0).
+- **The Play listing is not live**, held by his own word since 2026-09-18 (V0). The listing text
+  and screenshots are updated for round seventeen and approved by Fable.
+- **Nobody has heard the new sounds on the phone.** They were judged by measurement and by a
+  listen pack he was sent, not by his ear in the game.
 
 ## Next three milestones
 
-Done 2026-09-25: **AI.** Each Anchor broken adds one violet sign; the Charge and the Drone moved
-into tier 1. Built, not ticked: **AJ, a slimmer HUD.** Depth sits in the region chip, the money
-is stacked so nothing runs off a phone, and the timed three sit behind one TIMED button. It
-ticks on his word after a phone session. **AB** waits on one press of Android back.
+Done 2026-09-29: **AS and AT.** Every one-shot is a file now, rendered offline by `tools/sfx.py`
+as a struck or handled object (a noise transient over inharmonic partials, one shared small
+room), 43 takes of 16 sounds, 218 KB. Ore is a knock on the hopper, a key rings like a crystal,
+selling empties the hopper, fitting is a clamp, a servo and a lock. The drill stays synthesized
+but darker and chattering. Each sound falls back to its old synthesized version until its file
+decodes. Music is untouched.
 
-AM to AJ were pushed live on 2026-09-25. **AP** (his answer): the real sky shows now; the haze
-had made the canvas opaque.
+Built, not ticked: **AJ, a slimmer HUD**, on his word after a phone session. **AB** waits on one
+press of Android back.
 
-Done: **AQ.** Tier 2 has its own vein room and seven cysts: sealed air in dense rock, each with a
-cache, four with a key, reached by drilling or by Sink. Counting keys and lodes, tier 2 was never
-empty (29% quiet); the old probe could not see them. The campaign probe's Vault moved from 55.8
-to 62 minutes, all of it the cysts in its fixed mining columns.
-
-**AR** closed on his word: the cysts met its cache target. AM to AQ are live.
-
-1. **Z2** - a real phone read, which also closes AB and AJ.
-2. **V0** - the store, when he says; its listing needs his re-read first.
+1. **Z2** - a real phone read, which also closes AB and AJ, and is his first listen to AS/AT.
+2. **V0** - the store, when he says.
+3. Whatever he says about the sounds.
 
 ## Phone readings
 
