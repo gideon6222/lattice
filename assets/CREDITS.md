@@ -15,7 +15,14 @@ Anything imported from now on is appended by that script automatically.
 | 2026-09-10 | ambientCG | gravel normal map, 384×384 WebP | CC0 | `src/textures/gravel-normal.webp` |
 | 2026-09-10 | ambientCG | gravel roughness map, 384×384 WebP | CC0 | `src/textures/gravel-rough.webp` |
 | 2026-09-06 | Google Fonts | Chakra Petch, weights 500 and 700 | OFL-1.1 | `public/fonts/chakrapetch-*.woff2` |
-| 2026-09-29 | own work, rendered by `tools/sfx.py` | the one-shot sounds, 43 takes of 16 sounds, mono Opus | own work | `public/sfx/` |
+| 2026-09-30 | own work, rendered by `tools/sfx.py` from the recordings below | the one-shot sounds and the drill bed, 44 takes, mono Opus | own work over CC0 | `public/sfx/` |
+| 2026-09-30 | Kenney, Impact Sounds 1.0 (kenney.nl/assets/impact-sounds) | `impactMining`, `impactSoft_heavy`, `impactMetal_heavy`, `impactWood_light`, `impactGlass_light` takes, OGG | CC0 | `assets/sfx-src/impact*.ogg`, license in `assets/sfx-src/kenney-License.txt` |
+| 2026-09-30 | OpenGameArt, "75 CC0 breaking / falling / hit sfx" (opengameart.org/content/75-cc0-breaking-falling-hit-sfx) | rock breaking and rock falling takes, OGG | CC0 | `assets/sfx-src/bfh1_*.ogg` |
+| 2026-09-30 | OpenGameArt, "100 CC0 SFX #2" (opengameart.org/content/100-cc0-sfx-2) | stones, air, machine loop, thunder, switch, lock, OGG | CC0 | `assets/sfx-src/sfx100v2_*.ogg` |
+
+**The recordings folder, `sfx-src`, holds only the CC0 files in the three rows above.** They are
+source material: `tools/sfx.py` renders the game's sounds from them into `public/sfx/`, and none
+of them ships as it is.
 
 **The planet normal map is gone**, with the space scene it dressed: the way in
 plays in the game's own world now (v0.33.0), and the file was deleted in the

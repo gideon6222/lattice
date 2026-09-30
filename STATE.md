@@ -6,22 +6,20 @@ cartoony (DESIGN.md, "Round eighteen: the sound of things").
 
 ## What still does not exist
 
-- **The sounds he wants.** He heard AS/AT on 2026-09-30: "tinny and hollow". AU rebuilds them
-  deep, earthy and soothing.
-- **The Play listing is not live**, held by his own word since 2026-09-18 (V0). The listing text
-  and screenshots are updated and approved by Fable.
-- **A studio phone reading.** The desk launches games by Android package and Lattice has none
-  until V0, so Z2's perf number cannot be taken yet.
+- **The game on Google Play.** V0 is shipping now to the internal track, on his word of
+  2026-09-30. Production waits on his own click.
+- **A studio phone reading.** The desk launches games by Android package, which the Play
+  install gives Lattice for the first time, so Z2's perf number can be taken after it.
 
 ## Next three milestones
 
-Done 2026-09-30 on his word from the phone: **AB** (Android back closes the top panel), **AJ**
-(the slimmer HUD, "looking good"). He also checked offline: airplane mode, the installed app
-starts normally with sound.
+Done 2026-09-30: **AU**, the sounds he settled on: real CC0 recordings of rock, stones, air and
+a machine, their highs kept quiet over a deep synthesized body, levelled for a phone speaker.
+His word: "That sounds great." Also done on his word from the phone: AB and AJ.
 
-1. **AU** - the sounds deeper and earthier, then his listen.
-2. **Z2** - offline is confirmed by him; the perf reading waits on V0's package.
-3. **V0** - the store, when he says.
+1. **V0** - the internal track, then whatever the Console still asks for.
+2. **Z2** - the desk's perf reading, once the Play build is on the phone.
+3. Whatever he finds playing the Play build.
 
 ## Phone readings
 

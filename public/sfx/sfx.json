@@ -14,5 +14,6 @@
  "alarm": 1,
  "thrust": 2,
  "laser": 2,
- "gas": 2
+ "gas": 2,
+ "drill": 1
 }

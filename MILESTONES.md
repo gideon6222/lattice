@@ -148,7 +148,7 @@ His words: "Can you improve the sounds in the game. They seem too cartoony"
       briefs: audio
       design: ## Round eighteen: the sound of things
 
-- [ ] **AU Deeper, earthier, and soothing.** His words, 2026-09-30: "I don't really like any
+- [x] **AU Deeper, earthier, and soothing.** His words, 2026-09-30: "I don't really like any
       of the new sounds. They sound very tinny and hollow. I want deeper more rumbly sounds. It
       should feel and sound like you are digging into the earth but still sound soothing and
       satisfying." AS's struck metal and crystal go: the energy moves below about 600 Hz (earth
@@ -157,6 +157,11 @@ His words: "Can you improve the sounds in the game. They seem too cartoony"
       thousand times a session never grates. The drill loop drops lower and rumbles. Receipt:
       a test that every rendered sound's spectral centroid sits under a ceiling, a listen pack,
       and his word on it.
+      Then, on the second draft: "I don't want higher tones to be removed completely, just
+      less often or less pronounced... Can you find a good mix and see if you can find some
+      more realistic sounds?" So the texture is real CC0 recordings (Kenney, OpenGameArt) with
+      their highs pulled down, over the deep body; loudness is set as a phone speaker plays it.
+      His word on the third draft: "That sounds great."
       briefs: audio
       design: ## Round eighteen: the sound of things
 

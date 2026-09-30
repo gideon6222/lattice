@@ -3325,6 +3325,20 @@ low, soft material: thuds of packed soil, crumbling grit kept dark, a warm low b
 pitch as it settles. Every take's centroid sits under a ceiling a test holds. Soothing means soft
 attacks and nothing that rings on, so a pickup heard a thousand times in a session stays pleasant.
 
+**The second draft, and the mix he settled on (2026-09-30).** The all-earth draft measured
+right but he still heard it as "a bit cartoony", and he did not want the highs gone, only quiet:
+*"for the drilling and cracking, you can still use higher frequencies for more realistic sounds,
+just make sure they are quiet and have deeper sounds behind them."* Synthesis had gone as far
+as it could, so the texture is now recorded: a pick in stone, rock breaking and falling, stones,
+soft heavy impacts, air, thunder and a low machine loop, 31 CC0 files from Kenney's Impact Sounds
+and two OpenGameArt packs, kept in `assets/sfx-src/` and credited in `assets/CREDITS.md`. Each
+recording keeps its top end but goes through a high shelf cut of 8 to 16 dB, and the synthesized
+body from the first draft sits under it. Two measured corrections along the way: the first
+earth draft put 90% of its energy under 200 Hz, which a phone speaker barely plays, so the body
+moved up to 150 to 300 Hz and every take is levelled by what a phone speaker would reproduce,
+not by its peak. The drill keeps its synthesized chatter, which follows the rock's hardness,
+over a recorded motor bed that slows as the rock gets harder. His word: "That sounds great."
+
 # Engineering reference
 
 Moved here from the pre-migration CLAUDE.md on 2026-09-22 (studio migration): stack notes,

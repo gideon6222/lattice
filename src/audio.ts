@@ -883,7 +883,24 @@ export const sfx = {
     o.connect(ol); ol.connect(og); og.connect(gn);
     gn.connect(G.sfxBus);
     src.start(t); grit.start(t); o.start(t);
-    A.drill = { src: src, osc: o, gain: gn, extra: [grit, ...wobbles] };
+    const extra: AudioScheduledSourceNode[] = [grit, ...wobbles];
+    /* AU: a real machine under it all, recorded (tools/sfx.py cuts it to a
+       seamless loop). Harder rock slows it and drops its pitch, the way a
+       motor labours. The synthesized motor steps back when it is there. */
+    const bed = BANK.drill && BANK.drill[0];
+    if (bed) {
+      const m = ctx.createBufferSource();
+      m.buffer = bed; m.loop = true;
+      m.playbackRate.value = 1.05 - Math.min(0.3, hard * 0.02);
+      const mg = ctx.createGain();
+      mg.gain.value = 0.55;
+      m.connect(mg); mg.connect(gn);
+      m.start(t, Math.random() * bed.duration);
+      og.gain.value = 0.04;
+      chatter.gain.value = 0.5;
+      extra.push(m);
+    }
+    A.drill = { src: src, osc: o, gain: gn, extra };
   },
   digStop() {
     const G = graph;
