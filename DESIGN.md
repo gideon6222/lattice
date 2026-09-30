@@ -3281,6 +3281,37 @@ device's sentence shown once at its find and never again. The gate shops were th
 
 ---
 
+## Round eighteen: the sound of things
+
+His words, 2026-09-29: *"Can you improve the sounds in the game. They seem too cartoony."*
+
+What made them cartoony is plain in `src/audio.ts`: every reward was a pitched oscillator
+playing a musical interval. Ore was a triangle-wave fifth, selling was a major arpeggio,
+fitting an upgrade was two square-wave beeps, a cache was a C major run. Those are the sounds
+of a game show, and this game is a drill ship alone inside a dead planet.
+
+The research (researcher brief, 2026-09-29) decided it in three lines:
+
+1. A struck object is inharmonic. Modal synthesis puts partials near 1, 2.76, 5.40 and 8.93
+   times the fundamental, which clangs where a fifth sings. Every sound becomes a short noise
+   transient over a few decaying inharmonic partials.
+2. Vary every play. Dome Keeper's sound designer layers each sound so it "shifts and changes
+   every time it's played". Every one-shot has several rendered variants and a small pitch
+   spread at runtime.
+3. Put it all in one small dark room: one short tail baked into each sound, the same for all.
+
+So the one-shots are rendered offline by `tools/sfx.py` (numpy, mono 22050 Hz, Opus) into
+`public/sfx/`, loaded after the first gesture, and played from buffers. The synthesized
+recipes stay as the fallback for the moment before a buffer has decoded. What answers the
+game's state continuously, the drill's grind with the rock's hardness and the thruster, stays
+synthesized at runtime, darker and rougher than before. Music is untouched: he asked about
+the sounds.
+
+A key is the one reward allowed a hint of pitch: a crystal that rings and beats slowly,
+because a key is the rare promise (Dome Keeper's artifact "musical promise"). Ore is a dull
+knock of metal on the hopper. Selling is a hopper emptying, fitting is a clamp, a servo and a
+lock. Nothing plays a chord.
+
 # Engineering reference
 
 Moved here from the pre-migration CLAUDE.md on 2026-09-22 (studio migration): stack notes,
