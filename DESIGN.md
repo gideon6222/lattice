@@ -3312,6 +3312,19 @@ because a key is the rare promise (Dome Keeper's artifact "musical promise"). Or
 knock of metal on the hopper. Selling is a hopper emptying, fitting is a clamp, a servo and a
 lock. Nothing plays a chord.
 
+### His verdict on AS, and AU (2026-09-30)
+
+*"I don't really like any of the new sounds. They sound very tinny and hollow. I want deeper
+more rumbly sounds. It should feel and sound like you are digging into the earth but still
+sound soothing and satisfying."*
+
+The measurement agrees with him: the AS takes had spectral centroids of 2 to 5 kHz, most of it
+from highpassed clicks, plate modes at 300 to 1700 Hz and a room tail of white noise up to
+3.2 kHz. Struck metal was the wrong material. The game is earth, so AU rebuilds every sound from
+low, soft material: thuds of packed soil, crumbling grit kept dark, a warm low body that sinks in
+pitch as it settles. Every take's centroid sits under a ceiling a test holds. Soothing means soft
+attacks and nothing that rings on, so a pickup heard a thousand times in a session stays pleasant.
+
 # Engineering reference
 
 Moved here from the pre-migration CLAUDE.md on 2026-09-22 (studio migration): stack notes,

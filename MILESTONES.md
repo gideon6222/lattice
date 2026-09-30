@@ -148,6 +148,18 @@ His words: "Can you improve the sounds in the game. They seem too cartoony"
       briefs: audio
       design: ## Round eighteen: the sound of things
 
+- [ ] **AU Deeper, earthier, and soothing.** His words, 2026-09-30: "I don't really like any
+      of the new sounds. They sound very tinny and hollow. I want deeper more rumbly sounds. It
+      should feel and sound like you are digging into the earth but still sound soothing and
+      satisfying." AS's struck metal and crystal go: the energy moves below about 600 Hz (earth
+      thuds, soil crumbling, a warm low body that settles), nothing bright or ringing, the
+      shared room darkened so it stops sounding hollow, and soft attacks so a sound fired a
+      thousand times a session never grates. The drill loop drops lower and rumbles. Receipt:
+      a test that every rendered sound's spectral centroid sits under a ceiling, a listen pack,
+      and his word on it.
+      briefs: audio
+      design: ## Round eighteen: the sound of things
+
 ## Milestones
 
 - [x] **F1** fuel per cell, drill buys speed not efficiency, measured at every leg
@@ -724,7 +736,7 @@ His words: "Can you improve the sounds in the game. They seem too cartoony"
       briefs: balance, testing
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AB Back closes the top panel, every panel has an X, and every panel scrolls.** One
+- [x] **AB Back closes the top panel, every panel has an X, and every panel scrolls.** One
       close stack is the only way a panel opens (event card, map, pause, manifest, Ballast,
       shop, and any panel added later): Android back pops the top panel and does nothing
       more, and on the bare HUD it falls through. An X at thumb reach on every panel.
@@ -842,7 +854,7 @@ His words: "Can you improve the sounds in the game. They seem too cartoony"
       briefs: level-design
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **AJ A slimmer HUD, nothing lost.** The depth line folds into the region chip and the
+- [x] **AJ A slimmer HUD, nothing lost.** The depth line folds into the region chip and the
       three timed supplies sit behind one button; credits and haul stay, since they decide
       when to surface. Receipt: the readout count before and after, a screenshot at
       1080x2340, and after his first phone session on it, the readout he missed or his word
