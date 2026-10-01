@@ -1,5 +1,13 @@
 # The Lattice — Play Store & AdMob setup overview
 
+> **Current state, 2026-09-30 (supersedes the dated notes below where they disagree).** 7 (0.56.0)
+> is on the internal track, built by `tools/twa.ps1` at minSdk 24 (Play's automatic protection
+> refuses 21) and uploaded by hand in the Console under the Calsynergy Games account (`/u/1/`).
+> The ads declaration is **No** and the game has no ads. The privacy policy URL is
+> https://gideon6222.github.io/privacy/lattice.html. The listing text and four screenshots match
+> `store/listing/en-US/`. The app was sent for Google's review that day. This repo has no signing
+> or Play secrets, so the listing-sync workflow cannot run.
+
 Written 2026-09-15 by Claude (Cowork), after finishing the last steps of the Play Console + AdMob setup. Read this before touching store listing, ads declarations, or AdMob wiring for this game.
 
 ## What this game is, packaging-wise

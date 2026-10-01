@@ -6,9 +6,9 @@ cartoony (DESIGN.md, "Round eighteen: the sound of things").
 
 ## What still does not exist
 
-- **A reviewed app on Play.** 7 (0.56.0) is live on the internal track (2026-09-30), so testers
-  see a temporary name until Google reviews the app; "Send app for review" is greyed out in
-  the Console, waiting on something the Console does not name.
+- **A reviewed app on Play.** 7 (0.56.0) is live on the internal track (2026-09-30). The app was
+  sent for Google's review the same day (listing, content rating, privacy policy now at
+  privacy/lattice.html, ads declared none); until it passes, testers see a temporary name.
 - **Web builds in the studio.** `studio ship` and `studio deliver` do not build the TWA, and
   this repo has no signing or Play secrets, so the listing-sync workflow cannot run either.
   The bundle is built by tools/twa.ps1 and uploaded by hand.
