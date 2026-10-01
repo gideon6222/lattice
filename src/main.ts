@@ -47,6 +47,8 @@ import { reducedMotion } from './motion';
 import { installContextGuard, contextLost } from './context';
 import { installModalFocus, gameIsInert } from './modalfocus';
 import { applyVisuals } from './visualsapply';
+import { buildLine } from './buildinfo';
+import { recoverBeforeLoad, bootFinished } from './recovery';
 
 /* The screen must not sleep while a thumb is held on the d-pad - see
    wakelock.ts. The crash reporter this file used to also install lives in
@@ -72,23 +74,19 @@ installModalFocus();
 void applyVisuals();
 
 /* ============ build stamp ============
-   Vite replaces __BUILD_SHA__ and __BUILD_TIME__ at build time. This is the
-   only way to tell on the phone which build is actually running: an installed
-   PWA can be a load behind after a deploy, and the game itself is meant to
-   look identical between builds. Open the pause menu and read the line.
-   The typeof guards keep this harmless if the file is ever loaded unbuilt. */
+   The only way to tell on the phone which build is actually running: an
+   installed app can be a load behind after a deploy, and the game itself is
+   meant to look identical between builds. The pause sheet (Settings) carries
+   `v<version> | <commit> | release`, and nothing else in the game shows it. */
 function stampBuild() {
-  const sha = typeof __BUILD_SHA__ === 'string' ? __BUILD_SHA__ : 'dev';
-  let when = 'unbuilt';
-  if (typeof __BUILD_TIME__ === 'string') {
-    const d = new Date(__BUILD_TIME__);
-    when = isNaN(d.getTime()) ? __BUILD_TIME__ : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-  }
   const node = el('build');
-  if (node) node.textContent = 'build ' + sha + '  ·  ' + when;
+  if (node) node.textContent = buildLine();
 }
 
 /* ============ boot ============ */
+/* After a crash: the ship back on the pad and the progress kept, quietly
+   (recovery.ts). Before load(), so load() reads the recovered save. */
+try { recoverBeforeLoad(localStorage); } catch (e) { /* storage blocked: nothing to recover */ }
 load();
 lamp.distance = S.light();
 g.fuel = S.fuelCap();
@@ -157,6 +155,8 @@ setStartHandler((fresh: boolean) => {
 });
 wireTitle();
 if (hasSave()) showTitle(); else showIntro();
+/* The boot reached a screen, so the next one is not a crash recovery. */
+try { bootFinished(localStorage); } catch (e) { /* ignore */ }
 
 window.addEventListener('visibilitychange', () => { save(); if (document.hidden) sfx.digStop(); });
 setInterval(save, 5000);

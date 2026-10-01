@@ -24,15 +24,18 @@ function buildSha() {
   }
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   /* GitHub Pages serves this from /lattice/, not from the domain root, so
      every emitted URL must be relative. The manifest and icon already use
      './' for the same reason. */
   base: './',
 
+  /* The version line in the pause sheet is `v<version> | <commit> | <kind>`
+     (src/buildinfo.ts). The kind is the build's own: `vite build` is the
+     release that Pages and the Play wrapper serve, the dev server is debug. */
   define: {
     __BUILD_SHA__: JSON.stringify(buildSha()),
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString())
+    __BUILD_KIND__: JSON.stringify(command === 'build' ? 'release' : 'debug')
   },
 
   build: {
@@ -126,4 +129,4 @@ export default defineConfig({
       }
     })
   ]
-});
+}));

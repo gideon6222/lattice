@@ -2,9 +2,11 @@
    here is global. */
 
 /* Replaced by Vite's `define` at build time; see buildSha() in vite.config.js.
-   The game reads these through typeof guards so it stays harmless unbuilt. */
+   The game reads these through typeof guards (src/buildinfo.ts) so it stays
+   harmless unbuilt. __BUILD_KIND__ is `release` from `vite build` and `debug`
+   from the dev server. */
 declare const __BUILD_SHA__: string;
-declare const __BUILD_TIME__: string;
+declare const __BUILD_KIND__: string;
 
 interface Window {
   /* Safari's prefixed constructor. audio.ts falls back to it before giving up

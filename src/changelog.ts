@@ -7,7 +7,12 @@
 
    Rules for entries: describe what the player can now do or see, not what was
    refactored; one line each; newest first. If an entry cannot be written that
-   way it probably did not need a version. */
+   way it probably did not need a version.
+
+   Entries start at the first build uploaded to Google Play (0.39.0, version
+   code 1, 2026-09-13). Every line is a new feature, an improvement, or a fix
+   worded as what is better now, and nothing a player would read as negative
+   (his rule, 2026-09-30). test/version.test.mjs holds both. */
 
 export interface Release {
   version: string;
@@ -17,6 +22,14 @@ export interface Release {
 }
 
 export const VERSION = '0.56.0';
+
+/* The first version on Google Play, and how many releases came before it.
+   Those are not shown, but they were releases, so the count is kept here the
+   way the Godot games' RELEASES_BEFORE_PLAY keeps theirs. The Play version
+   code is not tied to it: tools/twa.ps1 raises the code once per version that
+   is uploaded, and every upload so far is one of the entries below. */
+export const FIRST_ON_PLAY = '0.39.0';
+export const RELEASES_BEFORE_PLAY = 52;
 
 export const CHANGELOG: Release[] = [
   {
@@ -29,39 +42,38 @@ export const CHANGELOG: Release[] = [
       'The barriers and cores are things in the rock now, with their own light and heat. The last core is the door of the Vault, and the ending shows the light leaving.',
       'Deep in the second tier, pockets of air sit sealed in dense rock, each holding a cache. Drill in slowly, or sink straight through and let the hull pay.',
       'Scars you pack with ore close as you watch, and every Anchor you break leaves a sign in the rock and then in the air.',
-      'The sky over the pad shows, the HUD is slimmer, and Android back closes the top panel instead of the game.',
+      'The sky over the pad shows, the HUD is slimmer, and Android back closes the top panel and keeps you in the game.',
       'Every sound is new: real recordings of rock, stones, air and machinery, their highs kept quiet over a deep warm body. The drill runs on a motor that labors in harder rock.'
     ]
   },
   {
     version: '0.55.0', date: '2026-09-19', title: 'The descent is a ladder now',
     notes: [
-      'Ore comes in veins. The same amount is in the ground as before, but it is no longer scattered a cell at a time - it sits in pockets, so a wall of nothing is a real answer and finding one seam can be worth the whole trip. Anything genuinely rare now announces itself when you cut it.',
-      'The first Anchor you wake does something new: the Survey map starts marking where the ground is rich, but only in the regions you have already woken. It says richer or leaner, never what or exactly where.',
-      'A barrier now stops you at 113 meters, and again at 226 and 339. The drill cannot touch it and there is no way around - the world is the full width of it. Wake all three Anchors of that depth and one cell of the barrier opens up: a dark core, warm gold in a cold violet wall, directly in your path.',
+      'Ore comes in veins. The same amount is in the ground as before, gathered into pockets, so a wall of nothing is a real answer and finding one seam can be worth the whole trip. Anything genuinely rare announces itself when you cut it.',
+      'The first Anchor you wake does something new: the Survey map starts marking where the ground is rich, in the regions you have already woken. It says richer or leaner, never what or exactly where.',
+      'A barrier stops you at 113 meters, and again at 226 and 339. The drill cannot touch it, and it runs the full width of the world. Wake all three Anchors of that depth and one cell of the barrier opens up: a dark core, warm gold in a cold violet wall, directly in your path.',
       'Cut it and the whole barrier goes with it. The core stays where it was, spent and still lit, and you fly straight through it on the way down. The last of the three is the Vault\'s own door.',
-      'The Outfitter is cut by the barriers now. The surface shelf holds the rig you need for the first hundred meters and stops - and it stops in two ways: there are fewer rows, and every row has a level it will not go past until you have broken a core. Break the first one and the shelf steps: more rows, and higher levels on the ones you already own. Break the second and it opens the rest.',
-      'Two upgrades changed what they are built from, because they moved down the ladder with everything else: the Scrubber wants emerald now and Hull Plating wants amethyst.',
-      'You do not feed the Ballast at the pad any more. Repairing the planet is a trip: carry ore down to the scar of an Anchor you broke and pack it into the hole. It is worth three times what tipping it in on the surface ever was, and it settles the ground around it - but it comes out of the hold, so every kilo of it is a kilo of ore you are not bringing back.',
-      'Every core hands something over, and none of it is a number. The first gives you THE HOLLOW: hold SEE and empty space shows through rock within a few cells - caves, rooms, a wreck - but never what is in it. The second gives you SINK: hold it and the ship falls straight through solid rock, paying in hull instead of time, mining nothing on the way. The third gives you THE CALL, and whatever is still buried in the regions you have broken answers it on the Survey map.',
-      'Nothing sinks through a barrier, an Anchor, the bedrock or the Vault. Those are still the four things this planet will not let you past.',
-      'The Ballast is gone from the surface until the first core breaks, and so is the drain behind it. The planet is not falling apart yet, so there is nothing to hold up and no clock running - the machine beside the pad just stands there full. The moment you release the first core, it starts to fall, and every core after that makes it fall faster.',
-      'The Anchors do not light any more. They break. Standing next to one still settles its region, still strengthens the Ballast, still draws the ground onto your map - but the thing itself comes apart, hard, and what is left is a dark scar in the plinth it was set into. Nothing can ever cut it away, so every place you have been stays marked.'
+      'The Outfitter grows with the barriers. The surface shelf holds the rig you need for the first hundred meters. Break the first core and the shelf steps up: more rows, and higher levels on the ones you already own. Break the second and it opens the rest.',
+      'Two upgrades are built from minerals that match their new place on the ladder: the Scrubber wants emerald and Hull Plating wants amethyst.',
+      'Repairing the planet is a trip: carry ore down to the scar of an Anchor you broke and pack it into the hole. It is worth three times what tipping it in at the surface was, and it settles the ground around it. It comes out of the hold, so every kilo of it is a kilo of ore you are not bringing back.',
+      'Every core hands something over, and none of it is a number. The first gives you THE HOLLOW: hold SEE and empty space shows through rock within a few cells (caves, rooms, a wreck), never what is in it. The second gives you SINK: hold it and the ship falls straight through solid rock, paying in hull instead of time, mining nothing on the way. The third gives you THE CALL, and whatever is still buried in the regions you have broken answers it on the Survey map.',
+      'A barrier, an Anchor, the bedrock and the Vault all hold firm against Sink. Those are the four things this planet will not let you past.',
+      'The Ballast waits beside the pad, full and still, until the first core breaks. The moment you release that core it starts to fall, and every core after it makes it fall faster.',
+      'The Anchors break when you reach them. Standing next to one settles its region, strengthens the Ballast and draws the ground onto your map, and the thing itself comes apart, hard, leaving a dark scar in the plinth it was set into. The scar stays, so every place you have been stays marked.'
     ]
   },
   {
     version: '0.54.0', date: '2026-09-19', title: 'Somebody else got here first',
     notes: [
       'There is a wrecked drill ship buried in every region of the planet - twelve of them, always in the same places. You will see the shape of it in the dark before you see what it is: flat plates where the ground has none, and its own lamp still faintly lit at the low end where it went in nose-first.',
-      'Cutting the plates gives you nothing. They are a wall, and what is behind them is that ship\'s hold, still holding whatever that crew had dug before they stopped. A wreck near the surface is full of copper; one near the bottom is not. It costs you no cargo weight, so a full hold is never a reason to leave one.',
-      'It asks you for nothing else. There is no choice to make and no clock on it - it is just a thing that happened down here before you arrived, and the only reason it is in the game is so the planet stops reading as somewhere nothing has ever happened.'
+      'The plates are a wall, and behind them is that ship\'s hold, still holding whatever its crew had dug. A wreck near the surface is full of copper, and one near the bottom holds what that depth gives. It costs you no cargo weight, so a full hold always has room for one.',
+      'It asks nothing of you: no choice to make and no clock on it. It is something that happened down here before you arrived, and it gives the planet a history.'
     ]
   },
   {
     version: '0.53.1', date: '2026-09-19', title: 'The icon is the game now',
     notes: [
-      'The icon on your home screen used to be a drawing of a planet with a lit core and a probe going into it. That was the game before the Anchors, and there has been no core to break for five rounds - so the first thing anyone saw of The Lattice was a picture of something it is not.',
-      'The new one is a real frame out of the game: the ship in its own lamp, in a shaft it cut, in the same rock you actually dig through.'
+      'The icon on your home screen is a real frame out of the game: the ship in its own lamp, in a shaft it cut, in the same rock you actually dig through.'
     ]
   },
   {
@@ -73,616 +85,102 @@ export const CHANGELOG: Release[] = [
   {
     version: '0.52.0', date: '2026-09-18', title: 'The ground will not be as you left it',
     notes: [
-      'When the fifth Anchor wakes the planet, it now takes some of your own tunnels back. The card has always said the ground will not be as you left it - until now that only meant things that would happen later, and none of it touched the digging you had already done.',
-      'It takes what you can spare. A player who drilled one straight hole down loses almost nothing; a player who spread out across the planet loses more. It will never close the last way back to the pad.'
+      'When the fifth Anchor wakes the planet, it takes some of your own tunnels back, so the card\'s warning that the ground will not be as you left it reaches the digging you have already done.',
+      'It takes what you can spare. One straight hole down loses almost nothing, tunnels spread across the planet lose more, and the last way back to the pad always stays open.'
     ]
   },
   {
     version: '0.51.0', date: '2026-09-18', title: 'The planet in three acts',
     notes: [
-      'The world now looks different depending on how far through you are. Before the fifth Anchor it is the dead place it always was. From the fifth on - when the ground starts moving on its own - the air and the far rock take on the same ember the deep heat has, so the planet reads as being against you.',
+      'The world looks different depending on how far through you are. Before the fifth Anchor it is the dead place it always was. From the fifth on, when the ground starts moving on its own, the air and the far rock take on the same ember the deep heat has, so the planet reads as being against you.',
       'Once the Vault is open and the center is behind you, it goes quiet: cooler, and with some of the color taken out. The ending says the ground is yours, and now the ground looks like it.',
-      'None of it changes how anything is lit, what anything costs or where anything is. It is the same game in a different mood.'
+      'The lighting, the prices and where everything is all stay exactly as they were. It is the same game in a different mood.'
     ]
   },
   {
     version: '0.50.0', date: '2026-09-18', title: 'Rock that is holding something up',
     notes: [
       'Below ninety meters you will start seeing a warm glow in the rock that is worth more than anything else down there. Cutting it pays better than any ore at that depth. It also brings the tunnel you came down in partly down behind you, so the way home is one you have to find again. Both choices cost you something, which is the point of it.',
-      'It can take your easy way out. It can never take your run - if the ground coming down would leave you with no route to the pad at all, it holds instead.',
-      'The Survey map now writes the name of a region you have calmed in the Anchors’ own color, so you can see how much of the planet is settled without counting markers.'
+      'It can take your easy way out. It can never take your run: if the ground coming down would leave you with no route to the pad at all, it holds instead.',
+      'The Survey map writes the name of a region you have calmed in the Anchors’ own color, so you can see how much of the planet is settled without counting markers.'
     ]
   },
   {
     version: '0.49.0', date: '2026-09-18', title: 'The game says what it wants',
     notes: [
-      'Nine marks now sit under the depth readout, one for each Anchor, and they light as you light them. The game used to tell you what it wanted once, during the opening, and then never mention it again - so if you came back the next day there was nothing on screen saying what you were down there for.',
+      'Nine marks sit under the depth readout, one for each Anchor, and they light as you light them, so the screen always says what you are down there for.',
       'The tenth mark is the Vault. It stays dark until all nine Anchors are lit, and then it is the only thing left on the row.'
     ]
   },
   {
     version: '0.48.0', date: '2026-09-14', title: 'It says why it cannot run',
     notes: [
-      'A browser that cannot run the game now says so in a sentence you can act on, instead of showing a page of developer error text. The usual cause on a computer is graphics acceleration being switched off, and it says that.',
-      'With scripts turned off the page says what it needs instead of loading forever.'
+      'A browser that cannot run the game says so in a sentence you can act on. The usual cause on a computer is graphics acceleration being switched off, and it says that.',
+      'With scripts turned off the page says what it needs.'
     ]
   },
   {
     version: '0.47.0', date: '2026-09-14', title: 'A menu keeps the keyboard',
     notes: [
-      'With a menu open, the keyboard stays in it. Tabbing used to walk straight past the menu into the buttons of the game running behind it.'
+      'With a menu open, the keyboard stays in it, so Tab moves through the menu you are reading.'
     ]
   },
   {
     version: '0.46.0', date: '2026-09-14', title: 'The warning is readable now',
     notes: [
-      'The restart warning - the line that tells you what erasing your progress actually costs - was the hardest text in the game to read. It and the build stamp are both legible now, and every other word on screen was measured to make sure it already was.'
+      'The restart warning, the line that tells you what erasing your progress costs, is easy to read, and so is the build stamp. Every other word on screen was measured to make sure it already was.'
     ]
   },
   {
     version: '0.45.0', date: '2026-09-14', title: 'When the phone takes the graphics away',
     notes: [
-      'If the phone drops the game’s graphics - which Android does when an app has been in the background a while, or when the driver resets - the game now stops, saves, and tells you, then picks up again when the graphics come back. It used to keep playing behind a black screen: fuel burning, heat climbing, the ship still going wherever your thumb pointed, with no way out but closing the app.'
+      'If the phone takes the game’s graphics away, which Android does when an app has been in the background a while or when the driver resets, the game stops, saves and tells you, then picks up again when the graphics come back.'
     ]
   },
   {
     version: '0.44.0', date: '2026-09-14', title: 'Less motion, if you ask for it',
     notes: [
-      'If your phone is set to reduce motion, the game now listens. The camera stops shaking and the screen stops washing white - but every warning stays exactly as visible as it was, held steady instead of pulsing. Turning the motion down does not turn the information off.',
-      'Sharing the link now shows the game’s name, a line about it and its icon, instead of a bare address.',
-      'Added to an iPhone home screen, the game gets its own icon rather than a screenshot of whatever was on screen.'
+      'If your phone is set to reduce motion, the game listens. The camera holds steady and the screen keeps its color, and every warning stays exactly as visible as it was, held steady rather than pulsing. Turning the motion down keeps all of the information.',
+      'Sharing the link shows the game’s name, a line about it and its icon.',
+      'Added to an iPhone home screen, the game gets its own icon.'
     ]
   },
   {
     version: '0.43.0', date: '2026-09-14', title: 'It looks right on a screen that is not mine',
     notes: [
-      'Held sideways, or on a small phone, the buttons down the left no longer disappear under the fuel gauge. MAP and BALLAST were completely covered and AUTOPILOT was off the bottom of the screen.',
-      'On a wide screen the ground no longer stops in mid-air with empty space either side of it. The camera was framing twice as much world as the game actually draws.',
-      'The pause menu keeps RESUME on screen when the menu is too tall to fit. On a short screen it was below the fold with nothing saying so, and the pause menu is the only thing that unpauses the game.',
-      'Nothing changed on a phone held upright, which is deliberate: the framing there is identical to before.'
+      'Held sideways, or on a small phone, every button down the left stays in view beside the fuel gauge, MAP, BALLAST and AUTOPILOT included.',
+      'On a wide screen the ground reaches the edges of the frame.',
+      'The pause menu keeps RESUME on screen on a short screen, so the way back into the game is always in reach.',
+      'A phone held upright frames the game exactly as before.'
     ]
   },
   {
     version: '0.42.0', date: '2026-09-14', title: 'Detail, and a screen that stays on',
     notes: [
       'Three levels of visual detail in the menu - LOW, MEDIUM and HIGH - which change straight away and are remembered. They change the resolution, how much dust is in the air, how much grows on the rock and whether the rock has relief. They never change the game: the same reach, the same rules, the same ore.',
-      'The screen no longer sleeps while you are flying. A long dig is one held thumb and no taps, which Android does not count as using the phone, so the display used to go dark in the middle of a descent.',
-      'A crash caused by a broken promise now says where it came from, not just what it was.'
+      'The screen stays awake while you are flying, all through a long dig on one held thumb.'
     ]
   },
   {
     version: '0.41.0', date: '2026-09-13', title: 'The Outfitter says what to do',
     notes: [
-      'The panel under the shop shelves is no longer blank. The floating "swipe to walk the aisles" hint retires for good after your first visit, and from then on nothing on that screen told you anything - now the panel picks the line up when the hint puts it down.',
-      'The Outfitter deck is wet. It is glossy instead of matte, and the aisle you are standing in throws its own color across it.'
+      'The panel under the shop shelves picks up where the "swipe to walk the aisles" hint leaves off after your first visit, so the screen always has something to tell you.',
+      'The Outfitter deck is wet: glossy, with the aisle you are standing in throwing its own color across it.'
     ]
   },
   {
     version: '0.40.0', date: '2026-09-13', title: 'Your thumb can move',
     notes: [
-      'The d-pad no longer lets go when your thumb drifts. A key is held until you lift it, even if your hand slides off the edge of it mid-dig - which it did, and which quietly ended a lot of digs.',
-      'Slide from one key to the next without lifting and the ship follows. It used to simply stop.',
-      'Every fade, slide and press in the game now runs on the same four speeds and the same curve, instead of the fourteen different ones that had built up.'
+      'The d-pad holds on when your thumb drifts. A key is held until you lift it, even if your hand slides off the edge of it mid-dig.',
+      'Slide from one key to the next without lifting and the ship follows.',
+      'Every fade, slide and press in the game runs on the same four speeds and the same curve.'
     ]
   },
   {
     version: '0.39.0', date: '2026-09-13', title: 'A hull older than the halls',
     notes: [
-      'A new ship. Not steampunk any more: no boiler, no chimney, no spoked wheel, no brass. It is a sealed, faceted hull of pale worn stone with a single teal light running along its seams - the same teal an Anchor gives off when you light it, because it is the same hands that made both.',
-      'It is advanced and it is very old. One flank plate is struck out of line and has never been re-seated, two panels that used to be lit are dark, and the surface is pitted rather than rusted.'
-    ]
-  },
-  {
-    version: '0.38.0', date: '2026-09-13', title: 'The pad is the dock',
-    notes: [
-      'You sell, refuel and repair at the landing pad now, not anywhere along the top of the world. Flying up a far shaft puts you on the surface, not in port - the trip home is the trip.',
-      'Nothing can strand you: the fuel reserve on your dial has always been the fuel to reach the pad, and Auto-Return still flies you there.',
-      'Moss, frost, plants, salt, ash and oil are real things on the rock now instead of flat stickers painted over it. They catch the lamp, they have shadows, and they no longer flicker in and out as you move.',
-      'Two regions that grow different things show both where they meet, instead of the whole wall changing over at once as you cross.'
-    ]
-  },
-  {
-    version: '0.37.0', date: '2026-09-13', title: 'The Lattice',
-    notes: [
-      'The game is called THE LATTICE now. It was Coreward, which meant "toward the core" - and there has been no core since the planet became one world with nine Anchors in it. The Lattice is what those Anchors belong to.',
-      'It lives at a new address: gideon6222.github.io/lattice. Your saved game comes with you, because the save is tied to the site and not to the path.',
-      'If you have the old one on your home screen, add the new link and remove the old tile.'
-    ]
-  },
-  {
-    version: '0.36.0', date: '2026-09-13', title: 'Options that do what they say',
-    notes: [
-      'Music and sound have volume sliders now, not just on and off. Where you set them is remembered, and a slider grays out when its own channel is muted.',
-      'The Outfitter can be driven without a thumb: up and down walk the cases in the aisle you are standing in, left and right change department, and the card you are looking at is the confirm. Arrow keys and Enter do the same thing.',
-      'CREDITS in the pause menu, listing every texture and font in the game and who made them.',
-      'Put the game in the background and the sound stops, instead of playing on to nobody. It comes back when you do.'
-    ]
-  },
-  {
-    version: '0.35.1', date: '2026-09-13', title: 'US English',
-    notes: [
-      'Every word on screen is US English now: the center, the meters, the colors. Same game, one spelling.',
-      'All seven devices are actually buried on the planet. Until now only the magnet and the bomb were, and the Cutting Laser - the key to three sealed Anchors - did not exist, so the game could not be finished. It can now.'
-    ]
-  },
-  {
-    version: '0.35.0', date: '2026-09-12', title: 'Checkpoints',
-    notes: [
-      'Lighting an Anchor, reaching the Vault, recovering a relic or digging up a device saves the game right there, with the tank, the hull and the hold as they are. Close the game after one and CONTINUE puts you back at that moment.',
-      'CONTINUE on a checkpoint goes straight there: the light comes up in the hall, the camera travels to your ship, and its lamp comes on.'
-    ]
-  },
-  {
-    version: '0.34.0', date: '2026-09-12', title: 'The pad save',
-    notes: [
-      'The game saves at the launch pad, and only there. Close it mid-run and you are back on the pad next time with everything you had banked - the run you were on is gone, hold and all, the same as if the ship had been lost. So there is no quitting your way home with a full hold.',
-      'CONTINUE is the opening at a run: the hall, the climb to the surface, the ship coming down - no words, under four seconds.',
-      'The title screen is the hall in the dark, so nothing cuts when you press either button.',
-      'The climb in the opening no longer sidesteps at the top to line up with the pad.'
-    ]
-  },
-  {
-    version: '0.33.0', date: '2026-09-12', title: 'The way in',
-    notes: [
-      'A new opening, and it happens in the planet. Tap, and a cold light comes up inside a hall somebody cut, forty meters under the pad you are about to land on. Then the surface at night, and your ship coming down out of the dark as the sky wakes. Three lines. No space, no cut.',
-      'CONTINUE takes two seconds. The ship drops onto the pad, or the camera drops down your shaft to where you left it.',
-      'The title screen is the pad at night.'
-    ]
-  },
-  {
-    version: '0.32.0', date: '2026-09-12', title: 'The opening tells you about this game',
-    notes: [
-      'The intro is about the planet you are landing on: one world, nine Anchors buried across it, and a center that opens when they are all lit. It used to describe twelve worlds and a jump drive, neither of which exists any more.',
-      'The line under CONTINUE says where you are, how deep you have been of the 452 m, and how many Anchors are lit. It used to promise a core.',
-      'RESTART and NEW GAME say what they actually wipe.'
-    ]
-  },
-  {
-    version: '0.31.0', date: '2026-09-11', title: 'One planet, and the Lattice',
-    notes: [
-      'There is one planet now. It is 61 columns wide and 452 meters deep, and you are going to be here a while.',
-      'The twelve worlds became twelve REGIONS of it, three across and four down, each with its own rock, its own color and its own rules. The chip at the top names the one you are standing in.',
-      'A MAP. It fills in as you fly, draws your own tunnels exactly, names the places you have been and puts three question marks over the ones you have not.',
-      'Buried across the planet are nine ANCHORS, in halls of cut stone somebody built before you got here. You cannot mine one - you break into the hall, cross it, and drop into the niche. Lighting one calms its region, draws the whole region onto your map, and makes the Ballast stronger for the rest of the game.',
-      'Three of the nine are behind a seal nothing cuts until you have found the Cutting Laser somewhere else entirely.',
-      'The refinery, the derrick and the store shed are gone. In their place the BALLAST: one riveted pressure station on the pad, with a sight glass for the level and a dial whose needle is how angry the planet is.',
-      'It drains while you are out working. You feed it banked ore - the same ore the Outfitter wants - so the hold is two decisions now.',
-      'If it runs out, a region COMES DOWN. Every tunnel you cut there fills in and you cannot get back in until you have shored it up, which costs 45% of a full Ballast.',
-      'UNREST. Everything you cut makes the ground angrier, and it is per region, so working one place out and going somewhere else is a real move. Restless ground shakes at depths that used to be quiet. Nothing tells you what the numbers mean.',
-      'At the fifth Anchor the planet answers. Every region steps, permanently; tunnels in restless ground start closing while you are docked; and something new starts growing in the shallow rock you finished with hours ago.',
-      'The ninth Anchor opens the center. That is the end of the game, and the game does not throw you out when you finish it.',
-      'The star chart, the jump drive and the Planet Core are gone with the old ending. There is one planet and one way to finish it.',
-      'Rock got its own character: every block is turned a quarter-turn and scaled a little, the strata boundaries wander instead of ruling straight lines, and cut stone is the only smooth surface in the world.',
-      'A new ship, designed at thirty pixels: a boiler, a raked stack, a spoked flywheel and an open under-frame. Brass where brass can cover a whole panel.'
-    ]
-  },
-  {
-    version: '0.30.0', date: '2026-09-10', title: 'No tow',
-    notes: [
-      'There is no salvage rig any more. Run the tank dry or lose the hull and the ship goes down with everything in it.',
-      'You keep every credit you had already banked, every upgrade, every relic and every drive component. The world stays where it is. It is the run you lose, not the save.',
-      'Tow Insurance is gone, and every credit anybody spent on it has been refunded.',
-      'In its place, the Scrubber: up to 40% off the fuel a cell of rock costs.',
-      'Drilling is charged by the cell now, not by the second - so a better Drill gets through rock faster and pays exactly the same for it. A full tank used to be 14 cells of hard rock at the start of the game and 760 by the end of it.',
-      'The fuel gauge shows a red band: the fuel it would take to fly home from where you are. It grows as you descend. When the needle gets near it the dial goes red and pulses, and the game tells you to turn back.',
-      'The reactor idles, so sitting still underground is no longer free.',
-      'Far less ore in the ground, and the deep kinds are properly rare now - Solmarrow was turning up four times as often as Umbrite, which is worth a third as much.',
-      'New materials arrive over eight worlds instead of five. Copper, Iron and Silver on the first; Solmarrow not until 372 m, which is the eighth planet.',
-      'The first time you ever cut a new material the game stops for a beat, names it, and tells you what it is worth.',
-      'Ore is worth more per unit, and the mineral requirements at the top of a ladder stop climbing after the fourth rung.'
-    ]
-  },
-  {
-    version: '0.29.0', date: '2026-09-10', title: 'The drawer under the counter',
-    notes: [
-      'The six supplies are gone from the bottom of the shop. You have to have held one before the Outfitter will sell you another.',
-      'You get the first of each out of a supply cache in the ground - and a cache now hands over something you have never seen before anything you have.',
-      'Finding one announces itself the way a device does, without stopping the game.',
-      'What you have collected lives in a drawer under the counter. Pull the brass handle and it drops open with the crates lit inside; tap one to see what it does and buy another.',
-      'Tap anywhere else to shut it.',
-      'A Bulwark Field absorbs three impacts outright and used to be on sale to a first-hour player. Now it costs knowing it exists.',
-      'The shop screen gave back 120 pixels of room when the grid left, and the framing picked it up on its own.',
-      'The instrument dials no longer ghost through the bottom of the Outfitter.',
-      'The room no longer shifts when you tap something: the detail card reserves its full height instead of growing into the bottom of the shop.',
-      'The swipe hint retires once you have walked the aisles once.',
-      'Anything you could already buy stays buyable. A consumable you have spent still counts as one you have held.'
-    ]
-  },
-  {
-    version: '0.28.0', date: '2026-09-10', title: 'Dug up, not bought',
-    notes: [
-      'Seven upgrades are no longer for sale at any price. The Salvage Magnet, Deep Survey, Seismic Charge, Reactor Core, Repair Drone, Autopilot and Cutting Laser are sealed in crates buried in the rock, and the Outfitter can only improve one once you have found it.',
-      'The first world holds three of them, at 20, 35 and 40 meters. The rest arrive with new worlds.',
-      'Breaking a crate fits the device on the spot and tells you in one line what it does. It does not pause the game - you keep drilling.',
-      'Leave one in the ground and it turns up on the next world. A device is never lost, only delayed.',
-      'The Outfitter is four departments now - RIG, LIFE, SURVEY and ORDNANCE - and you walk between them. Swipe, or tap the arrows either side.',
-      'Never more than five things in front of you at once, and the ship is parked at the pump at the end of the run instead of standing in front of the stock.',
-      'ORDNANCE starts dark, because everything in it has to be dug up. The first time you find a charge, the whole aisle lights.',
-      'Dock after finding something and the shop opens standing in front of it.',
-      'Brass, copper and riveted iron throughout, with gauges whose needles read your claim, your record depth and your store. One terminal behind the counter, running code.',
-      'Anything you were already carrying stays yours. A device you paid for is a device you found.'
-    ]
-  },
-  {
-    version: '0.27.0', date: '2026-09-10', title: 'The counter',
-    notes: [
-      'The Outfitter is a shop counter now. The expensive upgrades sit on the glass in front of you; the ordinary ones are racked on the wall behind.',
-      'Nothing has to be tapped to see what is for sale. Where a thing stands is what tells you which kind it is.',
-      'Every neon light is a real fitting - a tube in a metal housing with a lamp in it - so the color lands on the counter and the floor instead of floating in front of the room.',
-      'The four group plinths are gone. They named a filter that had been cut, so they did nothing.'
-    ]
-  },
-  {
-    version: '0.26.0', date: '2026-09-10', title: 'A room that digs for a living',
-    notes: [
-      'The Outfitter is a room now: a deck, a window onto the planet you are parked over, pipe runs, an ore skip with rock still in it, crates and samples on the floor.',
-      'Four lit plinths across the front name the four groups of upgrades, each under its own neon and a cone of light.',
-      'Three consoles on the back wall carry real readings: how strained the claim is, how deep you have ever been, and what is in the store shed.',
-      'The camera stands back and looks down into the room instead of sitting level with a shelf.',
-      'The ship in the intro flies with its drill leading, which is the direction it is going.',
-      'Landing gives you the controls back sooner.'
-    ]
-  },
-  {
-    version: '0.25.2', date: '2026-09-10', title: 'A claim you can read',
-    notes: [
-      'Each building on the surface now has a lit sign, a window showing what is inside it, and something that moves when it is working.',
-      'The refinery lights up with the hold you are carrying, the derrick pumps while your tank is filling, and the shed sits dark when it is empty.',
-      'The Outfitter is sorted into four departments - rig, survival, instruments, ordnance - each under its own lit header and color.',
-      'The ship carries real hardware now: a drill collar at the nose from drill 3, generator blocks at the stern from thrust 2 and 6.',
-      'Loose soil and gravel are their own surfaces instead of sharing one stone for the whole world.',
-      'The ship flies with its drill forward in the intro instead of pitched nose-up while the worlds stream past.',
-      'The cut from the crossing to the landing is hidden inside the atmosphere, and the descent onto the pad is long enough to watch.'
-    ]
-  },
-  {
-    version: '0.25.1', date: '2026-09-10', title: 'A way out of a bad boot',
-    notes: [
-      'If the game ever fails to start, the error screen now shows where it broke and offers a button to clear the save and reload.',
-      'A hold carrying something the gift table cannot price no longer stops the game from starting.'
-    ]
-  },
-  {
-    version: '0.25.0', date: '2026-09-10', title: 'A claim you can lose',
-    notes: [
-      'You own a claim on the surface now: a refinery, a fuel derrick and a store shed beside the pad.',
-      'Digging deep shakes the ground they stand on. When it gives, they take the damage - and you cannot fly them to safety.',
-      'A damaged refinery pays less for every haul, a damaged derrick fills your tank short, a damaged shed spills what is in it.',
-      'A quake also cracks the world open, and a shaken world pays more. Going deep is a bet, not a tax.',
-      'Repairs need credits and a mineral that only exists below the line that breaks them.',
-      'Breaking a core no longer opens a menu. The world starts closing from the bottom and you have ninety seconds to climb out of it.',
-      'Miss the clock and you are towed. The world still breaks - it costs you the hold, never the run.',
-      'The first world is a whole world now: heat at 38 m, tremors at 44, and a core at 58 that you can reach in one sitting.',
-      'Every world has the same shape - danger in the bottom third - instead of two fixed depths that meant different things on every planet.',
-      'The shop was repriced against the depth each row unlocks at, so the first sale no longer buys four upgrades.',
-      'The hold is smaller and the drill is thirstier, so a seam of ore is worth more than you can carry and a corridor of dirt runs your tank dry.',
-      'Every rock face is textured on its own plane. Tunnel floors, cavern ceilings and ledges were smeared and are stone now.',
-      'The phone buzzes when you cut, strike ore, take a hit, or feel the ground go. There is a toggle in the pause screen.',
-      'A run tells you what it paid, how it stood against your record, and the cheapest thing you still cannot afford.',
-      'The pause screen keeps your fastest core, how many worlds you have broken, and the drive at n of five.',
-      'The chart offers different worlds each day.',
-      'Every trait changes a rule now: Stable pays for a clean run, a charge reaches further on Volatile, the lamp carries on Hollow, Crystalline pays more but fights back, and Searing cuts easier while it starts on you sooner.'
-    ]
-  },
-  {
-    version: '0.24.0', date: '2026-09-09', title: 'Ground of its own',
-    notes: [
-      'The ship flies nose-first now - you see it from behind, drill pointed at wherever it is going.',
-      'It lowers itself onto the pad under its own thrust before you get the controls.',
-      'Every world has its own ground: moss, frost, plants, oil, ash or salt, on rock that is rougher or glassier depending where you are.',
-      'Continuing a run that was already underground puts you back where you were, not on the pad.'
-    ]
-  },
-  {
-    version: '0.23.0', date: '2026-09-09', title: 'Three ways in',
-    notes: [
-      'A first run watches the intro through - it only plays once, and it is the once that counts.',
-      'Continue now takes off: the drive lights, the stars streak past, and the ship flies to the world you left.',
-      'Beaten the game? A new run gives you a skip button - and taking it still flies you down to the planet.'
-    ]
-  },
-  {
-    version: '0.22.0', date: '2026-09-09', title: 'Flying in',
-    notes: [
-      'The intro is a flight now, not a slide show - worlds come up out of the dark, pass you, and fall behind.',
-      'It says less. You are told what to look for and nothing else.',
-      'Both the intro and CONTINUE end by flying down to a planet - CONTINUE takes you to the world you are actually on.',
-      'CONTINUE is grayed out until you have a game to continue.',
-      'The Outfitter only stocks what you can buy plus the next thing you cannot, so it starts at six cases instead of fifteen.',
-      'Nothing on a display plate is cut off any more, and the supply chips have room for their names.',
-      'Planets have real surface relief instead of being colored spheres.'
-    ]
-  },
-  {
-    version: '0.21.0', date: '2026-09-09', title: 'A way in',
-    notes: [
-      'A title screen, with Continue, New Game, Settings and Notes.',
-      'First time you play, a short intro tells you where you are and what you are trying to do.',
-      'It says the thing the game never used to: five jump drive components, one on each kind of world, and they open a route to the Heart.',
-      'Tap to move it along, or skip it entirely. It plays over the real starfield, with the real ship and real worlds.'
-    ]
-  },
-  {
-    version: '0.20.0', date: '2026-09-09', title: 'Every world has its own weather',
-    notes: [
-      'Volatile worlds vent gas out of the rock. Searing worlds send embers up from the deep.',
-      'Crystalline worlds glint in the lamp; Hollow ones drop grit from a ceiling you cannot see.',
-      'Stable worlds stay completely still - which is how you notice all the others.',
-      'The deeper you go, the busier the air gets.',
-      'And the crossing between planets can be skipped now.'
-    ]
-  },
-  {
-    version: '0.19.0', date: '2026-09-09', title: 'Five more ways to build the ship',
-    notes: [
-      'Hull Plating: the hull was stuck at 100 forever. Now it is a ladder like everything else.',
-      'Salvage Magnet: ore you dropped when the hold filled now comes to you instead of needing a cell-perfect approach.',
-      'Deep Survey: reads ore through solid rock, and points at what is buried down there.',
-      'Repair Drone: slowly mends the hull underground, so a bad run can become a long one instead of a tow.',
-      'Reactor Core: more power cells and a faster trickle, so the charge and the laser finally have a ladder of their own.',
-      'And three new consumables that buy a window rather than fixing a bar: Overdrive, Bulwark Field and Survey Pulse.'
-    ]
-  },
-  {
-    version: '0.18.0', date: '2026-09-09', title: 'A chart, a crossing, and a way out',
-    notes: [
-      'Breaking a core now opens a navigation chart: three worlds, and you choose. Shallow and poor, or deep and rich.',
-      'You actually fly there. The world you broke falls away in pieces and the next one comes up out of the dark.',
-      'There is a goal now. Five Jump Drive components, one buried on each kind of world, and they open a route to the Heart of the Drift.',
-      'A component left in the ground goes with the planet when its core breaks - so go and find it first.',
-      'The manifest tracks the drive and tells you what kind of world each missing piece is on.'
-    ]
-  },
-  {
-    version: '0.17.0', date: '2026-09-09', title: 'Twelve worlds, twelve palettes',
-    notes: [
-      'Every planet now has its own rock, fog, haze, dust and skyline instead of the same cave with the horizon repainted.',
-      'Rustmoor is rust, Cryon is blue ice, Ashvault is violet ash - you can tell where you are before you dig a meter.',
-      'Ore keeps its own color everywhere, so what a vein is worth still reads at a glance.'
-    ]
-  },
-  {
-    version: '0.16.0', date: '2026-09-08', title: 'Dust in the beam',
-    notes: [
-      'The lamp now throws a visible shaft of light through the air in front of the ship.',
-      'Real dust drifts in that beam - it hangs in the world, so it rises past you as you dive.',
-      'The air thickens the deeper you go, and the beam gets heavier with it.',
-      'Autopilot flies you home nose-first instead of reversing up the shaft.'
-    ]
-  },
-  {
-    version: '0.15.7', date: '2026-09-08', title: 'One lamp, one shadow',
-    notes: [
-      'The light no longer splits into several separate cones - it is one lamp casting one shadow.',
-      'Shadow edges now follow the wall the light actually meets instead of snapping to whole blocks.',
-      'Most of the warmth taken out of the tunnels last version is back: that darkening was treating the symptom.'
-    ]
-  },
-  {
-    version: '0.15.6', date: '2026-09-08', title: 'The tunnels stop being cards',
-    notes: [
-      'The flat orange shapes that appeared as you came up on a side tunnel are gone.',
-      'A branch the beam has already passed is dim lit air again, not a panel of color.',
-      'The glow in the air now sits where the drill is pointing instead of filling every tunnel evenly.'
-    ]
-  },
-  {
-    version: '0.15.5', date: '2026-09-08', title: 'A smoother fade into the rock',
-    notes: [
-      'Rock now darkens as a smooth gradient into the mass instead of in visible patches.',
-      'The fade follows the shape of the tunnel rather than the shape of the grid.',
-      'Fixed a shadow that could appear a fixed distance ahead of the ship with nothing casting it.'
-    ]
-  },
-  {
-    version: '0.15.4', date: '2026-09-08', title: 'Light that fits the rock',
-    notes: [
-      'The rounded blobs are gone. Light now changes at the edges of blocks, where the rock changes.',
-      'A rock face is no longer half lit with a soft curve running across it.',
-      'The lighting grid is three times finer, so nothing is smeared a whole block wide any more.'
-    ]
-  },
-  {
-    version: '0.15.3', date: '2026-09-08', title: 'The glow ends at the rock',
-    notes: [
-      'The light in a tunnel is now exactly the width of the tunnel, and stops at the wall.',
-      'No more soft circle around the ship - that was the light grid being blurred a whole cell wide.',
-      'A crossing reads as a cross, a shaft reads as a shaft.'
-    ]
-  },
-  {
-    version: '0.15.2', date: '2026-09-08', title: 'Light stays in the tunnel',
-    notes: [
-      'The glow in a tunnel stops at the rock now instead of washing over the faces around you.',
-      'No circle around the ship: the lit shape is the tunnel you dug, whatever shape that is.',
-      'Shadow edges are crisp again - nothing is painted over them.'
-    ]
-  },
-  {
-    version: '0.15.1', date: '2026-09-08', title: 'Nothing spare on the dial',
-    notes: [
-      'The fuel gauge lost its outer load ring. It was moving every time you did, which is not what a gauge is for.',
-      'No more circle of light around the ship. The lamps on its nose are the source now, and rock stops the light like everything else.',
-      'The Scanner grows those lamps instead, so the upgrade is still something you can see.'
-    ]
-  },
-  {
-    version: '0.15.0', date: '2026-09-08', title: 'The panel',
-    notes: [
-      'The status bars are gone. There are two brass dials in the bottom-left corner instead.',
-      'The big one is fuel, with the drill load running round its outer ring like a tachometer.',
-      'Cargo is a sub-dial let into its face, and it starts pulsing when the hold is nearly full.',
-      'The small dial is hull, with heat eating down from the full end of the scale.',
-      'The needles have weight - they swing and settle rather than snapping to a value.'
-    ]
-  },
-  {
-    version: '0.14.1', date: '2026-09-08', title: 'Instruments',
-    notes: [
-      'Fuel, hull and cargo are lit segmented gauges behind glass now, not progress bars.',
-      'Each one carries its own number, so fuel is a reading rather than a guess.',
-      'Fuel and hull share a row at double the width; cargo sits under them, full width.',
-      'The heat stripe still runs along the bottom of the hull gauge, and still tells you the rate.'
-    ]
-  },
-  {
-    version: '0.14.0', date: '2026-09-08', title: 'Machined',
-    notes: [
-      'The ship is a dark machine with its own lamps on it, instead of a bright shape with light shining on it.',
-      'Two headlamp housings on the nose - the thing that has been lighting the whole cave finally looks like it.',
-      'Every button, gauge and panel is stamped steel now: grain, hard corners, a bevelled edge.',
-      'Pressing a control reads as pushing it in rather than lighting it up.',
-      'The landing pad has worn metal and proper hazard striping, and it goes dark as you drop below it.'
-    ]
-  },
-  {
-    version: '0.13.0', date: '2026-09-08', title: 'Two lights',
-    notes: [
-      'Tunnel light and rock light are separate now. Rock faces no longer have shadows cut across them.',
-      'Light spreads through every tunnel you have opened. The one you are facing is the brightest.',
-      'A branch the beam passes is still in shadow, but it keeps enough ambient light to read as a tunnel.',
-      'The lamp reaches further ahead than to the side, and fades out instead of ending at an edge.'
-    ]
-  },
-  {
-    version: '0.12.3', date: '2026-09-08', title: 'Three layers deep',
-    notes: [
-      'Rock no longer casts a shadow on itself. Angled shadows now only come from actual tunnels.',
-      'Three layers of rock read either side of a tunnel, and anything past that is black.',
-      'You can no longer tell what a mineral is through four cells of unlit rock.',
-      'The glow behind the ship reaches further and fades away instead of ending at an edge.',
-      'The light in a tunnel now spills onto the rock at its edge, so nothing pokes through it.'
-    ]
-  },
-  {
-    version: '0.12.1', date: '2026-09-08', title: 'The lamp points somewhere',
-    notes: [
-      'The lamp shines out of the front of the ship. Whichever way you are drilling is the way you can see.',
-      'Behind you stays dim rather than dark, so the way back up is always readable.',
-      'Corners throw real shadows now. A tunnel crossing your path is in shadow except where the light can actually reach it.',
-      'That shadow closes over the crossing tunnel as you move away from it, and opens up as you come level with it.',
-      'Fixed rock poking through the glow in a tunnel.'
-    ]
-  },
-  {
-    version: '0.12.0', date: '2026-09-08', title: 'Light travels',
-    notes: [
-      'Your lamp lights the tunnel, not a circle: light runs down the shafts you have dug.',
-      'Turn a corner and the branch behind you goes dark - the light had to go the long way.',
-      'Rock more than a cell or two from open ground is black. There is nothing out there until you cut to it.',
-      'Open tunnels near the ship glow, so a shaft reads as a space with light in it rather than a hole.',
-      'The headlight cone is gone. The light is real now and does not need a triangle drawn on it.',
-      'The Scanner Array buys reach in all of this, so a bigger lamp opens up more of the ground.'
-    ]
-  },
-  {
-    version: '0.11.1', date: '2026-09-08', title: 'Read the room',
-    notes: [
-      'Every display case has a name plate, so you can see what is what without tapping.',
-      'A strip of light on each case: cyan means you can buy it, amber means not yet.',
-      'Locked cases are shuttered and stamped with the depth that opens them.',
-      'When a mineral is what you are missing, the plate names the mineral, not the price.'
-    ]
-  },
-  {
-    version: '0.11.0', date: '2026-09-08', title: 'The Outfitter is a place',
-    notes: [
-      'The shop is a hangar bay you dock in, not a list - your ship is parked in the middle of it.',
-      'Every upgrade sits in its own display case. Tap one to inspect it, and buy from there.',
-      'The part in the case is the part that gets bolted on, so what you see is what you fly out with.',
-      'The ship on the deck is the real one: buy something and it changes in front of you.'
-    ]
-  },
-  {
-    version: '0.10.0', date: '2026-09-08', title: 'Real rock, real ship',
-    notes: [
-      'The rock is photographed stone now - grain, cracks and roughness, lit properly.',
-      'It is much darker down there, and the lamp is what you see by.',
-      'The ship is a machine instead of a bubble: hard edges, gunmetal, a proper canopy.',
-      'Upgrades bolt visible hardware onto the ship - tanks, radiators, a cargo pod, a sensor dish.',
-      'A bigger drill for every drill tier, so the tier is something you can see.'
-    ]
-  },
-  {
-    version: '0.9.4', date: '2026-09-07', title: 'Smoother stop',
-    notes: [
-      'The ship eases to a stop instead of bouncing, and only lines up when you change direction.',
-      'Fixed the drill nosing into the rock it was cutting, which was the jerk after every block.',
-      'A RUN LOG in the pause menu: what drains how fast, what you earn, and what you never use.',
-      'The d-pad and the supply buttons sit a little higher, clear of the system gesture bar.'
-    ]
-  },
-  {
-    version: '0.9.3', date: '2026-09-07', title: 'Under the hood',
-    notes: [
-      'Nothing you can see - the game can now be driven far faster than real time for testing.',
-      'Tremors are proven to actually fire deep down, which had never been checked before.'
-    ]
-  },
-  {
-    version: '0.9.2', date: '2026-09-07', title: 'Real rock',
-    notes: [
-      'The rock is photographed stone now, not flat panels - the lamp catches the surface as you fly.',
-      'The detail runs continuously through the walls instead of restarting at every block.'
-    ]
-  },
-  {
-    version: '0.9.1', date: '2026-09-07', title: 'Flying straight',
-    notes: [
-      'The ship follows the tunnels again - it keeps its momentum but stops drifting off line.',
-      'Fixed the drill refusing to bite when the ship was not quite lined up.',
-      'Fixed the ship snagging on the edge of its own shaft.',
-      'The ship no longer twists out of shape when it banks flying sideways.',
-      'Letting go now parks you neatly in a cell instead of half in two.'
-    ]
-  },
-  {
-    version: '0.9.0', date: '2026-09-07', title: 'Free flight',
-    notes: [
-      'The ship flies freely instead of hopping cell to cell.',
-      'Half-drilled blocks stay half-drilled - come back and finish them off.',
-      'The dark is much darker, and the edges of the screen fall away to nothing.',
-      'The Outfitter is a station you dock at, with a window onto the planet.',
-      'A proper typeface, and this list.'
-    ]
-  },
-  {
-    version: '0.8.0', date: '2026-09-07', title: 'Seams, ordnance and relics',
-    notes: [
-      'The drill never refuses: ore you cannot carry waits where it falls.',
-      'Flecked rock is a mineral seam and worth stopping for; plain rock is spoil.',
-      'The Scanner Array decides how much of the world you can see.',
-      'Seismic Charge and Cutting Laser, sharing one Power Cell meter.',
-      'The Outfitter has counters, and stock that unlocks with depth.',
-      'One relic buried on every planet, kept forever, marked on nothing.'
-    ]
-  },
-  {
-    version: '0.7.0', date: '2026-09-07', title: 'Depth and consequence',
-    notes: [
-      'Tremors past 85 m collapse the tunnel behind you.',
-      'Upgrades past level three cost minerals as well as credits.',
-      'Supply caches, left by whoever was here before.',
-      'The score gains layers for the heat zone, the unstable band and danger.',
-      'A marker across the rock at your deepest reach.',
-      'Umbrite and Solmarrow, and twelve planets instead of six.',
-      'A headlight, and rock in the distance behind the tunnels.'
-    ]
-  },
-  {
-    version: '0.6.0', date: '2026-09-07', title: 'Heat, read properly',
-    notes: [
-      'Heat has its own color, its own gauge and its own number.',
-      'The hull bar shows what is draining it and how fast.'
-    ]
-  },
-  {
-    version: '0.5.0', date: '2026-09-06', title: 'Pockets and pressure',
-    notes: [
-      'Gas pockets, geodes and cave systems.',
-      'Coolant, patches and fuel cells, bought at the pad and spent below.',
-      'Every planet has a trait that changes how its ground behaves.',
-      'Heat soak: how long you stay matters as much as how deep you go.'
+      'A new ship: a sealed, faceted hull of pale worn stone with a single teal light running along its seams, the same teal an Anchor gives off when you light it, because it is the same hands that made both.',
+      'It is advanced and it is very old. One flank plate is struck out of line and has never been re-seated, two of its panels have gone dark, and the surface is pitted rather than rusted.'
     ]
   }
 ];

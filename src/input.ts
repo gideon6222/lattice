@@ -27,6 +27,7 @@ import { autopilot, hardReset, useSupply, fireBomb, fireLaser, packHere } from '
 import { sfx, audioInit, setAudio, setVolume, audioFocus, audioState } from './audio';
 import { setTier, tier, type Tier } from './visuals';
 import { applyVisuals } from './visualsapply';
+import { debugTools } from './buildinfo';
 
 function firstTouch() { audioInit(); }
 window.addEventListener('pointerdown', firstTouch, { once: true });
@@ -353,6 +354,14 @@ const PANELS: { btn: HTMLElement; panel: HTMLElement; label: string; build: () =
   { btn: ui.btnLog, panel: ui.runlog, label: 'RUN LOG', build: buildRunLog },
   { btn: ui.btnCredits, panel: ui.creditsPanel, label: 'CREDITS', build: buildCredits }
 ];
+/* RUN LOG is a balance table, a developer's tool: a player never sees it (his
+   bar, launch.md section 2, 2026-10-01). It is there under the dev server and
+   with ?debug on the address. */
+if (!debugTools()) {
+  ui.btnLog.style.display = 'none';
+  ui.runlog.classList.add('hidden');
+  PANELS.splice(PANELS.findIndex((p) => p.btn === ui.btnLog), 1);
+}
 for (const p of PANELS) {
   p.btn.onclick = () => {
     sfx.ui();

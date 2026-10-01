@@ -4,6 +4,12 @@ Moved onto the studio 2026-09-22. Rounds one to seventeen shipped (`journal/lega
 the early history). Round eighteen is his ask of 2026-09-29, that the sounds stop being
 cartoony (DESIGN.md, "Round eighteen: the sound of things").
 
+Met 2026-10-01, his launch bar (AV, AW, AX): a player never sees the stack overlay or the
+RUN LOG (both behind ?debug or the dev server); a crash is logged to the console and to
+`coreward.crash`, and the next boot puts the ship back on the pad with the progress kept; the
+pause sheet reads `v<version> | <commit> | release`; WHAT'S NEW starts at 0.39.0, the first
+Play upload. Not yet in a Play build: the next ship carries it.
+
 ## What still does not exist
 
 - **A reviewed app on Play.** 7 (0.56.0) is live on the internal track (2026-09-30). The app was

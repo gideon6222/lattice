@@ -7,16 +7,60 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>The Lattice</title>
-<!-- The error overlay must be the FIRST script in the document. On a phone
-     with no devtools it is the only way to see a stack trace, and Vite
-     hoists the bundled entry script into <head> during build, so a handler
-     left down in <body> would be registered too late to catch it. -->
+<!-- The crash reporter must be the FIRST script in the document. Vite hoists
+     the bundled entry script into <head> during build, so a handler left down
+     in <body> would be registered too late to catch it.
+
+     A player never sees it (his bar, launch.md section 2, 2026-10-01): every
+     uncaught error and rejection goes to the console and to one localStorage
+     record (`coreward.crash`), and src/recovery.ts reads that record on the
+     next boot and quietly puts the ship back on the pad, progress kept. The
+     stack overlay and its CLEAR SAVE button are a developer's tool now: on
+     only under the dev server or with ?debug on the address. -->
 <script>
   /* Set once the "this browser cannot run it" notice is up, so the stack-trace
      overlay does not pile in on top of it. Without WebGL the renderer throws
      during module evaluation, and a player who has just been told plainly what
      is wrong should not then be shown a stack about it. */
   var GL_REFUSED = false;
+
+  /* The developer's overlay: the dev server (Vite writes %DEV%) or ?debug. */
+  var DEBUG = '%DEV%' === 'true';
+  try { DEBUG = DEBUG || new URLSearchParams(location.search).has('debug'); } catch (x) {}
+
+  /* This boot, counted before any module can fail to load. src/recovery.ts
+     reads the count and clears it once a screen is up, so a count above one
+     means the boots before this one never got that far. */
+  var BOOT_KEY = 'coreward.boot', CRASH_KEY = 'coreward.crash';
+  var BOOTS = 1;
+  try {
+    BOOTS = (parseInt(localStorage.getItem(BOOT_KEY) || '0', 10) || 0) + 1;
+    localStorage.setItem(BOOT_KEY, String(BOOTS));
+  } catch (x) {}
+  var RELOADING = false;
+
+  function booting(){
+    var b = document.getElementById('boot');
+    return !b || !b.classList.contains('hidden');
+  }
+
+  /* Every uncaught fault comes through here. */
+  function report(kind, text){
+    try { console.error('[lattice] ' + kind + ': ' + text); } catch (x) {}
+    try {
+      localStorage.setItem(CRASH_KEY, JSON.stringify({
+        at: new Date().toISOString(), kind: kind, message: String(text).slice(0, 2400), pending: true
+      }));
+    } catch (x) {}
+    if (DEBUG) { showErr(kind + ': ' + text); return; }
+    /* A boot that fails is retried, quietly, at most twice: the first retry
+       has the ship back on the pad, the second sets a save that will not load
+       aside, so the game opens instead of sitting on LOADING. */
+    if (booting() && !GL_REFUSED && !RELOADING && BOOTS < 3) {
+      RELOADING = true;
+      setTimeout(function(){ location.reload(); }, 60);
+    }
+  }
 
   function showErr(m){
     if (GL_REFUSED) return;
@@ -68,12 +112,12 @@
     if (document.body) refuseNoGL();
     else document.addEventListener('DOMContentLoaded', refuseNoGL);
   }
-  /* A way out of a broken save without a console.
+  /* A way out of a broken save without a console, for a developer (?debug).
+     A player's broken save is handled by src/recovery.ts instead, quietly.
 
      A phone has no devtools, so a save that crashes the boot is a game that
-     cannot be started again - the only fix was to clear site data through
-     browser settings, which nobody should have to go looking for. This button
-     appears the first time anything is reported, and asks before it acts,
+     cannot be started again. This button appears with the overlay the first
+     time anything is reported, and asks before it acts,
      because it throws away real progress. It clears the service worker too: a
      boot crash and a stale cached bundle look identical from here, and
      clearing only one of them means doing this twice. */
@@ -105,7 +149,7 @@
        on 2026-09-10, produced a message that could not be placed from here at
        all: a message names what broke, a stack names what called it. */
     var st = (e.error && e.error.stack) ? String(e.error.stack).split('\n').slice(0, 6).join('\n') : '';
-    showErr('ERROR: ' + (e.message || e) + '\n' + (e.filename || '') + ':' + (e.lineno || '') +
+    report('ERROR', (e.message || e) + '\n' + (e.filename || '') + ':' + (e.lineno || '') +
             (st ? '\n' + st : ''));
   });
   window.addEventListener('unhandledrejection', function(e){
@@ -116,7 +160,7 @@
        whose message names no file at all. */
     var r = e.reason;
     var st = (r && r.stack) ? String(r.stack).split('\n').slice(0, 6).join('\n') : '';
-    showErr('PROMISE: ' + (r && r.message ? r.message : r) + (st ? '\n' + st : ''));
+    report('PROMISE', (r && r.message ? r.message : r) + (st ? '\n' + st : ''));
   });
 </script>
 <link rel="manifest" href="manifest.webmanifest">

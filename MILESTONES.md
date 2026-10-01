@@ -165,6 +165,37 @@ His words: "Can you improve the sounds in the game. They seem too cartoony"
       briefs: audio
       design: ## Round eighteen: the sound of things
 
+## From Gideon 2026-10-01
+
+*His standing bar (studio-knowledge `checklists/launch.md` section 2): no debug UI for players,
+the version line read from the build, patch notes from the first Play upload on.*
+
+- [x] **AV No crash or debug UI for a player.** The stack overlay and its CLEAR SAVE button
+      show only under the dev server or with ?debug. Every uncaught error and rejection goes to
+      the console and to one record, `coreward.crash`. On the next boot `src/recovery.ts` puts
+      a crashed run's ship back on the pad with an empty hold, keeping credits, upgrades,
+      keys, tunnels, Anchors and the record; a boot that fails is retried quietly, and a save
+      that will not load twice running is set aside (never deleted) so the game opens rather
+      than sitting on LOADING. RUN LOG, the balance table, is behind ?debug too.
+      `test/recovery.test.mjs`, and two e2e specs that boot without ?debug.
+      briefs: save, menu
+      design: ## Polish budget
+
+- [x] **AW The version line says what the build is.** The pause sheet (Settings) reads
+      `v0.56.0 | <commit> | release`: the version from the changelog, the commit Vite stamps,
+      and the kind from the build itself (`vite build` is release, the dev server debug). It
+      no longer falls back to "unbuilt". `src/buildinfo.ts`, the stamp spec.
+      briefs: menu
+      design: ## Polish budget
+
+- [x] **AX Patch notes start at the first Play upload.** WHAT'S NEW lists 0.56.0 back to
+      0.39.0 (version code 1, the first build on Play); the 52 releases before it are counted by
+      `RELEASES_BEFORE_PLAY` and not shown, and every line kept reads as what is better now.
+      `test/version.test.mjs` holds the first version, the version code against the notes, and
+      the wording.
+      briefs: store
+      design: ## Polish budget
+
 ## Milestones
 
 - [x] **F1** fuel per cell, drill buys speed not efficiency, measured at every leg

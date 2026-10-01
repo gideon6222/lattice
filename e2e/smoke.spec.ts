@@ -1339,9 +1339,81 @@ test('heat reads as its own channel on the hull bar, and a flush visibly drops i
 test('the build stamp is populated', async ({ page }) => {
   await page.locator('#btnPause').dispatchEvent('click');
   const stamp = await page.locator('#build').innerText();
-  expect(stamp).toMatch(/^build [0-9a-f]{7}\+?\s+·/);
+  /* `v<version> | <commit> | release` (launch.md section 2, 2026-10-01): this
+     suite runs the production build, so it is a release, and says so. */
+  expect(stamp).toMatch(/^v\d+\.\d+\.\d+ \| [0-9a-f]{7}\+? \| release$/);
+  const version = await page.evaluate(() => document.getElementById('verNum')!.textContent);
+  expect(stamp.startsWith(version + ' '), 'the stamp and the version beside it disagree').toBe(true);
   expect(stamp, 'an unbuilt stamp means the Vite define pipeline broke')
     .not.toContain('dev');
+  expect(stamp).not.toContain('unbuilt');
+});
+
+/* ---------- a player never sees crash or debug UI ----------
+
+   His bar (launch.md section 2, 2026-10-01). Every spec above boots with
+   ?debug, the developer's seam, which is where the stack overlay and the RUN
+   LOG balance table still live. These boot the way a player does: no ?debug,
+   the production build. */
+test('without ?debug there is no run log and no stack overlay, and a crash is only logged', async ({ page }) => {
+  page.removeAllListeners('pageerror');
+  const logged: string[] = [];
+  page.on('console', (m) => { if (m.type() === 'error') logged.push(m.text()); });
+  await page.goto('/');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await enterGame(page);
+
+  await page.locator('#btnPause').dispatchEvent('click');
+  await expect(page.locator('#btnLog'), 'RUN LOG is a balance table for a developer').toBeHidden();
+  await expect(page.locator('#btnNotes')).toBeVisible();
+  await expect(page.locator('#build')).toContainText('| release');
+  await page.locator('#btnResume').dispatchEvent('click');
+
+  /* A fault mid-play, the async kind and the thrown kind. */
+  await page.evaluate(() => {
+    void Promise.reject(new Error('a made-up async fault'));
+    setTimeout(() => { throw new Error('a made-up thrown fault'); }, 0);
+  });
+  await expect.poll(() => logged.join('\n'), { timeout: 5_000 }).toContain('a made-up thrown fault');
+  expect(logged.join('\n'), 'the async fault never reached the console').toContain('a made-up async fault');
+  await expect(page.locator('#err'), 'a player was shown the stack overlay').toHaveClass(/hidden/);
+  await expect(page.locator('#errFix'), 'a player was offered CLEAR SAVE').toHaveCount(0);
+  const rec = await page.evaluate(() => JSON.parse(localStorage.getItem('coreward.crash') || 'null'));
+  expect(rec && rec.pending, 'the crash was not kept for the next boot').toBe(true);
+  expect(String(rec.message)).toContain('made-up');
+});
+
+test('after a crash mid-run the game opens normally, on the pad, with the progress kept', async ({ page }) => {
+  page.removeAllListeners('pageerror');
+  await page.goto('/');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  /* A run under way at a checkpoint 40 m down with ore aboard, and a crash
+     on record, as if the app died there. */
+  await page.evaluate(() => {
+    localStorage.setItem('coreward.v2', JSON.stringify({
+      at: 'checkpoint', planet: 0, credits: 4321, up: {}, dug: [], cargo: { iron: 3 }, weight: 18,
+      px: 31, pd: 40, fuel: 9, hull: 30, best: { depth: 44 }
+    }));
+    localStorage.setItem('coreward.crash', JSON.stringify({
+      at: new Date().toISOString(), kind: 'ERROR', message: 'a made-up fault', pending: true
+    }));
+  });
+  await page.goto('/');
+  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
+  await expect(page.locator('#err')).toHaveClass(/hidden/);
+  await expect(page.locator('#title'), 'the game did not open on its title').not.toHaveClass(/hidden/);
+  const after = await page.evaluate(() => ({
+    save: JSON.parse(localStorage.getItem('coreward.v2') || 'null'),
+    crash: JSON.parse(localStorage.getItem('coreward.crash') || 'null'),
+    boot: localStorage.getItem('coreward.boot')
+  }));
+  expect(after.save.at, 'the half-finished run was restored rather than dropped').toBe('pad');
+  expect(after.save.pd).toBe(-1);
+  expect(after.save.cargo).toEqual({});
+  expect(after.save.credits, 'the credits were lost with the run').toBe(4321);
+  expect(after.save.best.depth, 'the record was lost with the run').toBe(44);
+  expect(after.crash.pending, 'the crash will be recovered from again').toBe(false);
+  expect(after.boot, 'a finished boot left its count behind').toBeNull();
 });
 
 /* The bug that lanes exist to fix, reproduced end to end.
