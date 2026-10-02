@@ -27,3 +27,10 @@ player_text = ["store/listing/**/*.txt", "store/release-notes/**/*.txt", "src/ch
 # content rating, data safety and release pages. Read from the Console
 # 2026-09-22; it never changes for the life of the app.
 app_id = "4974028602351317913"
+
+# Which Claude model, effort and account the desk's builds of this game use (coordinator,
+# 2026-10-02, his ask: "whichever way will provide the best results while being efficient").
+[build]
+model = "sonnet"
+effort = "medium"
+account = "main"
