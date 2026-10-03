@@ -4,6 +4,7 @@ import { HULL_MAX, SAVE_KEY, OLD_KEY, START_X, W, UPGRADES, SUPPLIES, ORES, matT
          valueMult , OVERDRIVE_MULT, PULSE_REACH} from './config';
 import { CHARGE_MAX } from './feel';
 import { FOUND_KEYS } from './finds';
+import { sealTake, sealSoak } from './hazards';
 import { R } from './runtime';
 import { newGround, loadGround, cutCell, drainBallast, planetUnrest, collapseTarget,
          isCollapsed, unrestBand, lightAnchor, isLit, type GroundState } from './unrest';
@@ -131,7 +132,7 @@ export const g: {
   world: 0, trait: 'stable', coreOff: 0, rich: 1,
   won: false,
   up: { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0 },
+    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0, seal: 0, tip: 0 },
   kit: { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 },
   dug: new Set<string>(),
   rubble: new Set<string>(),
@@ -174,7 +175,8 @@ export const S = {
   /* the multipliers relics add, read by the frame loop and by feel.ts */
   fuelUse: () => (relic('recyc') ? 0.85 : 1),
   heatTake: () => (relic('lattice') ? 0.85 : 1),
-  gasTake: () => (relic('damper') ? 0.67 : 1),
+  gasTake: () => (relic('damper') ? 0.67 : 1) * sealTake(g.up.seal || 0),
+  gasSoak: () => sealSoak(g.up.seal || 0),
   powerCap: () => (relic('coupler') ? 1 : 0),
   saleBonus: () => 1 + relicCount('assay') * 0.04,
   /* capped below 1 on purpose - a fully upgraded rig buys time, it does

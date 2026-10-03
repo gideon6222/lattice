@@ -239,7 +239,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: feel
       design: ## Progression and unlocks
 
-- [ ] **BE Pressure Seal and Resonance Tip.** The gas feat and the hard-rock feat, the two
+- [x] **BE Pressure Seal and Resonance Tip.** The gas feat and the hard-rock feat, the two
       ladders, their effect in the sim, their hull parts. Proved by sim tests (damage taken in gas
       with and without the Seal, strikes to open a hard vein with and without the Tip).
       briefs: feel

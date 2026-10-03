@@ -393,8 +393,8 @@ function breakCells(cells: number[][]) {
 
     if (b.hazard) {
       gassed++;
-      g.hull -= absorb(Math.round(GAS_HULL_DAMAGE * (worldTrait().gasDamage || 1)));
-      g.soak = Math.min(1, g.soak + GAS_SOAK);
+      g.hull -= absorb(Math.round(GAS_HULL_DAMAGE * (worldTrait().gasDamage || 1) * S.gasTake()));
+      g.soak = Math.min(1, g.soak + GAS_SOAK * S.gasSoak());
       R.hullCause = 'gas';
     } else if (b.find) {
       const f = findHere(x, d);
@@ -660,7 +660,7 @@ export function hardReset() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_KEY); } catch (e) { /* ignore */ }
   g.planet = 0; g.credits = 0;
   g.up = { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0 };
+    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0, seal: 0, tip: 0 };
   g.kit = { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 };
   g.stock = {};
   g.relics = []; g.relicsTaken = [];

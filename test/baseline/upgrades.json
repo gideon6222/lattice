@@ -604,6 +604,74 @@
     ],
     "matTotal": 2
   },
+  "seal": {
+    "name": "Pressure Seal",
+    "base": 1800,
+    "mul": 1.5,
+    "max": 4,
+    "tiers": null,
+    "costs": [
+      1800,
+      2700,
+      4050,
+      6075,
+      9113
+    ],
+    "effects": [
+      "Not installed",
+      "Gas hits for 80%",
+      "Gas hits for 65%",
+      "Gas hits for 50%, and is vented",
+      "Gas hits for 35%, and is vented"
+    ],
+    "mats": [
+      null,
+      null,
+      {
+        "id": "amethyst",
+        "need": 1
+      },
+      {
+        "id": "magmite",
+        "need": 1
+      }
+    ],
+    "matTotal": 2
+  },
+  "tip": {
+    "name": "Resonance Tip",
+    "base": 2200,
+    "mul": 1.5,
+    "max": 4,
+    "tiers": null,
+    "costs": [
+      2200,
+      3300,
+      4950,
+      7425,
+      11138
+    ],
+    "effects": [
+      "Not installed",
+      "Hard rock needs 85% of the strikes",
+      "Hard rock needs 70% of the strikes",
+      "Hard rock needs 60% of the strikes",
+      "Hard rock needs 50% of the strikes"
+    ],
+    "mats": [
+      null,
+      null,
+      {
+        "id": "amethyst",
+        "need": 1
+      },
+      {
+        "id": "ruby",
+        "need": 1
+      }
+    ],
+    "matTotal": 2
+  },
   "survey": {
     "name": "Deep Survey",
     "base": 3600,

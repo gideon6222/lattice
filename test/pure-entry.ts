@@ -36,3 +36,4 @@ export * from '../src/sim/cysts';
 export * from '../src/sim/bay';
 export * from '../src/sim/feats';
 export * from '../src/sim/sorter';
+export * from '../src/sim/hazards';

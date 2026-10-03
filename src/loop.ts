@@ -58,6 +58,7 @@ import { stepGauges } from './gauges';
 import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard, countFeat } from './actions';
 import { HARD_ROCK } from './sim/feats';
 import { sortSwap, applySwap } from './sim/sorter';
+import { tipWork } from './sim/hazards';
 import { coreOpens, openGate, gateAtDepth, barrierSays, spentCoreNear } from './sim/gate';
 import { HINTS } from './sim/hints';
 import { hasAbility, SINK_RATE, SINK_HULL, HOLLOW_DRAIN } from './sim/ability';
@@ -135,7 +136,7 @@ function startDig(tx: number, td: number, dir: Dir) {
     /* Pick up where the last attempt stopped. The stored value is a fraction,
        so a drill bought in between makes the REMAINDER faster without making
        the work already done disappear. */
-    const total = (b.hard * DIG_BASE) / S.drill();
+    const total = (b.hard * DIG_BASE * tipWork(g.up.tip || 0, b.hard)) / S.drill();
     const done = clamp(g.damage[key(t.x, t.d)] || 0, 0, 0.985);
     beginDig(t.x, t.d, b, done);
     R.digging = { x: t.x, d: t.d, dir, t: done * total, total, block: b,
@@ -506,7 +507,7 @@ export function tick(raw: number, draw = true) {
           R.run.hullGas += dmg;
           g.hull -= dmg;
           R.hullCause = 'gas';
-          g.soak = Math.min(1, g.soak + GAS_SOAK);
+          g.soak = Math.min(1, g.soak + GAS_SOAK * S.gasSoak());
           R.shake = Math.max(R.shake, 0.7);
           flash('rgba(150,220,80,.30)', 380);
           spray(worldX(R.digging.x), -R.digging.d, b.color, 90, 9, 1.5);

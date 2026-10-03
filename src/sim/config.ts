@@ -5,6 +5,7 @@ import { zoomForScan } from './feel';
 import { rnd } from './util';
 import { regionAt, REGION_TRAIT, REGION_COUNT, WORLD_DEPTH } from './region';
 import { FOUND_KEYS } from './finds';
+import { sealTake, tipWork, SEAL_VENTS_AT, TIP_FROM } from './hazards';
 
 /* World width in columns. Only about 8 fit on a portrait screen at the current
    framing, so the rest is lateral room to explore: which way to dig at a given
@@ -1172,6 +1173,17 @@ export const UPGRADES: Upgrade[] = [
       (l >= 3 ? 'Weighs every ore, and a key mineral first' :
         'Weighs the ' + (l === 1 ? 'cheapest ore' : 'two cheapest ores') + ' against a new find')) },
 
+  /* PRESSURE SEAL and RESONANCE TIP. Handed over for the gas and hard-rock
+     feats (feats.ts), never sold at level zero. The Seal takes the sting out of
+     gas and, from rung three, vents it so it adds no heat soak. The Tip makes a
+     hard cell open in fewer strikes (hazards.ts). Four rungs each. */
+  { key: 'seal',   name: 'Pressure Seal',  base: 1800, mul: 1.5, max: 4, keys: ['amethyst', 'magmite'], system: 'hull', group: 'survival', unlock: 0,
+    effect: (l: number) => (l === 0 ? 'Not installed' :
+      'Gas hits for ' + Math.round(sealTake(l) * 100) + '%' + (l >= SEAL_VENTS_AT ? ', and is vented' : '')) },
+  { key: 'tip',    name: 'Resonance Tip',  base: 2200, mul: 1.5, max: 4, keys: ['amethyst', 'ruby'], system: 'drill', group: 'rig', unlock: 0,
+    effect: (l: number) => (l === 0 ? 'Not installed' :
+      'Hard rock needs ' + Math.round(tipWork(l, TIP_FROM) * 100) + '% of the strikes') },
+
   /* DEEP SURVEY. Distinct from the Scanner, which is light and framing: this
      is knowing what is inside rock you have not cut. It also points at the
      buried Jump Drive component, which is the thing the goal most needs a way
@@ -1534,6 +1546,8 @@ export const WHAT: Record<string, string> = {
   laser: 'Cuts a straight line of rock, sealed stone included.',
   cargo: 'Carries more back from every run.',
   magnet: 'Pulls dropped ore to you from a distance.',
+  seal: 'Gas pockets hit for less, and the top rungs vent them.',
+  tip: 'Hard rock cracks open in fewer strikes.',
   sorter: 'In a full hold, swaps the cheapest ore for a richer find.',
   thrust: 'Flies faster, up and down the shaft.',
   tank: 'Holds more fuel. The top rungs make every cell cheaper to cut.',

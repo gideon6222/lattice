@@ -100,8 +100,10 @@ test('the Next line is one line, in the right shape, and never carries a count',
     assert.ok(!/\d+ of \d+/.test(line), line);
   }
   assert.equal(H.nextLine(stateAt(0)), 'Next: Ore Sorter, sell a full hold');
-  assert.equal(H.nextLine(stateAt(0, ['sorter'])), 'Next: ? in the rock below 20 m');
-  assert.equal(H.nextLine(stateAt(60, ['magnet', 'receiver', 'survey', 'sorter'])), 'Next: Hull Plating, break the first core');
+  assert.equal(H.nextLine(stateAt(0, ['sorter'])), 'Next: Pressure Seal, ride out some gas');
+  assert.equal(H.nextLine(stateAt(0, ['sorter', 'seal'])), 'Next: Resonance Tip, keep cutting hard rock');
+  assert.equal(H.nextLine(stateAt(0, ['sorter', 'seal', 'tip'])), 'Next: ? in the rock below 20 m');
+  assert.equal(H.nextLine(stateAt(60, ['magnet', 'receiver', 'survey', 'sorter', 'seal', 'tip'])), 'Next: Hull Plating, break the first core');
 });
 
 test('a first run is told about the nearest dig, before it has found anything', () => {
@@ -118,7 +120,9 @@ test('the line carries the table: regrouping changed no key, price, level cap or
     hull: [3700, 1.38, 9, 113], magnet: [1200, 1.38, 6, 0], survey: [3600, 1.42, 5, 0],
     receiver: [3500, 1.38, 5, 0], drone: [4400, 1.38, 5, 113],
     /* Added in BD: the Ore Sorter, handed over for a full hold. */
-    sorter: [1500, 1.6, 3, 0]
+    sorter: [1500, 1.6, 3, 0],
+    /* Added in BE: the Pressure Seal and the Resonance Tip, handed over for gas and hard rock. */
+    seal: [1800, 1.5, 4, 0], tip: [2200, 1.5, 4, 0]
   };
   const now = Object.fromEntries(H.UPGRADES.map((u) => [u.key, [u.base, u.mul, u.max, u.unlock]]));
   assert.deepEqual(now, frozen);
