@@ -204,7 +204,7 @@ everything like that and base it around that same structure." The rule is Fable'
 `unlocks-2026-10-02.md`, section A). Existing saves carry over: an owned line stays owned, and a
 save already past a feat is granted its gift. Nothing here ships: the app is in Google's review.
 
-- [ ] **BA The shelf rule, as pure code.** `src/sim/bay.ts`: seven systems (CREW added, Autopilot and
+- [x] **BA The shelf rule, as pure code.** `src/sim/bay.ts`: seven systems (CREW added, Autopilot and
       Repair Drone move to it), `bayView(system, state)` returns the owned lines plus at most one
       silhouette, `nextLine(state)` returns the one Next line, and a route table states how every
       entry is earned. Old saves keep every key and level. Proved by `test/bay.test.mjs`: at most

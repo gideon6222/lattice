@@ -394,7 +394,7 @@ test('every upgrade has a counter and a sensible unlock depth', () => {
        the one mineral it was built from. Keys are asked for by band now, and a
        band opens with its barrier (keys.test.mjs), so each row is held to the
        six systems of the fitting bay instead. */
-    assert.ok(['drill', 'hold', 'engines', 'hull', 'sensors', 'ordnance'].includes(u.system),
+    assert.ok(['drill', 'hold', 'engines', 'hull', 'sensors', 'crew', 'ordnance'].includes(u.system),
       u.key + ' belongs to no system of the ship: ' + u.system);
   }
   /* the opening kit has to be big enough to make a first run possible */

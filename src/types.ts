@@ -217,7 +217,7 @@ export interface Upgrade {
      bank and never sell. Absent on a line no key gates. */
   keys?: [string, string];
   /* Which of the six systems of the ship it belongs to (the fitting bay, AN). */
-  system: 'drill' | 'hold' | 'engines' | 'hull' | 'sensors' | 'ordnance';
+  system: 'drill' | 'hold' | 'engines' | 'hull' | 'sensors' | 'crew' | 'ordnance';
   /* Which counter of the Outfitter this sits on. */
   group: 'rig' | 'survival' | 'instruments' | 'ordnance';
   /* Deepest metre ever reached before this appears on the shelf at all. Zero

@@ -33,3 +33,4 @@ export * from '../src/sim/vendor';
 export * from '../src/sim/wrongness';
 export * from '../src/sim/ending';
 export * from '../src/sim/cysts';
+export * from '../src/sim/bay';

@@ -1119,7 +1119,7 @@ export const UPGRADES: Upgrade[] = [
   { key: 'scan',   name: 'Scanner Array', base: 700, mul: 1.42, max: 9, keys: ['emerald', 'ruby'], system: 'sensors', group: 'instruments', unlock: 0,
     effect: (l: number) => (8 + l * 2.4).toFixed(0) + 'm light · ' +
       Math.round(zoomForScan(l) * 100) + '% view' },
-  { key: 'auto',   name: 'Autopilot',     base: 4900, mul: 1.42, max: 6, keys: ['ruby', 'magmite'], system: 'engines', group: 'instruments', unlock: 113,
+  { key: 'auto',   name: 'Autopilot',     base: 4900, mul: 1.42, max: 6, keys: ['ruby', 'magmite'], system: 'crew', group: 'instruments', unlock: 113,
     effect: (l: number) => (l === 0 ? 'Not installed' : (0.55 - (l - 1) * 0.075).toFixed(2) + ' fuel per meter') },
 
   /* ---------- ordnance ----------
@@ -1209,7 +1209,7 @@ export const UPGRADES: Upgrade[] = [
   /* REPAIR DRONE. Turns a bad run into a long one instead of a tow. Slow on
      purpose - it must never make heat survivable, only recoverable, so it is
      an order of magnitude under what soak takes at depth. */
-  { key: 'drone',  name: 'Repair Drone',   base: 4400, mul: 1.38, max: 5, keys: ['emerald', 'magmite'], system: 'hull', group: 'survival', unlock: 113,
+  { key: 'drone',  name: 'Repair Drone',   base: 4400, mul: 1.38, max: 5, keys: ['emerald', 'magmite'], system: 'crew', group: 'survival', unlock: 113,
     effect: (l: number) => (l === 0 ? 'Not installed' : '+' + (l * 0.55).toFixed(2) + ' hull/s underground') }
 ];
 /* What the Fuel Tank's upper rungs save, as a fraction of a cell's fuel cost.
@@ -1508,6 +1508,7 @@ export const SYSTEMS = [
   { key: 'engines', name: 'ENGINES' },
   { key: 'hull', name: 'HULL' },
   { key: 'sensors', name: 'SENSORS' },
+  { key: 'crew', name: 'CREW' },
   { key: 'ordnance', name: 'ORDNANCE' }
 ] as const;
 export type SystemKey = typeof SYSTEMS[number]['key'];
