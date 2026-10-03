@@ -3775,3 +3775,211 @@ Service workers are off in `vite dev` on purpose. The in-app Claude browser cann
 one at all, so any PWA check has to happen in real Chrome or on the phone — and that browser
 also stops `requestAnimationFrame` when its pane is hidden, so anything on a timer must be
 tested through a pure reducer rather than by watching it.
+
+
+## Progression and unlocks
+
+*From Gideon, 2026-10-02: "I want them to be locked and either hidden or some kind of creative way
+for you to get them at some point so it's not just all shown at once", then "I want the games to
+look at that structure and improve the amount and the quality of the items and upgrades and XP and
+everything like that and base it around that same structure." The structure is Fable's studio rule
+(`C:\dev\plans\unlocks-2026-10-02.md`, section A). His note for this game: already the model.*
+
+### What the research said
+
+Three games, from a researcher brief (thin sources, several pages blocked):
+
+- **SteamWorld Dig 2** finds its tools in the world and sells their later tiers at the hub.
+  *"Each of the weapons have perks that can be activated by installing Upgrade Cogs found in
+  secret areas."* (Wikipedia). Spent on a per-tool screen, so few choices at once. This is the
+  found-then-improved model, and it is what this game already does.
+- **Motherload** sells four part lines of five or six tiers, buy only, all tiers shown.
+  *"The Micro Tank will run out of fuel after mining for ~30 seconds"* (guide paraphrase), so the
+  first buy is the tank, inside the first run. Its top rung is $500,000, the thing to avoid.
+- **Dome Keeper** offers a found gadget back at base. *"Your first three upgrades are almost always
+  going to be to upgrade your drill, jet pack and carrying capacity."* (player critique,
+  paraphrase). Three mandatory-feeling first buys flatten every build, so the first buy here must be
+  a choice among equals.
+
+What decided it: none of the three has a separate XP bar. Progress is found things, ladders and
+feats. **This game gets no XP track.** Gideon's "XP" is answered by the Ledger below: named feats,
+each with a gift, shown one at a time, with no number to grind.
+
+### What is thin today
+
+Seventeen upgrade lines, six supplies, two abilities (a third bought at a gate), seven found
+devices. The shop already hides every unfound device and shows one sealed case (`shelfStock`). What
+the rule asks for that is missing:
+
+1. **More than three on a screen.** The bay has six systems. ENGINES and HULL carry four lines plus
+   supplies, so a rack runs to six or seven cards.
+2. **No Next line.** The sealed case says "Sealed until you have reached 113 m". Nothing says what an
+   unfound device is or where it hides.
+3. **Found things are not in one place.** There is no collection surface the player opens on purpose.
+4. **Too few things to find.** Seven devices, all found by depth. Nothing is earned by doing, so the
+   rock is the only route, and nothing is gifted for a moment the player will remember.
+5. **No lock states its route in the session that shows it.** A device never found is silent on
+   purpose (S2). The rule says state it, in the game's words.
+
+### The shelf: seven systems, three lines each
+
+The bay keeps its fitting-bay shape (round seventeen AN) and gains a seventh system, **CREW** (things
+that act for you). Each system holds at most three lines. A rack shows the owned ones plus **one**
+sealed silhouette, so at most four cards, and the fourth is always the silhouette. Supplies leave the
+racks and live in **KIT**, a drawer the player opens on purpose, three to a page.
+
+| system | line 1 | line 2 | line 3 |
+|---|---|---|---|
+| DRILL | Drill Bit | Cutting Laser | Resonance Tip (new) |
+| HOLD | Cargo Hold | Salvage Magnet | Ore Sorter (new) |
+| ENGINES | Thrusters | Fuel Tank | Return Beacon (new) |
+| HULL | Hull Plating | Cooling Rig | Pressure Seal (new) |
+| SENSORS | Scanner Array | Deep Survey | Lattice Receiver |
+| CREW | Autopilot | Repair Drone | Flare Line (new) |
+| ORDNANCE | Seismic Charge | Arc Lance (new) | |
+
+A test holds the cap: no system lists more than three lines, and a rack lists at most one
+silhouette. Moving Autopilot and Repair Drone to CREW is a re-grouping only. Their saves, levels
+and prices do not change.
+
+### The Next line
+
+One line at the top of the bay and one on the pause sheet, always the same shape: **what, route,
+progress.** It names the nearest unmet thing, in this order: a sealed silhouette whose route is a
+feat or a find in reach, then the barrier or depth that opens a rung, then the next Ledger feat.
+In the game's words:
+
+- "Next: ? in the rock below 20 m"
+- "Next: Ore Sorter, sell a full hold"
+- "Next: Cooling Rig, break the second core"
+- "Next: Resonance Tip, keep cutting hard rock"
+
+The line names the device and the kind of act, never a count. Counts show only in the Ledger.
+
+Never a list of locks. One pure function in `src/sim/bay.ts` computes it, so the room, the pause
+sheet and the tests read the same answer.
+
+### The silhouette
+
+A sealed card shows an empty mount (a bolt pattern and a seal plate, drawn like the hull, never a flat outline), the word SEALED, and its route in one sentence. It
+is the only sealed card on a rack, and everything behind it is dark and says nothing. For an unfound
+device the route carries a depth ("Dug up in the rock below 62 m"), never a coordinate and never a
+bearing (the Receiver fence in `src/sim/call.ts` stays). An optional find adds a second clause after
+a delay ("near an old wreck") once the player has reached its depth and spent two runs there. The
+only road is never hidden: Drill Bit, Cargo Hold, Thrusters, Fuel Tank, Scanner Array and Hull
+Plating are sold from the first dock, and the barrier gate to the next rung is always stated.
+
+### Catalog
+
+Route: **bought** (credits and keys), **found** (dug up), **gift** (handed over for a moment),
+**feat** (done a thing). Timing is when a typical player first holds it.
+
+| entry | system | route | first shown | silhouette or Next says | timing |
+|---|---|---|---|---|---|
+| Drill Bit (9 rungs) | DRILL | bought | first dock | rung price and keys | first buy, run 1 |
+| Cargo Hold (9) | HOLD | bought | first dock | price | run 1 to 2 |
+| Thrusters (9) | ENGINES | bought | first dock | price | run 2 to 3 |
+| Fuel Tank (9) | ENGINES | bought | first dock | price | run 3 to 5 |
+| Scanner Array (9) | SENSORS | bought | first dock | price | run 3 to 5 |
+| Hull Plating (9) | HULL | bought, opens at barrier 1 | run 2 | "Hull Plating, break the first core" | after core 1 |
+| Cooling Rig (7) | HULL | bought, opens at barrier 2 | after core 1 | "Cooling Rig, break the second core" | after core 2 |
+| Salvage Magnet (6) | HOLD | found, 20 m | run 1 | "? in the rock below 20 m" | run 3 to 6 |
+| Lattice Receiver (5) | SENSORS | found, 48 m | after the Magnet | "? below 48 m" | run 6 to 12 |
+| Deep Survey (5) | SENSORS | found, 62 m | after the Receiver | "? below 62 m" | hour 1 |
+| Seismic Charge (3) | ORDNANCE | found, 125 m | at 100 m | "? below 125 m" | hour 1 to 2 |
+| Repair Drone (5) | CREW | found, 150 m | after core 1 | "? below 150 m" | hour 2 |
+| Autopilot (6) | CREW | found, 190 m | after core 1 | "? below 190 m" | hour 2 to 3 |
+| Cutting Laser (5) | DRILL | found, 260 m | after core 2 | "? below 260 m" | hour 3 to 5 |
+| **Ore Sorter** (3) | HOLD | feat: sell a full hold | run 1 (Ledger) | "Ore Sorter, sell a full hold" | run 2 |
+| **Return Beacon** (4) | ENGINES | gift: a black box lands on the pad after the first lost ship | after the first loss | dark until the box lands, then the Next line says what it is | first loss |
+| **Flare Line** (4) | CREW | found: the first derelict wreck | on meeting a wreck | "? in an old wreck" | hour 1 to 2 |
+| **Pressure Seal** (4) | HULL | feat: ride out gas, a total across runs | first gas pocket | "Pressure Seal, ride out some gas" | hour 1 |
+| **Resonance Tip** (4) | DRILL | feat: cut hard rock, a total across runs | past 60 m | "Resonance Tip, keep cutting hard rock" | hour 1 to 2 |
+| **Arc Lance** (4) | ORDNANCE | found: in the vault of the second barrier | after core 1 | "? in the second barrier's vault" | hour 3 |
+| The Hollow | ability | gift: core 1 | first barrier | stated at the core | hour 1 |
+| The Call | ability | gift: core 2 | second barrier | stated at the core | hour 3 |
+| Sink | ability | bought at the first gate vendor | at the gate | price and key | hour 2 |
+| Six supplies | KIT | found in caches, then bought | first cache | the cache banner | run 3 on |
+
+Entries that enter the shop or the ship: 24. Bought and open at the first dock: 5. Bought at a gate:
+1. Earned by an act (found, gift, feat or a core broken): 18. That is three quarters, and a test
+counts it.
+
+### What each new entry does (play, never only a number)
+
+- **Ore Sorter.** When the hold is full, the bit swaps out the lowest-value ore it carries for the
+  new find instead of refusing it. Rungs widen how many kinds it will swap and let it keep keys
+  first. The hold stops being a wall in a rich seam.
+- **Return Beacon.** Once a run, hold the HOME button two seconds underground and the ship climbs
+  to the pad on its own, keeping a share of the hold (50, 65, 80, 90 percent). A way out when fuel
+  and nerve run low, at a price.
+- **Flare Line.** Thrown flares light a dark pocket for a minute, so a cave can be read before you
+  commit. Light still only darkens (`coreLit()` clamps at 1): a flare is a light added to the
+  lights, not a lightmap boost.
+- **Pressure Seal.** Gas pockets and rockfall hit for less, and at its third rung the ship vents gas
+  instead of carrying it. Answers the hazard the player has just survived.
+- **Resonance Tip.** A hard-rock strike cracks the cell behind it, so a vein in hard rock opens in
+  half the strikes. The drill gets a verb in the deep rock, not only a bigger number.
+- **Arc Lance.** A charged shot that follows a vein of one ore through the rock and breaks all of
+  it within reach. The Charge is an area and the Laser a straight line, so this is a third shape.
+
+Each has three or four rungs priced under the four-runs rule below, and each rung has a name and
+shows on the hull (a lance, a flare rack, a seal ring, a beacon mast), so the ship shows what was
+found.
+
+### The Ledger
+
+A collection surface the player opens on purpose, from the pause sheet. Three tabs: DEVICES (every
+found device and ability, with its rungs), FEATS (done, and the one current feat as the Next line),
+RELICS (as now). It lists only what has been found or done, plus the one current feat. It never
+lists a lock.
+
+### Pacing, in sessions
+
+- **First two runs (about five minutes).** A first buy: Cargo Hold or Drill Bit at 300 to 340
+  credits, a choice between two. One silhouette on the rack ("? in the rock below 20 m"). The Ore
+  Sorter feat shown.
+- **First hour.** The Magnet, Receiver and Survey found. The Ore Sorter and the Pressure Seal won by
+  act. The Hollow from core 1. The first Hull Plating rung after the barrier.
+- **First week (about eight sessions).** All three barriers and their abilities. Every found device
+  met once. A missed one reappears on the next world (`finds.ts`, unchanged). The Arc Lance and the
+  Cutting Laser arrive in the last third.
+- **No rung below a ladder's last asks more than four runs of saving.** Tested against the economy.
+
+### What Fable found, and what changed (counsel, 2026-10-02)
+
+- **A fraction in the Next line is an XP bar.** The Next line names the device and the kind of act
+  and never a count. Counts show only in the Ledger. Done.
+- **A feat must not be an errand.** The gas and hard-rock feats are totals across runs, so they land
+  on a player who is just playing and nobody hovers in gas. The thresholds are not guessed: BE sets
+  them from the bot's measured counts, near what a committed run reaches by accident. Done.
+- **The first-buy window and the Beacon's kept shares have no measurement yet.** BH reads them
+  against what two runs bank and against the climb's fuel and time, and sets the numbers from that.
+- **The tests prove shape, not pacing.** BA gains a check that the Next line never names a thing
+  out of reach (no Cooling Rig while core 1 is unbroken). A phone run with his words stays a For
+  Gideon line, since a bot that drills straight down proves reachable, not paced.
+- **Menus are his likeliest complaint.** BB's proof names one scroll region per panel and an
+  explicit close button on the Ledger and the KIT drawer.
+- **Declined: dropping Pressure Seal or Resonance Tip for a choice-heavy device.** Each answers a
+  hazard or a rock the player has just met and gives the hull a visible part. If the first hour shows
+  them as unfelt, they are cut then, with the diff read.
+
+### What I declined, and why
+
+- **A separate XP or level bar.** The research says to drop it and none of the three games has one.
+  The Ledger answers the same want without a number to grind.
+- **Showing every lock's route at once.** Fable's rule 2: one Next line, never a list.
+- **Re-pricing the old ladders.** The bots will say whether a rung breaks the four-run rule. Any
+  retune goes through `test/econ.test.mjs` and the diff is read first.
+
+### Saves
+
+An owned line stays owned. The re-grouping changes a line's system, never its key or level. `g.found`
+already records finds. New fields (`feats`, `kept`) default to empty and are written with the save. A
+save already past a feat's condition is granted that gift on the first dock, so nobody loses a
+reward for having played before.
+
+### Seed offsets
+
+New finds (Flare Line, Arc Lance) use hashed cells on their own offsets, 263 and 269, like 257 in
+`finds.ts`, so no existing world value moves. `test/baseline/blocks-frozen.json` must not change.

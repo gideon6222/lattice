@@ -196,6 +196,80 @@ the version line read from the build, patch notes from the first Play upload on.
       briefs: store
       design: ## Polish budget
 
+## From Gideon 2026-10-02 (progression)
+
+His words: "I want them to be locked and either hidden or some kind of creative way for you to get
+them at some point", then "improve the amount and the quality of the items and upgrades and XP and
+everything like that and base it around that same structure." The rule is Fable's (studio plan
+`unlocks-2026-10-02.md`, section A). Existing saves carry over: an owned line stays owned, and a
+save already past a feat is granted its gift. Nothing here ships: the app is in Google's review.
+
+- [ ] **BA The shelf rule, as pure code.** `src/sim/bay.ts`: seven systems (CREW added, Autopilot and
+      Repair Drone move to it), `bayView(system, state)` returns the owned lines plus at most one
+      silhouette, `nextLine(state)` returns the one Next line, and a route table states how every
+      entry is earned. Old saves keep every key and level. Proved by `test/bay.test.mjs`: at most
+      three lines a system, at most one silhouette a rack, every sealed entry carries a non-empty
+      route, at least half of all entries are earned by an act, a save from before the change
+      loads with every owned level intact, and the Next line never names a thing out of reach
+      (no Cooling Rig while core 1 is unbroken).
+      briefs: menu, save
+      design: ## Progression and unlocks
+
+- [ ] **BB The bay shows three and one shadow.** The fitting bay uses `bayView`: seven tabs, at most
+      three cards plus one silhouette card (outline, SEALED, its route in a sentence), the Next
+      line at the top, and the supplies move to a KIT drawer of three a page. Proved by an e2e
+      spec on a fresh save and a mid-game save (count the cards and the silhouette, read the Next
+      line, one scroll region, an explicit close on the KIT drawer) and an emulator shot of the
+      rack. The sealed slot is an empty mount with a bolt pattern, not a flat outline.
+      briefs: menu
+      design: ## Progression and unlocks
+
+- [ ] **BC The Ledger and the feats.** `src/sim/feats.ts` records the feats (full hold sold, gas ridden out and
+      hard rock cut as totals across runs, a lost ship; thresholds set from the bot's measured
+      counts, not guessed), saved as `feats`. The Ledger sheet opens from the
+      pause sheet with DEVICES, FEATS and RELICS, never a lock. A save already past a feat gets
+      its gift on the first dock. Proved by `test/feats.test.mjs` (each feat fires once, saves
+      round-trip, backfill grants once) and an e2e that opens the Ledger.
+      briefs: menu, save
+      design: ## Progression and unlocks
+
+- [ ] **BD Ore Sorter.** The first feat gift: a full hold swaps out its cheapest ore for the new
+      find. Three rungs, a model on the hull. Proved by a sim test of the swap and a bot run that
+      sells a full hold and holds the Sorter by run 2 to 3.
+      briefs: feel
+      design: ## Progression and unlocks
+
+- [ ] **BE Pressure Seal and Resonance Tip.** The gas feat and the hard-rock feat, the two
+      ladders, their effect in the sim, their hull parts. Proved by sim tests (damage taken in gas
+      with and without the Seal, strikes to open a hard vein with and without the Tip).
+      briefs: feel
+      design: ## Progression and unlocks
+
+- [ ] **BF Return Beacon.** The black box on the pad after the first lost ship, then the HOME hold
+      that climbs the ship to the pad with a share of the hold. Four rungs. Proved by a sim test of
+      the kept share and the once-a-run limit, and a bot that loses a ship and finds the box.
+      briefs: feel, save
+      design: ## Progression and unlocks
+
+- [ ] **BG Flare Line and Arc Lance.** Two new finds on seed offsets 263 and 269, crates in the
+      first derelict wreck and the second barrier's vault, with their banners, effects and
+      ladders. Proved by `test/finds.test.mjs` extended (placement, missable but never lost) and
+      the frozen block golden unchanged.
+      briefs: feel
+      design: ## Progression and unlocks
+
+- [ ] **BH Pacing bots.** Bots play the first hour on the economy probe. Proved by: a first buy
+      inside two runs, no rung under a ladder's last asking more than four runs of saving, the
+      Sorter by run 3, and every device met once by the end of the third barrier. Any rung that
+      fails is retuned with the diff read.
+      briefs: feel
+      design: ## Progression and unlocks
+
+- [ ] **BI The notes for players.** The changelog and Play release notes for all of the above, as
+      what is better now. Proved by `test/version.test.mjs`.
+      briefs: store
+      design: ## Progression and unlocks
+
 ## Milestones
 
 - [x] **F1** fuel per cell, drill buys speed not efficiency, measured at every leg
