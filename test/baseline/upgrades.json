@@ -573,6 +573,37 @@
     ],
     "matTotal": 4
   },
+  "sorter": {
+    "name": "Ore Sorter",
+    "base": 1500,
+    "mul": 1.6,
+    "max": 3,
+    "tiers": null,
+    "costs": [
+      1500,
+      2400,
+      3840,
+      6144
+    ],
+    "effects": [
+      "Not installed",
+      "Weighs the cheapest ore against a new find",
+      "Weighs the two cheapest ores against a new find",
+      "Weighs every ore, and a key mineral first"
+    ],
+    "mats": [
+      null,
+      {
+        "id": "emerald",
+        "need": 1
+      },
+      {
+        "id": "ruby",
+        "need": 1
+      }
+    ],
+    "matTotal": 2
+  },
   "survey": {
     "name": "Deep Survey",
     "base": 3600,

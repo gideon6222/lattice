@@ -57,6 +57,7 @@ import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBann
 import { stepGauges } from './gauges';
 import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard, countFeat } from './actions';
 import { HARD_ROCK } from './sim/feats';
+import { sortSwap, applySwap } from './sim/sorter';
 import { coreOpens, openGate, gateAtDepth, barrierSays, spentCoreNear } from './sim/gate';
 import { HINTS } from './sim/hints';
 import { hasAbility, SINK_RATE, SINK_HULL, HOLLOW_DRAIN } from './sim/ability';
@@ -449,6 +450,9 @@ export function tick(raw: number, draw = true) {
            the game's own existing line for "worth coming back for", which is the
            question this row is actually asking. */
         R.run.blocks++; if (b.value >= DROP_MIN_VALUE) R.run.oreBlocks++;
+        /* A full hold with a Sorter fitted: the cheaper ore to put down, if any. */
+        const swapOut = b.ore && g.weight + b.wt > S.cargoCap()
+          ? sortSwap(g.cargo, g.weight, S.cargoCap(), b.id, g.up.sorter || 0) : null;
         if (!b.ore && !b.hazard && b.hard >= HARD_ROCK) countFeat('hard');
         /* Round fifteen, Y3. Asked BEFORE anything is written, because every
            term of the answer is about to change: the cell joins `g.dug`, and
@@ -583,7 +587,7 @@ export function tick(raw: number, draw = true) {
           R.digging = null;
           save();
         }
-        else if (g.weight + b.wt > S.cargoCap()) {
+        else if (g.weight + b.wt > S.cargoCap() && !swapOut) {
           /* The drill never refuses any more. What will not fit is left at the
              cell it came from - ore waits to be flown through, plain rock is
              spoil and is thrown away, because a tunnel full of glowing dirt
@@ -600,8 +604,17 @@ export function tick(raw: number, draw = true) {
           save();
         }
         else {
-          g.cargo[b.id] = (g.cargo[b.id] || 0) + 1;
-          g.weight += b.wt;
+          if (swapOut) {
+            /* The Ore Sorter: the cheapest ore in the hold is set down where
+               the find came from, and the find takes its weight. */
+            const out = DEF[swapOut];
+            g.weight = applySwap(g.cargo, g.weight, swapOut, b.id);
+            if (out.value >= DROP_MIN_VALUE) leaveDrop(R.digging.x, R.digging.d, swapOut);
+            toast('Sorter · ' + out.name + ' out, ' + b.name + ' in');
+          } else {
+            g.cargo[b.id] = (g.cargo[b.id] || 0) + 1;
+            g.weight += b.wt;
+          }
           if (b.ore) sfx.collect(b.tone);
           /* ---------- the first one of its kind ----------
 

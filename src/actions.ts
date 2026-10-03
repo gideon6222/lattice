@@ -30,8 +30,7 @@ import { sfx } from './audio';
 import { SHAKE_TOW, SHAKE_BOOM, CHARGE_MAX } from './sim/feel';
 import type { Dir, SupplyKey, UpgradeKey } from './types';
 import { mergeLog, blankLog } from './sim/telemetry';
-import { bump, settle, holdIsFull, blankTally, type Counter, type Feat } from './sim/feats';
-
+import { bump, settle, holdIsFull, blankTally, FEAT_DEVICES, type Counter, type Feat } from './sim/feats';
 /* Stop drilling, and remember how far through the block you were.
 
    Called from every path that interrupts a dig - releasing the direction,
@@ -81,6 +80,15 @@ function announceFeats(won: Feat[]) {
   if (!won.length) return;
   toast('Feat · ' + won[0].name);
   sfx.record();
+  /* The gift: a device arrives at level one, free, the way a find does. */
+  for (const f of won) {
+    const key = Object.keys(FEAT_DEVICES).find((k) => FEAT_DEVICES[k].feat === f.key) as UpgradeKey | undefined;
+    if (!key) continue;
+    if (!g.found.includes(key)) g.found.push(key);
+    g.up[key] = Math.max(g.up[key] || 0, 1);
+    const u = UPGRADES.find((x) => x.key === key);
+    foundBanner(u ? u.name : key, FEAT_DEVICES[key].blurb);
+  }
   save();
 }
 /* A save played before feats existed is granted what its log already reached,
@@ -652,7 +660,7 @@ export function hardReset() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_KEY); } catch (e) { /* ignore */ }
   g.planet = 0; g.credits = 0;
   g.up = { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0 };
+    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0 };
   g.kit = { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 };
   g.stock = {};
   g.relics = []; g.relicsTaken = [];

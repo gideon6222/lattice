@@ -20,22 +20,25 @@ Play upload. Not yet in a Play build: the next ship carries it.
   The bundle is built by tools/twa.ps1 and uploaded by hand.
 - **A studio phone reading.** Possible now that Play installs `com.gideon.lattice` (Z2).
 
-- **The new progression, past its third box.** His ask of 2026-10-02 (locked, found, earned;
+- **The new progression, past its fourth box.** His ask of 2026-10-02 (locked, found, earned;
   DESIGN.md "Progression and unlocks"). The bay draws the rule (BB). The Ledger (pause sheet:
-  DEVICES, FEATS, RELICS) and `src/sim/feats.ts` exist (BC): four feats are recorded and saved,
-  but they hand over nothing yet, since the six new devices do not exist. Thresholds (4 gas
-  pockets, 40 hard-rock cells) are from the pure world, not a bot; BE retunes them.
+  DEVICES, FEATS, RELICS) and `src/sim/feats.ts` exist (BC). The Ore Sorter (BD) is the first
+  gift: selling a full hold hands it over at rung 1, and `FEAT_DEVICES` in feats.ts is where the
+  Seal, Tip and Beacon plug in. The other three feats still hand over nothing. Thresholds (4 gas
+  pockets, 40 hard-rock cells) are from the pure world, not a bot; BE retunes them. The Sorter
+  works on the drill only, not on floor drops or the Charge, and its swap has no e2e (sell is
+  not exposed to the page), only the pure tests.
 - **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
 
 ## Next three milestones
 
 Done 2026-09-30: **V0**, the internal track, and **AU**, the sounds he settled on. Done
 2026-10-02: **BA**, the shelf rule as code, **BB**, the bay that draws it, and **BC**, the
-Ledger and the feats.
+Ledger and the feats, and **BD**, the Ore Sorter.
 
-1. **BD** - the Ore Sorter.
-2. **BE** - Pressure Seal and Resonance Tip.
-3. **BF** - then BG to BI (see MILESTONES.md); **Z2**, the desk's perf reading, waits for the
+1. **BE** - Pressure Seal and Resonance Tip.
+2. **BF** - Return Beacon.
+3. **BG** to **BI** (see MILESTONES.md); **Z2**, the desk's perf reading, waits for the
    Play install.
 
 ## For Gideon
@@ -43,6 +46,8 @@ Ledger and the feats.
 - A phone run with your own eyes on the first two runs: is the first buy quick, and does the
   one shadow on a rack make you want to dig? Look at the Next line and the KIT button above
   the cards. (2026-10-02, the bay)
+- Does the Ore Sorter feel like a gift: fill the hold in a rich seam, sell it, then fill it again
+  and watch a cheap ore swap out for a better one? (2026-10-02, BD)
 
 ## Phone readings
 

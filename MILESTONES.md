@@ -233,7 +233,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: menu, save
       design: ## Progression and unlocks
 
-- [ ] **BD Ore Sorter.** The first feat gift: a full hold swaps out its cheapest ore for the new
+- [x] **BD Ore Sorter.** The first feat gift: a full hold swaps out its cheapest ore for the new
       find. Three rungs, a model on the hull. Proved by a sim test of the swap and a bot run that
       sells a full hold and holds the Sorter by run 2 to 3.
       briefs: feel

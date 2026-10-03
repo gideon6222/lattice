@@ -1163,6 +1163,15 @@ export const UPGRADES: Upgrade[] = [
   { key: 'magnet', name: 'Salvage Magnet', base: 1200, mul: 1.38, max: 6, keys: ['emerald', 'ruby'], system: 'hold', group: 'rig', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'Pulls drops from ' + (0.8 + l * 0.55).toFixed(1) + ' cells') },
 
+  /* ORE SORTER. Handed over for selling a full hold (feats.ts), never sold at
+     level zero. A full hold in a rich seam stops being a wall: the bit swaps
+     out the cheapest ore it carries for the new find (sorter.ts). Three rungs,
+     priced a step above the Magnet it sits beside. */
+  { key: 'sorter', name: 'Ore Sorter',     base: 1500, mul: 1.6, max: 3, keys: ['emerald', 'ruby'], system: 'hold', group: 'rig', unlock: 0,
+    effect: (l: number) => (l === 0 ? 'Not installed' :
+      (l >= 3 ? 'Weighs every ore, and a key mineral first' :
+        'Weighs the ' + (l === 1 ? 'cheapest ore' : 'two cheapest ores') + ' against a new find')) },
+
   /* DEEP SURVEY. Distinct from the Scanner, which is light and framing: this
      is knowing what is inside rock you have not cut. It also points at the
      buried Jump Drive component, which is the thing the goal most needs a way
@@ -1525,6 +1534,7 @@ export const WHAT: Record<string, string> = {
   laser: 'Cuts a straight line of rock, sealed stone included.',
   cargo: 'Carries more back from every run.',
   magnet: 'Pulls dropped ore to you from a distance.',
+  sorter: 'In a full hold, swaps the cheapest ore for a richer find.',
   thrust: 'Flies faster, up and down the shaft.',
   tank: 'Holds more fuel. The top rungs make every cell cheaper to cut.',
   auto: 'Flies you home on its own, cheaply.',

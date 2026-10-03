@@ -24,11 +24,12 @@
 import { UPGRADES, TIER_DEPTHS, SYSTEMS, type SystemKey } from './config';
 import { FINDS, FOUND_KEYS } from './finds';
 import { depthTier, gateDepth } from './gate';
+import { FEATS, FEAT_DEVICES } from './feats';
 import type { Upgrade } from '../types';
 
 /* How a thing comes to the ship. `core` is a rung that opens when a barrier's
    core breaks: an act, not a price. */
-export type RouteKind = 'bought' | 'found' | 'core';
+export type RouteKind = 'bought' | 'found' | 'core' | 'feat';
 
 export const ORDINAL = ['first', 'second', 'third'];
 
@@ -60,6 +61,12 @@ function find(key: string) { return FINDS.find((f) => f.key === key); }
 /* The route of a line, read off the table it already sits in. Nothing here is
    a second copy of a depth: a retune of `unlock` or `below` moves the words. */
 export function routeOf(u: Upgrade): Route {
+  const fd = FEAT_DEVICES[u.key];
+  if (fd) {
+    const feat = FEATS.find((x) => x.key === fd.feat);
+    const act = feat ? feat.act : '';
+    return { key: u.key, kind: 'feat', at: 0, card: 'Handed over when you ' + act + '.', act };
+  }
   const f = find(u.key);
   if (FOUND_KEYS.has(u.key) && f) {
     return { key: u.key, kind: 'found', at: Math.max(f.below, u.unlock),
@@ -130,9 +137,12 @@ export interface BayRack {
 export function bayRack(sys: SystemKey, st: BayState): BayRack {
   const inSys = UPGRADES.filter((u) => u.system === sys);
   const lines = inSys.filter((u) => ownable(u, st));
+  /* A device dug up or a rung behind a core takes the shadow before a feat
+     gift does: the feat is named by the Next line and the Ledger instead. */
+  const rank = (u: Upgrade) => (routeOf(u).kind === 'feat' ? 1e6 : 0) + routeOf(u).at;
   const next = inSys
     .filter((u) => !ownable(u, st) && shown(u, st))
-    .sort((a, b) => routeOf(a).at - routeOf(b).at)[0];
+    .sort((a, b) => rank(a) - rank(b))[0];
   return { lines, shadow: next ? { key: next.key, name: next.name, route: routeOf(next) } : null };
 }
 
@@ -143,6 +153,14 @@ export const RACK_LINES_MAX = 3;
    its name sealed; anything else names itself and its act. */
 export function nextLine(st: BayState): string | null {
   let best: Shadow | null = null;
+  /* A feat gift not yet won is the nearest thing there is: it is an act the
+     player can do now, so it is named ahead of a dig. */
+  for (const u of UPGRADES) {
+    const r = routeOf(u);
+    if (r.kind !== 'feat' || ownable(u, st) || r.at > reachEdge(st.depth)) continue;
+    if (!best || r.at < best.route.at) best = { key: u.key, name: u.name, route: r };
+  }
+  if (best) return 'Next: ' + best.name + ', ' + best.route.act;
   for (const s of SYSTEMS) {
     const sh = bayRack(s.key, st).shadow;
     if (sh && (!best || sh.route.at < best.route.at)) best = sh;

@@ -61,7 +61,7 @@ test('every shadow states its route, in words, and a found one gives a depth', (
 test('every entry has a route kind, and at least half are earned by an act', () => {
   const all = H.entries();
   assert.equal(all.length, H.UPGRADES.length + 3);
-  for (const e of all) assert.ok(['bought', 'found', 'core'].includes(e.kind), e.key);
+  for (const e of all) assert.ok(['bought', 'found', 'core', 'feat'].includes(e.kind), e.key);
   const { earned, total } = H.earnedShare();
   assert.ok(earned * 2 >= total, earned + ' of ' + total);
 });
@@ -99,8 +99,9 @@ test('the Next line is one line, in the right shape, and never carries a count',
     assert.ok(!line.includes('\n'), line);
     assert.ok(!/\d+ of \d+/.test(line), line);
   }
-  assert.equal(H.nextLine(stateAt(0)), 'Next: ? in the rock below 20 m');
-  assert.equal(H.nextLine(stateAt(60, ['magnet', 'receiver', 'survey'])), 'Next: Hull Plating, break the first core');
+  assert.equal(H.nextLine(stateAt(0)), 'Next: Ore Sorter, sell a full hold');
+  assert.equal(H.nextLine(stateAt(0, ['sorter'])), 'Next: ? in the rock below 20 m');
+  assert.equal(H.nextLine(stateAt(60, ['magnet', 'receiver', 'survey', 'sorter'])), 'Next: Hull Plating, break the first core');
 });
 
 test('a first run is told about the nearest dig, before it has found anything', () => {
@@ -115,7 +116,9 @@ test('the line carries the table: regrouping changed no key, price, level cap or
     tank: [1100, 1.42, 9, 0], cool: [6000, 1.38, 7, 226], scan: [700, 1.42, 9, 0],
     auto: [4900, 1.42, 6, 113], bomb: [3000, 1.45, 3, 0], laser: [12500, 1.45, 5, 226],
     hull: [3700, 1.38, 9, 113], magnet: [1200, 1.38, 6, 0], survey: [3600, 1.42, 5, 0],
-    receiver: [3500, 1.38, 5, 0], drone: [4400, 1.38, 5, 113]
+    receiver: [3500, 1.38, 5, 0], drone: [4400, 1.38, 5, 113],
+    /* Added in BD: the Ore Sorter, handed over for a full hold. */
+    sorter: [1500, 1.6, 3, 0]
   };
   const now = Object.fromEntries(H.UPGRADES.map((u) => [u.key, [u.base, u.mul, u.max, u.unlock]]));
   assert.deepEqual(now, frozen);

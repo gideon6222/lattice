@@ -359,6 +359,26 @@
       "total": 4
     },
     {
+      "key": "sorter",
+      "keys": [
+        "emerald",
+        "ruby"
+      ],
+      "steps": [
+        null,
+        {
+          "id": "emerald",
+          "need": 1
+        },
+        {
+          "id": "ruby",
+          "need": 1
+        }
+      ],
+      "capstone": [],
+      "total": 2
+    },
+    {
       "key": "survey",
       "keys": [
         "amethyst",

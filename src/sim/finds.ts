@@ -52,6 +52,7 @@
    a world, which is real, and is the right size of punishment. */
 
 import { W, coreDepth } from './config';
+import { FEAT_DEVICES } from './feats';
 import type { UpgradeKey } from '../types';
 
 export interface Find {
@@ -113,7 +114,12 @@ for (const f of FINDS) FIND_OF[f.key] = f;
 
 /* The set of keys that are found rather than sold. Exported as a set because
    every caller is asking "is this one of them", never iterating. */
-export const FOUND_KEYS = new Set<UpgradeKey>(FINDS.map((f) => f.key));
+export const FOUND_KEYS = new Set<UpgradeKey>([
+  ...FINDS.map((f) => f.key),
+  /* Devices handed over for a feat are owned the same way (listed in `found`)
+     but are never buried: they have no crate and no entry in FINDS. */
+  ...(Object.keys(FEAT_DEVICES) as UpgradeKey[])
+]);
 
 /* ---------- what is buried on THIS world ----------
 

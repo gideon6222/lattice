@@ -46,7 +46,13 @@ export const FEATS: Feat[] = [
     counter: 'lost', at: 1, gift: 'beacon' }
 ];
 
-export type Tally = Record<Counter, number>;
+/* The devices a feat hands over, by upgrade key: the feat that earns it and the
+   line the banner reads. BE and BF add the Seal, the Tip and the Beacon. */
+export const FEAT_DEVICES: Record<string, { feat: string; blurb: string }> = {
+  sorter: { feat: 'fullHold', blurb: 'Swaps the cheapest ore in a full hold for a richer find.' }
+};
+
+export type Tally =Record<Counter, number>;
 export const blankTally = (): Tally => ({ hold: 0, gas: 0, hard: 0, lost: 0 });
 
 /* A hold counts as full at nine tenths: ore weighs up to seven kilos, so a
