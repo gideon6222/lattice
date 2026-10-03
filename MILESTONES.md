@@ -245,7 +245,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: feel
       design: ## Progression and unlocks
 
-- [ ] **BF Return Beacon.** The black box on the pad after the first lost ship, then the HOME hold
+- [x] **BF Return Beacon.** The black box on the pad after the first lost ship, then the HOME hold
       that climbs the ship to the pad with a share of the hold. Four rungs. Proved by a sim test of
       the kept share and the once-a-run limit, and a bot that loses a ship and finds the box.
       briefs: feel, save

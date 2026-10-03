@@ -421,6 +421,27 @@
       "total": 2
     },
     {
+      "key": "beacon",
+      "keys": [
+        "magmite",
+        "coreite"
+      ],
+      "steps": [
+        null,
+        null,
+        {
+          "id": "magmite",
+          "need": 1
+        },
+        {
+          "id": "coreite",
+          "need": 1
+        }
+      ],
+      "capstone": [],
+      "total": 2
+    },
+    {
       "key": "survey",
       "keys": [
         "amethyst",

@@ -55,7 +55,8 @@ import { aimRelic } from './relic';
 import { stepParallax, fadeParallax, setParallaxTint } from './parallax';
 import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner, savedMoment, tickSaved } from './ui';
 import { stepGauges } from './gauges';
-import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard, countFeat } from './actions';
+import { beaconReady, BEACON_HOLD_SECONDS } from './sim/beacon';
+import { useBeacon, sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard, countFeat } from './actions';
 import { HARD_ROCK } from './sim/feats';
 import { sortSwap, applySwap } from './sim/sorter';
 import { tipWork } from './sim/hazards';
@@ -346,6 +347,12 @@ export function tick(raw: number, draw = true) {
     /* The only clock the run log keeps. It runs in play and nowhere else, so
        time spent paused, shopping or reading the manifest never dilutes a rate. */
     R.run.sec += dt;
+    /* HOME is held, not tapped: a climb that costs part of the hold is not
+       one to fire with a stray thumb. Letting go drops the hold at once. */
+    if (R.homeHeld && beaconReady(g.up.beacon || 0, R.beaconUsed, !atSurface())) {
+      R.homeT += dt;
+      if (R.homeT >= BEACON_HOLD_SECONDS) { R.homeT = 0; R.homeHeld = false; useBeacon(); }
+    } else R.homeT = 0;
     /* The timed consumables. On `dt` rather than `raw`, so hit-stop pauses
        them with the simulation - a window bought with a limited resource must
        not be spent by frames in which nothing happened. */

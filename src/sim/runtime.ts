@@ -111,6 +111,11 @@ export const R = {
   /* Edge trigger for arriving at the pad, since selling used to happen on
      landing in a cell and there are no cell arrivals any more. */
   wasAtSurface: true,
+  /* The Return Beacon (BF): HOME is held, for how long, and whether this run's
+     one climb is spent. Cleared when the run is banked or lost. */
+  homeHeld: false,
+  homeT: 0,
+  beaconUsed: false,
   /* The same shape, for a gate's station: which tier the ship was last at, or
      -1. Round fifteen, Y8. */
   wasAtGate: -1,

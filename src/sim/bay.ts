@@ -114,6 +114,7 @@ export function reachEdge(depth: number): number {
    SHADOW_LEAD metres before its depth and only inside the reachable tier. A
    line that opens at a core appears one barrier ahead and no further. */
 function shown(u: Upgrade, st: BayState): boolean {
+  if (FEAT_DEVICES[u.key]?.dark) return false;
   const r = routeOf(u);
   const edge = reachEdge(st.depth);
   if (r.kind === 'found') {
@@ -157,7 +158,7 @@ export function nextLine(st: BayState): string | null {
      player can do now, so it is named ahead of a dig. */
   for (const u of UPGRADES) {
     const r = routeOf(u);
-    if (r.kind !== 'feat' || ownable(u, st) || r.at > reachEdge(st.depth)) continue;
+    if (r.kind !== 'feat' || FEAT_DEVICES[u.key]?.dark || ownable(u, st) || r.at > reachEdge(st.depth)) continue;
     if (!best || r.at < best.route.at) best = { key: u.key, name: u.name, route: r };
   }
   if (best) return 'Next: ' + best.name + ', ' + best.route.act;

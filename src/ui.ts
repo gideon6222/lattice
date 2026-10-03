@@ -1,6 +1,7 @@
 import { SYSTEMS, SUPPLY_SYSTEM, WHAT, shelfStock, type SystemKey } from './sim/config';
 import { keyNear, senseRange } from './sim/keys';
 import { ledgerFeats } from './sim/feats';
+import { beaconReady, BEACON_HOLD_SECONDS } from './sim/beacon';
 import { FOUND_KEYS } from './sim/finds';
 import { ABILITIES } from './sim/ability';
 import { bayRack, nextLine, type BayState } from './sim/bay';
@@ -358,6 +359,14 @@ export function updateHUD() {
     ui.btnAuto.textContent = 'AUTOPILOT  ' + Math.ceil(g.pd * S.autoRate()) + ' FUEL';
   } else {
     ui.btnAuto.style.display = 'none';
+  }
+  /* The Return Beacon's HOME: shown underground while this run's climb is
+     unspent, and filled left to right as it is held. */
+  const home = el('btnHome');
+  if (home) {
+    const on = g.mode === 'play' && beaconReady(g.up.beacon || 0, R.beaconUsed, !atSurface());
+    home.style.display = on ? '' : 'none';
+    home.style.setProperty('--hold', Math.round(Math.min(1, R.homeT / BEACON_HOLD_SECONDS) * 100) + '%');
   }
   /* ---------- heat, as its own channel ----------
 

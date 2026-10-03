@@ -27,19 +27,22 @@ Play upload. Not yet in a Play build: the next ship carries it.
   the Resonance Tip (BE, `src/sim/hazards.ts`: gas hits for less and the top rungs vent it, hard
   rock needs fewer strikes). The lost-ship feat still hands over nothing (BF). Thresholds (4 gas
   pockets, 40 hard-rock cells) are from the pure world, not a bot, and were kept. Rockfall has
-  no hull damage in the game, so the Seal covers gas only. The Sorter works on the drill only,
-  and none of the three has an e2e (the feats are not reachable from the page), only pure tests.
+  no hull damage in the game, so the Seal covers gas only. The Sorter works on the drill only.
+  The first lost ship now hands over the Return Beacon (BF, `src/sim/beacon.ts`): hold HOME two
+  seconds underground, once a run, and the ship climbs to the pad keeping 50/65/80/90% of the
+  ore and all keys. It is dark in the bay until the box lands. Kept shares are the design's own
+  numbers, BH measures them. None of the four gifts has an e2e, only pure tests.
 - **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
 
 ## Next three milestones
 
 Done 2026-09-30: **V0**, the internal track, and **AU**, the sounds he settled on. Done
 2026-10-02: **BA**, the shelf rule as code, **BB**, the bay that draws it, and **BC**, the
-Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip.
+Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip, and **BF**, the Return Beacon.
 
-1. **BF** - Return Beacon.
-2. **BG** - Flare Line and Arc Lance.
-3. **BH** and **BI** (see MILESTONES.md); **Z2**, the desk's perf reading, waits for the
+1. **BG** - Flare Line and Arc Lance.
+2. **BH** - Pacing bots.
+3. **BI** (see MILESTONES.md); **Z2**, the desk's perf reading, waits for the
    Play install.
 
 ## For Gideon
@@ -52,6 +55,9 @@ Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal 
 
 - Do the Pressure Seal and Resonance Tip feel earned: ride out four gas pockets over a few runs,
   cut hard rock in the deep, and see the hull ring and the drill fins arrive? (2026-10-03, BE)
+
+- Does the Return Beacon feel like a rescue: lose a ship, then hold HOME deep down and see the
+  climb, the kept share in the toast and the mast on the hull? (2026-10-03, BF)
 
 ## Phone readings
 

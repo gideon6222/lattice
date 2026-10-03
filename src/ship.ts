@@ -598,6 +598,8 @@ const sieve = bolt(new THREE.CylinderGeometry(0.05, 0.05, 0.16, 8), steelMat, -0
 /* The Pressure Seal: a ring round the hull, the Resonance Tip: a fin by the bit. */
 const sealRing = bolt(new THREE.TorusGeometry(0.2, 0.018, 6, 16), steelMat, 0, 0.04, 0, [Math.PI / 2, 0, 0]);
 const tipFin = boltRow(new THREE.ConeGeometry(0.025, 0.12, 5), trimMat, [[-0.07, -0.3, 0.1], [0.07, -0.3, 0.1]], [Math.PI, 0, 0]);
+/* The Return Beacon: a mast with a lamp on the tail, tall at the top rungs. */
+const homeMast = bolt(new THREE.CylinderGeometry(0.008, 0.012, 0.22, 4), steelMat, -0.05, 0.34, -0.26);
 const barrel = bolt(new THREE.CylinderGeometry(0.022, 0.03, 0.34, 6), steelMat, 0.16, -0.26, 0.04);
 
 /* Which line each part belongs to, for the bay: a tap on the ship finds the
@@ -605,7 +607,7 @@ const barrel = bolt(new THREE.CylinderGeometry(0.022, 0.03, 0.34, 6), steelMat, 
 const PART_OF: [THREE.Object3D, string][] = [
   [tanks, 'tank'], [rads, 'cool'], [pod, 'cargo'], [mast, 'scan'], [dish, 'scan'], [jets, 'thrust'],
   [plates, 'hull'], [coil, 'magnet'], [probe, 'survey'], [whip, 'receiver'], [droneBody, 'drone'],
-  [sieve, 'sorter'], [sealRing, 'seal'], [tipFin, 'tip'], [beacon, 'auto'], [charges, 'bomb'], [barrel, 'laser'], [bit, 'drill']
+  [sieve, 'sorter'], [sealRing, 'seal'], [tipFin, 'tip'], [homeMast, 'beacon'], [beacon, 'auto'], [charges, 'bomb'], [barrel, 'laser'], [bit, 'drill']
 ];
 for (const [o, k] of PART_OF) o.traverse((c) => { c.userData.part = k; });
 /* Every line a part exists for, for the test that no line is a placeholder. */
@@ -664,6 +666,8 @@ export function setUpgradeHardware(up: Record<string, number>) {
   on(sealRing, (up.seal || 0) >= 1);
   sealRing.scale.setScalar(1 + Math.max(0, (up.seal || 0) - 1) * 0.08);
   tipFin.count = Math.min(2, Math.ceil((up.tip || 0) / 2));
+  on(homeMast, (up.beacon || 0) >= 1);
+  homeMast.scale.y = 1 + Math.max(0, (up.beacon || 0) - 1) * 0.25;
   on(beacon, (up.auto || 0) >= 1);
   charges.count = Math.min(3, up.bomb || 0);
   on(barrel, (up.laser || 0) >= 1);

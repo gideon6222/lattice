@@ -148,6 +148,7 @@ function hold(id: string, set: (on: boolean) => void) {
 }
 hold('abSee', (on) => { R.seeHeld = on; });
 hold('abSink', (on) => { R.sinkHeld = on; });
+hold('btnHome', (on) => { R.homeHeld = on; });
 
 ui.btnAuto.onclick = autopilot;
 ui.btnShop.onclick = () => {

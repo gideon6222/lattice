@@ -6,6 +6,7 @@ import { rnd } from './util';
 import { regionAt, REGION_TRAIT, REGION_COUNT, WORLD_DEPTH } from './region';
 import { FOUND_KEYS } from './finds';
 import { sealTake, tipWork, SEAL_VENTS_AT, TIP_FROM } from './hazards';
+import { beaconKeep } from './beacon';
 
 /* World width in columns. Only about 8 fit on a portrait screen at the current
    framing, so the rest is lateral room to explore: which way to dig at a given
@@ -1184,6 +1185,12 @@ export const UPGRADES: Upgrade[] = [
     effect: (l: number) => (l === 0 ? 'Not installed' :
       'Hard rock needs ' + Math.round(tipWork(l, TIP_FROM) * 100) + '% of the strikes') },
 
+  /* RETURN BEACON. Left on the pad as a black box when the first ship is lost
+     (feats.ts), never sold at level zero. Hold HOME underground, once a run, and
+     the ship climbs to the pad keeping a share of the ore (beacon.ts). */
+  { key: 'beacon', name: 'Return Beacon',  base: 2000, mul: 1.5, max: 4, keys: ['magmite', 'coreite'], system: 'engines', group: 'survival', unlock: 0,
+    effect: (l: number) => (l === 0 ? 'Not installed' : 'HOME keeps ' + Math.round(beaconKeep(l) * 100) + '% of the ore') },
+
   /* DEEP SURVEY. Distinct from the Scanner, which is light and framing: this
      is knowing what is inside rock you have not cut. It also points at the
      buried Jump Drive component, which is the thing the goal most needs a way
@@ -1548,6 +1555,7 @@ export const WHAT: Record<string, string> = {
   magnet: 'Pulls dropped ore to you from a distance.',
   seal: 'Gas pockets hit for less, and the top rungs vent them.',
   tip: 'Hard rock cracks open in fewer strikes.',
+  beacon: 'Once a run, climbs you to the pad with part of the hold.',
   sorter: 'In a full hold, swaps the cheapest ore for a richer find.',
   thrust: 'Flies faster, up and down the shaft.',
   tank: 'Holds more fuel. The top rungs make every cell cheaper to cut.',

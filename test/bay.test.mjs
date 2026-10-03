@@ -122,7 +122,9 @@ test('the line carries the table: regrouping changed no key, price, level cap or
     /* Added in BD: the Ore Sorter, handed over for a full hold. */
     sorter: [1500, 1.6, 3, 0],
     /* Added in BE: the Pressure Seal and the Resonance Tip, handed over for gas and hard rock. */
-    seal: [1800, 1.5, 4, 0], tip: [2200, 1.5, 4, 0]
+    seal: [1800, 1.5, 4, 0], tip: [2200, 1.5, 4, 0],
+    /* Added in BF: the Return Beacon, handed over for the first lost ship. */
+    beacon: [2000, 1.5, 4, 0]
   };
   const now = Object.fromEntries(H.UPGRADES.map((u) => [u.key, [u.base, u.mul, u.max, u.unlock]]));
   assert.deepEqual(now, frozen);

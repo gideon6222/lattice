@@ -136,7 +136,7 @@ export interface Block {
 export type UpgradeKey =
   | 'drill' | 'cargo' | 'thrust' | 'tank' | 'cool' | 'scan' | 'auto'
   | 'bomb' | 'laser' | 'hull' | 'magnet' | 'survey' | 'drone'
-  | 'receiver' | 'sorter' | 'seal' | 'tip';
+  | 'receiver' | 'sorter' | 'seal' | 'tip' | 'beacon';
 
 export type SupplyKey = 'coolant' | 'patch' | 'cell' | 'overdrive' | 'bulwark' | 'pulse';
 

@@ -672,6 +672,40 @@
     ],
     "matTotal": 2
   },
+  "beacon": {
+    "name": "Return Beacon",
+    "base": 2000,
+    "mul": 1.5,
+    "max": 4,
+    "tiers": null,
+    "costs": [
+      2000,
+      3000,
+      4500,
+      6750,
+      10125
+    ],
+    "effects": [
+      "Not installed",
+      "HOME keeps 50% of the ore",
+      "HOME keeps 65% of the ore",
+      "HOME keeps 80% of the ore",
+      "HOME keeps 90% of the ore"
+    ],
+    "mats": [
+      null,
+      null,
+      {
+        "id": "magmite",
+        "need": 1
+      },
+      {
+        "id": "coreite",
+        "need": 1
+      }
+    ],
+    "matTotal": 2
+  },
   "survey": {
     "name": "Deep Survey",
     "base": 3600,

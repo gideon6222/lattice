@@ -30,6 +30,7 @@ import { sfx } from './audio';
 import { SHAKE_TOW, SHAKE_BOOM, CHARGE_MAX } from './sim/feel';
 import type { Dir, SupplyKey, UpgradeKey } from './types';
 import { mergeLog, blankLog } from './sim/telemetry';
+import { beaconReady, beaconCargo } from './sim/beacon';
 import { bump, settle, holdIsFull, blankTally, FEAT_DEVICES, type Counter, type Feat } from './sim/feats';
 /* Stop drilling, and remember how far through the block you were.
 
@@ -71,8 +72,8 @@ export function stopDigging() {
   sfx.digStop();
 }
 
-/* Count one more of a feat's counter and say so when it wins. The gifts are
-   built in BD to BF; for now the Ledger records the feat. */
+/* Count one more of a feat's counter and say so when it wins, handing over its
+   gift (FEAT_DEVICES) the way a find does. */
 export function countFeat(counter: Counter, n = 1) {
   announceFeats(bump(g.tally, g.feats, counter, n));
 }
@@ -99,6 +100,8 @@ export function dockFeats() {
 
 export function sell() {
   dockFeats();
+  /* Being on the pad ends the run, so the Beacon's one climb comes back. */
+  R.beaconUsed = false;
   const wasFull = holdIsFull(g.weight, S.cargoCap());
   /* Keys first, and they are BANKED, never sold (round seventeen, AK): a key
      is an ingredient you keep for the rung that needs it. Before the early
@@ -549,6 +552,30 @@ export function autopilot() {
   toast('Autopilot engaged · ' + route.length + ' m of tunnel');
 }
 
+/* The Return Beacon (BF). The ship climbs to the pad in a straight line through
+   the rock, keeping a share of the ore, once a run. Arrival is the autopilot's
+   own: the loop lands the ship and sells. The latch clears when the run does. */
+export function useBeacon() {
+  const level = g.up.beacon || 0;
+  if (g.mode !== 'play' || !beaconReady(level, R.beaconUsed, !atSurface())) return;
+  const kept = beaconCargo(g.cargo, level, (id) => (DEF[id] ? { wt: DEF[id].wt, key: isKey(id) } : undefined));
+  const left = haulValue();
+  g.cargo = kept.cargo;
+  g.weight = kept.weight;
+  const keptValue = haulValue();
+  R.beaconUsed = true;
+  stopDigging();
+  const from = new THREE.Vector3(worldX(g.px), -g.pd, 0);
+  const to = new THREE.Vector3(worldX(START_X), 1, 0);
+  const curve = new THREE.CatmullRomCurve3([from, to], false, 'catmullrom', 0.35);
+  const len = curve.getLength();
+  R.flight = { curve, len, u: 0, dur: len / clamp(len / 4.2, 8, 26), t: 0, last: from.clone() };
+  R.vx = 0; R.vy = 0; R.held = null;
+  sfx.thrust();
+  g.mode = 'fly';
+  toast('Return Beacon · kept ◈ ' + keptValue.toLocaleString() + (left > keptValue ? ' of ◈ ' + left.toLocaleString() : ''));
+}
+
 /* ---------- death ----------
 
    Playtest: *"I dont want towing to be a thing. if you run out of gas, you
@@ -580,6 +607,7 @@ export function die(cause: 'fuel' | 'heat' | 'gas' | 'sink', after: () => void =
   /* Counted before anything is cleared, and it is still the number that says
      most about whether the game is priced right. */
   R.run.towed++;
+  R.beaconUsed = false;
   countFeat('lost');
   const lost = haulValue();
   g.cargo = {};
@@ -660,7 +688,7 @@ export function hardReset() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_KEY); } catch (e) { /* ignore */ }
   g.planet = 0; g.credits = 0;
   g.up = { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0, seal: 0, tip: 0 };
+    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0, seal: 0, tip: 0, beacon: 0 };
   g.kit = { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 };
   g.stock = {};
   g.relics = []; g.relicsTaken = [];

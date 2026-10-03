@@ -48,10 +48,13 @@ export const FEATS: Feat[] = [
 
 /* The devices a feat hands over, by upgrade key: the feat that earns it and the
    line the banner reads. BE and BF add the Seal, the Tip and the Beacon. */
-export const FEAT_DEVICES: Record<string, { feat: string; blurb: string }> = {
+export const FEAT_DEVICES: Record<string, { feat: string; blurb: string; dark?: boolean }> = {
   sorter: { feat: 'fullHold', blurb: 'Swaps the cheapest ore in a full hold for a richer find.' },
   seal: { feat: 'ridOutGas', blurb: 'Gas pockets hit the hull for less.' },
-  tip: { feat: 'hardRock', blurb: 'Hard rock cracks open in fewer strikes.' }
+  tip: { feat: 'hardRock', blurb: 'Hard rock cracks open in fewer strikes.' },
+  /* Dark: losing a ship is never an errand, so no silhouette and no Next line
+     names it until the box has landed. */
+  beacon: { feat: 'shipLost', blurb: 'Hold HOME underground and the ship climbs to the pad with part of the hold.', dark: true }
 };
 
 export type Tally =Record<Counter, number>;
