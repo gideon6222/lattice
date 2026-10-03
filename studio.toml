@@ -33,4 +33,4 @@ app_id = "4974028602351317913"
 [build]
 model = "sonnet"
 effort = "medium"
-account = "main"
+account = "second"
