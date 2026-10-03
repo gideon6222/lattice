@@ -20,25 +20,27 @@ Play upload. Not yet in a Play build: the next ship carries it.
   The bundle is built by tools/twa.ps1 and uploaded by hand.
 - **A studio phone reading.** Possible now that Play installs `com.gideon.lattice` (Z2).
 
-- **The new progression, past its first box.** His ask of 2026-10-02 (locked, found, earned;
-  DESIGN.md "Progression and unlocks"). The rule is in pure code (BA, `src/sim/bay.ts`) but the
-  bay does not use it yet: racks still run past three, there is no Next line, no Ledger, and
-  the six new finds and feats do not exist.
+- **The new progression, past its second box.** His ask of 2026-10-02 (locked, found, earned;
+  DESIGN.md "Progression and unlocks"). The bay now draws the rule (BB): three lines and one
+  sealed shadow a rack, a Next line, supplies in a KIT drawer. There is no Ledger yet, and the
+  six new finds and feats do not exist.
+- **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
 
 ## Next three milestones
 
 Done 2026-09-30: **V0**, the internal track, and **AU**, the sounds he settled on. Done
-2026-10-02: **BA**, the shelf rule as code (tested, not yet drawn).
+2026-10-02: **BA**, the shelf rule as code, and **BB**, the bay that draws it.
 
-1. **BB** - the bay shows three and one shadow, with the Next line and a KIT drawer.
-2. **BC** - the Ledger and the feats.
-3. **BD** - the Ore Sorter. Then BE to BI (see MILESTONES.md); **Z2**, the desk's perf reading,
-   waits for the Play install.
+1. **BC** - the Ledger and the feats.
+2. **BD** - the Ore Sorter.
+3. **BE** - then BF to BI (see MILESTONES.md); **Z2**, the desk's perf reading, waits for the
+   Play install.
 
 ## For Gideon
 
-- A phone run with your own eyes on the first two runs once BB is in: is the first buy quick
-  and does the one shadow on a rack make you want to dig? (2026-10-02, the bay)
+- A phone run with your own eyes on the first two runs: is the first buy quick, and does the
+  one shadow on a rack make you want to dig? Look at the Next line and the KIT button above
+  the cards. (2026-10-02, the bay)
 
 ## Phone readings
 

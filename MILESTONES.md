@@ -215,7 +215,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: menu, save
       design: ## Progression and unlocks
 
-- [ ] **BB The bay shows three and one shadow.** The fitting bay uses `bayView`: seven tabs, at most
+- [x] **BB The bay shows three and one shadow.** The fitting bay uses `bayView`: seven tabs, at most
       three cards plus one silhouette card (outline, SEALED, its route in a sentence), the Next
       line at the top, and the supplies move to a KIT drawer of three a page. Proved by an e2e
       spec on a fresh save and a mid-game save (count the cards and the silhouette, read the Next

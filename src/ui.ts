@@ -1,5 +1,6 @@
 import { SYSTEMS, SUPPLY_SYSTEM, WHAT, shelfStock, type SystemKey } from './sim/config';
 import { keyNear, senseRange } from './sim/keys';
+import { bayRack, nextLine, type BayState } from './sim/bay';
 import { vendorLines, sellsRung, rungBand, sellsSupplies, dealAt, SINK_GATE, SINK_PRICE, type Place } from './sim/vendor';
 import { HULL_MAX, DEF, isOre, isKey, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
 import { setGauges, setFuelReserve } from './gauges';
@@ -41,7 +42,7 @@ export const ui = {
   anchors: mustEl('anchors'), callLamp: mustEl('callLamp'), keyNear: mustEl('keyNear'),
   cargoTxt: mustEl('cargoTxt'), fuelTxt: mustEl('fuelTxt'),
   toast: mustEl('toast'), shop: mustEl('shop'), shopCredits: mustEl('shopCredits'),
-  rack: mustEl('rack'), systems: mustEl('systems'), shopName: mustEl('shopName'), shopSub: mustEl('shopSub'),
+  rack: mustEl('rack'), bayNext: mustEl('bayNext'), systems: mustEl('systems'), shopName: mustEl('shopName'), shopSub: mustEl('shopSub'),
   event: mustEl('event'), evTitle: mustEl('evTitle'), evBody: mustEl('evBody'), evBtn: mustEl('evBtn'),
   manifest: mustEl('manifest'), manifestRows: mustEl('manifestRows'), manifestTotal: mustEl('manifestTotal'),
   vault: mustEl('vault'),
@@ -586,6 +587,7 @@ export function openBay() {
 export function selectSystem(k: SystemKey) {
   if (k !== baySys) bayPick = 0;
   baySys = k;
+  bayKit = false;
   buildShop();
   ui.rack.scrollTop = 0;
 }
@@ -616,13 +618,28 @@ function placeNow(): Place { return docked() ? -1 : gateHere(); }
 
 /* The lines a system shows, in the order the table lists them: what this
    counter stocks (see vendor.ts; found devices included, unfound ones not). */
-function linesOf(sys: SystemKey): Upgrade[] {
-  return vendorLines(placeNow(), g.best.depth, g.found).filter((u) => u.system === sys);
+function bayState(): BayState { return { depth: g.best.depth, found: g.found }; }
+/* Only what the shelf rule shows (BA): at most three owned lines a system. */
+export function bayLines(sys: SystemKey): Upgrade[] {
+  const rack = bayRack(sys, bayState()).lines;
+  return vendorLines(placeNow(), g.best.depth, g.found).filter((u) => rack.includes(u));
 }
-function suppliesOf(sys: SystemKey): Supply[] {
+const linesOf = bayLines;
+
+/* The KIT drawer: every supply found, three a page, drawn over the same rack
+   so the bay keeps one scroll region. */
+export const KIT_PAGE = 3;
+let bayKit = false, kitPage = 0;
+function kitSupplies(): Supply[] {
   if (!sellsSupplies(placeNow())) return [];
-  return SUPPLIES.filter((sp) => SUPPLY_SYSTEM[sp.key] === sys && g.foundKit.includes(sp.key));
+  return SUPPLIES.filter((sp) => g.foundKit.includes(sp.key));
 }
+export function openKit(on: boolean) {
+  bayKit = on; kitPage = 0; bayPick = 0;
+  buildShop();
+  ui.rack.scrollTop = 0;
+}
+export function kitOpen() { return bayKit; }
 
 /* The gate's own two things (AO): its one key-priced supply a visit, and Sink
    at the first gate. Each shows in the system it serves. */
@@ -645,7 +662,6 @@ function sinkOk(): boolean {
 /* Whether anything in a system can be bought right now - the strip's pip. */
 function canBuyIn(sys: SystemKey): boolean {
   for (const u of linesOf(sys)) if (buyState(u).ok) return true;
-  for (const sp of suppliesOf(sys)) if (g.kit[sp.key] < sp.max && g.credits >= sp.cost) return true;
   if (dealIn(sys) && dealOk()) return true;
   if (sinkHere(sys) && sinkOk()) return true;
   return false;
@@ -684,6 +700,7 @@ export function buildShop() {
   ui.shopSub.textContent = gate >= 0 && !docked()
     ? 'GATE ' + (gate + 1) + ' · ' + gateDepth(gate) + ' M · SAVED HERE' : 'THE PAD';
   buildStrip();
+  buildNext();
   buildRack();
   reframeIfNeeded();
 }
@@ -692,10 +709,10 @@ function buildStrip() {
   ui.systems.innerHTML = '';
   for (const sys of SYSTEMS) {
     const b = document.createElement('button');
-    b.className = 'sysb' + (sys.key === baySys ? ' on' : '') + (canBuyIn(sys.key) ? ' can' : '');
+    b.className = 'sysb' + (sys.key === baySys && !bayKit ? ' on' : '') + (canBuyIn(sys.key) ? ' can' : '');
     b.dataset.sys = sys.key;
     b.setAttribute('role', 'tab');
-    b.setAttribute('aria-selected', String(sys.key === baySys));
+    b.setAttribute('aria-selected', String(sys.key === baySys && !bayKit));
     b.innerHTML = SYS_ICON[sys.key] + '<span>' + sys.name + '</span><i class="pip"></i>';
     b.onclick = () => { sfx.ui(); selectSystem(sys.key); };
     ui.systems.appendChild(b);
@@ -704,8 +721,71 @@ function buildStrip() {
 
 const hex = (c: number) => '#' + c.toString(16).padStart(6, '0');
 
+/* The one Next line, and the KIT button beside it. */
+function buildNext() {
+  ui.bayNext.innerHTML = '';
+  const t = document.createElement('div');
+  t.className = 'bnextline';
+  t.textContent = nextLine(bayState()) || 'Everything in reach is on the ship.';
+  ui.bayNext.appendChild(t);
+  const b = document.createElement('button');
+  b.className = 'bkit' + (bayKit ? ' on' : '');
+  b.id = 'bayKit';
+  b.textContent = 'KIT';
+  b.hidden = !kitSupplies().length && !bayKit;
+  b.onclick = () => { sfx.ui(); openKit(!bayKit); };
+  ui.bayNext.appendChild(b);
+}
+
+function buildKit() {
+  const all = kitSupplies();
+  const pages = Math.max(1, Math.ceil(all.length / KIT_PAGE));
+  kitPage = Math.min(kitPage, pages - 1);
+  const head = document.createElement('div');
+  head.className = 'bsub bkithead';
+  head.innerHTML = '<span>KIT · ' + (kitPage + 1) + '/' + pages + '</span>';
+  const mk = (txt: string, label: string, on: () => void, dis = false) => {
+    const x = document.createElement('button');
+    x.className = 'bkx'; x.textContent = txt; x.setAttribute('aria-label', label); x.disabled = dis;
+    x.onclick = () => { sfx.ui(); on(); };
+    return x;
+  };
+  head.appendChild(mk('‹', 'Previous page', () => { kitPage--; bayPick = 0; buildShop(); }, kitPage <= 0));
+  head.appendChild(mk('›', 'Next page', () => { kitPage++; bayPick = 0; buildShop(); }, kitPage >= pages - 1));
+  const close = mk('×', 'Close the kit', () => openKit(false));
+  close.id = 'kitClose';
+  head.appendChild(close);
+  ui.rack.appendChild(head);
+  let i = 0;
+  for (const sp of all.slice(kitPage * KIT_PAGE, (kitPage + 1) * KIT_PAGE)) {
+    ui.rack.appendChild(supplyCard(sp, i++ === bayPick));
+  }
+  if (!i) {
+    const e = document.createElement('div');
+    e.className = 'bwhat';
+    e.style.padding = '14px 4px';
+    e.textContent = 'Nothing in the kit yet. Supplies are found in the rock.';
+    ui.rack.appendChild(e);
+  }
+}
+
+/* The sealed mount: an empty plate with a bolt pattern, and its route in a
+   sentence. Never a button, never a price. */
+function shadowCard(sh: { name: string; route: { kind: string; card: string } }): HTMLElement {
+  const c = document.createElement('div');
+  c.className = 'bshadow';
+  c.dataset.shadow = sh.name;
+  c.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="9" width="38" height="30" rx="5"/>' +
+    '<circle cx="11" cy="15" r="1.7"/><circle cx="37" cy="15" r="1.7"/><circle cx="11" cy="33" r="1.7"/><circle cx="37" cy="33" r="1.7"/>' +
+    '<path d="M18 24h12M24 18v12"/></svg>' +
+    '<div><div class="bname">' + (sh.route.kind === 'found' ? '? ? ?' : sh.name) + ' <span class="blvl">SEALED</span></div>' +
+    '<div class="bwhat">' + sh.route.card + '</div></div>';
+  return c;
+}
+
 function buildRack() {
   ui.rack.innerHTML = '';
+  if (bayKit) { buildKit(); return; }
   let i = 0;
   /* The gate's own counter (AO) comes FIRST: it is the reason to stop here
      rather than at the pad, and below the lines it sat under the fold. */
@@ -719,15 +799,9 @@ function buildRack() {
     if (deal) ui.rack.appendChild(dealCard(deal, i++ === bayPick));
   }
   for (const u of linesOf(baySys)) ui.rack.appendChild(upgradeCard(u, i++ === bayPick));
-  const sups = suppliesOf(baySys);
-  if (sups.length) {
-    const h = document.createElement('div');
-    h.className = 'bsub';
-    h.textContent = 'SUPPLIES';
-    ui.rack.appendChild(h);
-    for (const sp of sups) ui.rack.appendChild(supplyCard(sp, i++ === bayPick));
-  }
-  if (!i) {
+  const shadow = bayRack(baySys, bayState()).shadow;
+  if (shadow) ui.rack.appendChild(shadowCard(shadow));
+  if (!i && !shadow) {
     const e = document.createElement('div');
     e.className = 'bwhat';
     e.style.padding = '14px 4px';

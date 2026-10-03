@@ -106,7 +106,13 @@ async function tapBay(page: Page, key: string): Promise<Locator> {
     return u ? u.system : w.SUPPLY_SYSTEM[k];
   }, key);
   expect(sys, key + ' belongs to no system').toBeTruthy();
-  await page.locator('.sysb[data-sys="' + sys + '"]').click();
+  /* A supply is in the KIT drawer, not in a system's rack. */
+  const isSupply = await page.evaluate((k) => !(window as any).__cw.upgradeOf(k) && !!(window as any).__cw.SUPPLY_SYSTEM[k], key);
+  if (isSupply) {
+    if (!await page.evaluate(() => (window as any).__cw.kitOpen())) await page.locator('#bayKit').click();
+  } else {
+    await page.locator('.sysb[data-sys="' + sys + '"]').click();
+  }
   const card = page.locator('#rack .bcard[data-key="' + key + '"]');
   await expect(card, key + ' has no card in ' + sys).toHaveCount(1);
   await card.scrollIntoViewIfNeeded();
@@ -367,7 +373,7 @@ test('the shop, manifest and pause menu all open', async ({ page }) => {
      in exactly one system - a line with no card is a line nobody can buy. */
   const onShelf: string[] = await page.evaluate(() => (window as any).__cw.shelfKeys());
   const carded: string[] = [];
-  for (const sys of ['drill', 'hold', 'engines', 'hull', 'sensors', 'ordnance']) {
+  for (const sys of ['drill', 'hold', 'engines', 'hull', 'sensors', 'crew', 'ordnance']) {
     await page.locator('.sysb[data-sys="' + sys + '"]').click();
     carded.push(...await page.locator('#rack .bcard').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.key || '')));
   }
@@ -378,10 +384,22 @@ test('the shop, manifest and pause menu all open', async ({ page }) => {
   const drill = await tapBay(page, 'drill');
   await expect(drill).toContainText('Drill Bit');
   await expect(drill).toContainText('Cuts rock faster');
-  const sealed = await page.evaluate(() => (window as any).__cw.sealedKey());
-  expect(sealed, 'nothing on the shelf is sealed, so there is no reason to go deeper').toBeTruthy();
-  await expect(await tapBay(page, sealed as string), 'a sealed card must say what unlocks it')
-    .toContainText('Sealed until');
+  /* Never more than three cards and one sealed shadow a rack, one Next line,
+     and one scroll region. */
+  let shadows = 0;
+  for (const sys of ['drill', 'hold', 'engines', 'hull', 'sensors', 'crew', 'ordnance']) {
+    await page.locator('.sysb[data-sys="' + sys + '"]').click();
+    expect(await page.locator('#rack .bcard').count(), sys + ' lists more than three').toBeLessThanOrEqual(3);
+    const sh = await page.locator('#rack .bshadow').count();
+    expect(sh, sys + ' shows more than one shadow').toBeLessThanOrEqual(1);
+    if (sh) await expect(page.locator('#rack .bshadow')).toContainText('SEALED');
+    shadows += sh;
+  }
+  expect(shadows, 'no rack shows a sealed shadow, so nothing draws the player on').toBeGreaterThan(0);
+  await expect(page.locator('#bayNext .bnextline')).toContainText('Next:');
+  expect(await page.evaluate(() => [...document.querySelectorAll('#shop *')]
+    .filter((e) => ['auto', 'scroll'].includes(getComputedStyle(e).overflowY)).length),
+  'the bay has more than one scroll region').toBe(1);
   /* No drawer, no aisles: a supply is found first and then sits in its system. */
   await expect(page.locator('#supplies')).toHaveCount(0);
   await expect(page.locator('#aisles')).toHaveCount(0);
@@ -2355,17 +2373,40 @@ test('a supply sits in its system once found, and nowhere before', async ({ page
     document.getElementById('btnShop')!.click();
   });
   await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
-  await page.locator('.sysb[data-sys="hull"]').click();
+  /* Supplies sit in the KIT drawer, closed with its own X. */
+  await expect(page.locator('#rack .bcard[data-key="patch"]'), 'a supply is in a system rack').toHaveCount(0);
+  await page.locator('#bayKit').click();
   await expect(page.locator('#rack .bcard[data-key="patch"]')).toHaveCount(1);
   await expect(page.locator('#rack .bcard[data-key="coolant"]'), 'a supply never held is on sale').toHaveCount(0);
-  await page.locator('.sysb[data-sys="engines"]').click();
   await expect(page.locator('#rack .bcard[data-key="cell"]')).toHaveCount(1);
   const before = await page.evaluate(() => (window as any).__cw.g.kit.cell);
   await page.locator('#rack .bcard[data-key="cell"] button.bbuy').click();
   expect(await page.evaluate(() => (window as any).__cw.g.kit.cell)).toBe(before + 1);
+  await page.locator('#kitClose').click();
+  await expect(page.locator('#rack .bkithead'), 'the KIT drawer did not close').toHaveCount(0);
+  await expect(page.locator('#rack .bcard[data-key="cell"]')).toHaveCount(0);
 });
 
-test('a supply cache hands over something new, and the Outfitter stocks it', async ({ page }) => {
+test('a mid-game bay still shows at most three cards and one shadow a rack', async ({ page }) => {
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.best.depth = 130;
+    w.g.credits = 9e6;
+    for (const k of ['laser', 'bomb', 'magnet']) w.grantFind(k);
+    w.g.px = w.START_X; w.g.pd = -1; w.advance(0.5);
+    document.getElementById('btnShop')!.click();
+  });
+  await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
+  for (const sys of ['drill', 'hold', 'engines', 'hull', 'sensors', 'crew', 'ordnance']) {
+    await page.locator('.sysb[data-sys="' + sys + '"]').click();
+    expect(await page.locator('#rack .bcard').count(), sys + ' lists more than three').toBeLessThanOrEqual(3);
+    expect(await page.locator('#rack .bshadow').count(), sys + ' shows more than one shadow').toBeLessThanOrEqual(1);
+  }
+  await expect(page.locator('#bayNext .bnextline')).toContainText(/Next:|Everything/);
+});
+
+test('a supply cache hands over something new, and the Outfitter stocks it',async ({ page }) => {
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const got = await page.evaluate(() => {
@@ -5490,6 +5531,7 @@ test('the pad sells supplies for credits and never Sink', async ({ page }) => {
   await expect(page.locator('#shop')).not.toHaveClass(/hidden/);
   await page.evaluate(() => (window as any).__cw.selectSystem('engines'));
   await expect(page.locator('#rack .bcard[data-key="sink"]')).toHaveCount(0);
+  await page.locator('#bayKit').click();
   await expect(page.locator('#rack .bcard[data-key="cell"] button.cbuy')).toBeEnabled();
 });
 

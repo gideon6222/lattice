@@ -3,7 +3,7 @@
    top to bottom. */
 import { wrongHex } from './sim/wrongness';
 import * as THREE from 'three';
-import { HULL_MAX, UPGRADES, SUPPLIES, ORES, ROCKS, shelfStock, tremorDepth, heatDepth, traitAt, W, START_X, CAVE_MIN_DEPTH, costOf, matCost, GROWTH_BAND, SUPPLY_SYSTEM } from './sim/config';
+import { HULL_MAX, UPGRADES, SUPPLIES, ORES, ROCKS, shelfStock, tremorDepth, heatDepth, traitAt, W, START_X, CAVE_MIN_DEPTH, costOf, matCost, GROWTH_BAND, SUPPLY_SYSTEM, SYSTEMS } from './sim/config';
 import { g, S, save, load, hasSave, coreM, padRegion, worldUnrest, markSeen, onPad, docked, atSurface } from './sim/state';
 import { R } from './sim/runtime';
 import { camera, lamp, resize, scene, amb, sun, rim, fog, renderer } from './scene';
@@ -17,7 +17,7 @@ import { stationCamera, stationScene, roomReady, roomPlace, pickPart, shipYaw, t
 import { partKeys } from './ship';
 import { keyPockets, KEY_PLANS, keyHome, keyNear, senseRange } from './sim/keys';
 import { vendorStock } from './sim/vendor';
-import { baySystem, selectSystem, sensedKey } from './ui';
+import { baySystem, selectSystem, sensedKey, bayLines, openKit, kitOpen } from './ui';
 import { el, updateHUD, audioLabels, buildShop, toast, foundBanner, buildBallast, flash } from './ui';
 import { frame, tick, advance, stopClock, startClock, clockRunning } from './loop';
 import { installPanelGrain } from './grain';
@@ -257,11 +257,8 @@ if (new URLSearchParams(location.search).has('debug')) {
        points rather than reasoning about Euler order. Two "fixes" to the
        intro's heading were argued from the code and both were wrong. */
     rig, bit, player,
-    shelfKeys: () => shelfStock(g.best.depth, g.found).map((u) => u.key),
-    sealedKey: () => {
-      const s = shelfStock(g.best.depth, g.found).filter((u) => g.best.depth < u.unlock);
-      return s.length ? s[0].key : null;
-    },
+    shelfKeys: () => SYSTEMS.flatMap((s) => bayLines(s.key)).map((u) => u.key),
+    openKit, kitOpen,
     /* The map. `mapView` and `mapPan` rather than the canvas, because the one
        part of that screen that can silently be wrong is the panning arithmetic
        - backwards, or unclamped off either end of the world. */
