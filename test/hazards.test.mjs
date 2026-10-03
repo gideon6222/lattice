@@ -33,7 +33,8 @@ test('a hard cell needs fewer strikes with the Tip, soft rock and ore below the 
   const soft = H.ROCKS.find((r) => r.hard < H.HARD_ROCK);
   const strikes = (l, b) => H.DIG_BASE * b.hard * H.tipWork(l, b.hard);
   for (let l = 1; l <= H.TIP_MAX; l++) assert.ok(strikes(l, hard) < strikes(l - 1, hard), 'rung ' + l);
-  assert.equal(H.tipWork(H.TIP_MAX, hard.hard), 0.5, 'the top rung is the half the design names');
+  assert.equal(H.tipWork(1, hard.hard), 0.7, 'the first rung is felt at once');
+  assert.equal(H.tipWork(H.TIP_MAX, hard.hard), 0.4);
   for (let l = 0; l <= H.TIP_MAX; l++) assert.equal(strikes(l, soft), strikes(0, soft));
   assert.equal(H.tipWork(H.TIP_MAX, Infinity), 1);
 });

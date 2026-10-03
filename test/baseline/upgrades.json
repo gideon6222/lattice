@@ -619,10 +619,10 @@
     ],
     "effects": [
       "Not installed",
-      "Gas hits for 80%",
       "Gas hits for 65%",
-      "Gas hits for 50%, and is vented",
-      "Gas hits for 35%, and is vented"
+      "Gas hits for 50%",
+      "Gas hits for 40%, and is vented",
+      "Gas hits for 30%, and is vented"
     ],
     "mats": [
       null,
@@ -653,10 +653,10 @@
     ],
     "effects": [
       "Not installed",
-      "Hard rock needs 85% of the strikes",
       "Hard rock needs 70% of the strikes",
       "Hard rock needs 60% of the strikes",
-      "Hard rock needs 50% of the strikes"
+      "Hard rock needs 50% of the strikes",
+      "Hard rock needs 40% of the strikes"
     ],
     "mats": [
       null,

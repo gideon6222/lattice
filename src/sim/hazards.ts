@@ -13,7 +13,7 @@ export const SEAL_MAX = 4;
 export const TIP_MAX = 4;
 
 /* What a gas pocket's hull damage is multiplied by. */
-const SEAL_TAKE = [1, 0.8, 0.65, 0.5, 0.35];
+const SEAL_TAKE = [1, 0.65, 0.5, 0.4, 0.3];
 export const sealTake = (level: number) => SEAL_TAKE[Math.max(0, Math.min(SEAL_MAX, Math.floor(level || 0)))];
 
 /* What the heat-soak spike from gas is multiplied by: from the third rung the
@@ -21,9 +21,9 @@ export const sealTake = (level: number) => SEAL_TAKE[Math.max(0, Math.min(SEAL_M
 export const SEAL_VENTS_AT = 3;
 export const sealSoak = (level: number) => ((level || 0) >= SEAL_VENTS_AT ? 0 : 1);
 
-/* The share of a hard cell's work left to do. The fourth rung is the half the
-   design names: a vein in hard rock opens in half the strikes. */
-const TIP_WORK = [1, 0.85, 0.7, 0.6, 0.5];
+/* The share of a hard cell's work left to do. The first rung already saves
+   30%, enough to feel on the first hard cell after the gift. */
+const TIP_WORK = [1, 0.7, 0.6, 0.5, 0.4];
 export const TIP_FROM = 5;
 export const tipWork = (level: number, hard: number) =>
   hard >= TIP_FROM && isFinite(hard) ? TIP_WORK[Math.max(0, Math.min(TIP_MAX, Math.floor(level || 0)))] : 1;

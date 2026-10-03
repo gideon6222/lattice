@@ -46,15 +46,6 @@ Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal 
 
 ## For Gideon
 
-- Does the Ore Sorter feel like a gift: fill the hold in a rich seam, sell it, then fill it again
-  and watch a cheap ore swap out for a better one? (2026-10-02, BD)
-
-- Do the Pressure Seal and Resonance Tip feel earned: ride out four gas pockets over a few runs,
-  cut hard rock in the deep, and see the hull ring and the drill fins arrive? (2026-10-03, BE)
-
-- Does the Return Beacon feel like a rescue: lose a ship, then hold HOME deep down and see the
-  climb, the kept share in the toast and the mast on the hull? (2026-10-03, BF)
-
 - Do the Flare Line and Arc Lance feel found: dig to about 40 m for the wreck crate at the left
   edge, throw a flare in a dark pocket, and later find the Anchor-hall crate near 189 m and
   follow a vein with the Arc button? Check the four-button ordnance row fits. (2026-10-03, BG)
