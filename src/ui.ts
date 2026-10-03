@@ -1,8 +1,11 @@
 import { SYSTEMS, SUPPLY_SYSTEM, WHAT, shelfStock, type SystemKey } from './sim/config';
 import { keyNear, senseRange } from './sim/keys';
+import { ledgerFeats } from './sim/feats';
+import { FOUND_KEYS } from './sim/finds';
+import { ABILITIES } from './sim/ability';
 import { bayRack, nextLine, type BayState } from './sim/bay';
 import { vendorLines, sellsRung, rungBand, sellsSupplies, dealAt, SINK_GATE, SINK_PRICE, type Place } from './sim/vendor';
-import { HULL_MAX, DEF, isOre, isKey, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS } from './sim/config';
+import { HULL_MAX, DEF, isOre, isKey, ORES, GEODE, UPGRADES, SUPPLIES, SUPPLY_OF, BOMB_CHARGE, LASER_CHARGE, coreDepth, planetName, traitOf, valueMult, costOf, matCost, capstoneCost, TRAIT_OF, heatDepth, levelCap, TIER_DEPTHS, RELIC_OF } from './sim/config';
 import { setGauges, setFuelReserve } from './gauges';
 import { clamp } from './sim/util';
 import { flashScale } from './motion';
@@ -61,6 +64,7 @@ export const ui = {
   verNum: mustEl('verNum'), notes: mustEl('notes'), btnNotes: mustEl('btnNotes'),
   runlog: mustEl('runlog'), btnLog: mustEl('btnLog'),
   creditsPanel: mustEl('creditsPanel'), btnCredits: mustEl('btnCredits'),
+  ledger: mustEl('ledger'), btnLedger: mustEl('btnLedger'),
   volMusic: mustEl('volMusic') as HTMLInputElement, volSfx: mustEl('volSfx') as HTMLInputElement,
   /* el(), not mustEl(): the banner is new, and a save loaded into an older
      cached shell must not take the whole HUD down with it - the same clause
@@ -1009,6 +1013,45 @@ export function buildCredits() {
 
 
 
+
+/* ---------- the Ledger ----------
+
+   Opens from the pause sheet. Three tabs: DEVICES, FEATS, RELICS. It lists
+   only what has been found or done, plus the one feat in front of you, and it
+   never draws a lock (progression round, BC). Counts live here and nowhere
+   else. One scroll region: the `.notes` panel itself. */
+export type LedgerTab = 'devices' | 'feats' | 'relics';
+let ledgerTab: LedgerTab = 'devices';
+export function buildLedger(tab: LedgerTab = ledgerTab) {
+  ledgerTab = tab;
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const row = (head: string, d: string, body: string) =>
+    '<div class="rel"><div class="relhead">' + esc(head) + (d ? '  <span class="d">' + esc(d) + '</span>' : '') +
+    '</div><div class="upeff">' + esc(body) + '</div></div>';
+  let body = '';
+  if (tab === 'devices') {
+    const devs = UPGRADES.filter((u) => FOUND_KEYS.has(u.key) && g.found.includes(u.key));
+    const abil = ABILITIES.filter((a) => hasAbility(g.ground.gates, a.key, g.skills));
+    body = devs.map((u) => row(u.name, 'rung ' + (g.up[u.key] || 0) + ' of ' + u.max, u.effect(g.up[u.key] || 0))).join('') +
+      abil.map((a) => row(a.name, 'ability', a.blurb)).join('');
+    if (!body) body = '<div class="upeff">Nothing found yet. Devices are dug out of the rock.</div>';
+  } else if (tab === 'feats') {
+    const { done, next } = ledgerFeats(g.feats);
+    body = done.map((f) => row(f.name, 'done', f.done)).join('') +
+      (next ? row('Next', '', next.name + ': ' + next.act) : '');
+    if (!body) body = '<div class="upeff">Nothing done yet.</div>';
+  } else {
+    body = g.relics.length
+      ? g.relics.map((r) => row(RELIC_OF[r] ? RELIC_OF[r].name : r, '', RELIC_OF[r] ? RELIC_OF[r].blurb : '')).join('')
+      : '<div class="upeff">None taken yet.</div>';
+  }
+  const tabs = (['devices', 'feats', 'relics'] as LedgerTab[]).map((t) =>
+    '<button class="notesbtn ledtab' + (t === tab ? ' on' : '') + '" data-tab="' + t + '">' + t.toUpperCase() + '</button>').join(' ');
+  ui.ledger.innerHTML = '<div class="ledtabs">' + tabs + '</div>' + body;
+  for (const b of ui.ledger.querySelectorAll<HTMLElement>('.ledtab')) {
+    b.onclick = () => { sfx.ui(); buildLedger(b.dataset.tab as LedgerTab); };
+  }
+}
 
 /* ---------- the Ballast panel ----------
 

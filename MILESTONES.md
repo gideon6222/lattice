@@ -224,7 +224,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: menu
       design: ## Progression and unlocks
 
-- [ ] **BC The Ledger and the feats.** `src/sim/feats.ts` records the feats (full hold sold, gas ridden out and
+- [x] **BC The Ledger and the feats.** `src/sim/feats.ts` records the feats (full hold sold, gas ridden out and
       hard rock cut as totals across runs, a lost ship; thresholds set from the bot's measured
       counts, not guessed), saved as `feats`. The Ledger sheet opens from the
       pause sheet with DEVICES, FEATS and RELICS, never a lock. A save already past a feat gets

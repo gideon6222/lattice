@@ -1168,6 +1168,8 @@
     border:1px solid #2a5570; background:rgba(63,224,255,.1); color:var(--cyan);
     border-radius:9px; padding:7px 11px; font-size:10.5px; font-weight:700; letter-spacing:.09em;
   }
+  .ledtabs{display:flex; gap:6px; margin-bottom:8px;}
+  .ledtab.on{background:rgba(63,224,255,.28); color:#fff;}
   .notes{max-height:230px; overflow-y:auto; margin-top:10px;}
   .notes.hidden{display:none;}
   .rel{padding:9px 0; border-top:1px solid var(--line);}
@@ -1677,10 +1679,12 @@
     <div class="fine">Restarting wipes credits, upgrades, every Anchor you have lit and every tunnel you have dug. It cannot be undone.</div>
     <div class="verline">
       <span id="verNum">v0.0.0</span>
+      <button id="btnLedger" class="notesbtn">LEDGER</button>
       <button id="btnLog" class="notesbtn">RUN LOG</button>
       <button id="btnNotes" class="notesbtn">WHAT&apos;S NEW</button>
       <button id="btnCredits" class="notesbtn">CREDITS</button>
     </div>
+    <div id="ledger" class="notes hidden"></div>
     <div id="runlog" class="notes hidden"></div>
     <div id="notes" class="notes hidden"></div>
     <!-- `creditsPanel`, not `credits`: the HUD's credit counter already owns

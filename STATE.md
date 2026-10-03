@@ -20,20 +20,22 @@ Play upload. Not yet in a Play build: the next ship carries it.
   The bundle is built by tools/twa.ps1 and uploaded by hand.
 - **A studio phone reading.** Possible now that Play installs `com.gideon.lattice` (Z2).
 
-- **The new progression, past its second box.** His ask of 2026-10-02 (locked, found, earned;
-  DESIGN.md "Progression and unlocks"). The bay now draws the rule (BB): three lines and one
-  sealed shadow a rack, a Next line, supplies in a KIT drawer. There is no Ledger yet, and the
-  six new finds and feats do not exist.
+- **The new progression, past its third box.** His ask of 2026-10-02 (locked, found, earned;
+  DESIGN.md "Progression and unlocks"). The bay draws the rule (BB). The Ledger (pause sheet:
+  DEVICES, FEATS, RELICS) and `src/sim/feats.ts` exist (BC): four feats are recorded and saved,
+  but they hand over nothing yet, since the six new devices do not exist. Thresholds (4 gas
+  pockets, 40 hard-rock cells) are from the pure world, not a bot; BE retunes them.
 - **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
 
 ## Next three milestones
 
 Done 2026-09-30: **V0**, the internal track, and **AU**, the sounds he settled on. Done
-2026-10-02: **BA**, the shelf rule as code, and **BB**, the bay that draws it.
+2026-10-02: **BA**, the shelf rule as code, **BB**, the bay that draws it, and **BC**, the
+Ledger and the feats.
 
-1. **BC** - the Ledger and the feats.
-2. **BD** - the Ore Sorter.
-3. **BE** - then BF to BI (see MILESTONES.md); **Z2**, the desk's perf reading, waits for the
+1. **BD** - the Ore Sorter.
+2. **BE** - Pressure Seal and Resonance Tip.
+3. **BF** - then BG to BI (see MILESTONES.md); **Z2**, the desk's perf reading, waits for the
    Play install.
 
 ## For Gideon

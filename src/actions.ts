@@ -30,6 +30,7 @@ import { sfx } from './audio';
 import { SHAKE_TOW, SHAKE_BOOM, CHARGE_MAX } from './sim/feel';
 import type { Dir, SupplyKey, UpgradeKey } from './types';
 import { mergeLog, blankLog } from './sim/telemetry';
+import { bump, settle, holdIsFull, blankTally, type Counter, type Feat } from './sim/feats';
 
 /* Stop drilling, and remember how far through the block you were.
 
@@ -71,7 +72,26 @@ export function stopDigging() {
   sfx.digStop();
 }
 
+/* Count one more of a feat's counter and say so when it wins. The gifts are
+   built in BD to BF; for now the Ledger records the feat. */
+export function countFeat(counter: Counter, n = 1) {
+  announceFeats(bump(g.tally, g.feats, counter, n));
+}
+function announceFeats(won: Feat[]) {
+  if (!won.length) return;
+  toast('Feat · ' + won[0].name);
+  sfx.record();
+  save();
+}
+/* A save played before feats existed is granted what its log already reached,
+   on its first dock. */
+export function dockFeats() {
+  announceFeats(settle(g.tally, g.feats));
+}
+
 export function sell() {
+  dockFeats();
+  const wasFull = holdIsFull(g.weight, S.cargoCap());
   /* Keys first, and they are BANKED, never sold (round seventeen, AK): a key
      is an ingredient you keep for the rung that needs it. Before the early
      return, or a hold of nothing but keys would be thrown away. */
@@ -113,6 +133,7 @@ export function sell() {
   sfx.sell();
   hap.buy();
   toast(debrief(paid) + (banked ? '  ·  ' + banked + ' key' + (banked === 1 ? '' : 's') + ' banked' : ''));
+  if (wasFull) countFeat('hold');
   save();
 }
 
@@ -551,6 +572,7 @@ export function die(cause: 'fuel' | 'heat' | 'gas' | 'sink', after: () => void =
   /* Counted before anything is cleared, and it is still the number that says
      most about whether the game is priced right. */
   R.run.towed++;
+  countFeat('lost');
   const lost = haulValue();
   g.cargo = {};
   g.weight = 0;
@@ -642,6 +664,7 @@ export function hardReset() {
      zero and were still on the shelf - a fresh start that had somehow already
      done the finding. Same for the kit, the mineral reveals and the map. */
   g.found = []; g.foundKit = []; g.skills = []; g.hintsShown = 0;
+  g.feats = []; g.tally = blankTally();
   g.seenOre = []; g.seen = []; g.marks = [];
   resetSeen();
   /* `won` deliberately SURVIVES a reset. It is not progress, it is something

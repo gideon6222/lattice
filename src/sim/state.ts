@@ -12,6 +12,7 @@ import { anchorNear, vaultCoreNear, vaultOpen, VAULT_CORE_X, VAULT_CORE_D,
 import { gateNear } from './gate';
 import type { Best, Cargo, Dir, Drops, Kit, Mode, UpgradeKey, SaveV1, SaveV2 } from '../types';
 import { blankLog, loadLog, type Log } from './telemetry';
+import { blankTally, loadTally, loadFeats, backfillTally, type Tally } from './feats';
 
 /* The whole game state. One mutable singleton, read by nearly every module. */
 export const g: {
@@ -101,6 +102,10 @@ export const g: {
      could only ever be found once, which is true, and that a cache could only
      ever be found once, which is not. The Anchors join this list in W7. */
   marks: string[];
+  /* The feats won (feats.ts) and the running totals they are won from. Totals
+     across runs, so a quit mid-run costs nothing. */
+  feats: string[];
+  tally: Tally;
   /* balance telemetry: all time in the save, this run in memory only */
   log: Log;
   /* Ore dug with a full hold, left at the cell it came from. Keyed by cell,
@@ -134,6 +139,7 @@ export const g: {
   face: 'down',
   fuel: 90, hull: HULL_MAX, soak: 0, charge: CHARGE_MAX,
   cargo: {}, weight: 0, stock: {}, drops: {}, damage: {}, relics: [], relicsTaken: [], found: [], foundKit: [], skills: [], hintsShown: 0, seenOre: [], seen: [], marks: [],
+  feats: [], tally: blankTally(),
   log: blankLog(),
   best: { depth: 0, haul: 0, fastest: 0, worlds: 0 },
   ground: newGround(),
@@ -351,7 +357,7 @@ function stateNow(at: SaveAt): Record<string, unknown> {
     drops: g.drops, damage: g.damage, charge: g.charge,
     relics: g.relics, relicsTaken: g.relicsTaken, log: g.log,
     found: g.found, foundKit: g.foundKit, skills: g.skills, hintsShown: g.hintsShown, seenOre: g.seenOre, seen: g.seen,
-    marks: g.marks,
+    marks: g.marks, feats: g.feats, tally: g.tally,
     ground: g.ground
   };
 }
@@ -517,6 +523,11 @@ export function load() {
       /* loadLog defaults every field, so a save from before the log existed
          comes back zeroed rather than full of undefined that render as NaN. */
       g.log = loadLog(s.log);
+      /* Feats. A save from before them has no tally, so it is read off the log
+         it kept (feats.ts) and the first dock grants what that already
+         reached. A save that has a tally is trusted as it stands. */
+      g.feats = loadFeats(s.feats);
+      g.tally = s.tally ? loadTally(s.tally) : backfillTally(g.log);
       g.stock = s.stock || grandfatherStock();
       /* On the pad, always - see landSave. The M5 floor check above may
          already have moved a ship parked inside bedrock; this lands it. */

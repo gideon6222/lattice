@@ -18,7 +18,7 @@ import { ANCHOR_COUNT } from './sim/vaults';
 import { MAP_TILE, WORLD_DEPTH, regionName, regionAt } from './sim/region';
 import { W } from './sim/config';
 import { shoreUp } from './collapse';
-import { mustEl, ui, atSurface, buildShop, openBay, setTimedOpen, toggleTimed, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, buildBallast, updateHUD,
+import { mustEl, ui, atSurface, buildShop, openBay, setTimedOpen, toggleTimed, buildManifest, audioLabels, buildNotes, buildRunLog, buildCredits, buildLedger, buildBallast, updateHUD,
          selectSystem, stepSystem, stepCard, confirmCard } from './ui';
 import { dockShip, undockShip, resizeStation, turnShip, pickPart } from './station';
 import { UPGRADES } from './sim/config';
@@ -351,6 +351,7 @@ mustEl('btnPause').onclick = () => {
    six at four. */
 const PANELS: { btn: HTMLElement; panel: HTMLElement; label: string; build: () => void }[] = [
   { btn: ui.btnNotes, panel: ui.notes, label: "WHAT'S NEW", build: buildNotes },
+  { btn: ui.btnLedger, panel: ui.ledger, label: 'LEDGER', build: () => buildLedger() },
   { btn: ui.btnLog, panel: ui.runlog, label: 'RUN LOG', build: buildRunLog },
   { btn: ui.btnCredits, panel: ui.creditsPanel, label: 'CREDITS', build: buildCredits }
 ];

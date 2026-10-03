@@ -55,7 +55,8 @@ import { aimRelic } from './relic';
 import { stepParallax, fadeParallax, setParallaxTint } from './parallax';
 import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner, savedMoment, tickSaved } from './ui';
 import { stepGauges } from './gauges';
-import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard } from './actions';
+import { sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard, countFeat } from './actions';
+import { HARD_ROCK } from './sim/feats';
 import { coreOpens, openGate, gateAtDepth, barrierSays, spentCoreNear } from './sim/gate';
 import { HINTS } from './sim/hints';
 import { hasAbility, SINK_RATE, SINK_HULL, HOLLOW_DRAIN } from './sim/ability';
@@ -448,6 +449,7 @@ export function tick(raw: number, draw = true) {
            the game's own existing line for "worth coming back for", which is the
            question this row is actually asking. */
         R.run.blocks++; if (b.value >= DROP_MIN_VALUE) R.run.oreBlocks++;
+        if (!b.ore && !b.hazard && b.hard >= HARD_ROCK) countFeat('hard');
         /* Round fifteen, Y3. Asked BEFORE anything is written, because every
            term of the answer is about to change: the cell joins `g.dug`, and
            `openGate` below moves this tier from 'core' to 'spent'. */
@@ -506,6 +508,7 @@ export function tick(raw: number, draw = true) {
           spray(worldX(R.digging.x), -R.digging.d, b.color, 90, 9, 1.5);
           sfx.gas();
           toast('Gas pocket! Hull -' + dmg);
+          if (g.hull > 0) countFeat('gas');
           R.digging = null;
           save();
         }

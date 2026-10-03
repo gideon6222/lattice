@@ -4040,7 +4040,23 @@ test('the credits screen renders the credits file, and is reachable from the pau
   await expect(page.locator('#notes')).toBeVisible();
 });
 
-test('the Outfitter is drivable with arrows and a confirm, not only with a thumb', async ({ page }) => {
+test('the Ledger opens from the pause sheet with three tabs and no lock', async ({ page }) => {
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  await page.locator('#btnPause').dispatchEvent('click');
+  await page.locator('#btnLedger').dispatchEvent('click');
+  const panel = page.locator('#ledger');
+  await expect(panel).toBeVisible();
+  await expect(panel.locator('.ledtab')).toHaveCount(3);
+  await panel.locator('.ledtab[data-tab=feats]').dispatchEvent('click');
+  await expect(panel).toContainText('Next');
+  await expect(panel).not.toContainText('SEALED');
+  await panel.locator('.ledtab[data-tab=relics]').dispatchEvent('click');
+  await expect(panel).toContainText('None taken yet');
+  await page.locator('#btnNotes').dispatchEvent('click');
+  await expect(panel).toBeHidden();
+});
+
+test('the Outfitter is drivable with arrows and a confirm, not only with a thumb',async ({ page }) => {
   /* Playtest, three times in two days and across two other games: *"since the
      text is small I want arrow keys and confirm button to navigate the
      menues"*, *"make it so clicking the up or down arrow changes what is
