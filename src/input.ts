@@ -23,7 +23,7 @@ import { mustEl, ui, atSurface, buildShop, openBay, setTimedOpen, toggleTimed, b
 import { dockShip, undockShip, resizeStation, turnShip, pickPart } from './station';
 import { UPGRADES } from './sim/config';
 import type { Dir } from './types';
-import { autopilot, hardReset, useSupply, fireBomb, fireLaser, packHere } from './actions';
+import { autopilot, hardReset, useSupply, fireBomb, fireLaser, fireArc, throwFlare, packHere } from './actions';
 import { sfx, audioInit, setAudio, setVolume, audioFocus, audioState } from './audio';
 import { setTier, tier, type Tier } from './visuals';
 import { applyVisuals } from './visualsapply';
@@ -130,6 +130,8 @@ mustEl('supTimed').addEventListener('pointerdown', (e) => { e.preventDefault(); 
    there is not enough power. */
 mustEl('ordBomb').addEventListener('pointerdown', (e) => { e.preventDefault(); fireBomb(); });
 mustEl('ordLaser').addEventListener('pointerdown', (e) => { e.preventDefault(); fireLaser(); });
+mustEl('ordArc').addEventListener('pointerdown', (e) => { e.preventDefault(); fireArc(); });
+mustEl('ordFlare').addEventListener('pointerdown', (e) => { e.preventDefault(); throwFlare(); });
 
 /* The cores' abilities. Round fifteen, Y4, and they are HELD rather than
    tapped, which is why they are wired like the d-pad rather than like the

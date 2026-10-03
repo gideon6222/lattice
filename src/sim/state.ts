@@ -132,7 +132,7 @@ export const g: {
   world: 0, trait: 'stable', coreOff: 0, rich: 1,
   won: false,
   up: { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0, seal: 0, tip: 0, beacon: 0 },
+    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0, seal: 0, tip: 0, beacon: 0, flare: 0, arc: 0 },
   kit: { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 },
   dug: new Set<string>(),
   rubble: new Set<string>(),

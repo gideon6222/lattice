@@ -109,13 +109,28 @@ export const FINDS: Find[] = [
     blurb: 'Cuts a straight shaft ahead of you. Expensive in power.' }
 ];
 
+/* The two finds that sit in a room rather than in the open rock (BG). They are
+   outside FINDS on purpose: FINDS is capped, ordered shallowest-first and
+   placed by `findAt`, and these are placed beside their room (vaults.ts,
+   seeds 263 and 269) and always on the world until opened. `where` is the
+   route in the game's words, for the silhouette and the Next line. */
+export interface RoomFind extends Find { where: string }
+export const ROOM_FINDS: RoomFind[] = [
+  { key: 'flare', slot: 0, below: 40, where: 'in an old wreck',
+    blurb: 'Throws a flare that lights a dark pocket for a minute.' },
+  { key: 'arc', slot: 0, below: 150, where: "in the second barrier's vault",
+    blurb: 'Follows a vein of one ore through the rock and breaks it all.' }
+];
+
 export const FIND_OF: Record<string, Find> = {};
 for (const f of FINDS) FIND_OF[f.key] = f;
+for (const f of ROOM_FINDS) FIND_OF[f.key] = f;
 
 /* The set of keys that are found rather than sold. Exported as a set because
    every caller is asking "is this one of them", never iterating. */
 export const FOUND_KEYS = new Set<UpgradeKey>([
   ...FINDS.map((f) => f.key),
+  ...ROOM_FINDS.map((f) => f.key),
   /* Devices handed over for a feat are owned the same way (listed in `found`)
      but are never buried: they have no crate and no entry in FINDS. */
   ...(Object.keys(FEAT_DEVICES) as UpgradeKey[])

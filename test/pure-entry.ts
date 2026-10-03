@@ -38,3 +38,5 @@ export * from '../src/sim/feats';
 export * from '../src/sim/sorter';
 export * from '../src/sim/hazards';
 export * from '../src/sim/beacon';
+export * from '../src/sim/flare';
+export * from '../src/sim/lance';

@@ -1,14 +1,9 @@
 # State
 
-Moved onto the studio 2026-09-22. Rounds one to seventeen shipped (`journal/legacy-plan.md` has
-the early history). Round eighteen is his ask of 2026-09-29, that the sounds stop being
-cartoony (DESIGN.md, "Round eighteen: the sound of things").
+Moved onto the studio 2026-09-22. Rounds one to seventeen shipped (`journal/legacy-plan.md`).
+Round eighteen is the sounds (DESIGN.md, "Round eighteen: the sound of things").
 
-Met 2026-10-01, his launch bar (AV, AW, AX): a player never sees the stack overlay or the
-RUN LOG (both behind ?debug or the dev server); a crash is logged to the console and to
-`coreward.crash`, and the next boot puts the ship back on the pad with the progress kept; the
-pause sheet reads `v<version> | <commit> | release`; WHAT'S NEW starts at 0.39.0, the first
-Play upload. Not yet in a Play build: the next ship carries it.
+His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
 
 ## What still does not exist
 
@@ -32,24 +27,25 @@ Play upload. Not yet in a Play build: the next ship carries it.
   seconds underground, once a run, and the ship climbs to the pad keeping 50/65/80/90% of the
   ore and all keys. It is dark in the bay until the box lands. Kept shares are the design's own
   numbers, BH measures them. None of the four gifts has an e2e, only pure tests.
+- **Flare Line and Arc Lance** (BG, `src/sim/flare.ts`, `lance.ts`, `ROOM_FINDS`): two finds in
+  crates beside a wreck (40 m) and an Anchor hall (150 m). Crates join the world only once
+  you have been within 20 m, so the frozen block golden is unchanged. They ask for no keys,
+  because the rock has no key slack left. Pure tests only.
 - **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
 
 ## Next three milestones
 
 Done 2026-09-30: **V0**, the internal track, and **AU**, the sounds he settled on. Done
 2026-10-02: **BA**, the shelf rule as code, **BB**, the bay that draws it, and **BC**, the
-Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip, and **BF**, the Return Beacon.
+Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip, and **BF**, the Return Beacon, and **BG**, the Flare Line and Arc Lance.
 
-1. **BG** - Flare Line and Arc Lance.
-2. **BH** - Pacing bots.
-3. **BI** (see MILESTONES.md); **Z2**, the desk's perf reading, waits for the
+1. **BH** - Pacing bots.
+2. **BI** - The notes for players.
+3. See MILESTONES.md; **Z2**, the desk's perf reading, waits for the
    Play install.
 
 ## For Gideon
 
-- A phone run with your own eyes on the first two runs: is the first buy quick, and does the
-  one shadow on a rack make you want to dig? Look at the Next line and the KIT button above
-  the cards. (2026-10-02, the bay)
 - Does the Ore Sorter feel like a gift: fill the hold in a rich seam, sell it, then fill it again
   and watch a cheap ore swap out for a better one? (2026-10-02, BD)
 
@@ -58,6 +54,10 @@ Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal 
 
 - Does the Return Beacon feel like a rescue: lose a ship, then hold HOME deep down and see the
   climb, the kept share in the toast and the mast on the hull? (2026-10-03, BF)
+
+- Do the Flare Line and Arc Lance feel found: dig to about 40 m for the wreck crate at the left
+  edge, throw a flare in a dark pocket, and later find the Anchor-hall crate near 189 m and
+  follow a vein with the Arc button? Check the four-button ordnance row fits. (2026-10-03, BG)
 
 ## Phone readings
 

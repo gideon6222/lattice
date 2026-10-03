@@ -7,6 +7,8 @@ import { regionAt, REGION_TRAIT, REGION_COUNT, WORLD_DEPTH } from './region';
 import { FOUND_KEYS } from './finds';
 import { sealTake, tipWork, SEAL_VENTS_AT, TIP_FROM } from './hazards';
 import { beaconKeep } from './beacon';
+import { flaresPerRun, flareRadius } from './flare';
+import { lanceCells, lanceLook } from './lance';
 
 /* World width in columns. Only about 8 fit on a portrait screen at the current
    framing, so the rest is lateral room to explore: which way to dig at a given
@@ -1191,6 +1193,18 @@ export const UPGRADES: Upgrade[] = [
   { key: 'beacon', name: 'Return Beacon',  base: 2000, mul: 1.5, max: 4, keys: ['magmite', 'coreite'], system: 'engines', group: 'survival', unlock: 0,
     effect: (l: number) => (l === 0 ? 'Not installed' : 'HOME keeps ' + Math.round(beaconKeep(l) * 100) + '% of the ore') },
 
+  /* FLARE LINE. Found in a crate beside the first wreck (finds.ts ROOM_FINDS).
+     Thrown flares light a dark pocket for a minute (flare.ts). */
+  { key: 'flare', name: 'Flare Line',  base: 1800, mul: 1.5, max: 4, system: 'crew', group: 'instruments', unlock: 0,
+    effect: (l: number) => (l === 0 ? 'Not installed' :
+      flaresPerRun(l) + ' flares a run, lighting ' + flareRadius(l) + ' cells for a minute') },
+
+  /* ARC LANCE. Found in a crate beside an Anchor hall under the second barrier.
+     Follows one ore's vein through the rock and breaks it (lance.ts). */
+  { key: 'arc', name: 'Arc Lance',  base: 4200, mul: 1.5, max: 4, system: 'ordnance', group: 'ordnance', unlock: 0,
+    effect: (l: number) => (l === 0 ? 'Not installed' :
+      'Breaks up to ' + lanceCells(l) + ' cells of a vein, found ' + lanceLook(l) + ' cells ahead') },
+
   /* DEEP SURVEY. Distinct from the Scanner, which is light and framing: this
      is knowing what is inside rock you have not cut. It also points at the
      buried Jump Drive component, which is the thing the goal most needs a way
@@ -1537,7 +1551,7 @@ export const SYSTEMS = [
   { key: 'hull', name: 'HULL' },
   { key: 'sensors', name: 'SENSORS' },
   { key: 'crew', name: 'CREW' },
-  { key: 'ordnance', name: 'ORDNANCE' }
+  { key: 'ordnance', name: 'ARMS' }
 ] as const;
 export type SystemKey = typeof SYSTEMS[number]['key'];
 
@@ -1556,6 +1570,8 @@ export const WHAT: Record<string, string> = {
   seal: 'Gas pockets hit for less, and the top rungs vent them.',
   tip: 'Hard rock cracks open in fewer strikes.',
   beacon: 'Once a run, climbs you to the pad with part of the hold.',
+  flare: 'Throws a flare that lights a dark pocket for a minute.',
+  arc: 'Follows a vein of one ore through the rock and breaks it all.',
   sorter: 'In a full hold, swaps the cheapest ore for a richer find.',
   thrust: 'Flies faster, up and down the shaft.',
   tank: 'Holds more fuel. The top rungs make every cell cheaper to cut.',

@@ -31,6 +31,9 @@ import { SHAKE_TOW, SHAKE_BOOM, CHARGE_MAX } from './sim/feel';
 import type { Dir, SupplyKey, UpgradeKey } from './types';
 import { mergeLog, blankLog } from './sim/telemetry';
 import { beaconReady, beaconCargo } from './sim/beacon';
+import { lanceVein, LANCE_CHARGE } from './sim/lance';
+import { flareReady, flareLand, flaresPerRun, FLARE_SECONDS } from './sim/flare';
+import { clearFlares } from './flares';
 import { bump, settle, holdIsFull, blankTally, FEAT_DEVICES, type Counter, type Feat } from './sim/feats';
 /* Stop drilling, and remember how far through the block you were.
 
@@ -102,6 +105,8 @@ export function sell() {
   dockFeats();
   /* Being on the pad ends the run, so the Beacon's one climb comes back. */
   R.beaconUsed = false;
+  R.flaresThrown = 0;
+  clearFlares();
   const wasFull = holdIsFull(g.weight, S.cargoCap());
   /* Keys first, and they are BANKED, never sold (round seventeen, AK): a key
      is an ingredient you keep for the rung that needs it. Before the early
@@ -532,6 +537,41 @@ export function fireLaser() {
   toast(out.gassed ? 'Laser \u00b7 gas! Hull hit' : 'Laser fired');
 }
 
+/* The Arc Lance (BG): finds the first ore along the facing, within the rung's
+   look, and breaks that ore's whole vein up to the rung's cap. Refused before
+   any power is spent when there is no ore in reach. */
+export function fireArc() {
+  if (g.up.arc === 0 || g.mode !== 'play' || atSurface()) return;
+  const v = FACE_VEC[g.face];
+  const sx = Math.round(g.px), sd = Math.round(g.pd);
+  const cells = lanceVein((x, d) => {
+    const b = blockAt(x, d);
+    return !b ? null : b.ore || b.key ? b.id : '';
+  }, sx, sd, v[0], v[1], g.up.arc);
+  if (!cells.length) { toast('Arc Lance · no vein ahead'); return; }
+  if (!spend(LANCE_CHARGE, LANCE_CHARGE + ' cells needed')) return;
+  const out = breakCells(cells);
+  R.run.ordBlocks += out.taken; R.run.powerSpent += LANCE_CHARGE;
+  R.shake = Math.max(R.shake, 0.6);
+  flash('rgba(150,255,190,.24)', 320);
+  sfx.laser();
+  fireBeam(sx, sd, v[0], v[1], Math.max(Math.abs(cells[0][0] - sx), Math.abs(cells[0][1] - sd)));
+  toast(out.gassed ? 'Arc Lance · gas! Hull hit' : 'Arc Lance · ' + cells.length + ' cells of vein');
+}
+
+/* The Flare Line (BG): throws one flare ahead of the ship. It lands before the
+   first closed cell and burns for a minute (flares.ts ages it). */
+export function throwFlare() {
+  const level = g.up.flare || 0;
+  if (g.mode !== 'play' || !flareReady(level, R.flaresThrown, !atSurface())) return;
+  const v = FACE_VEC[g.face];
+  const at = flareLand((x, d) => !blockAt(x, d), Math.round(g.px), Math.round(g.pd), v[0], v[1]);
+  R.flares.push({ x: at.x, d: at.d, t: FLARE_SECONDS });
+  R.flaresThrown++;
+  sfx.supply();
+  toast('Flare thrown · ' + (flaresPerRun(level) - R.flaresThrown) + ' left');
+}
+
 export function autopilot() {
   if (g.up.auto === 0 || docked() || g.mode !== 'play') return;
   const cost = Math.ceil(g.pd * S.autoRate());
@@ -608,6 +648,8 @@ export function die(cause: 'fuel' | 'heat' | 'gas' | 'sink', after: () => void =
      most about whether the game is priced right. */
   R.run.towed++;
   R.beaconUsed = false;
+  R.flaresThrown = 0;
+  clearFlares();
   countFeat('lost');
   const lost = haulValue();
   g.cargo = {};
@@ -688,7 +730,7 @@ export function hardReset() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_KEY); } catch (e) { /* ignore */ }
   g.planet = 0; g.credits = 0;
   g.up = { drill: 0, cargo: 0, thrust: 0, tank: 0, cool: 0, scan: 0, auto: 0, bomb: 0, laser: 0,
-    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0, seal: 0, tip: 0, beacon: 0 };
+    hull: 0, magnet: 0, survey: 0, drone: 0, receiver: 0, sorter: 0, seal: 0, tip: 0, beacon: 0, flare: 0, arc: 0 };
   g.kit = { coolant: 0, patch: 0, cell: 0, overdrive: 0, bulwark: 0, pulse: 0 };
   g.stock = {};
   g.relics = []; g.relicsTaken = [];

@@ -116,6 +116,10 @@ export const R = {
   homeHeld: false,
   homeT: 0,
   beaconUsed: false,
+  /* The Flare Line (BG): flares thrown this run, and the ones still burning,
+     each with its cell and the seconds it has left. */
+  flaresThrown: 0,
+  flares: [] as { x: number; d: number; t: number }[],
   /* The same shape, for a gate's station: which tier the ship was last at, or
      -1. Round fifteen, Y8. */
   wasAtGate: -1,

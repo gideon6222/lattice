@@ -645,10 +645,12 @@
     bottom:calc(var(--ctrl-b) + 190px + 8px);
     display:flex; gap:5px;
   }
-  .sup.ord{width:87px; height:44px;}
+  .sup.ord{width:66px; height:44px;}
   .sup.ord .g{top:9px; font-size:11px;}
   #ordBomb{border-color:#7a4a1e;}
   #ordLaser{border-color:#1e5f7a;}
+  #ordArc{border-color:#5a3a9a;}
+  #ordFlare{border-color:#9a7a1e;}
   /* Not enough power: dim like an idle supply, but keep the count readable so
      you can see how close you are rather than only that you cannot. */
   .sup.ord.cold{opacity:.34;}
@@ -1524,6 +1526,8 @@
 <div id="ord">
   <button class="sup ord none" id="ordBomb"><span class="g">CHARGE</span><span class="n">2</span></button>
   <button class="sup ord none" id="ordLaser"><span class="g">LASER</span><span class="n">1</span></button>
+  <button class="sup ord none" id="ordArc"><span class="g">ARC</span><span class="n">2</span></button>
+  <button class="sup ord none" id="ordFlare"><span class="g">FLARE</span><span class="n">3</span></button>
 </div>
 
 <!-- What the dark cores handed over. Round fifteen, Y4. A row of its own above

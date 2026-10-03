@@ -23,6 +23,8 @@ import { sfx, audioState, audioVolume } from './audio';
 import CREDITS_MD from '../assets/CREDITS.md?raw';
 import { summarise, mergeLog, loadLog, type Row } from './sim/telemetry';
 import { R } from './sim/runtime';
+import { flaresPerRun } from './sim/flare';
+import { LANCE_CHARGE } from './sim/lance';
 import { ballastDrain, unrestBand, UNREST_BANDS, ballastStarted,
          BALLAST_SAFE, BALLAST_SHORE_COST, BALLAST_LOW } from './sim/unrest';
 import { regionName, regionAt } from './sim/region';
@@ -59,7 +61,7 @@ export const ui = {
   vignette: mustEl('vignette'),
   flash: mustEl('flash'), btnShop: mustEl('btnShop'), btnAuto: mustEl('btnAuto'),
   kit: mustEl('kit'),
-  ordBomb: mustEl('ordBomb'), ordLaser: mustEl('ordLaser'),
+  ordBomb: mustEl('ordBomb'), ordLaser: mustEl('ordLaser'), ordArc: mustEl('ordArc'), ordFlare: mustEl('ordFlare'),
   abSee: mustEl('abSee'), abSink: mustEl('abSink'),
   power: mustEl('power'), powerChip: mustEl('powerChip'),
   verNum: mustEl('verNum'), notes: mustEl('notes'), btnNotes: mustEl('btnNotes'),
@@ -431,13 +433,21 @@ export function updateOrd() {
   const hidden = g.mode !== 'play' || atSurface();
   for (const [el, lvl, cost] of [
     [ui.ordBomb, g.up.bomb, BOMB_CHARGE] as const,
-    [ui.ordLaser, g.up.laser, LASER_CHARGE] as const
+    [ui.ordLaser, g.up.laser, LASER_CHARGE] as const,
+    [ui.ordArc, g.up.arc, LANCE_CHARGE] as const
   ]) {
     el.classList.toggle('none', lvl <= 0 || hidden);
     el.classList.toggle('cold', g.charge < cost);
     const n = el.querySelector('.n');
     if (n) n.textContent = String(cost);
   }
+
+  const fl = g.up.flare || 0;
+  const left = flaresPerRun(fl) - R.flaresThrown;
+  ui.ordFlare.classList.toggle('none', hidden || fl <= 0);
+  ui.ordFlare.classList.toggle('cold', left <= 0);
+  const fn = ui.ordFlare.querySelector('.n');
+  if (fn) fn.textContent = String(Math.max(0, left));
 
   /* And what the cores handed over. Round fifteen, Y4. A button exists only
      once its core is broken, off `g.ground.gates` like everything else this
@@ -579,6 +589,7 @@ const SYS_ICON: Record<string, string> = {
   engines: '<svg viewBox="0 0 24 24"><path d="M8 3h8v7l-4 3-4-3z"/><path d="M9 14c0 3 3 4 3 7 0-3 3-4 3-7"/></svg>',
   hull: '<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>',
   sensors: '<svg viewBox="0 0 24 24"><path d="M5 19a10 10 0 0 1 0-14"/><path d="M9 15a5 5 0 0 1 0-6"/><circle cx="14" cy="12" r="2"/><path d="M14 14v7"/></svg>',
+  crew: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 2.5-6 6-6s6 2 6 6"/><circle cx="17" cy="9" r="2.3"/><path d="M16 14c3 0 5 1.8 5 5"/></svg>',
   ordnance: '<svg viewBox="0 0 24 24"><circle cx="11" cy="14" r="6"/><path d="M15 9l3-3M17 4l3 3"/></svg>'
 };
 

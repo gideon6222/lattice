@@ -3,6 +3,7 @@ import { W } from './sim/config';
 import { WINDOW_COLS } from './streamwindow';
 import { S } from './sim/state';
 import { LAMP_DECAY, LAMP_INTENSITY } from './sim/feel';
+import { FLARE_POOL } from './sim/flare';
 import { R } from './sim/runtime';
 import { loadTier, spec } from './visuals';
 import { applyLightUnlit, haze } from './lightmap';
@@ -101,6 +102,14 @@ export const SHIP_LAYER = 1;
 export const LAMP_COLOR = 0xffd9a0;
 export const lamp = new THREE.PointLight(LAMP_COLOR, LAMP_INTENSITY, S.light(), LAMP_DECAY);
 scene.add(lamp);
+/* The Flare Line's lights (BG): a fixed pool, switched off at intensity 0 and
+   never added or removed, so the light count (and the compiled shaders) never
+   changes mid-run. Driven by flares.ts. */
+export const flareLights: THREE.PointLight[] = Array.from({ length: FLARE_POOL }, () => {
+  const l = new THREE.PointLight(0xff9a4a, 0, 8, 1.4);
+  scene.add(l);
+  return l;
+});
 /* Draw the world, then draw the ship with the lamp switched off.
 
    THE LAYER ON ITS OWN DOES NOTHING, and that was wrong in this file for three
@@ -139,12 +148,15 @@ export function renderWorld() {
   renderer.render(scene, camera);
 
   const held = lamp.intensity;
+  const heldFlares = flareLights.map((l) => l.intensity);
   lamp.intensity = 0;
+  for (const l of flareLights) l.intensity = 0;
   camera.layers.set(SHIP_LAYER);
   renderer.autoClear = false;
   renderer.render(scene, camera);
   renderer.autoClear = true;
   lamp.intensity = held;
+  flareLights.forEach((l, i) => { l.intensity = heldFlares[i]; });
 
   camera.layers.set(0);
   camera.layers.enable(SHIP_LAYER);

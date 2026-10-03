@@ -103,7 +103,7 @@ test('the Next line is one line, in the right shape, and never carries a count',
   assert.equal(H.nextLine(stateAt(0, ['sorter'])), 'Next: Pressure Seal, ride out some gas');
   assert.equal(H.nextLine(stateAt(0, ['sorter', 'seal'])), 'Next: Resonance Tip, keep cutting hard rock');
   assert.equal(H.nextLine(stateAt(0, ['sorter', 'seal', 'tip'])), 'Next: ? in the rock below 20 m');
-  assert.equal(H.nextLine(stateAt(60, ['magnet', 'receiver', 'survey', 'sorter', 'seal', 'tip'])), 'Next: Hull Plating, break the first core');
+  assert.equal(H.nextLine(stateAt(60, ['magnet', 'receiver', 'survey', 'flare', 'sorter', 'seal', 'tip'])), 'Next: Hull Plating, break the first core');
 });
 
 test('a first run is told about the nearest dig, before it has found anything', () => {
@@ -124,7 +124,9 @@ test('the line carries the table: regrouping changed no key, price, level cap or
     /* Added in BE: the Pressure Seal and the Resonance Tip, handed over for gas and hard rock. */
     seal: [1800, 1.5, 4, 0], tip: [2200, 1.5, 4, 0],
     /* Added in BF: the Return Beacon, handed over for the first lost ship. */
-    beacon: [2000, 1.5, 4, 0]
+    beacon: [2000, 1.5, 4, 0],
+    /* Added in BG: the Flare Line and the Arc Lance, found in a wreck and a vault. */
+    flare: [1800, 1.5, 4, 0], arc: [4200, 1.5, 4, 0]
   };
   const now = Object.fromEntries(H.UPGRADES.map((u) => [u.key, [u.base, u.mul, u.max, u.unlock]]));
   assert.deepEqual(now, frozen);

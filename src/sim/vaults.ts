@@ -310,7 +310,7 @@ export const anchorRegions = (): number[] => {
 };
 
 /* Its own seed offset, like everything else that generates. 11, 23, 41, 77,
-   91, 131, 137, 173, 211, 257, 311, 313, 421, 977 and 1013 are taken. */
+   91, 131, 137, 173, 211, 257, 263, 269, 311, 313, 421, 977 and 1013 are taken. */
 const ANCHOR_SEED = 601;
 const SLOT_SEED = 619;
 
@@ -587,6 +587,50 @@ export function tier2RoomAt(t: number): Placed {
     d: Math.round(lo + rnd(t * 11 + 7, t * 31 + 3, TIER2_SEED + 1) * (hi - lo)),
     vault: VEIN_ROOM
   };
+}
+
+/* ---------- the two room finds, progression round BG ----------
+
+   The Flare Line is a crate beside the first wreck (the shallowest one placed)
+   and the Arc Lance a crate beside one of the three Anchor halls under the
+   second barrier. Each rolls on its own seed offset, 263 and 269, so nothing
+   already generated moves. Both sit just OUTSIDE the room's footprint, in rock
+   the generator made, and the world evicts a crate from a room all the same
+   (`evictFromRooms`). A crate stays until it is opened: missable, never lost. */
+const FLARE_SEED = 263;
+const ARC_SEED = 269;
+
+let wreckCache: Placed | null | undefined;
+export function firstWreck(): Placed | null {
+  if (wreckCache === undefined) {
+    const w = vaultPlan().filter((p) => p.vault.id === 'derelict');
+    wreckCache = w.length ? w.reduce((a, b) => (b.d < a.d ? b : a)) : null;
+  }
+  return wreckCache;
+}
+
+/* Which side, and how far along the room's flank, from one roll each. */
+function beside(cx: number, cd: number, seed: number, salt: number): { x: number; d: number } {
+  const side = rnd(salt * 7 + 1, salt * 3 + 5, seed) < 0.5 ? -1 : 1;
+  const dy = Math.floor(rnd(salt * 5 + 2, salt * 11 + 9, seed + 1) * 7) - 3;
+  const x = cx + side * 8;
+  return { x: Math.max(1, Math.min(W - 2, x < 1 || x > W - 2 ? cx - side * 8 : x)), d: cd + dy };
+}
+
+export function flareCrateAt(): { x: number; d: number } | null {
+  const w = firstWreck();
+  return w ? beside(w.x, w.d, FLARE_SEED, 1) : null;
+}
+
+/* The three halls under the second barrier are Anchors 3 to 5 (the second row
+   of regions); the roll picks which one holds the lance. */
+export const ARC_HALLS = [3, 4, 5];
+export function arcHall(): number {
+  return ARC_HALLS[Math.floor(rnd(17, 29, ARC_SEED + 2) * ARC_HALLS.length)];
+}
+export function arcCrateAt(): { x: number; d: number } {
+  const a = anchorAt(arcHall());
+  return beside(a.x, a.d, ARC_SEED, 2);
 }
 
 export function vaultCells(): Map<string, string> {

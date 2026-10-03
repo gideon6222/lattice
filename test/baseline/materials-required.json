@@ -442,6 +442,30 @@
       "total": 2
     },
     {
+      "key": "flare",
+      "keys": null,
+      "steps": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "capstone": [],
+      "total": 0
+    },
+    {
+      "key": "arc",
+      "keys": null,
+      "steps": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "capstone": [],
+      "total": 0
+    },
+    {
       "key": "survey",
       "keys": [
         "amethyst",

@@ -45,6 +45,7 @@ import { spray, stepParticles, starMat, sunSprite } from './particles';
 import { stepDust } from './dust';
 import { leaveDrop, stepDrops } from './drops';
 import { stepBeam } from './beam';
+import { stepFlares } from './flares';
 import { moveAndCollide, thrust, laneVel, headingFor } from './sim/fly';
 import { player, rig, bit, flames, lensFlares, drillTint, FACE_ANGLE, SHIP_Z } from './ship';
 import { padLights, beam } from './pad';
@@ -1113,6 +1114,7 @@ export function tick(raw: number, draw = true) {
 
   stepParticles(dt);
   stepBeam(raw);
+  stepFlares(dt);
   setDepth((R.eye || g).pd);
   /* Hand the score what the depth actually MEANS. Danger is whichever of a
      failing hull or a full heat soak is worse, so the alarm layer answers to

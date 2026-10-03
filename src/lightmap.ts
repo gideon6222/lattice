@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GATE_COUNT } from './sim/gate';
+import { FLARE_POOL } from './sim/flare';
 import { W, worldX } from './sim/config';
 import { blockAt } from './sim/world';
 import { solveVis, shiftField, castShadows, subOpts } from './sim/light';
@@ -137,6 +138,11 @@ const U = {
      is a core with nothing to say. A fixed-size array for the same reason the
      core lights are a fixed pool - the shader is compiled once. */
   uLmCores: { value: Array.from({ length: GATE_COUNT }, () => new THREE.Vector4(0, 0, 1, 0)) },
+  /* Progression round BG: each burning flare, as world x, world y, radius and
+     strength. A flare is a light added to the lights, so where one burns the
+     lit factor is raised to at least its glow, still clamped at 1 like all of
+     it. Strength 0 is a flare that is out. */
+  uLmFlares: { value: Array.from({ length: FLARE_POOL }, () => new THREE.Vector4(0, 0, 1, 0)) },
   /* Round seventeen, AH: the ending's dark, as the depth in metres above
      which the world is still lit, and how dark below it. */
   uLmEnd: { value: new THREE.Vector2(0, 0) }
@@ -149,6 +155,11 @@ export function setEndDark(front: number, dark: number) {
 /* Set by barrier.ts each frame. Darkening only: the propagated light never
    brightens, and a core is the one thing in the world that pushes it the
    other way on purpose. */
+export function setFlare(i: number, x: number, y: number, radius: number, strength: number) {
+  const c = U.uLmFlares.value[i];
+  if (c) c.set(x, y, Math.max(0.001, radius), strength);
+}
+
 export function setCoreDim(t: number, x: number, y: number, radius: number, strength: number) {
   const c = U.uLmCores.value[t];
   if (c) c.set(x, y, Math.max(0.001, radius), strength);
@@ -330,6 +341,7 @@ const DECL = `
   uniform vec3 uLmShade;
   uniform vec4 uLmSoft;
   uniform vec4 uLmCores[${GATE_COUNT}];
+  uniform vec4 uLmFlares[${FLARE_POOL}];
   uniform vec2 uLmEnd;
 
   /* Where p sits in the light grid. */
@@ -479,9 +491,20 @@ const DECL = `
     return k;
   }
 
+  /* What the burning flares give here, 0..1: the brightest of them, falling to
+     nothing at its radius. */
+  float flareLit(vec2 p) {
+    float k = 0.0;
+    for (int i = 0; i < ${FLARE_POOL}; i++) {
+      vec4 c = uLmFlares[i];
+      k = max(k, c.w * (1.0 - smoothstep(0.0, c.z, distance(p, c.xy))));
+    }
+    return k;
+  }
+
   float coreLit(vec2 p) {
     float fl = coreFloor(p);
-    return (fl + (1.0 - fl) * coreShade(p)) * coreDim(p);
+    return min(1.0, max((fl + (1.0 - fl) * coreShade(p)) * coreDim(p), flareLit(p)));
   }
 
   /* What a GLOWING thing keeps here - emissive rock, ore crystals, haloes.

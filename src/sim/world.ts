@@ -9,11 +9,12 @@ import { WRONGNESS } from './wrongness';
 import { key, mixHex, rnd } from './util';
 import { regionAt, REGION_COUNT } from './region';
 import { vaultCells, anchorHere, anchorPlinth, WORKED_HARD, SEALED_HARD, HULK_HARD,
-         vaultOpen, VAULT_WALL_HARD, ANCHOR_COUNT, anchorAt, VAULT_W, VAULT_H } from './vaults';
+         vaultOpen, VAULT_WALL_HARD, ANCHOR_COUNT, anchorAt, VAULT_W, VAULT_H,
+         flareCrateAt, arcCrateAt } from './vaults';
 import { isCollapsed, hardScale, isAwake, UNREST_BANDS } from './unrest';
 import { gateCellAt, gateDepth } from './gate';
 import { g , coreM, valueM, worldTrait} from './state';
-import { findMap, cacheSupply, FIND_COLOR, FIND_HOST, FIND_HARD, type Find } from './finds';
+import { findMap, cacheSupply, FIND_COLOR, FIND_HOST, FIND_HARD, FIND_OF, type Find } from './finds';
 import { keyAt } from './keys';
 
 const GEODE_DEEP_MULT = 3;
@@ -30,9 +31,41 @@ let fcKey = '';
 let fcMap: Map<string, Find> = new Map();
 export function findCells(): Map<string, Find> {
   const cd = coreM();
-  const k = g.planet + '|' + cd + '|' + g.found.length;
-  if (k !== fcKey) { fcKey = k; fcMap = evictFromRooms(findMap(g.planet, cd, g.found), cd); }
+  const best = g.best.depth;
+  /* Whether each room crate has come into the world yet, so the key moves
+     twice at most rather than on every metre of progress. */
+  const k = g.planet + '|' + cd + '|' + g.found.length + '|' + roomFindsNear(best);
+  if (k !== fcKey) { fcKey = k; fcMap = evictFromRooms(withRoomFinds(findMap(g.planet, cd, g.found), g.found, best), cd); }
   return fcMap;
+}
+
+/* How far above a room crate it joins the world. It is out of the streamed
+   window by then, and a fresh save (depth 0) has none, which is what keeps the
+   frozen block golden as it was. */
+export const ROOM_FIND_LEAD = 20;
+let roomCratesMemo: (readonly [string, { x: number; d: number } | null])[] | null = null;
+function roomCrates() {
+  /* blockAt asks for this per cell; the places never change. */
+  return roomCratesMemo || (roomCratesMemo = [['flare', flareCrateAt()], ['arc', arcCrateAt()]]);
+}
+function roomFindsNear(best: number): number {
+  let mask = 0;
+  roomCrates().forEach(([, at], i) => { if (at && best >= at.d - ROOM_FIND_LEAD) mask |= 1 << i; });
+  return mask;
+}
+
+/* The Flare Line and the Arc Lance crates (BG) join the buried ones until they
+   are opened, once the player has come within ROOM_FIND_LEAD metres of them.
+   Appended after the others, so every other crate stays where it was; a cell
+   already taken is walked down like any crate. */
+export function withRoomFinds(m: Map<string, Find>, found: string[], best = Infinity): Map<string, Find> {
+  for (const [key, at] of roomCrates()) {
+    if (!at || found.includes(key) || best < at.d - ROOM_FIND_LEAD) continue;
+    let d = at.d;
+    while (m.has(at.x + ',' + d)) d++;
+    m.set(at.x + ',' + d, FIND_OF[key]);
+  }
+  return m;
 }
 
 /* A crate never sits inside an ANCHOR HALL - not its stone and not its air.

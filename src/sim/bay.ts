@@ -22,7 +22,7 @@
    one stands.) */
 
 import { UPGRADES, TIER_DEPTHS, SYSTEMS, type SystemKey } from './config';
-import { FINDS, FOUND_KEYS } from './finds';
+import { FINDS, ROOM_FINDS, FOUND_KEYS } from './finds';
 import { depthTier, gateDepth } from './gate';
 import { FEATS, FEAT_DEVICES } from './feats';
 import type { Upgrade } from '../types';
@@ -56,7 +56,7 @@ export interface Route {
   at: number;
 }
 
-function find(key: string) { return FINDS.find((f) => f.key === key); }
+function find(key: string) { return FINDS.find((f) => f.key === key) || ROOM_FINDS.find((f) => f.key === key); }
 
 /* The route of a line, read off the table it already sits in. Nothing here is
    a second copy of a depth: a retune of `unlock` or `below` moves the words. */
@@ -69,6 +69,11 @@ export function routeOf(u: Upgrade): Route {
   }
   const f = find(u.key);
   if (FOUND_KEYS.has(u.key) && f) {
+    const room = ROOM_FINDS.find((r) => r.key === u.key);
+    if (room) {
+      return { key: u.key, kind: 'found', at: Math.max(f.below, u.unlock),
+        card: 'Found ' + room.where + ', below ' + f.below + ' m.', act: room.where };
+    }
     return { key: u.key, kind: 'found', at: Math.max(f.below, u.unlock),
       card: 'Dug up in the rock below ' + f.below + ' m.', act: 'in the rock below ' + f.below + ' m' };
   }

@@ -706,6 +706,62 @@
     ],
     "matTotal": 2
   },
+  "flare": {
+    "name": "Flare Line",
+    "base": 1800,
+    "mul": 1.5,
+    "max": 4,
+    "tiers": null,
+    "costs": [
+      1800,
+      2700,
+      4050,
+      6075,
+      9113
+    ],
+    "effects": [
+      "Not installed",
+      "2 flares a run, lighting 4 cells for a minute",
+      "3 flares a run, lighting 5 cells for a minute",
+      "4 flares a run, lighting 6 cells for a minute",
+      "6 flares a run, lighting 7 cells for a minute"
+    ],
+    "mats": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "matTotal": 0
+  },
+  "arc": {
+    "name": "Arc Lance",
+    "base": 4200,
+    "mul": 1.5,
+    "max": 4,
+    "tiers": null,
+    "costs": [
+      4200,
+      6300,
+      9450,
+      14175,
+      21263
+    ],
+    "effects": [
+      "Not installed",
+      "Breaks up to 6 cells of a vein, found 4 cells ahead",
+      "Breaks up to 10 cells of a vein, found 6 cells ahead",
+      "Breaks up to 16 cells of a vein, found 8 cells ahead",
+      "Breaks up to 24 cells of a vein, found 10 cells ahead"
+    ],
+    "mats": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "matTotal": 0
+  },
   "survey": {
     "name": "Deep Survey",
     "base": 3600,
