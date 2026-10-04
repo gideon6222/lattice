@@ -841,22 +841,42 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: level-design
       design: ## Round seventeen: the ladder, finished
 
+- [ ] **Z1b The ship with every gift is filmed on the PC.** Fable's phase review of
+      2026-10-04: BD to BG promised a model on the hull each and none was filmed, and he called
+      the ship bubbly on 2026-09-08. A film of the ship with the Sorter, Seal, Tip, Beacon mast,
+      Flare Line and Arc Lance all fitted at top rung, rendered with the Mobile-like web
+      renderer at the phone's size, held against his 2026-09-08 words. Any part that reads
+      bubbly or flat is reshaped before the phone sees it. Proved by the film and its contact
+      sheet, a DECIDED line, and the picture named in STATE.md.
+      briefs: art, rendering
+      design: ## Progression and unlocks
+
 - [ ] **Z2 A real phone read, before V0.** Fable's review: S6's phone pass was
       desk evidence (draw calls, filmed contact sheets), never a reading taken on
       the handset, and PWA install/offline behaviour has never been checked on
-      this phone at all. `studio phone read perf`, a shot of a shop station and
-      of the third hint, and an install-and-offline pass in Chrome on the S26
-      Ultra - none of it needs Gideon's held console work, so it does not wait on
-      V0. Fable's phase review adds the progression phase to it: a 0.57.0 internal
-      build installed on the S26 Ultra, one shot of the ship on the pad with every hull part
-      mounted, one of the bay rack with its silhouette, one of the Ledger, and three GPU
-      readings within the same hour, all four shots judged against the realism bar before
-      Round eighteen begins. Proved by the four shots and three readings filed in STATE.md,
-      and his own yes or no on the hull. The Ledger's DEVICES page must show sealed devices as
-      silhouettes with routes, not all at once, and the walk covers the seventh tab, the KIT
-      drawer and the Ledger.
-      briefs: phone
+      this phone at all. Fable's phase review of 2026-10-04 makes it a named list. Its first
+      step is uploading 0.57.0 to Play by hand through tools/twa.ps1 and installing it, since
+      nothing else puts it on the phone. After it STATE.md holds one phone screenshot each of
+      the fitting bay on the ARMS tab with the silhouette card, the Ledger sheet (sealed
+      devices as silhouettes with routes, not all at once), and the ordnance row with all four
+      buttons inside the safe area, plus GPU and frame readings (three, within the same hour)
+      taken while a Flare Line is lit in a dark pocket, since that is a new light in a world
+      where the lightmap only darkens. The walk covers the seventh tab, the KIT drawer and
+      the Ledger, plus the shop station, the third hint and install-and-offline in Chrome.
+      It fails if any button clips or the lit-flare reading falls under the phone floor in
+      STATE.md. Proved by those shots and readings, and his own yes or no on the hull.
+      briefs: phone, controls
       design: ## Round sixteen: closing Fable's review
+
+- [ ] **Z3 The three feel moments are filmed.** Fable's phase review of 2026-10-04, after
+      Z2: the Beacon climb from depth with half the hold, an Arc Lance breaking a whole vein,
+      and a flare lighting a pocket had only pure tests. Each is filmed with a DECIDED line.
+      The crate depth for the Arc Lance is settled in BG's text, STATE.md and the code's
+      `where` line, so all three agree: today BG says the second barrier's vault, STATE.md an
+      Anchor hall at 150 m, and the code `below: 150`. Proved by three films and the three
+      words agreeing.
+      briefs: feel, rendering
+      design: ## Progression and unlocks
 
 ### Round seventeen: the ladder, finished (2026-09-25)
 
