@@ -258,7 +258,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: feel
       design: ## Progression and unlocks
 
-- [ ] **BH Pacing bots.** Bots play the first hour on the economy probe. Proved by: a first buy
+- [x] **BH Pacing bots.** Bots play the first hour on the economy probe. Proved by: a first buy
       inside two runs, no rung under a ladder's last asking more than four runs of saving, the
       Sorter by run 3, and every device met once by the end of the third barrier. Any rung that
       fails is retuned with the diff read.

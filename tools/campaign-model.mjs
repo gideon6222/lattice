@@ -41,6 +41,7 @@ export function makeCampaign(H) {
     g.ground = H.newGround();
     g.cargo = {}; g.weight = 0; g.dug = new Set(); g.stock = {};
     g.found = []; g.best.depth = 0;
+    g.feats = []; g.tally = H.blankTally();
     g.px = START; g.pd = -1;
     g.hull = S.hullCap();
   }
@@ -66,6 +67,8 @@ export function makeCampaign(H) {
     const cargo = {}; let weight = 0;
     const cut = [];
     const finds = [], caches = [];
+    /* What the feats count (src/loop.ts): hard rock that is not ore, and gas. */
+    let hard = 0, gas = 0;
     const speed = S.speed();
     const move = (secs) => { t += secs; fuel -= H.FUEL_PER_MOVE * secs * S.fuelUse(); };
     const heat = (cx, d, secs) => {
@@ -81,6 +84,8 @@ export function makeCampaign(H) {
       const secs = (b.hard * H.DIG_BASE) / S.drill();
       t += secs; fuel -= H.fuelPerCell(b.hard) * S.cellFuel() * S.fuelUse();
       heat(cx, d, secs);
+      if (b.hazard) gas++;
+      else if (!b.ore && b.hard >= H.HARD_ROCK) hard++;
       if (b.find) finds.push(b.find);
       if (b.cache) caches.push([cx, d]);
       if (b.value != null && H.DEF[b.id] && weight + b.wt <= cap) {
@@ -138,7 +143,7 @@ export function makeCampaign(H) {
     }
     move(lastD / speed + Math.abs(lastX - START) / speed + (route && !extra.length ? Math.abs(route.c - x) / speed : 0));
     const ok = blockedAt < 0 && fuel > 0 && hull > 0;
-    return { ok, blockedAt, t, fuel, hull, cargo, weight, cut, finds, caches };
+    return { ok, blockedAt, t, fuel, hull, cargo, weight, cut, finds, caches, hard, gas };
   }
 
   function commit(trip) {
@@ -154,6 +159,16 @@ export function makeCampaign(H) {
     }
     g.cargo = trip.cargo; g.weight = trip.weight;
     g.px = START; g.pd = -1;
+    /* The feats, as actions.ts and loop.ts count them. The ship is never lost
+       here, so the Beacon's feat is never won: it is measured on its own. */
+    const won = [];
+    if (H.holdIsFull(trip.weight, S.cargoCap())) won.push(...H.bump(g.tally, g.feats, 'hold'));
+    if (trip.hard) won.push(...H.bump(g.tally, g.feats, 'hard', trip.hard));
+    if (trip.gas) won.push(...H.bump(g.tally, g.feats, 'gas', trip.gas));
+    for (const f of won) {
+      const key = Object.keys(H.FEAT_DEVICES).find((k) => H.FEAT_DEVICES[k].feat === f.key);
+      if (key && !g.found.includes(key)) { g.found.push(key); g.up[key] = Math.max(g.up[key] || 0, 1); }
+    }
     /* As `sell()` does since round seventeen (AK): money is sold, keys are
        banked and never sold. */
     const value = Math.round(H.salePayout(H.haulValue()) * S.saleBonus());
@@ -179,6 +194,11 @@ export function makeCampaign(H) {
       else if (needCred && !needKey) waiting[u.key + lvl] = 'credits';
     }
   }
+  /* Every rung bought, with what it cost against what the last runs earned:
+     the pacing numbers (BH). Cleared by `play`. */
+  let buys = [];
+  let sales = [];
+  let runNow = 0;
   function buyAll() {
     const bought = [];
     for (;;) {
@@ -203,6 +223,9 @@ export function makeCampaign(H) {
       if (mc) g.stock[mc.id] -= mc.need;
       const cap = H.capstoneCost(u, lvl);
       if (cap) g.stock[cap.id] -= cap.need;
+      const recent = sales.slice(-4);
+      const income = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
+      buys.push({ run: runNow, key: u.key, level: lvl + 1, last: lvl + 1 === u.max, cost: H.costOf(u, lvl), income });
       g.credits -= H.costOf(u, lvl);
       g.up[u.key] = lvl + 1;
       bought.push(u.key + ' ' + (lvl + 1));
@@ -342,6 +365,9 @@ export function makeCampaign(H) {
 
   function play({ maxRuns = 600, stallRuns = 80 } = {}) {
     reset();
+    buys = []; sales = []; runNow = 0;
+    const metAt = {};
+    let barrierRun = { 0: null, 1: null, 2: null };
     const log = [];
     let runs = 0, secs = 0, sinceProgress = 0;
     const tierStart = [{ run: 0, secs: 0 }];
@@ -367,10 +393,11 @@ export function makeCampaign(H) {
         if (!m) { note('stalled: no survivable trip at all'); break; }
         trip = m.trip; label = { kind: 'mine', d: m.d };
       }
-      runs++; secs += trip.t;
+      runs++; secs += trip.t; runNow = runs;
       const depthReached = label.kind === 'mine' ? label.d : label.d;
       g.best.depth = Math.max(g.best.depth, depthReached);
-      commit(trip);
+      sales.push(commit(trip));
+      if (label.kind === 'core') barrierRun[label.what] = runs;
       if (label.kind === 'key') {
         note('key ' + label.what + ' at ' + (label.d) + ' m');
       } else if (label.kind !== 'mine') {
@@ -393,6 +420,7 @@ export function makeCampaign(H) {
           tierStart.push({ run: runs, secs });
         }
       } else sinceProgress++;
+      for (const k of g.found) if (!(k in metAt)) metAt[k] = { run: runs, min: +(secs / 60).toFixed(1) };
       noteWaits();
       const bought = buyAll();
       if (bought.length) sinceProgress = 0;
@@ -400,7 +428,8 @@ export function makeCampaign(H) {
     }
     return {
       won: !!g.won, runs, minutes: +(secs / 60).toFixed(1), tiers, log,
-      gates: g.ground.gates.slice(), lit: g.ground.lit.length, found: g.found.slice()
+      gates: g.ground.gates.slice(), lit: g.ground.lit.length, found: g.found.slice(),
+      buys, sales, metAt, barrierRun
     };
   }
 

@@ -23,32 +23,30 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
   rock needs fewer strikes). Rockfall has no hull damage, so the Seal covers gas only. The Sorter works on
   the drill only. The first lost ship now hands over the Return Beacon (BF, `src/sim/beacon.ts`): hold HOME two
   seconds underground, once a run, and the ship climbs to the pad keeping 50/65/80/90% of the
-  ore and all keys. It is dark in the bay until the box lands. Kept shares are the design's own
-  numbers, BH measures them. None of the four gifts has an e2e, only pure tests.
+  ore and all keys. It is dark in the bay until the box lands. The climb costs no fuel, so the
+  shares are its whole price and stay as designed. None of the four gifts has an e2e.
+- **Pacing is a floor** (BH, `studio run pacing`, `test/pacing.test.mjs`): the bot plays the whole
+  game in 46 runs and 56 minutes, first buy run 1, Sorter run 2, every device but the Beacon by
+  run 38, no rung over four runs of saving. It never dies or wanders, so people are slower.
 - **Flare Line and Arc Lance** (BG, `src/sim/flare.ts`, `lance.ts`, `ROOM_FINDS`): two finds in
   crates beside a wreck (40 m) and an Anchor hall (150 m). Crates join the world only once
   you have been within 20 m, so the frozen block golden is unchanged. They ask for no keys,
   because the rock has no key slack left. Pure tests only.
 - **A light e2e.** The browser run is pinned to 3 CPUs beside other gates and 6 alone, below
-  normal priority (`tools/e2e-cpu-cap.mjs`, applied in playwright.config.ts). Gate smoke was
-  about 28 min uncapped and is 25 min capped (2026-10-03). `npm run e2e:measure` prints wall
-  time and browser CPU. The whole measure is 27 min and the desk cuts a call at 10, so run it in
-  parts: `npm run e2e:measure -- --part 1/8` to `8/8`, 3 min each, saved as they end. `-- --report`
-  sums them, `-- --reset` clears, `-- -g "<title>"` runs only touched scenes. All eight parts only
-  at the end of a phase. About 30 redundant page loads are gone and the ore-band specs run in
-  node (`test/world-bands.test.mjs`). Seeded saves in place of playing up to a state are not
-  done.
+  normal priority (`tools/e2e-cpu-cap.mjs`). Gate smoke is about 24 min. `npm run e2e:measure`
+  prints wall time and browser CPU. The whole measure is 27 min and the desk cuts a call at 10,
+  so run it in parts: `-- --part 1/8` to `8/8`, `-- --report` sums, `-- --reset` clears,
+  `-- -g "<title>"` runs touched scenes. All eight only at the end of a phase.
 - **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
 
 ## Next three milestones
 
 Done 2026-09-30: **V0**, the internal track, and **AU**, the sounds he settled on. Done
 2026-10-02: **BA**, the shelf rule as code, **BB**, the bay that draws it, and **BC**, the
-Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip, and **BF**, the Return Beacon, and **BG**, the Flare Line and Arc Lance.
+Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip, and **BF**, the Return Beacon, and **BG**, the Flare Line and Arc Lance, and **BH**, the pacing bots.
 
-1. **BH** - Pacing bots.
-2. **BI** - The notes for players.
-3. See MILESTONES.md; **Z2**, the desk's perf reading, waits for the
+1. **BI** - The notes for players.
+2. See MILESTONES.md; **Z2**, the desk's perf reading, waits for the
    Play install.
 
 ## For Gideon

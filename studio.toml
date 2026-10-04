@@ -13,6 +13,7 @@ mechanics_version = "none"
 [commands]
 test = ["npm.cmd", "test"]
 smoke = ["npm.cmd", "run", "e2e"]
+pacing = ["node", "tools/pacing.mjs"]
 
 [budget]
 apk_bytes = 0
