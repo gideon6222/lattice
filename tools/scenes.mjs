@@ -782,6 +782,27 @@ export const SCENES = {
     `
   },
 
+  /* Fable's phase review, 2026-10-04: the six gift parts (Sorter, Seal, Tip,
+     Beacon mast, Flare Line, Arc Lance) were drawn from code and never filmed.
+     The ship on its lift with every line at the top rung, turned a sixth of a
+     turn between frames (87 px of drag is 60 degrees), so every flank is seen once. */
+  hullgifts: {
+    secs: 0.3,
+    frames: 6,
+    enter: true,
+    setup: `
+      __cw.g.credits = 9e6; __cw.g.best.depth = 400; __cw.g.ground.gates = [0, 1, 2];
+      for (const u of __cw.UPGRADES) __cw.g.up[u.key] = u.max || 1;
+      __cw.setUpgradeHardware(__cw.g.up);
+      __cw.g.px = __cw.START_X; __cw.g.pd = -1;
+      __cw.advance(0.5);
+      document.getElementById('btnShop').click();
+      __cw.advance(2);
+      __cw.setUpgradeHardware(__cw.g.up);
+    `,
+    step: `__cw.turnShip(87); __cw.advance(SECS);`
+  },
+
   gatebays: {
     secs: 0.6,
     frames: 5,

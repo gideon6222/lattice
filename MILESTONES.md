@@ -841,7 +841,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: level-design
       design: ## Round seventeen: the ladder, finished
 
-- [ ] **Z1b The ship with every gift is filmed on the PC.** Fable's phase review of
+- [x] **Z1b The ship with every gift is filmed on the PC.** Fable's phase review of
       2026-10-04: BD to BG promised a model on the hull each and none was filmed, and he called
       the ship bubbly on 2026-09-08. A film of the ship with the Sorter, Seal, Tip, Beacon mast,
       Flare Line and Arc Lance all fitted at top rung, rendered with the Mobile-like web

@@ -14,6 +14,8 @@ mechanics_version = "none"
 test = ["npm.cmd", "test"]
 smoke = ["npm.cmd", "run", "e2e"]
 pacing = ["node", "tools/pacing.mjs"]
+film-hullgifts = ["node", "tools/filmstrip.mjs", "hullgifts"]
+shot-hullgifts = ["node", "tools/shot.mjs", "hullgifts"]
 
 [budget]
 apk_bytes = 0

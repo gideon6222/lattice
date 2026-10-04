@@ -43,8 +43,13 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
 Done 2026-09-30: **V0** and **AU**. Done 2026-10-02 and 03: **BA** to **BK**
 (0.57.0 is in the changelog and `store/release-notes`, not yet built or uploaded to Play).
 
-1. **Z2** - the phone read of this phase (0.57.0 build, four shots, three readings). Needs the phone.
-2. See MILESTONES.md for anything after it.
+1. **Z2** - the named phone list (upload 0.57.0 first, three shots, flare-lit readings). Needs the phone.
+2. **Z3** - film the Beacon climb, the Arc vein and a flare; settle the Arc crate's depth.
+
+Z1b done 2026-10-04: `studio run film-hullgifts` and `shot-hullgifts` show the ship with every
+line at top rung (`test-results/film-hullgifts.png`). The hull reads angular, not bubbly. The
+Sorter drum and the masts read; the Seal ring and flare canisters are small and hard to tell
+apart at bay size, so Z2's phone shot judges them.
 
 ## For Gideon
 
