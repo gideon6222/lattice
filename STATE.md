@@ -53,7 +53,8 @@ Seal ring and flare canisters are small at bay size, so Z2's phone shot judges t
 
 ## For Gideon
 
-Nothing open.
+Z2 is the only open box and needs the phone: 0.57.0 must be built with tools/twa.ps1 and
+uploaded to Play by hand, then installed, before the three shots and flare-lit readings.
 
 ## Phone readings
 
