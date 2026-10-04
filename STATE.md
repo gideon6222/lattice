@@ -20,7 +20,8 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
   rung 1 through `FEAT_DEVICES`: Ore Sorter (BD, full hold sold), Pressure Seal and Resonance Tip
   (BE, gas and hard rock), Return Beacon (BF, `src/sim/beacon.ts`: hold HOME two seconds
   underground, once a run, climb to the pad keeping 50/65/80/90% of ore and all keys, no fuel).
-  The Seal covers gas only and the Sorter the drill only. None of the four has an e2e (BJ).
+  The Seal covers gas only and the Sorter the drill only. BJ's five e2e specs cover each gift's
+  banner and bay card, and the Beacon hold (gas and hard rock bump the counter, not real play).
 - **Pacing is a floor** (BH, BK, `studio run pacing`, `test/pacing.test.mjs`): the bot plays the
   whole game in 52 runs and 66 minutes, first buy run 1, Sorter run 2, no rung over four runs of
   saving. It loses a ship on purpose at run 4 and holds the Beacon then. Every device is met by
@@ -37,11 +38,11 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
 
 ## Next three milestones
 
-Done 2026-09-30: **V0** and **AU**. Done 2026-10-02 and 03: **BA** to **BI** and **BK**
+Done 2026-09-30: **V0** and **AU**. Done 2026-10-02 and 03: **BA** to **BK**
 (0.57.0 is in the changelog and `store/release-notes`, not yet built or uploaded to Play).
 
-1. **BJ** - an e2e for the four gifts (banner, new card on the right tab, the Beacon hold).
-2. **Z2** - the phone read of this phase (0.57.0 build, four shots, three readings). Needs the phone.
+1. **Z2** - the phone read of this phase (0.57.0 build, four shots, three readings). Needs the phone.
+2. See MILESTONES.md for anything after it.
 
 ## For Gideon
 

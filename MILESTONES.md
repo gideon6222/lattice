@@ -270,7 +270,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: store
       design: ## Progression and unlocks
 
-- [ ] **BJ The four gifts have an e2e.** One spec loads a save one act short of each of the four
+- [x] **BJ The four gifts have an e2e.** One spec loads a save one act short of each of the four
       feats (a full hold sold, gas ridden out, hard rock cut, a lost ship), performs the act, docks,
       and sees the banner and the new card on the right bay tab, plus the Beacon's HOME hold
       climbing to the pad with the kept share shown. Proved by that spec in `npm run check`.

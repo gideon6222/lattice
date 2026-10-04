@@ -5498,3 +5498,98 @@ test('the HUD fits a phone: nothing runs off the edge, and the timed three sit b
   await expect(page.locator('#supOverdrive')).toBeHidden();
   expect(await page.evaluate(() => (window as any).__cw.g.kit.overdrive), 'the spend did not happen').toBe(0);
 });
+
+/* The four gifts (progression round, BJ). Each spec starts a game one act
+   short of a feat, does the act, and watches the device arrive: the banner at
+   the moment it is won, and its card on the right bay tab once the ship is on
+   the pad. The sale and the lost ship are the real calls. Gas and hard rock
+   are the counter the loop bumps (`countFeat`), because the loop's own gas and
+   rock conditions are what the sim tests already pin and a SwiftShader drill
+   would only measure the machine. */
+async function giftBay(page: Page, counter: string, short: number, key: string, tab: string,
+                       act: string) {
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  await page.evaluate(([c, n]) => {
+    const w = (window as any).__cw;
+    w.g.tally[c as string] = n as number;
+    w.g.feats.length = 0;
+  }, [counter, short]);
+  expect(await page.evaluate((k) => (window as any).__cw.g.up[k], key), key + ' was owned before the act').toBe(0);
+  await page.evaluate((a) => {
+    const w = (window as any).__cw;
+    w.g.px = w.START_X; w.g.pd = -1;
+    const ore = 'gold';   // ORES[0] is a key mineral, which is banked and never sold
+    if (a === 'sell') {
+      w.g.cargo = { [ore]: 5 };
+      w.g.weight = w.S.cargoCap();
+      w.sell();
+    } else if (a === 'lose') {
+      w.g.cargo = { [ore]: 5 };
+      w.die('fuel');
+    } else w.countFeat(a);
+  }, act);
+  await expect(page.locator('#found'), 'no banner when the feat was won').toHaveClass(/on/);
+  await expect(page.locator('#found .fhead')).toHaveText('DEVICE RECOVERED');
+  expect(await page.evaluate((k) => (window as any).__cw.g.up[k], key), key + ' was not handed over').toBe(1);
+  if (act === 'lose') await page.locator('#evBtn').dispatchEvent('click');
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.credits = 1000; w.g.px = w.START_X; w.g.pd = -1; w.advance(0.5);
+    if (w.g.mode === 'play') w.sell();
+    document.getElementById('btnShop')!.click();
+  });
+  await page.waitForFunction(() => (window as any).__cw.roomReady(), null, { timeout: 15_000 });
+  await page.locator('.sysb[data-sys="' + tab + '"]').click();
+  await expect(page.locator('#rack .bcard[data-key="' + key + '"]'), key + ' has no card on the ' + tab + ' tab').toHaveCount(1);
+  for (const other of ['drill', 'hold', 'engines', 'hull'].filter((t) => t !== tab)) {
+    await page.locator('.sysb[data-sys="' + other + '"]').click();
+    await expect(page.locator('#rack .bcard[data-key="' + key + '"]'), key + ' showed on the ' + other + ' tab').toHaveCount(0);
+  }
+}
+
+test('a full hold sold hands over the Ore Sorter, on the HOLD tab', async ({ page }) => {
+  await giftBay(page, 'hold', 0, 'sorter', 'hold', 'sell');
+});
+
+test('gas ridden out hands over the Pressure Seal, on the HULL tab', async ({ page }) => {
+  await giftBay(page, 'gas', 3, 'seal', 'hull', 'gas');
+});
+
+test('hard rock cut hands over the Resonance Tip, on the DRILL tab', async ({ page }) => {
+  await giftBay(page, 'hard', 39, 'tip', 'drill', 'hard');
+});
+
+test('a ship lost hands over the Return Beacon, on the ENGINES tab', async ({ page }) => {
+  await giftBay(page, 'lost', 0, 'beacon', 'engines', 'lose');
+});
+
+test('the Return Beacon: HOME held two seconds climbs to the pad and shows the kept share', async ({ page }) => {
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  const ore = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    if (!w.g.found.includes('beacon')) w.g.found.push('beacon');
+    w.g.up.beacon = 1;
+    w.g.px = w.START_X; w.g.pd = 60;
+    w.g.cargo = { gold: 10 };
+    w.g.weight = 10 * w.ORES.find((o: any) => o.id === 'gold').wt;
+    w.advance(0.1);
+    return 'gold';
+  });
+  const home = page.locator('#btnHome');
+  await expect(home, 'HOME is not offered underground once the Beacon is held').toBeVisible();
+  await home.dispatchEvent('pointerdown');
+  await page.evaluate(() => (window as any).__cw.advance(1.0));
+  expect(await page.evaluate(() => (window as any).__cw.g.mode), 'HOME climbed after one second').toBe('play');
+  await page.evaluate(() => (window as any).__cw.advance(1.3));
+  expect(await page.evaluate(() => (window as any).__cw.g.mode), 'HOME did not climb after two seconds').toBe('fly');
+  await expect(page.locator('#toast')).toContainText('Return Beacon · kept');
+  expect(await page.evaluate((o) => (window as any).__cw.g.cargo[o], ore), 'rung 1 keeps half the hold').toBe(5);
+  /* Let the climb finish: the ship docks and the sale pays for the half. */
+  const before = await page.evaluate(() => (window as any).__cw.g.credits);
+  for (let i = 0; i < 40; i++) {
+    await page.evaluate(() => (window as any).__cw.advance(1));
+    if (await page.evaluate(() => (window as any).__cw.g.mode) === 'play') break;
+  }
+  expect(await page.evaluate(() => (window as any).__cw.atSurface()), 'the ship did not reach the pad').toBe(true);
+  expect(await page.evaluate(() => (window as any).__cw.g.credits), 'the kept half was not sold').toBeGreaterThan(before);
+});
