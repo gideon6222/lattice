@@ -6,9 +6,10 @@
    is a floor on a real player's runs and a ceiling on how fast the economy can
    be. These are the four promises of DESIGN.md "Pacing, in sessions".
 
-   The Return Beacon is outside the third: a bot that cannot lose a ship never
-   earns it. Its climb costs no fuel, so what it costs is the share it leaves,
-   and those shares are asserted to climb and to stay under a whole hold. */
+   The Return Beacon is outside the third: the bot loses one ship on purpose at
+   run 4 (`LOSS_RUN` in the model) and must hold the Beacon by the next run. Its
+   climb costs no fuel, so what it costs is the share it leaves, and those
+   shares are asserted to climb and to stay under a whole hold. */
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -50,6 +51,15 @@ test('every device is met once by the end of the third barrier', () => {
     assert.ok(r.metAt[key] && r.metAt[key].run <= end,
       `${key} was met at run ${r.metAt[key] && r.metAt[key].run}, after the third barrier at run ${end}`);
   }
+});
+
+test('the ship lost at run 4 hands over the Beacon by run 5, and its rung stays inside the saving cap', () => {
+  assert.equal(r.lostRun, 4, 'the bot lost its ship at run ' + r.lostRun);
+  assert.ok(r.metAt.beacon && r.metAt.beacon.run <= r.lostRun + 1,
+    'the Beacon was met at run ' + (r.metAt.beacon && r.metAt.beacon.run));
+  assert.equal(r.sales[r.lostRun - 1], 0, 'a lost hold sold for something');
+  const rungs = r.buys.filter((b) => b.key === 'beacon' && !b.last && b.income);
+  for (const b of rungs) assert.ok(b.cost / b.income <= 4, `beacon ${b.level} asks ${(b.cost / b.income).toFixed(1)} runs of saving`);
 });
 
 test('the Return Beacon keeps more on each rung and never a whole hold', () => {

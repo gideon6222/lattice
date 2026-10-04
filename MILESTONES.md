@@ -277,7 +277,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: menu, feel
       design: ## Progression and unlocks
 
-- [ ] **BK The pacing test settles the Beacon.** The pacing bot loses one ship on purpose by a stated
+- [x] **BK The pacing test settles the Beacon.** The pacing bot loses one ship on purpose by a stated
       run and holds the Beacon the run after, and `test/pacing.test.mjs` asserts it beside the
       four-run saving cap, so STATE.md and the commit message agree. Proved by the test.
       briefs: feel

@@ -14,20 +14,18 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
   this repo has no signing or Play secrets, so the listing-sync workflow cannot run either.
   The bundle is built by tools/twa.ps1 and uploaded by hand.
 - **A studio phone reading.** Possible now that Play installs `com.gideon.lattice` (Z2).
-
-- **The new progression, past its fifth box.** His ask of 2026-10-02 (locked, found, earned;
+- **The new progression, past its eighth box.** His ask of 2026-10-02 (locked, found, earned;
   DESIGN.md "Progression and unlocks"). The bay draws the rule (BB). The Ledger (pause sheet:
-  DEVICES, FEATS, RELICS) and `src/sim/feats.ts` exist (BC). Three feats now hand over a device
-  at rung 1 through `FEAT_DEVICES`: the Ore Sorter (BD, a full hold sold), the Pressure Seal and
-  the Resonance Tip (BE, `src/sim/hazards.ts`: gas hits for less and the top rungs vent it, hard
-  rock needs fewer strikes). Rockfall has no hull damage, so the Seal covers gas only. The Sorter works on
-  the drill only. The first lost ship now hands over the Return Beacon (BF, `src/sim/beacon.ts`): hold HOME two
-  seconds underground, once a run, and the ship climbs to the pad keeping 50/65/80/90% of the
-  ore and all keys. It is dark in the bay until the box lands. The climb costs no fuel, so the
-  shares are its whole price and stay as designed. None of the four gifts has an e2e.
-- **Pacing is a floor** (BH, `studio run pacing`, `test/pacing.test.mjs`): the bot plays the whole
-  game in 46 runs and 56 minutes, first buy run 1, Sorter run 2, every device but the Beacon by
-  run 38, no rung over four runs of saving.- **Flare Line and Arc Lance** (BG, `src/sim/flare.ts`, `lance.ts`, `ROOM_FINDS`): two finds in
+  DEVICES, FEATS, RELICS) and `src/sim/feats.ts` exist (BC). Four feats hand over a device at
+  rung 1 through `FEAT_DEVICES`: Ore Sorter (BD, full hold sold), Pressure Seal and Resonance Tip
+  (BE, gas and hard rock), Return Beacon (BF, `src/sim/beacon.ts`: hold HOME two seconds
+  underground, once a run, climb to the pad keeping 50/65/80/90% of ore and all keys, no fuel).
+  The Seal covers gas only and the Sorter the drill only. None of the four has an e2e (BJ).
+- **Pacing is a floor** (BH, BK, `studio run pacing`, `test/pacing.test.mjs`): the bot plays the
+  whole game in 52 runs and 66 minutes, first buy run 1, Sorter run 2, no rung over four runs of
+  saving. It loses a ship on purpose at run 4 and holds the Beacon then. Every device is met by
+  run 47, before the third barrier at run 51. All asserted.
+- **Flare Line and Arc Lance** (BG, `src/sim/flare.ts`, `lance.ts`, `ROOM_FINDS`): two finds in
   crates beside a wreck (40 m) and an Anchor hall (150 m). Crates join the world only once
   you have been within 20 m, so the frozen block golden is unchanged. They ask for no keys,
   because the rock has no key slack left. Pure tests only.
@@ -39,13 +37,11 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
 
 ## Next three milestones
 
-Done 2026-09-30: **V0**, the internal track, and **AU**, the sounds he settled on. Done
-2026-10-02: **BA**, the shelf rule as code, **BB**, the bay that draws it, and **BC**, the
-Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip, and **BF**, the Return Beacon, and **BG**, the Flare Line and Arc Lance, and **BH**, the pacing bots, and **BI**, the notes for players (0.57.0 in the changelog and
-`store/release-notes`, not yet built or uploaded to Play).
+Done 2026-09-30: **V0** and **AU**. Done 2026-10-02 and 03: **BA** to **BI** and **BK**
+(0.57.0 is in the changelog and `store/release-notes`, not yet built or uploaded to Play).
 
-1. **Z2** - the desk's perf reading, waits for the Play install.
-2. See MILESTONES.md for anything after it.
+1. **BJ** - an e2e for the four gifts (banner, new card on the right tab, the Beacon hold).
+2. **Z2** - the phone read of this phase (0.57.0 build, four shots, three readings). Needs the phone.
 
 ## For Gideon
 

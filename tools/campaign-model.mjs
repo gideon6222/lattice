@@ -178,6 +178,18 @@ export function makeCampaign(H) {
     return value;
   }
 
+  /* The run on which the bot loses its ship, stated here and asserted by
+     test/pacing.test.mjs: late enough that the first buys are in, early
+     enough to be the first loss a new player would plausibly have. */
+  const LOSS_RUN = 4;
+  function lose() {
+    g.cargo = {}; g.weight = 0;
+    for (const f of H.bump(g.tally, g.feats, 'lost')) {
+      const key = Object.keys(H.FEAT_DEVICES).find((k) => H.FEAT_DEVICES[k].feat === f.key);
+      if (key && !g.found.includes(key)) { g.found.push(key); g.up[key] = Math.max(g.up[key] || 0, 1); }
+    }
+  }
+
   const PRIORITY = ['cool', 'tank', 'drill', 'hull', 'thrust', 'laser'];
   /* What each rung was last waiting on before it was bought: its credits, or
      its key. Round seventeen, AK's receipt: keys should hold back the rungs
@@ -367,6 +379,7 @@ export function makeCampaign(H) {
     reset();
     buys = []; sales = []; runNow = 0;
     const metAt = {};
+    let lostRun = null;
     let barrierRun = { 0: null, 1: null, 2: null };
     const log = [];
     let runs = 0, secs = 0, sinceProgress = 0;
@@ -394,6 +407,16 @@ export function makeCampaign(H) {
         trip = m.trip; label = { kind: 'mine', d: m.d };
       }
       runs++; secs += trip.t; runNow = runs;
+      /* The one ship the bot loses on purpose (BK): the hold is gone, nothing
+         is sold, and the lost-ship feat hands over the Beacon at the dock. */
+      if (runs === LOSS_RUN && lostRun === null) {
+        lostRun = runs;
+        lose();
+        sales.push(0);
+        for (const k of g.found) if (!(k in metAt)) metAt[k] = { run: runs, min: +(secs / 60).toFixed(1) };
+        buyAll();
+        continue;
+      }
       const depthReached = label.kind === 'mine' ? label.d : label.d;
       g.best.depth = Math.max(g.best.depth, depthReached);
       sales.push(commit(trip));
@@ -429,7 +452,7 @@ export function makeCampaign(H) {
     return {
       won: !!g.won, runs, minutes: +(secs / 60).toFixed(1), tiers, log,
       gates: g.ground.gates.slice(), lit: g.ground.lit.length, found: g.found.slice(),
-      buys, sales, metAt, barrierRun
+      buys, sales, metAt, barrierRun, lostRun
     };
   }
 
