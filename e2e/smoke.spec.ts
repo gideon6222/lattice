@@ -350,9 +350,6 @@ test('digging fills the hold and selling at the pad pays out', async ({ page }) 
    missing id. Opening each panel is therefore also a check that index.html and
    ui.ts still agree with each other. */
 test('the shop, manifest and pause menu all open', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   /* The ship has to be DOWN first. Landing puts the game in 'settle' mode and
      the shop button refuses clicks until it is 'play' - so a click sent during
      the descent is silently dropped and everything after it tests a shop that
@@ -1393,7 +1390,8 @@ test('without ?debug there is no run log and no stack overlay, and a crash is on
     setTimeout(() => { throw new Error('a made-up thrown fault'); }, 0);
   });
   await expect.poll(() => logged.join('\n'), { timeout: 5_000 }).toContain('a made-up thrown fault');
-  expect(logged.join('\n'), 'the async fault never reached the console').toContain('a made-up async fault');
+  await expect.poll(() => logged.join('\n'), { message: 'the async fault never reached the console', timeout: 10_000 })
+    .toContain('a made-up async fault');
   await expect(page.locator('#err'), 'a player was shown the stack overlay').toHaveClass(/hidden/);
   await expect(page.locator('#errFix'), 'a player was offered CLEAR SAVE').toHaveCount(0);
   const rec = await page.evaluate(() => JSON.parse(localStorage.getItem('coreward.crash') || 'null'));
@@ -1510,9 +1508,6 @@ test('a ship parked off-lane still digs instead of snagging on its own shaft', a
    CRAFT.md keeps asking for: a mechanic whose condition never comes true fails
    as absence, and absence is exactly what playtesting cannot see. */
 test('a tremor actually fires in a real run below the tremor line', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
 
   const out = await page.evaluate(() => {
     const w = (window as any).__cw;
@@ -1568,9 +1563,6 @@ test('a tremor actually fires in a real run below the tremor line', async ({ pag
    different kind of test - so both properties get asserted directly rather
    than assumed by the tests that rely on them. */
 test('advance is deterministic and far faster than real time', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
 
   const out = await page.evaluate(() => {
     const w = (window as any).__cw;
@@ -1609,9 +1601,6 @@ test('advance is deterministic and far faster than real time', async ({ page }) 
    Asserted on position rather than on the depth readout, because the readout
    rounds: 49.58 displays as "50 m", which is how this first showed up. */
 test('drilling holds the ship against the rock, never inside it', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
 
   const out = await page.evaluate(() => {
     const w = (window as any).__cw;
@@ -1781,9 +1770,6 @@ test('hardware bought in the Outfitter is on the ship you undock with', async ({
    sampling says what it should: the shaft is lit and rock a few cells into the
    mass is not, which is the whole promise of the feature. */
 test('the lamp reaches the rock shader, and rock away from a tunnel goes dark', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
 
   const r = await page.evaluate(() => {
     const w = (window as any).__cw;
@@ -2490,7 +2476,7 @@ test('an empty tank loses the ship, the hold, and nothing else', async ({ page }
       weight: w.g.weight,
       pd: w.g.pd,
       credits: w.g.credits, drill: w.g.up.drill, relics: w.g.relics.length,
-      found: w.g.found.length, planet: w.g.planet
+      found: w.g.found.length, foundKeys: [...w.g.found] as string[], planet: w.g.planet
     };
   });
 
@@ -2510,7 +2496,11 @@ test('an empty tank loses the ship, the hold, and nothing else', async ({ page }
   expect(dead.credits, 'banked credits were taken').toBe(before.credits);
   expect(dead.drill, 'an upgrade level was taken').toBe(before.drill);
   expect(dead.relics, 'a relic was taken').toBe(before.relics);
-  expect(dead.found, 'a found device was taken').toBe(before.found);
+  /* The first ship lost leaves a black box on the pad (the Return Beacon), so a
+     device is added, never taken: the magnet stays and at most one is new. */
+  expect(dead.foundKeys, 'a found device was taken').toContain('magnet');
+  expect(dead.found, 'a loss may add the black box and nothing more')
+    .toBeLessThanOrEqual(before.found + 1);
   expect(dead.planet, 'the world was taken').toBe(before.planet);
 });
 
@@ -2567,92 +2557,7 @@ test('the fuel gauge shows the climb home, and goes red before it is too late', 
   expect(seen).toEqual(['clear', 'plan', 'danger', 'stranded']);
 });
 
-test('the shallow world holds three materials, and the deep ones are a prize', async ({ page }) => {
-  /* One world now, so "planet 0" is not a thing to sweep. The claim converts
-     to depth BANDS of the single world, which is what the ore ladder actually
-     gates on and what he asked for: three materials near the top, and the deep
-     kinds rare even where they exist.
-
-     Sixty metres, because gold starts at 64 - the band has to stop before the
-     fourth material to be a claim about the first three. */
-  const counts = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    w.g.dug = new Set(); w.g.rubble = new Set();
-    const floor = w.coreM();
-    const bands: Record<string, Record<string, number>> = {};
-    for (const [name, lo, hi] of [['shallow', 0, 60], ['deep', floor - 90, floor]] as
-         [string, number, number][]) {
-      const seen: Record<string, number> = {};
-      let cells = 0;
-      for (let d = lo; d < hi; d++) {
-        for (let x = 0; x < w.W; x++) {
-          const b = w.blockAt(x, d);
-          cells++;
-          if (b && b.ore && !b.core) seen[b.id] = (seen[b.id] || 0) + 1;
-        }
-      }
-      seen.__cells = cells;
-      bands[name] = seen;
-    }
-    return bands;
-  });
-
-  /* NO cell above a material's floor ever holds it - the invariant, swept, not
-     a sample. A 0.12% material can miss a single band by luck; a floor cannot
-     be broken by luck. */
-  const breaches = await page.evaluate(() => {
-    const w = (window as any).__cw;
-    const bad: string[] = [];
-    const floor = w.coreM();
-    for (let d = 0; d < floor; d++) {
-      for (let x = 0; x < w.W; x += 3) {
-        const b = w.blockAt(x, d);
-        if (!b || !b.ore || b.core) continue;
-        const o = w.ORES.find((z: any) => z.id === b.id);
-        if (o && d < o.min) bad.push(o.id + ' at ' + d + ' m, above its floor of ' + o.min);
-      }
-    }
-    return bad.slice(0, 5);
-  });
-  expect(breaches.join('; '), 'a material generated above its own floor depth').toBe('');
-
-  /* Blocks that carry `ore: true` and are not materials.
-
-     The flag does two jobs: it decides what goes in the hold when a block
-     breaks, and it decides whether blocks.ts draws crystal shards or pebbles.
-     An Anchor wants the second and cannot do the first - it never breaks - so
-     it is flagged and belongs on this list, next to the crates and pockets
-     that were already here for the same reason. */
-  /* Round thirteen's derelict adds two more, and the SECOND of them is the
-     reason this test earned its keep today rather than merely passing.
-
-     `derelictlamp` is the easy one: it carries the flag purely to be drawn with
-     a halo, it is `spoil`, and it can never enter the hold - exactly the Anchor
-     three lines up.
-
-     `salvage` is on this list only because the design was changed to put it
-     here. It shipped for an hour as a material paying a Bloom's 4,200, derived
-     on an argument that was sound about the wrong source: a Bloom is gated on
-     `isAwake` and is priced against a five-Anchor economy, while a wreck is
-     gated on nothing and Rustmoor's is at 13 m where copper is 40 a unit. This
-     test failed, and the tempting fix - adding the id here and moving on -
-     would have silenced a real finding. The hold is a CACHE now, so its prize
-     is `cachePrize(x, d)`, which has always handed over the deepest minerals a
-     depth allows. It belongs here for the same reason `cache` does. */
-  const notOre = new Set(['__cells', 'geode', 'gas', 'cache', 'schematic', 'relic', 'part',
-                          'anchor', 'anchorbroken', 'anchorscar', 'salvage', 'derelictlamp']);
-  const shallow = Object.keys(counts.shallow).filter((k) => !notOre.has(k));
-  expect(shallow.sort().join(','), 'the top sixty metres holds more than the starter three')
-    .toBe('copper,iron,silver');
-
-  /* And the deepest material is rare even in the band it lives in. */
-  const deep = counts.deep;
-  const sol = deep.solmarrow || 0;
-  expect(sol, 'solmarrow does not generate at all in the deepest band').toBeGreaterThan(0);
-  expect(sol / deep.__cells,
-    'solmarrow is ' + ((sol / deep.__cells) * 100).toFixed(2) + '% of the deep band, not a prize')
-    .toBeLessThan(0.006);
-});
+/* The ore bands moved to test/world-bands.test.mjs: they only read the world. */
 
 /* The map, end to end.
 
@@ -2668,9 +2573,6 @@ test('the shallow world holds three materials, and the deep ones are a prize', a
    or is never drawn into, is a black rectangle that reads as "you have not
    been anywhere". So the pixels are counted. */
 test('the map records the descent and draws it', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   /* Nothing is recorded while the ship is on the pad, so the map starts blank
@@ -2829,9 +2731,6 @@ test('the map records the descent and draws it', async ({ page }) => {
    and still lets you fly through it is a collapse that looks right in a
    screenshot and is not a stake at all. */
 test('the Ballast panel reads but does not take, and an empty one takes a region', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   /* A kitted rig, because the ground this test needs to reach is two regions
@@ -3028,9 +2927,6 @@ test('the Ballast panel reads but does not take, and an empty one takes a region
    and that the Anchor cannot be mined. A hall you can drift into is not a
    discovery, and an Anchor you can drill out is a pickup. */
 test('an Anchor hall is shut until you cut it, and lights by standing there', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   /* The shallowest Anchor, found rather than named: the positions are seeded
@@ -3162,9 +3058,6 @@ test('the first core wakes the planet, and the ground stops staying where you le
   async ({ page }) => {
   /* Round seventeen, AC: the wake was the fifth Anchor of nine, a second
      escalation beside the ladder's. It is the first core's now. */
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   /* Every Anchor of the first tier broken, and nothing has woken. */
@@ -3278,9 +3171,6 @@ test('the first core wakes the planet, and the ground stops staying where you le
    centre is, and the ending firing when the ship reaches it are the shipping
    path. */
 test('the Vault opens only when the last core breaks, and the last gate is its door', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   /* ---- shut, with all nine Anchors broken and two gates open ---- */
@@ -3400,9 +3290,6 @@ test('the Vault opens only when the last core breaks, and the last gate is its d
    which region falls may have been made minutes and a reload earlier. */
 test('the planet will not bury an Anchor, and stops at three regions down',
   async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   /* Every region furious and nothing lit, which is the state that used to
@@ -3517,9 +3404,6 @@ test('every Anchor lights by digging down its own column', async ({ page }) => {
      seconds. It is the only test in here that asserts the whole objective is
      reachable, and that is worth a slow lane. */
   test.setTimeout(360_000);
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const n = await page.evaluate(() => (window as any).__cw.ANCHOR_COUNT);
@@ -3593,9 +3477,6 @@ test('cutting a dark core brings its barrier down, on the real input path', asyn
      draws again. That is invisible in a unit test of `gate.ts`, because
      `gate.ts` is right. */
   test.setTimeout(180_000);
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const tiers = await page.evaluate(() => (window as any).__cw.GATE_COUNT);
@@ -3670,9 +3551,6 @@ test('the cores hand over abilities, and each one appears with its own core', as
      the buttons exist, appear when their core is broken and not before, and
      are gone again on a save that has not broken one - which is the half that
      lives entirely in `ui.ts` and cannot be reached from the sim. */
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const state = async (gates: number[]) => page.evaluate((gs: number[]) => {
@@ -3710,9 +3588,6 @@ test('Sink carries the ship through rock, and never through a barrier', async ({
      through a forcefield has no reason to find an Anchor, and the entire
      ladder his brief is about would have a way round it. */
   test.setTimeout(120_000);
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const run = await page.evaluate(async () => {
@@ -3799,9 +3674,6 @@ test('The Hollow draws what is buried and costs power to hold', async ({ page })
      than the sweep being made cheaper - looking at a hole the test dug for
      itself would prove nothing about the lens. */
   test.setTimeout(150_000);
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const run = await page.evaluate(async () => {
@@ -3856,9 +3728,6 @@ test('the planet is repaired at a scar, on the button, and never from the pad', 
 
      The Y3 lesson: the whole of a milestone can be four lines on a branch, and
      a branch nothing enters is a feature nobody has. */
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const run = await page.evaluate(async () => {
@@ -3952,9 +3821,6 @@ test('the pad has no donate buttons left on it', async ({ page }) => {
 
      Asserted on the panel rather than on the source, because what matters is
      that nobody can press one. */
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const feeds = await page.evaluate(() => {
@@ -4283,9 +4149,6 @@ test('growth is a thing on the rock: seated, per cell, and it does not pop', asy
    `pointerdown` never fires on the key it arrived at, because the pointer was
    already down. */
 test('a thumb that drifts off the key is still holding it, and sliding hands over', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
 
   const box = async (dir: string) => {
     const b = await page.locator(`#dpad .k[data-dir=${dir}]`).boundingBox();
@@ -4358,6 +4221,7 @@ test('the screen is held awake while flying, and released when it is not', async
       }
     } });
   });
+  /* A fresh navigation: the stub above is an init script and only a new page load runs it. */
   await page.goto('/?debug');
   await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
   await enterGame(page);
@@ -4435,9 +4299,6 @@ test.describe(() => {
   test.use({ deviceScaleFactor: 3 });
 
 test('picking a visuals tier changes the renderer live, and is remembered', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const open = async () => {
@@ -4478,9 +4339,6 @@ test('picking a visuals tier changes the renderer live, and is remembered', asyn
    if the pixel-ratio assertion above ever passes for an environmental reason,
    this one still has to be earned. */
 test('a lower tier thins the dust as well as the resolution', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   const motes = () => page.evaluate(() => {
@@ -4530,9 +4388,6 @@ test('a lower tier thins the dust as well as the resolution', async ({ page }) =
    of the size: NO interactive control overlaps another, at every shape the
    game can be opened at. */
 test('no HUD control is covered by another, at any shape the game opens at', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
   /* Ballast and Autopilot are hidden until owned, and they make the column
      longer - so the worst case is the one where everything is shown. */
@@ -4658,9 +4513,6 @@ test('the camera never frames more columns than the terrain window streams', asy
    restart, the run log, the credits - may live below the fold; they are things
    you go looking for. RESUME is the thing you must never have to look for. */
 test('the way out of the pause sheet is on screen without scrolling, at every shape', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   for (const [name, w, h] of [
@@ -4709,9 +4561,6 @@ test.describe(() => {
   test.use({ reducedMotion: 'reduce' });
 
   test('reduced motion stops the shake and the wash, and keeps every warning', async ({ page }) => {
-    await page.goto('/?debug');
-    await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-    await enterGame(page);
     await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
     /* The camera must not move, however hard the game shakes it. */
@@ -4764,7 +4613,6 @@ test.describe(() => {
 /* The link is how this game is distributed, so it has to look like something
    when it is pasted. Without these it was a bare grey URL. */
 test('the page describes itself for a shared link, and names an icon for iOS', async ({ page }) => {
-  await page.goto('/?debug');
   const meta = async (sel: string) =>
     page.locator(sel).first().getAttribute('content');
 
@@ -4793,9 +4641,6 @@ test('the page describes itself for a shared link, and names an icon for iOS', a
    Driven with `WEBGL_lose_context`, which is exactly what the browser does to
    the page for real. */
 test('losing the GPU stops the game and says so, and getting it back resumes', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
   await page.evaluate(() => (window as any).__cw.startClock());
 
@@ -4852,9 +4697,6 @@ test('losing the GPU stops the game and says so, and getting it back resumes', a
    The whole set is asserted rather than those two, so a new dim colour cannot
    be introduced without this failing. */
 test('every piece of text on screen meets WCAG AA for contrast', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
   await page.locator('#btnPause').dispatchEvent('click');
   await expect(page.locator('#pause')).not.toHaveClass(/hidden/);
@@ -4913,9 +4755,6 @@ test('every piece of text on screen meets WCAG AA for contrast', async ({ page }
    with the arrows and a confirm, and has its own test - so half-finished
    keyboard support is not a non-issue, it is an invitation that fails. */
 test('with a panel open, the keyboard cannot reach the game behind it', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
   /* While nothing is open the HUD is of course reachable - asserted so that a
@@ -5020,9 +4859,6 @@ test('the objective is on screen: this tier Anchors and the core they wake', asy
 });
 
 test('the row fills as this tier Anchors break, and starts again at the next gate', async ({ page }) => {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
 
   /* Driven through the sim rather than by writing classes: the point is that
      the readout follows the game state. [Anchors broken, gates open] ->
@@ -5219,9 +5055,7 @@ test('the ending pulls the camera back over the world, and gives it back', async
 const panels = () => (window as any).__cw.openPanels() as string[];
 
 async function inPlay(page: Page) {
-  await page.goto('/?debug');
-  await expect(page.locator('#boot')).toHaveClass(/hidden/, { timeout: 15_000 });
-  await enterGame(page);
+  /* beforeEach has already booted ?debug and crossed the way in. */
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 }
 

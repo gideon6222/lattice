@@ -31,6 +31,12 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
   crates beside a wreck (40 m) and an Anchor hall (150 m). Crates join the world only once
   you have been within 20 m, so the frozen block golden is unchanged. They ask for no keys,
   because the rock has no key slack left. Pure tests only.
+- **A light e2e.** The browser run is pinned to 3 CPUs beside other gates and 6 alone, below
+  normal priority (`tools/e2e-cpu-cap.mjs`, applied in playwright.config.ts). Gate smoke was
+  about 28 min uncapped and is 25 min capped (2026-10-03). `npm run e2e:measure` prints wall
+  time and browser CPU. About 30 redundant page loads are gone and the ore-band specs run in
+  node (`test/world-bands.test.mjs`). Seeded saves in place of playing up to a state are not
+  done.
 - **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
 
 ## Next three milestones

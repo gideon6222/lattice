@@ -11,6 +11,7 @@
     "check": "npm run typecheck && npm test && npm run build && npm run size && npm run e2e",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
     "e2e": "node tools/check-e2e-browser.mjs && playwright test",
+    "e2e:measure": "node tools/measure-e2e.mjs",
     "size": "node tools/check-bundle-size.mjs",
     "size:update": "node tools/check-bundle-size.mjs --update",
     "film": "node tools/filmstrip.mjs",

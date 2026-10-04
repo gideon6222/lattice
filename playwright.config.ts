@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import { applyCpuCap } from './tools/e2e-cpu-cap.mjs';
+
+/* Pin the run to a few CPUs before any worker or browser is started. */
+applyCpuCap();
 
 /* The smoke test runs against the PRODUCTION BUILD, served exactly the way
    GitHub Pages will serve it. That is the whole point: the golden tests cover
