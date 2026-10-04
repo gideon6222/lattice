@@ -265,7 +265,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: feel
       design: ## Progression and unlocks
 
-- [ ] **BI The notes for players.** The changelog and Play release notes for all of the above, as
+- [x] **BI The notes for players.** The changelog and Play release notes for all of the above, as
       what is better now. Proved by `test/version.test.mjs`.
       briefs: store
       design: ## Progression and unlocks

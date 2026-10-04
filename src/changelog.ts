@@ -21,7 +21,7 @@ export interface Release {
   notes: string[];
 }
 
-export const VERSION = '0.56.0';
+export const VERSION = '0.57.0';
 
 /* The first version on Google Play, and how many releases came before it.
    Those are not shown, but they were releases, so the count is kept here the
@@ -32,6 +32,18 @@ export const FIRST_ON_PLAY = '0.39.0';
 export const RELEASES_BEFORE_PLAY = 52;
 
 export const CHANGELOG: Release[] = [
+  {
+    version: '0.57.0', date: '2026-10-03', title: 'Found and earned',
+    notes: [
+      'The fitting bay shows only what you own: three lines at most on a rack, one sealed mount that says how to get it, a Next line on top, and your supplies in a KIT drawer. Autopilot and the Repair Drone have a CREW rack of their own.',
+      'A Ledger opens from the pause sheet with DEVICES, FEATS and RELICS, so you can see what you have done and what it handed you.',
+      'Sell a full hold and the Ore Sorter is yours: in a full hold the drill swaps the cheapest ore for a richer find. It has three rungs and a sieve drum on the hull.',
+      'Ride out gas and cut hard rock and two more gifts arrive. The Pressure Seal takes a third off gas hits and vents it at the top rungs. The Resonance Tip opens hard rock in fewer strikes. Both show on the hull.',
+      'The first ship you lose leaves a black box on the pad: the Return Beacon. Hold HOME for two seconds underground, once a run, and the ship climbs to the pad with a share of the hold and all your keys.',
+      'Two new finds wait in crates: a Flare Line beside an old wreck lights a dark pocket for a minute, and an Arc Lance in an Anchor hall breaks a whole vein of ore. Each has a part on the hull.',
+      'Bots that play the game end to end pace the whole ladder: your first purchase comes within two runs, the Ore Sorter by the third, and no rung asks for more than four runs of saving.'
+    ]
+  },
   {
     version: '0.56.0', date: '2026-09-30', title: 'Keys, the fitting bay, and the sound of rock',
     notes: [

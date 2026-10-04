@@ -27,8 +27,7 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
   shares are its whole price and stay as designed. None of the four gifts has an e2e.
 - **Pacing is a floor** (BH, `studio run pacing`, `test/pacing.test.mjs`): the bot plays the whole
   game in 46 runs and 56 minutes, first buy run 1, Sorter run 2, every device but the Beacon by
-  run 38, no rung over four runs of saving. It never dies or wanders, so people are slower.
-- **Flare Line and Arc Lance** (BG, `src/sim/flare.ts`, `lance.ts`, `ROOM_FINDS`): two finds in
+  run 38, no rung over four runs of saving.- **Flare Line and Arc Lance** (BG, `src/sim/flare.ts`, `lance.ts`, `ROOM_FINDS`): two finds in
   crates beside a wreck (40 m) and an Anchor hall (150 m). Crates join the world only once
   you have been within 20 m, so the frozen block golden is unchanged. They ask for no keys,
   because the rock has no key slack left. Pure tests only.
@@ -37,17 +36,16 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
   prints wall time and browser CPU. The whole measure is 27 min and the desk cuts a call at 10,
   so run it in parts: `-- --part 1/8` to `8/8`, `-- --report` sums, `-- --reset` clears,
   `-- -g "<title>"` runs touched scenes. All eight only at the end of a phase.
-- **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
 
 ## Next three milestones
 
 Done 2026-09-30: **V0**, the internal track, and **AU**, the sounds he settled on. Done
 2026-10-02: **BA**, the shelf rule as code, **BB**, the bay that draws it, and **BC**, the
-Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip, and **BF**, the Return Beacon, and **BG**, the Flare Line and Arc Lance, and **BH**, the pacing bots.
+Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal and Resonance Tip, and **BF**, the Return Beacon, and **BG**, the Flare Line and Arc Lance, and **BH**, the pacing bots, and **BI**, the notes for players (0.57.0 in the changelog and
+`store/release-notes`, not yet built or uploaded to Play).
 
-1. **BI** - The notes for players.
-2. See MILESTONES.md; **Z2**, the desk's perf reading, waits for the
-   Play install.
+1. **Z2** - the desk's perf reading, waits for the Play install.
+2. See MILESTONES.md for anything after it.
 
 ## For Gideon
 
