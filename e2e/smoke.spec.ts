@@ -5649,12 +5649,12 @@ test('each room crate is on screen for 1.5 s before it opens, and the banner hol
       if (!hit) return null;
       const [x, d] = (hit[0] as string).split(',').map(Number);
       w.g.best.depth = 0;
-      w.g.px = x; w.g.pd = Math.max(1, d - 18); w.g.face = 'down';
-      w.g.best.depth = Math.max(0, d - 15);
+      w.g.px = x; w.g.pd = Math.max(1, d - 14); w.g.face = 'down';
+      w.g.best.depth = Math.max(0, d - 11);
       w.g.fuel = 1e6; w.g.hull = 1e6;
       /* The Arc crate is met at the second barrier, by a ship with a mid drill. */
       w.g.up.drill = k === 'arc' ? 4 : 0;
-      w.advance(4);
+      w.advance(1.5);
       return { x, d };
     }, key0);
     expect(set, `the ${key} crate is not on the world`).not.toBeNull();
