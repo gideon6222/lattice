@@ -641,11 +641,11 @@
      it belongs under the thumb that decides that. Supplies stay on the left
      with the rest of the things that only happen to you. */
   #ord{
-    position:fixed; right:18px; z-index:9;
+    position:fixed; left:84px; right:18px; z-index:9;
     bottom:calc(var(--ctrl-b) + 190px + 8px);
-    display:flex; gap:5px;
+    display:flex; gap:5px; justify-content:flex-end;
   }
-  .sup.ord{width:66px; height:44px;}
+  .sup.ord{flex:1 1 0; min-width:0; max-width:66px; height:44px;}
   .sup.ord .g{top:9px; font-size:11px;}
   #ordBomb{border-color:#7a4a1e;}
   #ordLaser{border-color:#1e5f7a;}

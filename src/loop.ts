@@ -57,7 +57,7 @@ import { stepParallax, fadeParallax, setParallaxTint } from './parallax';
 import { ui, atSurface, updateHUD, toast, flash, tickToast, tickFound, foundBanner, savedMoment, tickSaved } from './ui';
 import { stepGauges } from './gauges';
 import { beaconReady, BEACON_HOLD_SECONDS } from './sim/beacon';
-import { useBeacon, sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard, countFeat } from './actions';
+import { useBeacon, sell, goSurface, die, tremor, lodeCollapse, collectHere, grantCache, grantFind, showEvent, stopDigging, absorb, anchorBreaks, vaultReached, coreBroken, endCard, countFeat, stepLance } from './actions';
 import { HARD_ROCK } from './sim/feats';
 import { sortSwap, applySwap } from './sim/sorter';
 import { tipWork } from './sim/hazards';
@@ -1115,6 +1115,7 @@ export function tick(raw: number, draw = true) {
   stepParticles(dt);
   stepBeam(raw);
   stepFlares(dt);
+  stepLance(dt);
   setDepth((R.eye || g).pd);
   /* Hand the score what the depth actually MEANS. Danger is whichever of a
      failing hull or a full heat soak is worse, so the alarm layer answers to

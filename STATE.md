@@ -29,7 +29,9 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
 - **Flare Line and Arc Lance** (BG, `src/sim/flare.ts`, `lance.ts`, `ROOM_FINDS`): two finds in
   crates beside a wreck (40 m) and an Anchor hall (150 m). Crates join the world only once
   you have been within 20 m, so the frozen block golden is unchanged. They ask for no keys,
-  because the rock has no key slack left. Pure tests only.
+  because the rock has no key slack left. Measured in the browser 2026-10-03 (crate on screen
+  1.5 s before pickup, banner 4 s, flare 2x bright at 30 frames and 1.5x at a minute, the Arc's
+  vein breaks over 15 frames). The ordnance row has both edges and fits at 360 and 412 wide.
 - **A light e2e.** The browser run is pinned to 3 CPUs beside other gates and 6 alone, below
   normal priority (`tools/e2e-cpu-cap.mjs`). Gate smoke is about 24 min. `npm run e2e:measure`
   prints wall time and browser CPU. The whole measure is 27 min and the desk cuts a call at 10,
@@ -46,9 +48,7 @@ Done 2026-09-30: **V0** and **AU**. Done 2026-10-02 and 03: **BA** to **BK**
 
 ## For Gideon
 
-- Do the Flare Line and Arc Lance feel found: dig to about 40 m for the wreck crate at the left
-  edge, throw a flare in a dark pocket, and later find the Anchor-hall crate near 189 m and
-  follow a vein with the Arc button? Check the four-button ordnance row fits. (2026-10-03, BG)
+Nothing open.
 
 ## Phone readings
 

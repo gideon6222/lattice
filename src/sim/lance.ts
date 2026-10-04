@@ -48,3 +48,15 @@ export function lanceVein(kindAt: CellKind, sx: number, sd: number, dx: number, 
   }
   return out;
 }
+
+/* How long the vein takes to go, first cell to last. One tap used to clear the
+   whole vein in a single frame, which reads as the ore vanishing. Spread over
+   half a second (15 frames at 30 fps) the eye follows it along the vein. */
+export const LANCE_SPREAD = 0.5;
+
+/* How many of `total` cells (nearest first) have gone by `elapsed` seconds. The
+   first goes at once and the last at LANCE_SPREAD. */
+export function lanceDue(total: number, elapsed: number): number {
+  if (total <= 1) return total;
+  return Math.min(total, 1 + Math.floor((elapsed / LANCE_SPREAD) * (total - 1) + 1e-9));
+}

@@ -120,6 +120,8 @@ export const R = {
      each with its cell and the seconds it has left. */
   flaresThrown: 0,
   flares: [] as { x: number; d: number; t: number }[],
+  /* Arc Lance shots still breaking their vein, cell by cell (BG). */
+  lances: [] as { cells: number[][]; t: number; n: number; gassed: number }[],
   /* The same shape, for a gate's station: which tier the ship was last at, or
      -1. Round fifteen, Y8. */
   wasAtGate: -1,

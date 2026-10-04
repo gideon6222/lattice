@@ -31,7 +31,7 @@ import { SHAKE_TOW, SHAKE_BOOM, CHARGE_MAX } from './sim/feel';
 import type { Dir, SupplyKey, UpgradeKey } from './types';
 import { mergeLog, blankLog } from './sim/telemetry';
 import { beaconReady, beaconCargo } from './sim/beacon';
-import { lanceVein, LANCE_CHARGE } from './sim/lance';
+import { lanceVein, lanceDue, LANCE_CHARGE } from './sim/lance';
 import { flareReady, flareLand, flaresPerRun, FLARE_SECONDS } from './sim/flare';
 import { clearFlares } from './flares';
 import { bump, settle, holdIsFull, blankTally, FEAT_DEVICES, type Counter, type Feat } from './sim/feats';
@@ -106,6 +106,7 @@ export function sell() {
   /* Being on the pad ends the run, so the Beacon's one climb comes back. */
   R.beaconUsed = false;
   R.flaresThrown = 0;
+  R.lances.length = 0;
   clearFlares();
   const wasFull = holdIsFull(g.weight, S.cargoCap());
   /* Keys first, and they are BANKED, never sold (round seventeen, AK): a key
@@ -550,13 +551,34 @@ export function fireArc() {
   }, sx, sd, v[0], v[1], g.up.arc);
   if (!cells.length) { toast('Arc Lance · no vein ahead'); return; }
   if (!spend(LANCE_CHARGE, LANCE_CHARGE + ' cells needed')) return;
-  const out = breakCells(cells);
-  R.run.ordBlocks += out.taken; R.run.powerSpent += LANCE_CHARGE;
+  R.lances.push({ cells, t: 0, n: 0, gassed: 0 });
+  stepLance(0);
+  R.run.powerSpent += LANCE_CHARGE;
   R.shake = Math.max(R.shake, 0.6);
   flash('rgba(150,255,190,.24)', 320);
   sfx.laser();
   fireBeam(sx, sd, v[0], v[1], Math.max(Math.abs(cells[0][0] - sx), Math.abs(cells[0][1] - sd)));
-  toast(out.gassed ? 'Arc Lance · gas! Hull hit' : 'Arc Lance · ' + cells.length + ' cells of vein');
+  toast('Arc Lance · ' + cells.length + ' cells of vein');
+}
+
+/* The vein goes cell by cell, nearest the ship first, over LANCE_SPREAD seconds
+   (lance.ts). Called every frame by the loop. */
+export function stepLance(dt: number) {
+  for (let i = R.lances.length - 1; i >= 0; i--) {
+    const j = R.lances[i];
+    j.t += dt;
+    const due = lanceDue(j.cells.length, j.t);
+    if (due > j.n) {
+      const out = breakCells(j.cells.slice(j.n, due));
+      R.run.ordBlocks += out.taken;
+      j.gassed += out.gassed;
+      j.n = due;
+    }
+    if (j.n >= j.cells.length) {
+      R.lances.splice(i, 1);
+      if (j.gassed) toast('Arc Lance · gas! Hull hit');
+    }
+  }
 }
 
 /* The Flare Line (BG): throws one flare ahead of the ship. It lands before the
@@ -649,6 +671,7 @@ export function die(cause: 'fuel' | 'heat' | 'gas' | 'sink', after: () => void =
   R.run.towed++;
   R.beaconUsed = false;
   R.flaresThrown = 0;
+  R.lances.length = 0;
   clearFlares();
   countFeat('lost');
   const lost = haulValue();

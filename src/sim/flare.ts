@@ -9,7 +9,9 @@
    how far each one lights. Pure: the caller holds the flares and the lights. */
 
 export const FLARE_MAX = 4;
-export const FLARE_SECONDS = 60;
+/* A minute at full light, then the last FADE seconds (flares.ts) guttering out.
+   It was 60 in all, so the light was already fading at the one-minute mark. */
+export const FLARE_SECONDS = 66;
 /* How many cells ahead a flare flies before it lands. */
 export const FLARE_THROW = 6;
 

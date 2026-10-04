@@ -4450,6 +4450,42 @@ test('no HUD control is covered by another, at any shape the game opens at', asy
   }
 });
 
+/* The four-button ordnance row (CHARGE, LASER, ARC, FLARE) is the widest thing
+   on the right. At 360 wide four 66 px buttons ran into the supply column on
+   the left, so the row now has both edges and the buttons give a little. */
+test('the four ordnance buttons clear the kit and every other control, at 360 and 412 wide', async ({ page }) => {
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  /* Show everything, so this is the worst case whatever the save owns. */
+  await page.addStyleTag({ content: '.sup.none{display:flex !important}' });
+  await page.evaluate(() => { document.getElementById('kit')?.classList.add('open'); });
+
+  for (const [w, h] of [[360, 780], [412, 892]] as const) {
+    await page.setViewportSize({ width: w, height: h });
+    await page.waitForTimeout(250);
+    const r = await page.evaluate(() => {
+      const box = (e: Element) => { const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; };
+      const ord = Array.from(document.querySelectorAll('#ord button')).map(box);
+      const others = Array.from(document.querySelectorAll(
+        '#kit, #kit .sup, #timedFly, #timedFly .sup, #abil, #abil .sup, #cluster')).map(box);
+      const label = document.querySelector('#ordBomb .g') as HTMLElement;
+      return { ord, others, clipped: label.scrollWidth - label.clientWidth,
+               row: box(document.getElementById('ord')!), kit: box(document.getElementById('kit')!) };
+    });
+    expect(r.ord.length).toBe(4);
+    for (const o of r.ord) {
+      expect(o.h, `${w}: ord button height`).toBeGreaterThanOrEqual(44);
+      expect(o.w, `${w}: ord button width`).toBeGreaterThanOrEqual(56);
+      for (const k of r.others) {
+        const hit = o.x < k.x + k.w && k.x < o.x + o.w && o.y < k.y + k.h && k.y < o.y + o.h;
+        expect(hit, `${w}: an ordnance button ${JSON.stringify(o)} intersects a control ${JSON.stringify(k)}`).toBe(false);
+      }
+    }
+    const left = Math.min(...r.ord.map(o => o.x));
+    expect(left - (r.kit.x + r.kit.w), `${w}: gap between the ordnance row and the kit`).toBeGreaterThanOrEqual(12);
+    expect(r.clipped, `${w}: the CHARGE label is clipped`).toBeLessThanOrEqual(0);
+  }
+});
+
 /* ---------- the camera may not frame more than is streamed ----------
 
    The terrain is a moving window of 21 columns around the ship, not the whole
@@ -5592,4 +5628,162 @@ test('the Return Beacon: HOME held two seconds climbs to the pad and shows the k
   }
   expect(await page.evaluate(() => (window as any).__cw.atSurface()), 'the ship did not reach the pad').toBe(true);
   expect(await page.evaluate(() => (window as any).__cw.g.credits), 'the kept half was not sold').toBeGreaterThan(before);
+});
+
+/* ---------- do the two room finds feel found? (Fable, 2026-10-03) ----------
+
+   Measured at 30 fps of game time (advance in 1/30 s slices), not asked. */
+/* Both crates in one test and one page: a second heavy test straight after
+   the first kept timing out in its beforeEach under the gate's load. */
+test('each room crate is on screen for 1.5 s before it opens, and the banner holds 2 s', async ({ page }) => {
+  test.setTimeout(300_000);
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  for (const key of ['flare', 'arc']) {
+    const key0 = key;
+    const down = page.locator('#dpad .k[data-dir=down]');
+    const set = await page.evaluate((k) => {
+      const w = (window as any).__cw;
+      w.g.found.length = 0;
+      w.g.best.depth = 400;
+      const hit = [...w.findCells().entries()].find(([, f]: any) => f.key === k);
+      if (!hit) return null;
+      const [x, d] = (hit[0] as string).split(',').map(Number);
+      w.g.best.depth = 0;
+      w.g.px = x; w.g.pd = Math.max(1, d - 18); w.g.face = 'down';
+      w.g.best.depth = Math.max(0, d - 15);
+      w.g.fuel = 1e6; w.g.hull = 1e6;
+      /* The Arc crate is met at the second barrier, by a ship with a mid drill. */
+      w.g.up.drill = k === 'arc' ? 4 : 0;
+      w.advance(4);
+      return { x, d };
+    }, key0);
+    expect(set, `the ${key} crate is not on the world`).not.toBeNull();
+    await down.dispatchEvent('pointerdown');
+    const r = await page.evaluate((c) => {
+      const w = (window as any).__cw;
+      const v = new w.Vec3Ctor(c.x - (w.W - 1) / 2, -c.d, 0);
+      let seen = -1, frames = 0, hit = -1;
+      for (let f = 0; f < 30 * 100; f++) {
+        /* Draw one tick in five: the camera's matrix is refreshed by hand. */
+        w.tick(1 / 30, f % 5 === 4);
+        w.g.fuel = 1e6; w.g.hull = 1e6;
+        w.camera.updateMatrixWorld(true);
+        const p = v.clone().project(w.camera);
+        const on = Math.abs(p.x) <= 1 && Math.abs(p.y) <= 1;
+        if (on && seen < 0) seen = f;
+        if (w.g.found.length) { hit = f; break; }
+        frames = f;
+      }
+      return { seen, hit, banner: document.getElementById('found')!.className,
+               pd: w.g.pd, px: w.g.px, mode: w.g.mode, want: c };
+    }, set!);
+    test.info().annotations.push({ type: 'crate', description: JSON.stringify(r) });
+    await down.dispatchEvent('pointerup');
+    expect(r.hit, 'the drill never reached the crate ' + JSON.stringify(r)).toBeGreaterThan(0);
+    expect(r.seen, 'the crate was never on screen').toBeGreaterThanOrEqual(0);
+    expect(r.hit - r.seen, `crate on screen for ${r.hit - r.seen} frames at 30 fps`).toBeGreaterThanOrEqual(45);
+    expect(r.banner).toContain('on');
+    /* 60 frames later the banner is still up, and it goes by 4.2 s. */
+    const held = await page.evaluate(() => {
+      const w = (window as any).__cw;
+      w.advance(2);
+      return document.getElementById('found')!.className;
+    });
+    expect(held, 'the banner went before 60 frames').toContain('on');
+  }
+});
+
+test('a flare lights its pocket at least twice as bright after 30 frames, and 1.5x at a minute', async ({ page }) => {
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  const grab = () => page.evaluate(async () => {
+    const w = (window as any).__cw;
+    const f = w.R.flares[0] || { x: w.g.px, d: w.g.pd + 6 };
+    w.renderer.render(w.scene, w.camera);
+    const url = w.renderer.domElement.toDataURL('image/png');
+    const cx = f.x - (w.W - 1) / 2;
+    const c = new w.Vec3Ctor(cx, -f.d, 0).project(w.camera);
+    const e = new w.Vec3Ctor(cx + 4, -f.d, 0).project(w.camera);
+    const cv = w.renderer.domElement;
+    const px = (c.x * 0.5 + 0.5) * cv.width, py = (-c.y * 0.5 + 0.5) * cv.height;
+    const rad = Math.abs(e.x - c.x) * 0.5 * cv.width;
+    const img = new Image();
+    await new Promise((ok) => { img.onload = ok; img.src = url; });
+    const k = document.createElement('canvas'); k.width = cv.width; k.height = cv.height;
+    const ctx = k.getContext('2d')!; ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, k.width, k.height).data;
+    let sum = 0, n = 0;
+    for (let y = Math.max(0, Math.floor(py - rad)); y < Math.min(k.height, py + rad); y++)
+      for (let x = Math.max(0, Math.floor(px - rad)); x < Math.min(k.width, px + rad); x++) {
+        if ((x - px) ** 2 + (y - py) ** 2 > rad * rad) continue;
+        const i = (y * k.width + x) * 4;
+        sum += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]; n++;
+      }
+    return { lum: n ? sum / n : -1, n, px, py, rad, w: cv.width, h: cv.height, mode: w.g.mode, pd: w.g.pd };
+  });
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.g.up.flare = 1;
+    w.g.best.depth = 60;
+    w.g.px = w.START_X + 8; w.g.pd = 60; w.g.face = 'down';
+    w.lamp.intensity = 0;
+    w.advance(4);
+  });
+  const before = await grab();
+  await page.evaluate(() => {
+    const w = (window as any).__cw;
+    w.R.flares.push({ x: w.g.px, d: w.g.pd + 3, t: w.FLARE_SECONDS || 66 });
+    w.advance(1);
+  });
+  const after = await grab();
+  await page.evaluate(() => (window as any).__cw.advance(59));
+  const late = await grab();
+  test.info().annotations.push({ type: 'luminance', description: JSON.stringify({ before, after, late }) });
+  expect(before.n, 'the pocket was off screen ' + JSON.stringify(before)).toBeGreaterThan(100);
+  expect(after.lum, `30 frames after: ${after.lum} vs ${before.lum}`).toBeGreaterThanOrEqual(before.lum * 2);
+  expect(late.lum, `at 60 s: ${late.lum} vs ${before.lum}`).toBeGreaterThanOrEqual(before.lum * 1.5);
+});
+
+test('one Arc tap takes its vein over 8 to 30 frames, nearest first, and leaves none of it', async ({ page }) => {
+  await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
+  const r = await page.evaluate(() => {
+    const w = (window as any).__cw;
+    /* The first ore vein of 8 to 24 cells, sought through the world. */
+    let comp: number[][] | null = null;
+    const seen = new Set<string>();
+    for (let d = 30; d < 220 && !comp; d++)
+      for (let x = 2; x < w.W - 2 && !comp; x++) {
+        const b = w.blockAt(x, d);
+        if (!b || !b.ore || seen.has(x + ',' + d)) continue;
+        const cells = [[x, d]]; seen.add(x + ',' + d);
+        for (let i = 0; i < cells.length; i++)
+          for (let ax = -1; ax <= 1; ax++) for (let ay = -1; ay <= 1; ay++) {
+            const nx = cells[i][0] + ax, nd = cells[i][1] + ay, k = nx + ',' + nd;
+            const nb = w.blockAt(nx, nd);
+            if (!seen.has(k) && nb && nb.ore && nb.id === b.id) { seen.add(k); cells.push([nx, nd]); }
+          }
+        if (cells.length >= 8 && cells.length <= 24) comp = cells;
+      }
+    if (!comp) return null;
+    /* Ship two cells left of the vein's nearest cell on its row, facing right. */
+    const first = comp.slice().sort((a, b) => a[0] - b[0])[0];
+    w.g.up.arc = 4; w.g.charge = 100; w.g.best.depth = first[1];
+    w.g.px = Math.max(0, first[0] - 2); w.g.pd = first[1]; w.g.face = 'right';
+    w.advance(0.1);
+    document.getElementById('ordArc')!.dispatchEvent(new Event('pointerdown'));
+    const left: number[] = [];
+    for (let f = 0; f < 60; f++) {
+      left.push(comp.filter((c) => w.blockAt(c[0], c[1])).length);
+      w.advance(1 / 30);
+    }
+    return { size: comp.length, left };
+  });
+  expect(r, 'no vein of 8 to 24 cells in this world').not.toBeNull();
+  const { size, left } = r!;
+  test.info().annotations.push({ type: 'arc', description: JSON.stringify(r) });
+  const first = left.findIndex((n) => n < size);
+  const last = left.findIndex((n) => n === Math.min(...left));
+  expect(first, 'the lance broke nothing').toBeGreaterThanOrEqual(0);
+  expect(left[left.length - 1], 'cells of the vein were left').toBeLessThanOrEqual(Math.max(0, size - 24));
+  expect(last - first, `the breaks ran over ${last - first} frames`).toBeGreaterThanOrEqual(8);
+  expect(last - first).toBeLessThanOrEqual(30);
 });

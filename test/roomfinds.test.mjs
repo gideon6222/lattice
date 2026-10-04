@@ -89,3 +89,24 @@ test('a deeper rung takes more of a vein', () => {
   assert.ok(c >= b && b >= a);
   assert.equal(H.lanceVein(kind, 0, 9, 1, 0, 4).length, 0, 'no ore along that row');
 });
+
+test('the Arc Lance breaks its vein over 8 to 30 frames at 30 fps, nearest first, never all at once', () => {
+  for (const n of [6, 10, 16, 24]) {
+    let first = -1, last = -1, prev = 0;
+    for (let f = 0; f <= 60; f++) {
+      const due = H.lanceDue(n, f / 30);
+      assert.ok(due >= prev, 'the count only grows');
+      if (due > 0 && first < 0) first = f;
+      if (due === n && last < 0) last = f;
+      prev = due;
+    }
+    assert.equal(first, 0, 'the first cell goes on the tap');
+    assert.ok(last - first >= 8 && last - first <= 30, n + ' cells took ' + (last - first) + ' frames');
+  }
+  assert.equal(H.lanceDue(1, 0), 1);
+  assert.equal(H.lanceDue(0, 1), 0);
+});
+
+test('a flare is still at full light a minute after the throw', () => {
+  assert.ok(H.FLARE_SECONDS >= 60 + 6, 'the minute is lit, then the six-second fade');
+});
