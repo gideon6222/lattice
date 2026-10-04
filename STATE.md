@@ -20,10 +20,8 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
   DEVICES, FEATS, RELICS) and `src/sim/feats.ts` exist (BC). Three feats now hand over a device
   at rung 1 through `FEAT_DEVICES`: the Ore Sorter (BD, a full hold sold), the Pressure Seal and
   the Resonance Tip (BE, `src/sim/hazards.ts`: gas hits for less and the top rungs vent it, hard
-  rock needs fewer strikes). The lost-ship feat still hands over nothing (BF). Thresholds (4 gas
-  pockets, 40 hard-rock cells) are from the pure world, not a bot, and were kept. Rockfall has
-  no hull damage in the game, so the Seal covers gas only. The Sorter works on the drill only.
-  The first lost ship now hands over the Return Beacon (BF, `src/sim/beacon.ts`): hold HOME two
+  rock needs fewer strikes). Rockfall has no hull damage, so the Seal covers gas only. The Sorter works on
+  the drill only. The first lost ship now hands over the Return Beacon (BF, `src/sim/beacon.ts`): hold HOME two
   seconds underground, once a run, and the ship climbs to the pad keeping 50/65/80/90% of the
   ore and all keys. It is dark in the bay until the box lands. Kept shares are the design's own
   numbers, BH measures them. None of the four gifts has an e2e, only pure tests.
@@ -34,7 +32,10 @@ His launch bar (AV, AW, AX) is met 2026-10-01 and not yet in a Play build.
 - **A light e2e.** The browser run is pinned to 3 CPUs beside other gates and 6 alone, below
   normal priority (`tools/e2e-cpu-cap.mjs`, applied in playwright.config.ts). Gate smoke was
   about 28 min uncapped and is 25 min capped (2026-10-03). `npm run e2e:measure` prints wall
-  time and browser CPU. About 30 redundant page loads are gone and the ore-band specs run in
+  time and browser CPU. The whole measure is 27 min and the desk cuts a call at 10, so run it in
+  parts: `npm run e2e:measure -- --part 1/8` to `8/8`, 3 min each, saved as they end. `-- --report`
+  sums them, `-- --reset` clears, `-- -g "<title>"` runs only touched scenes. All eight parts only
+  at the end of a phase. About 30 redundant page loads are gone and the ore-band specs run in
   node (`test/world-bands.test.mjs`). Seeded saves in place of playing up to a state are not
   done.
 - **A shot of the bay.** `studio deliver` refuses web builds, so BB was proved by e2e only.
@@ -59,5 +60,4 @@ Ledger and the feats, and **BD**, the Ore Sorter, and **BE**, the Pressure Seal 
 ## Phone readings
 
 None in the studio's format: the desk cannot launch a web game (2026-09-30). His own checks on
-the S26 Ultra, 2026-09-30: back, HUD and offline all good. The last desk evidence (2026-09-14):
-full gate green, 86 of 150 draw calls in the worst window.
+the S26 Ultra, 2026-09-30: back, HUD and offline all good.
