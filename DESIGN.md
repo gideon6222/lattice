@@ -3895,7 +3895,7 @@ Route: **bought** (credits and keys), **found** (dug up), **gift** (handed over 
 | **Flare Line** (4) | CREW | found: the first derelict wreck | on meeting a wreck | "? in an old wreck" | hour 1 to 2 |
 | **Pressure Seal** (4) | HULL | feat: ride out gas, a total across runs | first gas pocket | "Pressure Seal, ride out some gas" | hour 1 |
 | **Resonance Tip** (4) | DRILL | feat: cut hard rock, a total across runs | past 60 m | "Resonance Tip, keep cutting hard rock" | hour 1 to 2 |
-| **Arc Lance** (4) | ORDNANCE | found: in the vault of the second barrier | after core 1 | "? in the second barrier's vault" | hour 3 |
+| **Arc Lance** (4) | ORDNANCE | found: beside an Anchor hall of the second barrier | after core 1 | "? beside an Anchor hall of the second barrier" | hour 3 |
 | The Hollow | ability | gift: core 1 | first barrier | stated at the core | hour 1 |
 | The Call | ability | gift: core 2 | second barrier | stated at the core | hour 3 |
 | Sink | ability | bought at the first gate vendor | at the gate | price and key | hour 2 |

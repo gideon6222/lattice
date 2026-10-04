@@ -16,6 +16,11 @@ smoke = ["npm.cmd", "run", "e2e"]
 pacing = ["node", "tools/pacing.mjs"]
 film-hullgifts = ["node", "tools/filmstrip.mjs", "hullgifts"]
 shot-hullgifts = ["node", "tools/shot.mjs", "hullgifts"]
+build = ["npm.cmd", "run", "build"]
+crates =["node", "tools/crates.mjs"]
+film-beacon = ["node", "tools/filmstrip.mjs", "beacon"]
+film-arc = ["node", "tools/filmstrip.mjs", "arc"]
+film-flare = ["node", "tools/filmstrip.mjs", "flare"]
 
 [budget]
 apk_bytes = 0

@@ -252,7 +252,8 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       design: ## Progression and unlocks
 
 - [x] **BG Flare Line and Arc Lance.** Two new finds on seed offsets 263 and 269, crates in the
-      first derelict wreck and the second barrier's vault, with their banners, effects and
+      first derelict wreck and the rock beside an Anchor hall of the second barrier (150 m and
+      below; on this world 189 m), with their banners, effects and
       ladders. Proved by `test/finds.test.mjs` extended (placement, missable but never lost) and
       the frozen block golden unchanged.
       briefs: feel
@@ -868,7 +869,7 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: phone, controls
       design: ## Round sixteen: closing Fable's review
 
-- [ ] **Z3 The three feel moments are filmed.** Fable's phase review of 2026-10-04, after
+- [x] **Z3 The three feel moments are filmed.** Fable's phase review of 2026-10-04, after
       Z2: the Beacon climb from depth with half the hold, an Arc Lance breaking a whole vein,
       and a flare lighting a pocket had only pure tests. Each is filmed with a DECIDED line.
       The crate depth for the Arc Lance is settled in BG's text, STATE.md and the code's

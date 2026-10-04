@@ -25,7 +25,7 @@ import { growthCounts, growthKindAt } from './growth';
 import { buildGauges } from './gauges';
 import { lmDebug, LM_COLS } from './lightmap';
 import { sfx, busGain, audioCtxState, audioFocus, sfxLoaded } from './audio';
-import { grantFind, grantCache, coreBroken, vaultReached, anchorBreaks, sell, die, countFeat } from './actions';
+import { grantFind, grantCache, coreBroken, vaultReached, anchorBreaks, sell, die, countFeat, useBeacon, throwFlare, fireArc } from './actions';
 import { coreLights, coreLevels } from './barrier';
 import { END_CARD_AT } from './sim/ending';
 import { cystsOnWorld } from './sim/world';
@@ -38,7 +38,7 @@ import { ABILITIES, abilityFor, hasAbility } from './sim/ability';
 import { secretsHeard } from './sim/secrets';
 import { hollowCount } from './hollow';
 import { anchorAt, anchorSealed, anchorCells, ANCHOR_COUNT, vaultCells,
-         vaultOpen, VAULT_CORE_X, VAULT_CORE_D } from './sim/vaults';
+         vaultOpen, VAULT_CORE_X, VAULT_CORE_D, arcCrateAt, flareCrateAt } from './sim/vaults';
 import { setStartHandler, wireTitle, showTitle, showIntro, startIntro } from './titleui';
 import { hallEye } from './sim/intro';
 import './input';
@@ -234,6 +234,9 @@ if (new URLSearchParams(location.search).has('debug')) {
     /* The feat acts (BJ): the pad's sale, a lost ship and the feat counter the
        loop bumps for gas and hard rock, so a spec can do the act one short. */
     sell, die, countFeat,
+    /* The three hull gifts' acts and where the two room crates are, so a film
+       scenario can stage a Beacon climb, an Arc shot and a flare (Z3). */
+    useBeacon, throwFlare, fireArc, arcCrateAt, flareCrateAt,
     /* The danger lines, so a fixture can dig to one instead of to a literal
        depth that meant something in a world this no longer is. */
     tremorDepth, heatDepth, regionAt, traitAt, regionName, W, CAVE_MIN_DEPTH,

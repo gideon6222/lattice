@@ -803,6 +803,81 @@ export const SCENES = {
     step: `__cw.turnShip(87); __cw.advance(SECS);`
   },
 
+  /* Z3: THE THREE FEEL MOMENTS of the hull gifts, each filmed on the game's own acts.
+
+     BEACON: from 100 m in a pocket with ten gold, the climb to the pad (HOME held
+     two seconds is the loop's, the act is useBeacon's). Frames 0.9 s apart.
+     ARC: a shaft four cells short of the vein of the 'vein' scene, then one shot at
+     the top rung; ten frames a tenth of a second apart, so the half second the
+     vein takes to go is on the sheet cell by cell.
+     FLARE: a dark side tunnel, then one flare thrown along it; frames at 0, 0.05,
+     0.5, 3, 20 and 60 seconds, since the ask is that it reads at once and is still
+     lit after a minute. */
+  beacon: {
+    secs: 0.9,
+    frames: 6,
+    enter: true,
+    setup: `
+      __cw.g.best.depth = 400; __cw.g.ground.gates = [0, 1, 2];
+      __cw.g.found.push('beacon'); __cw.g.up.beacon = 2;
+      const dug = [];
+      for (let d = 90; d <= 101; d++) for (let x = 29; x <= 31; x++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = 30; __cw.g.pd = 100;
+      __cw.g.cargo = { gold: 10 };
+      __cw.g.weight = 10 * __cw.ORES.find((o) => o.id === 'gold').wt;
+      __cw.resetBlocks();
+      __cw.advance(0.5);
+      __cw.useBeacon();
+    `,
+    step: `__cw.advance(SECS);`
+  },
+
+  arc: {
+    secs: 0.1,
+    frames: 10,
+    enter: true,
+    setup: `
+      const VX = 16, VD = 72;
+      const dug = [];
+      for (let d = 0; d <= VD - 4; d++) dug.push(VX + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.found.push('arc'); __cw.g.up.arc = 4;
+      __cw.g.px = VX; __cw.g.pd = VD - 5; __cw.g.face = 'down';
+      __cw.g.charge = 99;
+      __cw.resetBlocks();
+      __cw.advance(0.4);
+      window.__fired = false;
+    `,
+    step: `
+      if (!window.__fired) { window.__fired = true; __cw.fireArc(); }
+      __cw.advance(SECS);
+    `
+  },
+
+  flare: {
+    secs: 1,
+    frames: 6,
+    enter: true,
+    setup: `
+      const dug = [];
+      for (let d = 0; d <= 100; d++) dug.push('20,' + d);
+      for (let x = 20; x <= 24; x++) dug.push(x + ',100');
+      __cw.g.dug = new Set(dug);
+      __cw.g.best.depth = 400; __cw.g.ground.gates = [0, 1, 2];
+      __cw.g.found.push('flare'); __cw.g.up.flare = 4;
+      __cw.g.px = 20; __cw.g.pd = 100; __cw.g.face = 'right';
+      __cw.resetBlocks();
+      __cw.advance(0.4);
+      window.__fi = 0;
+    `,
+    step: `
+      const T = [0, 0.05, 0.5, 3, 20, 60];
+      if (window.__fi === 0) __cw.throwFlare();
+      __cw.advance(T[++window.__fi] - T[window.__fi - 1]);
+    `
+  },
+
   gatebays: {
     secs: 0.6,
     frames: 5,

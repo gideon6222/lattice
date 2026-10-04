@@ -44,7 +44,7 @@ test('the two are devices: not installed at zero, found rather than sold, with a
     assert.equal(H.routeOf(u).kind, 'found');
   }
   assert.equal(H.routeOf(H.UPGRADES.find((x) => x.key === 'flare')).act, 'in an old wreck');
-  assert.equal(H.routeOf(H.UPGRADES.find((x) => x.key === 'arc')).act, "in the second barrier's vault");
+  assert.equal(H.routeOf(H.UPGRADES.find((x) => x.key === 'arc')).act, 'beside an Anchor hall of the second barrier');
 });
 
 test('the flare ladder: more flares and more reach at every rung, none without the line', () => {

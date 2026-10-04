@@ -1,4 +1,4 @@
-/* The Arc Lance: the second barrier's vault find. Progression round, BG.
+/* The Arc Lance: the find in the rock beside an Anchor hall of the second barrier. Progression round, BG.
 
    A charged shot that follows a vein of one ore through the rock and breaks all
    of it within reach. The Charge is an area and the Laser a straight line, so

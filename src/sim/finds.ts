@@ -118,7 +118,7 @@ export interface RoomFind extends Find { where: string }
 export const ROOM_FINDS: RoomFind[] = [
   { key: 'flare', slot: 0, below: 40, where: 'in an old wreck',
     blurb: 'Throws a flare that lights a dark pocket for a minute.' },
-  { key: 'arc', slot: 0, below: 150, where: "in the second barrier's vault",
+  { key: 'arc', slot: 0, below: 150, where: 'beside an Anchor hall of the second barrier',
     blurb: 'Follows a vein of one ore through the rock and breaks it all.' }
 ];
 
