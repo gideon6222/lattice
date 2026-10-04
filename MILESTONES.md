@@ -270,6 +270,19 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       briefs: store
       design: ## Progression and unlocks
 
+- [ ] **BJ The four gifts have an e2e.** One spec loads a save one act short of each of the four
+      feats (a full hold sold, gas ridden out, hard rock cut, a lost ship), performs the act, docks,
+      and sees the banner and the new card on the right bay tab, plus the Beacon's HOME hold
+      climbing to the pad with the kept share shown. Proved by that spec in `npm run check`.
+      briefs: menu, feel
+      design: ## Progression and unlocks
+
+- [ ] **BK The pacing test settles the Beacon.** The pacing bot loses one ship on purpose by a stated
+      run and holds the Beacon the run after, and `test/pacing.test.mjs` asserts it beside the
+      four-run saving cap, so STATE.md and the commit message agree. Proved by the test.
+      briefs: feel
+      design: ## Progression and unlocks
+
 ## Milestones
 
 - [x] **F1** fuel per cell, drill buys speed not efficiency, measured at every leg
@@ -834,7 +847,14 @@ save already past a feat is granted its gift. Nothing here ships: the app is in 
       this phone at all. `studio phone read perf`, a shot of a shop station and
       of the third hint, and an install-and-offline pass in Chrome on the S26
       Ultra - none of it needs Gideon's held console work, so it does not wait on
-      V0.
+      V0. Fable's phase review adds the progression phase to it: a 0.57.0 internal
+      build installed on the S26 Ultra, one shot of the ship on the pad with every hull part
+      mounted, one of the bay rack with its silhouette, one of the Ledger, and three GPU
+      readings within the same hour, all four shots judged against the realism bar before
+      Round eighteen begins. Proved by the four shots and three readings filed in STATE.md,
+      and his own yes or no on the hull. The Ledger's DEVICES page must show sealed devices as
+      silhouettes with routes, not all at once, and the walk covers the seventh tab, the KIT
+      drawer and the Ledger.
       briefs: phone
       design: ## Round sixteen: closing Fable's review
 
