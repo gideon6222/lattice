@@ -32,6 +32,7 @@ export function panelOpened(id: string, close: () => void): void {
   const at = stack.findIndex((e) => e.id === id);
   if (at >= 0) { stack[at].close = close; return; }
   stack.push({ id, close });
+  sheetClass();
   if (pushed < stack.length) {
     history.pushState({ lattice: id }, '');
     pushed++;
@@ -42,9 +43,16 @@ export function panelOpened(id: string, close: () => void): void {
 export function panelClosed(id: string): void {
   const at = stack.findIndex((e) => e.id === id);
   if (at >= 0) stack.splice(at, 1);
+  sheetClass();
 }
 
-export const openPanels = (): string[] => stack.map((e) => e.id);
+/* One sheet at a time and nothing behind it: the HUD, buttons and toasts hide
+   while any panel is open (the menu standard, 2026-10-04). */
+function sheetClass(): void {
+  document.body.classList.toggle('sheetopen', stack.length > 0);
+}
+
+export const openPanels =(): string[] => stack.map((e) => e.id);
 
 /* Whatever entry the back popped - the top panel's own or a debt left by a
    button close - it closes the top panel if there is one. With nothing open it
@@ -53,6 +61,7 @@ export const openPanels = (): string[] => stack.map((e) => e.id);
 window.addEventListener('popstate', () => {
   pushed = Math.max(0, pushed - 1);
   const top = stack.pop();
+  sheetClass();
   if (top) { top.close(); return; }
   history.back();
 });

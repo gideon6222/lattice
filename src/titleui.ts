@@ -1,4 +1,4 @@
-import { panelOpened } from './closestack';
+import { panelOpened, panelClosed } from './closestack';
 import { g, save, hasSave, onPad } from './sim/state';
 import { R } from './sim/runtime';
 import { sfx, setDuck } from './audio';
@@ -41,11 +41,6 @@ export function setStartHandler(fn: (fresh: boolean) => void) { onStart = fn; }
 /* ---------- the title ---------- */
 
 export function showTitle() {
-  /* Put the pause sheet's own wording back, or the next time it is opened
-     from PLAY it will still be headed "Settings" with a BACK button. */
-  el('pauseTitle').textContent = 'Paused';
-  el('pauseSub').textContent = 'Everything is frozen until you resume';
-  el('btnResume').textContent = 'RESUME';
   g.mode = 'title';
   R.intro = null;
   R.arrive = null;
@@ -61,8 +56,10 @@ export function showTitle() {
      tapped either. */
   const cont = el('btnContinue') as HTMLButtonElement;
   const has = hasSave();
-  cont.disabled = !has;
-  cont.classList.toggle('off', !has);
+  /* One PLAY: it continues a save, and starts a new game when there is none. */
+  cont.disabled = false;
+  cont.classList.remove('off');
+  cont.dataset.fresh = String(!has);
   /* The campaign in one line, which the round-eight design asks for at every
      return: where the ship is, how deep the run has been, how far through the
      Anchors. */
@@ -178,21 +175,28 @@ function leave() {
 }
 
 export function wireTitle() {
-  el('btnContinue').onclick = () => { sfx.ui(); startGame(); };
+  el('btnContinue').onclick = () => { sfx.ui(); if (hasSave()) startGame(); else newGame(); };
 
   el('btnNewGame').onclick = () => {
     sfx.ui();
+    newGame();
+  };
+
+  function newGame() {
     /* Confirmed, because it throws away everything. The pause menu's own reset
-       has the same guard for the same reason - and this button sits directly
-       under CONTINUE, which is the one place a mis-tap costs the most. */
+       has the same guard for the same reason. */
     if (hasSave() && !confirm('Start over? This wipes credits, upgrades, every Anchor you have broken and every relic you have found. It cannot be undone.')) return;
+    /* NEW GAME lives on More, which is a sheet over the title: close it. */
+    if (!el('pause').classList.contains('hidden')) {
+      panelClosed('pause');
+      el('pause').classList.add('hidden');
+    }
     hardReset();
     hideTitle();
     showIntro();
   };
 
-  el('btnSettings').onclick = () => { sfx.ui(); openSettings(false); };
-  el('btnTitleNotes').onclick = () => { sfx.ui(); openSettings(true); };
+  el('btnSettings').onclick = () => { sfx.ui(); openSettings(); };
 
   el('introSkip').onclick = (e) => {
     e.stopPropagation();
@@ -216,7 +220,7 @@ export function wireTitle() {
    screen - audio, restart, version, run log, what's new, the build stamp. A
    second copy of those controls would be a second place for them to drift.
    All that changes is its heading and what its close button does. */
-function openSettings(withNotes: boolean) {
+function openSettings() {
   const sheet = el('pause');
   /* The version line and the what's-new list are written by updateHUD and by
      the notes builder, neither of which has run when this is opened from the
@@ -224,14 +228,12 @@ function openSettings(withNotes: boolean) {
      the one thing this has to do that the pause path gets for free. */
   buildNotes();
   updateHUD();
-  el('pauseTitle').textContent = 'Settings';
-  el('pauseSub').textContent = 'Nothing is running yet';
-  const resume = el('btnResume');
-  resume.textContent = 'BACK';
+  const page = sheet.querySelector<HTMLElement>('.sheet')!;
+  page.dataset.page = 'settings';
+  page.dataset.from = 'title';
+  page.scrollTop = 0;
   sheet.classList.remove('hidden');
-  panelOpened('pause', () => resume.click());
-  el('notes').classList.toggle('hidden', !withNotes);
-  if (withNotes) el('notes').scrollIntoView({ block: 'nearest' });
+  panelOpened('pause', () => el('pauseX').click());
 }
 
 /* True while the pause sheet is standing in as the title's settings screen, so

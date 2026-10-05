@@ -816,6 +816,9 @@
     background:linear-gradient(180deg,rgba(10,16,24,0),#0a1018 40%);
   }
   .undock .wide{margin:0; width:100%;}
+  /* One way out per sheet: the X top-right. These buttons stay in the page
+     because the X clicks them through data-for. */
+  .undock, #mapClose, #ballastClose{display:none;}
 
   /* ---------- shelf furniture ----------
 
@@ -867,7 +870,12 @@
   #btnAuto{border-color:#2a5570; color:var(--cyan);}
   #btnHome{border-color:#6a5a2a; color:var(--amber); touch-action:none; user-select:none;
     background-image:linear-gradient(90deg, rgba(255,190,80,.35) var(--hold,0%), transparent var(--hold,0%));}
-  #btnPause{color:var(--dim);}
+  /* Pause is one 48 px button in the top-right corner over nothing, and the
+     money readouts sit under it (the menu standard, 2026-10-04). */
+  #btnPause{color:var(--dim); position:fixed; right:12px; z-index:9;
+    top:calc(env(safe-area-inset-top,0px) + 10px); width:48px; height:48px; padding:0;
+    font-size:18px; border-radius:12px;}
+  #hud .money{margin-top:56px;}
 
   /* ---------- the way in ----------
      Both screens are transparent over the game's own scene - the surface at
@@ -914,8 +922,10 @@
     letter-spacing:.09em; font-size:14px; color:var(--ink);
     background:rgba(12,17,25,.82); border:1px solid var(--line); backdrop-filter:blur(4px);
   }
-  .tbtn.primary{border-color:#2f6f52; color:var(--green); background:rgba(14,26,20,.85);}
-  .tbtn.small{font-size:12px; padding:12px 10px; color:var(--dim);}
+  .tbtn.primary{border-color:#2f6f52; color:var(--green); background:rgba(14,26,20,.85);
+    padding:28px 14px; font-size:18px;}
+  #title .trow{justify-content:center;}
+  .tbtn.small{font-size:14px; padding:0 10px; min-height:48px; width:44%; color:var(--dim);}
   .tbtn.hidden{display:none;}
   /* Greyed, not gone. A CONTINUE that vanishes on a first run tells a new
      player nothing; one that is visibly inert says "this is where your game
@@ -1150,6 +1160,36 @@
     color:var(--red); border-radius:11px; padding:14px; font-size:12px; font-weight:700; letter-spacing:.09em;
   }
   .danger.armed{background:rgba(255,92,107,.18); border-color:var(--red);}
+  /* The pause sheet's pages: one visible at a time, chosen by the sheet's
+     data-page. RESUME is the primary, at least twice the area of any other
+     control and the first thing on its page. */
+  #pause .pg{display:none;}
+  #pause .sheet[data-page=pause] .pg[data-pg=pause],
+  #pause .sheet[data-page=settings] .pg[data-pg=settings],
+  #pause .sheet[data-page=more] .pg[data-pg=more]{display:block;}
+  #pause .sheet[data-from=title] #btnReset,
+  #pause .sheet:not([data-from=title]) #btnNewGame{display:none;}
+  /* A bottom sheet: the primary sits in the lower part of the screen, where a
+     thumb is. */
+  #pause{align-items:flex-end;}
+  #pause:not(.hidden) .sheet{animation:sheetup .22s ease-out;}
+  @keyframes sheetup{from{transform:translateY(40px); opacity:0}}
+  #pause .wide.primary{padding:34px 14px; font-size:18px; margin-top:20px;
+    border-color:#2f6f52; color:var(--green); background:rgba(14,26,20,.85);}
+  #pause .wide.plain{background:transparent; color:var(--dim); min-height:48px;
+    width:50%; display:block; margin-left:auto; margin-right:auto; padding:0 14px;}
+  #pause .sub{color:var(--dim); font-size:14px; margin-top:6px;}
+  #pause .toggles{flex-direction:column;}
+  #pause .tog{min-height:48px; font-size:14px;}
+  #pause .tierb{min-height:48px; font-size:13px;}
+  #pause .morelist{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  #pause .notesbtn{min-height:48px; font-size:13px; text-align:left; padding:0 14px;}
+  #pause .verline{border-top:none; justify-content:center; font-size:12px; color:var(--dim);}
+  /* A sheet is the only thing on the screen: the HUD, the buttons and the
+     toasts hide while one is open (the menu standard, 2026-10-04). */
+  body.sheetopen #hud, body.sheetopen #kit, body.sheetopen #cluster,
+  body.sheetopen #actions, body.sheetopen #ord, body.sheetopen #abil,
+  body.sheetopen #ctrl, body.sheetopen #toast{visibility:hidden;}
   /* Lifted from #5a6780 on 2026-09-14. Measured against the panel it sits on,
      that was 3.17:1 - under WCAG AA's 4.5:1 for body text - and the sentence
      wearing this class is the most consequential one in the game: "Restarting
@@ -1401,7 +1441,7 @@
 </div>
 
 <div id="actions">
-  <button id="btnPause">⏸ MENU</button>
+  <button id="btnPause" aria-label="Pause">⏸</button>
   <button id="btnManifest">MANIFEST</button>
   <button id="btnMap">MAP</button>
   <button id="btnBallast" style="display:none">BALLAST</button>
@@ -1645,16 +1685,41 @@
 </div>
 
 <div id="pause" class="modal hidden">
-  <div class="sheet">
-    <button class="x" data-for="btnResume" aria-label="Close">&times;</button>
+  <!-- One sheet, three pages, one visible at a time (the menu standard,
+       2026-10-04). PAUSE is RESUME first and largest, then SETTINGS. SETTINGS
+       is at most six rows and a MORE row. MORE is the one long list, and the
+       version line is its foot. The X is in the top-right corner of every page
+       and does what back does: a page up, and on the first page the same as
+       RESUME (pauseBack in src/input.ts). -->
+  <div class="sheet" data-page="pause">
+    <button class="x" id="pauseX" aria-label="Close">&times;</button>
+    <div class="pg" data-pg="pause">
     <h2 id="pauseTitle">Paused</h2>
-    <div class="sub" id="pauseSub">Everything is frozen until you resume</div>
-    <div id="pauseStats"></div>
+    <div class="sub" id="pauseSub"></div>
+    <button id="btnResume" class="wide primary">RESUME</button>
+    <button id="btnToSettings" class="wide plain">SETTINGS</button>
+    </div>
+    <div class="pg" data-pg="settings">
+    <h2>Settings</h2>
     <div class="toggles">
       <button id="btnMusic" class="tog">MUSIC ON</button>
-      <button id="btnHaptics" class="tog">HAPTICS ON</button>
       <button id="btnSfx" class="tog">SOUND ON</button>
+      <button id="btnHaptics" class="tog">VIBRATION ON</button>
     </div>
+    <!-- The visuals tier (INDEX.md rule 18). Segmented rather than a slider:
+         three named states with meanings. Applies live, no reload. -->
+    <div class="tierrow" role="radiogroup" aria-label="Visual detail">
+      <span class="tierlab">GRAPHICS</span>
+      <div class="tiers" id="tierPick">
+        <button class="tierb" data-tier="low" role="radio" aria-checked="false">LOW</button>
+        <button class="tierb" data-tier="medium" role="radio" aria-checked="true">MEDIUM</button>
+        <button class="tierb" data-tier="high" role="radio" aria-checked="false">HIGH</button>
+      </div>
+    </div>
+    <button id="btnToMore" class="wide plain">MORE</button>
+    </div>
+    <div class="pg" data-pg="more">
+    <h2>More</h2>
     <!-- The two sliders the toggles are not. A mute is a promise that the
          sound stops; a volume is a promise that it can sit under something
          else, and one control cannot make both. Greyed out while its own
@@ -1668,38 +1733,28 @@
         <input id="volSfx" type="range" min="0" max="100" step="5" value="100"
                aria-label="Sound volume"></label>
     </div>
-    <!-- The three visuals tiers (INDEX.md rule 18). Segmented rather than a
-         slider: three named states with meanings, not a continuum, and the
-         one that is on has to be readable at a glance on a phone. Applies
-         live - no reload, which POLISH.md names as the most common prototype
-         tell. -->
-    <div class="tierrow" role="radiogroup" aria-label="Visual detail">
-      <span class="tierlab">DETAIL</span>
-      <div class="tiers" id="tierPick">
-        <button class="tierb" data-tier="low" role="radio" aria-checked="false">LOW</button>
-        <button class="tierb" data-tier="medium" role="radio" aria-checked="true">MEDIUM</button>
-        <button class="tierb" data-tier="high" role="radio" aria-checked="false">HIGH</button>
-      </div>
+    <div class="morelist">
+      <button id="btnLedger" class="notesbtn">LEDGER</button>
+      <div id="ledger" class="notes hidden"></div>
+      <button id="btnLog" class="notesbtn">RUN LOG</button>
+      <div id="runlog" class="notes hidden"></div>
+      <button id="btnNotes" class="notesbtn">WHAT&apos;S NEW</button>
+      <div id="notes" class="notes hidden"></div>
+      <!-- `creditsPanel`, not `credits`: the HUD's credit counter already owns
+           that id, and two elements sharing one id is a getElementById that
+           silently returns the wrong element. -->
+      <button id="btnCredits" class="notesbtn">CREDITS</button>
+      <div id="creditsPanel" class="notes hidden"></div>
     </div>
-    <button id="btnResume" class="wide">RESUME</button>
+    <div id="pauseStats"></div>
+    <!-- NEW GAME shows only when this page was opened from the title, and
+         RESTART PROGRESS only from a run. -->
+    <button id="btnNewGame" class="danger">NEW GAME</button>
     <button id="btnReset" class="danger">RESTART PROGRESS</button>
     <div class="fine">Restarting wipes credits, upgrades, every Anchor you have lit and every tunnel you have dug. It cannot be undone.</div>
-    <div class="verline">
-      <span id="verNum">v0.0.0</span>
-      <button id="btnLedger" class="notesbtn">LEDGER</button>
-      <button id="btnLog" class="notesbtn">RUN LOG</button>
-      <button id="btnNotes" class="notesbtn">WHAT&apos;S NEW</button>
-      <button id="btnCredits" class="notesbtn">CREDITS</button>
-    </div>
-    <div id="ledger" class="notes hidden"></div>
-    <div id="runlog" class="notes hidden"></div>
-    <div id="notes" class="notes hidden"></div>
-    <!-- `creditsPanel`, not `credits`: the HUD's credit counter already owns
-         that id, and two elements sharing one id is a getElementById that
-         silently returns the wrong element - the panel looked like it never
-         opened while it was the HUD chip being read. -->
-    <div id="creditsPanel" class="notes hidden"></div>
+    <div class="verline"><span id="verNum">v0.0.0</span></div>
     <div class="fine build" id="build"></div>
+    </div>
   </div>
 </div>
 
@@ -1715,11 +1770,9 @@
     <div class="ttag">Dig down. Break the Anchors. Open the center.</div>
   </div>
   <div class="tmenu">
-    <button id="btnContinue" class="tbtn primary">CONTINUE</button>
-    <button id="btnNewGame" class="tbtn">NEW GAME</button>
+    <button id="btnContinue" class="tbtn primary">PLAY</button>
     <div class="trow">
       <button id="btnSettings" class="tbtn small">SETTINGS</button>
-      <button id="btnTitleNotes" class="tbtn small">NOTES</button>
     </div>
     <div class="tfine" id="titleFine"></div>
   </div>

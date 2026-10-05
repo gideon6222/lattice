@@ -41,6 +41,7 @@ export const CHANGELOG: Release[] = [
       'Ride out gas and cut hard rock and two more gifts arrive. The Pressure Seal takes a third off gas hits and vents it at the top rungs. The Resonance Tip opens hard rock in fewer strikes. Both show on the hull.',
       'The first ship you lose leaves a black box on the pad: the Return Beacon. Hold HOME for two seconds underground, once a run, and the ship climbs to the pad with a share of the hold and all your keys.',
       'Two new finds wait in crates: a Flare Line beside an old wreck lights a dark pocket for a minute, and an Arc Lance in an Anchor hall breaks a whole vein of ore. Each has a part on the hull.',
+      'Cleaner menus: one big PLAY on the title, a pause sheet with RESUME first and SETTINGS beside it, the long list behind MORE, and one X in the top corner of every sheet.',
       'Bots that play the game end to end pace the whole ladder: your first purchase comes within two runs, the Ore Sorter by the third, and no rung asks for more than four runs of saving.'
     ]
   },

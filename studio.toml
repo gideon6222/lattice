@@ -20,7 +20,10 @@ build = ["npm.cmd", "run", "build"]
 crates =["node", "tools/crates.mjs"]
 film-beacon = ["node", "tools/filmstrip.mjs", "beacon"]
 film-arc = ["node", "tools/filmstrip.mjs", "arc"]
-film-flare = ["node", "tools/filmstrip.mjs", "flare"]
+menus-before = ["node", "tools/menusheet.mjs", "shoot", ".before/dist", "test-results/menus-before"]
+menus-after = ["node", "tools/menusheet.mjs", "shoot", "dist", "test-results/menus-after"]
+menus-sheet = ["node", "tools/menusheet.mjs", "sheet", "test-results/menus-before", "test-results/menus-after", "test-results/menus-sheet.png"]
+film-flare =["node", "tools/filmstrip.mjs", "flare"]
 
 [budget]
 apk_bytes = 0

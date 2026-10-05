@@ -148,6 +148,14 @@ test.beforeEach(async ({ page }) => {
   await enterGame(page);
 });
 
+/* The pause sheet is three pages (pause, settings, more), one visible at a
+   time. Walks from the page it opens on to the one asked for, by the buttons a
+   thumb would press. */
+async function pausePage(page: Page, name: 'settings' | 'more') {
+  await page.locator('#btnToSettings').dispatchEvent('click');
+  if (name === 'more') await page.locator('#btnToMore').dispatchEvent('click');
+}
+
 /* Get past the way in.
 
    Every spec below boots and starts driving, and as of the title screen there
@@ -202,11 +210,11 @@ async function enterGame(page: Page) {
        from a fresh context needs no confirm, because there is nothing to
        lose. */
     const cont = page.locator('#btnContinue');
-    /* Disabled rather than hidden now - CONTINUE is greyed on a save-less
-       run, not removed. */
-    const useCont = !(await cont.isDisabled());
-    await page.locator(useCont ? '#btnContinue' : '#btnNewGame').dispatchEvent('click');
-    if (!useCont) await enterGame(page);
+    /* One PLAY: it continues a save, and starts a new game (the intro) when
+       there is none, which it marks with data-fresh. */
+    const fresh = (await cont.getAttribute('data-fresh')) === 'true';
+    await cont.dispatchEvent('click');
+    if (fresh) await enterGame(page);
   }
   /* Both routes in now end by FLYING DOWN to the world, which is four and a
      half seconds of game time before play starts. Waiting for that on the wall
@@ -474,6 +482,7 @@ test('the audio graph builds on a user gesture', async ({ page }) => {
 
   /* toggling exercises setAudio against the live graph */
   await page.locator('#btnPause').dispatchEvent('click');
+  await pausePage(page, 'settings');
   const music = page.locator('#btnMusic');
   await expect(music).toHaveText(/MUSIC\s+ON/);
   await music.click();
@@ -1353,6 +1362,7 @@ test('heat reads as its own channel on the hull bar, and a flush visibly drops i
    breaks the stamp silently reads "dev", and the check becomes worthless. */
 test('the build stamp is populated', async ({ page }) => {
   await page.locator('#btnPause').dispatchEvent('click');
+  await pausePage(page, 'more');
   const stamp = await page.locator('#build').innerText();
   /* `v<version> | <commit> | release` (launch.md section 2, 2026-10-01): this
      suite runs the production build, so it is a release, and says so. */
@@ -1379,6 +1389,7 @@ test('without ?debug there is no run log and no stack overlay, and a crash is on
   await enterGame(page);
 
   await page.locator('#btnPause').dispatchEvent('click');
+  await pausePage(page, 'more');
   await expect(page.locator('#btnLog'), 'RUN LOG is a balance table for a developer').toBeHidden();
   await expect(page.locator('#btnNotes')).toBeVisible();
   await expect(page.locator('#build')).toContainText('| release');
@@ -2193,8 +2204,16 @@ test('a drag on the ship turns it, a drag on the rack scrolls it, never both', a
 
   /* The rack: the engines system has the most cards; scrolling it moves the
      rack and leaves the ship exactly where it was. */
-  await page.locator('.sysb[data-sys="engines"]').click();
   const rack = page.locator('#rack');
+  /* With the UNDOCK bar gone the rack is taller, so take the system whose rack overflows most. */
+  let bestSys = 'engines', bestOver = -1;
+  for (const sys of ['drill', 'hold', 'engines', 'hull', 'sensors', 'ordnance']) {
+    await page.locator('.sysb[data-sys="' + sys + '"]').click();
+    const over = await rack.evaluate((e) => e.scrollHeight - e.clientHeight);
+    if (over > bestOver) { bestOver = over; bestSys = sys; }
+  }
+  await page.locator('.sysb[data-sys="' + bestSys + '"]').click();
+  expect(bestOver, 'no rack overflows, so nothing can scroll').toBeGreaterThan(0);
   const before = await page.evaluate(() => (window as any).__cw.shipYaw());
   await rack.hover();
   await page.mouse.wheel(0, 600);
@@ -3852,6 +3871,7 @@ test('the volume sliders move the buses, persist, and grey out when muted', asyn
      gesture and a slider over a graph that does not exist asserts nothing. */
   await page.locator('#dpad .k[data-dir=left]').click();
   await page.locator('#btnPause').dispatchEvent('click');
+  await pausePage(page, 'more');
   await expect(page.locator('#volMusic')).toBeVisible();
 
   const full = await page.evaluate(() => (window as any).__cw.busGain('music'));
@@ -3890,6 +3910,7 @@ test('the credits screen renders the credits file, and is reachable from the pau
      it. The file existed and nothing in the game ever showed it. */
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
   await page.locator('#btnPause').dispatchEvent('click');
+  await pausePage(page, 'more');
   await page.locator('#btnCredits').dispatchEvent('click');
   const panel = page.locator('#creditsPanel');
   await expect(panel).toBeVisible();
@@ -3909,6 +3930,7 @@ test('the credits screen renders the credits file, and is reachable from the pau
 test('the Ledger opens from the pause sheet with three tabs and no lock', async ({ page }) => {
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
   await page.locator('#btnPause').dispatchEvent('click');
+  await pausePage(page, 'more');
   await page.locator('#btnLedger').dispatchEvent('click');
   const panel = page.locator('#ledger');
   await expect(panel).toBeVisible();
@@ -4738,7 +4760,12 @@ test('every piece of text on screen meets WCAG AA for contrast', async ({ page }
   await expect(page.locator('#pause')).not.toHaveClass(/hidden/);
   await page.waitForTimeout(400);
 
-  const rows = await page.evaluate(() => {
+  /* Every page of the sheet, one at a time: only the visible one is measured. */
+  const rows: { t: string; px: number; ratio: number; need: number }[] = [];
+  for (const pg of ['pause', 'settings', 'more']) {
+    if (pg === 'settings') await page.locator('#btnToSettings').dispatchEvent('click');
+    if (pg === 'more') await page.locator('#btnToMore').dispatchEvent('click');
+  rows.push(...await page.evaluate(() => {
     const lin = (c: number) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
     const lum = (p: number[]) => 0.2126 * lin(p[0]) + 0.7152 * lin(p[1]) + 0.0722 * lin(p[2]);
     const parse = (s: string) => {
@@ -4771,7 +4798,8 @@ test('every piece of text on screen meets WCAG AA for contrast', async ({ page }
       out.push({ t: txt.slice(0, 30), px, ratio: +ratio.toFixed(2), need: large ? 3 : 4.5 });
     }
     return out;
-  });
+  }));
+  }
 
   expect(rows.length, 'no text was measured at all, so this test proves nothing').toBeGreaterThan(20);
   const bad = rows.filter((r) => r.ratio < r.need);
@@ -5149,8 +5177,8 @@ test('every sheet scrolls to its last item at the phone size', async ({ page }) 
   const sheets: { open: string; panel: string; last: string }[] = [
     { open: '#btnPause', panel: '#pause', last: '#btnResume' },
     { open: '#btnManifest', panel: '#manifest', last: '#manifestClose' },
-    { open: '#btnBallast', panel: '#ballast', last: '#ballastClose' },
-    { open: '#btnShop', panel: '#shop', last: '#shopClose' }
+    { open: '#btnBallast', panel: '#ballast', last: '#ballast button.x' },
+    { open: '#btnShop', panel: '#shop', last: '#shop button.x' }
   ];
   for (const s of sheets) {
     await page.waitForFunction(() => (window as any).__cw.g.mode === 'play');
@@ -5164,6 +5192,57 @@ test('every sheet scrolls to its last item at the phone size', async ({ page }) 
     await page.locator(s.last).dispatchEvent('click');
     await expect(page.locator(s.panel)).toHaveClass(/hidden/);
   }
+});
+
+/* The menu standard (plans/studio-menu-clarity/RULING.md), applied by hand
+   because the Godot menu kit does not cover a web game. */
+test('menu check: pause, settings and more follow the ruling at the phone size', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 });
+  await inPlay(page);
+  const audit = (sel: string) => page.evaluate((s) => {
+    const root = document.querySelector(s) as HTMLElement;
+    const vis = (e: Element) => { const r = (e as HTMLElement).getBoundingClientRect(); const cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden'; };
+    const btns = [...root.querySelectorAll('button')].filter(vis).map((b) => {
+      const r = b.getBoundingClientRect();
+      return { id: b.id || b.className, w: r.width, h: r.height, x: r.right, y: r.top, words: (b.textContent || '').trim().split(/\s+/).length, cls: b.className };
+    });
+    const hud = (document.getElementById('hud') as HTMLElement);
+    return { btns, hudHidden: getComputedStyle(hud).visibility === 'hidden', text: root.innerText };
+  }, sel);
+  const checkX = (a: Awaited<ReturnType<typeof audit>>) => {
+    const x = a.btns.find((b) => b.cls.includes('x'))!;
+    expect(x, 'no X').toBeTruthy();
+    expect(x.w).toBeGreaterThanOrEqual(44);
+    expect(x.h).toBeGreaterThanOrEqual(44);
+    expect(x.x, 'X is not in the right 15%').toBeGreaterThan(360 * 0.85);
+  };
+  await page.locator('#btnPause').dispatchEvent('click');
+  await expect(page.locator('#pause')).not.toHaveClass(/hidden/);
+  expect(await page.evaluate(panels)).toEqual(['pause']);
+  const p = await audit('#pause');
+  expect(p.hudHidden, 'the HUD shows behind a sheet').toBe(true);
+  checkX(p);
+  expect(p.btns.filter((b) => !b.cls.includes('x')).length, 'pause has more than 4 buttons').toBeLessThanOrEqual(4);
+  expect(p.btns.find((b) => !b.cls.includes('x'))!.id, 'Resume is not first').toBe('btnResume');
+  expect(/v\d+\.\d+\.\d+/.test(p.text), 'a version shows outside More').toBe(false);
+  for (const b of p.btns) expect(b.words, b.id + ' label is long').toBeLessThanOrEqual(3);
+
+  await pausePage(page, 'settings');
+  const s = await audit('#pause');
+  checkX(s);
+  expect(s.btns.filter((b) => !b.cls.includes('x')).length, 'settings has more than 6 rows plus More').toBeLessThanOrEqual(9);
+  expect(/v\d+\.\d+\.\d+/.test(s.text), 'a version shows outside More').toBe(false);
+
+  await page.locator('#btnToMore').dispatchEvent('click');
+  const m = await audit('#pause');
+  checkX(m);
+  expect(/v\d+\.\d+\.\d+/.test(m.text), 'More has no version line').toBe(true);
+  expect(m.text.trim().split('\n').pop()!.includes('v'), 'the version line is not last').toBe(true);
+  expect(await page.evaluate(panels)).toEqual(['pause']);
+
+  /* X goes back one page at a time: more, settings, pause, then out. */
+  for (let i = 0; i < 3; i++) await page.locator('#pauseX').dispatchEvent('click');
+  await expect(page.locator('#pause')).toHaveClass(/hidden/);
 });
 
 /* ---------- Round seventeen, AN: the fitting bay's receipts ---------- */

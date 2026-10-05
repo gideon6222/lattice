@@ -26,6 +26,11 @@ Rounds one to seventeen shipped (`journal/legacy-plan.md`). Round eighteen is th
 Z2 is the only open box and needs the phone: 0.57.0 must be built with tools/twa.ps1 and
 uploaded to Play by hand, then installed, before the three shots and flare-lit readings.
 
+Menus (2026-10-04): the menu standard is applied by hand (the Godot kit does not cover web).
+`test-results/menus-sheet.png` is the before-and-after of every menu screen. The shop's six
+tabs, per-card FIT buttons and the gauge cluster are not reduced yet. Rebuild the sheet with
+`studio run menus-after` then `studio run menus-sheet` (`menus-before` needs a `.before/` build of an older commit).
+
 ## Phone readings
 
 None in the studio's format. His own checks on the S26 Ultra, 2026-09-30: back, HUD and

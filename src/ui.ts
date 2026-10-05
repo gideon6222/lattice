@@ -992,7 +992,7 @@ export function buyLine(u: Upgrade) {
 
 export function audioLabels() {
   if (ui.btnHaptics) {
-    ui.btnHaptics.textContent = 'HAPTICS  ' + (haptics.on ? 'ON' : 'OFF');
+    ui.btnHaptics.textContent = 'VIBRATION  ' + (haptics.on ? 'ON' : 'OFF');
     ui.btnHaptics.classList.toggle('off', !haptics.on);
   }
   ui.btnMusic.textContent = 'MUSIC  ' + (audioState.music ? 'ON' : 'OFF');

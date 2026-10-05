@@ -343,9 +343,40 @@ mustEl('btnPause').onclick = () => {
     '<div class="upeff">How much of the planet you have had a lamp on</div></div>' +
     '<div class="val">' + Math.floor((g.seen.length /
       (Math.ceil(W / MAP_TILE) * Math.ceil(WORLD_DEPTH / MAP_TILE))) * 100) + '%</div></div>';
+  mustEl('pauseSub').textContent =
+    regionName(regionAt(Math.round(g.px), Math.max(0, Math.round(g.pd)))) + ' · ' +
+    Math.max(0, Math.round(g.pd)) + ' m';
+  pausePage('pause', false);
   ui.pause.classList.remove('hidden');
-  panelOpened('pause', () => mustEl('btnResume').click());
+  panelOpened('pause', pauseBack);
 };
+
+/* The pause sheet's pages (pause, settings, more), one visible at a time.
+   `fromTitle` is set when the title opened it, which has no pause page to go
+   back to. */
+const pauseSheet = () => ui.pause.querySelector<HTMLElement>('.sheet')!;
+export function pausePage(page: 'pause' | 'settings' | 'more', fromTitle: boolean) {
+  const sheet = pauseSheet();
+  sheet.dataset.page = page;
+  if (fromTitle) sheet.dataset.from = 'title'; else delete sheet.dataset.from;
+  sheet.scrollTop = 0;
+}
+/* The X and the back button do the same thing: one page up, and from the first
+   page the same as RESUME (or back to the title). */
+export function pauseBack() {
+  const sheet = pauseSheet();
+  const page = sheet.dataset.page;
+  const next = page === 'more' ? 'settings'
+    : page === 'settings' && sheet.dataset.from !== 'title' ? 'pause' : null;
+  if (!next) { mustEl('btnResume').click(); return; }
+  sfx.ui();
+  sheet.dataset.page = next;
+  sheet.scrollTop = 0;
+  panelOpened('pause', pauseBack);
+}
+mustEl('pauseX').onclick = pauseBack;
+mustEl('btnToSettings').onclick = () => { sfx.ui(); pauseSheet().dataset.page = 'settings'; };
+mustEl('btnToMore').onclick = () => { sfx.ui(); pauseSheet().dataset.page = 'more'; pauseSheet().scrollTop = 0; buildNotes(); };
 /* Built on the click, never while the game is running. ONE panel open at a
    time: the pause sheet is already the tallest thing in the game, and two open
    lists inside one scroll region is how the shop's shelves got clipped at the
