@@ -196,6 +196,25 @@ the version line read from the build, patch notes from the first Play upload on.
       briefs: store
       design: ## Polish budget
 
+## From Gideon 2026-10-04
+
+*His words: "A lot of the games are much better than they were regarding their menus and
+transition between levels, but they still feel kind of unintuitive and cluttered. Can you
+have a session research why our games feel cluttered and multiple different things that make
+them feel better. Check in with Fable, then apply these findings to all current and future
+games."* The standard is `plans/studio-menu-clarity/RULING.md`. The Godot menu kit does not
+cover a web game, so the counts are applied by hand in the page.
+
+- [x] **BM The menu standard.** One PLAY, one small SETTINGS and one status line on the
+      title. Pause is one sheet of three pages (pause with RESUME first and SETTINGS, settings
+      of five rows plus MORE, more with the long list and the version line last). One X
+      top-right on every sheet, Back does what X does, one sheet at a time with the HUD
+      hidden, pause top-right. Receipt: the "menu check" smoke test at 360x780 and the
+      before-and-after sheet `test-results/menus-sheet.png`. Not done: the shop's six tabs and
+      per-card FIT buttons, and the left-hand gauge cluster, stay as they were.
+      briefs: menu, web
+      design: ## Polish budget
+
 ## From Gideon 2026-10-02 (progression)
 
 His words: "I want them to be locked and either hidden or some kind of creative way for you to get
