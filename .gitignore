@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-portal/
 # Only the worktrees, not the whole folder. `.claude/` wholesale meant this repo
 # could not carry a `.claude/settings.json`, and without one a background session
 # here is forced into `.claude/worktrees/` and its work never reaches main - the

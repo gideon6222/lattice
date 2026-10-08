@@ -24,7 +24,40 @@ function buildSha() {
   }
 }
 
-export default defineConfig(({ command }) => ({
+/* The portal build (CrazyGames, `npm run build:portal`, tools/build-portal.mjs):
+   the same source with no service worker, no manifest and no outside URLs in
+   the page. The normal build never takes this branch. */
+function portalPage() {
+  return {
+    name: 'lattice-portal-page',
+    transformIndexHtml(html) {
+      /* A portal player has twenty seconds to be flying, and the first-run
+         intro is twenty-eight. Here the SKIP button shows from the first
+         second, and a tap anywhere on the intro presses it (the first skip
+         jumps to the descent, a second ends it). Done from the page, so no
+         game file differs between the builds. */
+      const skip = `<script>
+  (function () {
+    var intro = document.getElementById('intro'), btn = document.getElementById('introSkip');
+    if (!intro || !btn) return;
+    function show() { if (btn.classList.contains('hidden')) btn.classList.remove('hidden'); }
+    new MutationObserver(show).observe(btn, { attributes: true, attributeFilter: ['class'] });
+    show();
+    intro.addEventListener('click', function () { setTimeout(function () { btn.click(); }, 0); });
+  })();
+</script>
+`;
+      return html
+        .replace('</body>', () => skip + '</body>')
+        .replace(/<script>\s*if \('serviceWorker' in navigator\) \{\s*window\.addEventListener\('load'[\s\S]*?<\/script>\s*/, '')
+        .replace(/<link rel="manifest"[^>]*>\s*/, '')
+        .replace(/<meta property="og:(?:image|url)"[^>]*>\s*/g, '')
+        .replace(/<meta name="twitter:image"[^>]*>\s*/, '');
+    }
+  };
+}
+
+export default defineConfig(({ command, mode }) => ({
   /* GitHub Pages serves this from /lattice/, not from the domain root, so
      every emitted URL must be relative. The manifest and icon already use
      './' for the same reason. */
@@ -40,9 +73,9 @@ export default defineConfig(({ command }) => ({
 
   build: {
     target: 'es2020',
-    outDir: 'dist',
+    outDir: mode === 'portal' ? 'dist-portal' : 'dist',
     assetsDir: 'assets',
-    sourcemap: true,
+    sourcemap: mode !== 'portal',
     rollupOptions: {
       output: {
         /* Split three.js out of the game code. Two reasons, and the second
@@ -74,7 +107,7 @@ export default defineConfig(({ command }) => ({
     }
   },
 
-  plugins: [
+  plugins: mode === 'portal' ? [portalPage()] : [
     VitePWA({
       /* Workbox generates the precache manifest from the real build output,
          hashed filenames and all. This is what retires the hand-written

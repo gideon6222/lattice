@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "build:portal": "node tools/build-portal.mjs",
+    "check:portal": "node tools/portal-check.mjs",
     "test": "node --test \"test/**/*.test.mjs\"",
     "check": "npm run typecheck && npm test && npm run build && npm run size && npm run e2e",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
