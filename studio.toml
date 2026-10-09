@@ -24,6 +24,8 @@ menus-before = ["node", "tools/menusheet.mjs", "shoot", ".before/dist", "test-re
 menus-after = ["node", "tools/menusheet.mjs", "shoot", "dist", "test-results/menus-after"]
 menus-sheet = ["node", "tools/menusheet.mjs", "sheet", "test-results/menus-before", "test-results/menus-after", "test-results/menus-sheet.png"]
 film-flare =["node", "tools/filmstrip.mjs", "flare"]
+cg-media = ["node", "tools/crazygames-media.mjs"]
+crazygames = ["node", "tools/crazygames-check.mjs"]
 
 [budget]
 apk_bytes = 0

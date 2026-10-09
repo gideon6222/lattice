@@ -1,0 +1,11 @@
+[
+{"scene":"vein","w":1920,"h":1080,"cover":"cover-landscape.png","titleY":80,"store":true},
+{"scene":"vein","w":800,"h":1200,"cover":"cover-portrait.png","titleY":84,"store":true},
+{"scene":"vein","w":800,"h":800,"cover":"cover-square.png","titleY":83,"store":true},
+{"scene":"vein","w":1080,"h":1920,"cover":"open-1080x1920.png","titleY":84},
+{"scene":"vein","w":1080,"h":1620,"cover":"open-1080x1620.png","titleY":84},
+{"video":"video-landscape.mp4","w":1920,"h":1080,"frame":true,"open":"cover-landscape.png","out":true,"upload":true},
+{"video":"video-portrait.mp4","w":1080,"h":1920,"frame":false,"open":"open-1080x1920.png","out":true},
+{"video":"video-portrait.mp4","w":1080,"h":1620,"frame":false,"open":"open-1080x1620.png","upload":true},
+{"sheet":true}
+]
