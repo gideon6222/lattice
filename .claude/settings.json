@@ -39,7 +39,18 @@
   },
   "permissions": {
     "deny": [
-      "Bash(*adb*)"
+      "Bash(adb *)",
+      "Bash(*adb.exe*)",
+      "Bash(*/adb*)",
+      "Bash(*& adb *)",
+      "Bash(*| adb *)",
+      "Bash(*; adb *)",
+      "Bash(*(adb *)",
+      "Bash(*`adb *)",
+      "Bash(*\"adb *)",
+      "Bash(*'adb *)",
+      "Bash(* -c adb *)",
+      "Bash(* /c adb *)"
     ]
   }
 }
