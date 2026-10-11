@@ -1,18 +1,27 @@
 name: Listing sync
+run-name: ${{ inputs.products && 'Products sync' || 'Listing sync' }}${{ inputs.dry_run && ' (dry run)' || '' }}
 # Manual only: pushing the store listing to Play is a deliberate act (the desk's
 # POST /api/listing-sync triggers this with `gh workflow run`), never a side effect of a
 # push (standing rule 3e: a private repo meters Actions minutes, and a listing edit is
 # rare enough that dispatch-only costs nothing).
+#
+# With `products` on it syncs store/products.json (the one-time products, such as Remove
+# ads) instead of the listing, through tools/play_products.py (contract section 5). The
+# listing check still runs first, the same as for a listing sync.
 on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Validate with Play without publishing the edit
+        description: Validate with Play without publishing anything
+        type: boolean
+        default: false
+      products:
+        description: Sync store/products.json (the one-time products) instead of the listing
         type: boolean
         default: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.products }}
   cancel-in-progress: true
 
 permissions:
@@ -20,7 +29,7 @@ permissions:
 
 jobs:
   sync:
-    name: Push store/listing to Play
+    name: Push store/ to Play
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -51,6 +60,14 @@ jobs:
           done
           if [ "$found" -eq 0 ]; then
             echo "::error::no locale under store/listing/ has a complete title, description and image set"
+            exit 1
+          fi
+
+      - name: Fail early if store/products.json is missing
+        if: ${{ inputs.products }}
+        run: |
+          if [ ! -f store/products.json ]; then
+            echo "::error::no store/products.json in this repo (studio adopt --ads writes it)"
             exit 1
           fi
 
@@ -101,6 +118,7 @@ jobs:
       # "Could not find release for version code '' to update changelog", measured on
       # this repo 2026-09-22 (GitHub Actions runs 35800713986 and 35800951019).
       - name: Push the listing to Play
+        if: ${{ !inputs.products }}
         env:
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
@@ -110,6 +128,22 @@ jobs:
             ARGS+=(--dry-run)
           fi
           python tools/play_listing.py "${ARGS[@]}"
+
+      # tools/play_products.py (installed with play_listing.py) creates or updates each
+      # product in store/products.json through monetization.onetimeproducts, with every
+      # region's price converted by Play from the USD one, one "buy" purchase option,
+      # backwards compatible, and activates it. A dry run reads and converts only.
+      - name: Push the one-time products to Play
+        if: ${{ inputs.products }}
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -e
+          ARGS=(--package "$PACKAGE_NAME" --key "$PLAY_KEY_PATH" --store store)
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          python tools/play_products.py "${ARGS[@]}"
 
       - name: Remove the Play service account key
         if: always()
