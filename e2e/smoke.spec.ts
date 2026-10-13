@@ -3686,12 +3686,12 @@ test('The Hollow draws what is buried and costs power to hold', async ({ page })
      the sim - the reach and the drain are constants there, and the drawing and
      the charging are both in `loop.ts`.
 
-     The fixture sweeps the generator for a REAL cave rather than digging one,
-     and that is most of its cost: it measured 46 s on its own and then timed
-     out at the default 60 s inside a full run. That is the sort of failure
-     that reads as a flake and is not one, so the budget is stated here rather
-     than the sweep being made cheaper - looking at a hole the test dug for
-     itself would prove nothing about the lens. */
+     The fixture looks at a REAL cave rather than digging one (a hole the test
+     dug for itself would prove nothing about the lens). The sweep for it is
+     cheap, a handful of cells; the time is the browser rebuilding the blocks
+     and drawing the lens: 12 s alone, far more beside other gates, and it
+     timed out inside the gate's cap. So it sits in the slow tier
+     (tools/e2e-tiers.mjs) and runs for ships, and the budget is stated here. */
   test.setTimeout(150_000);
   await page.waitForFunction(() => (window as any).__cw.g.mode === 'play', null, { timeout: 15_000 });
 
