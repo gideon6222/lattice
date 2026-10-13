@@ -53,46 +53,19 @@ const MIME = {
   '.glb': 'model/gltf-binary', '.woff2': 'font/woff2', '.ico': 'image/x-icon'
 };
 
-/* The four moments worth putting in front of a stranger. Each `setup` runs on
+/* The eight moments worth putting in front of a stranger, the first two in play. Each `setup` runs on
    the same `window.__cw` handle filmstrip uses, so this file cannot reach a
    state the game cannot actually be in. */
 const STATES = [
   {
-    name: 'title',
-    what: 'the hall in the dark, the Anchor lit',
-    setup: `
-      localStorage.setItem('coreward.v2', JSON.stringify({ credits: 5000, best: { depth: 140, haul: 900 }, dug: [], up: {} }));
-      __cw.g.pd = -1; __cw.g.best.depth = 140;
-      __cw.showTitle();
-      __cw.advance(1.2);
-    `
-  },
-  {
-    name: 'descent',
-    what: 'under way, the first cuts into the rock',
+    name: 'digging',
+    what: 'the drill in the rock, the shaft lit behind it',
     enter: true,
-    /* **`advance` alone does not descend.** The ship digs because a control is
-       HELD, so a state that only advances time is a picture of a ship sitting
-       on the surface - which is exactly what the first run of this file
-       produced, four frames all reading DEPTH 0 m. `R.held` is the same seam
-       filmstrip's dig and firstminute scenes drive. */
-    /* The shallow ores marked as already met: the first copper of a save
-       fires a white flash and a card on real time, and this file shoots faster
-       than either clears - the 2026-09-29 run came out washed white. */
+    /* `advance` alone does not descend: the ship digs because a control is HELD,
+       and `R.held` is the seam filmstrip's dig scene drives. The shallow ores
+       are marked as met, or the first copper's flash washes the picture white. */
     setup: `
       __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
-      __cw.R.held = 'down';
-      for (let i = 0; i < 12; i++) __cw.advance(0.5);
-    `,
-    assert: `__cw.g.pd > 2`
-  },
-  {
-    name: 'deep',
-    what: 'deep, with the shaft cut behind',
-    enter: true,
-    /* A shaft already cut, the way the dig scene sets one up, so the picture is
-       of a run that has been going rather than of the first few meters. */
-    setup: `
       const dug = [];
       for (let d = 0; d <= 40; d++) dug.push('6,' + d);
       for (let x = 2; x <= 10; x++) dug.push(x + ',28');
@@ -104,12 +77,59 @@ const STATES = [
     assert: `__cw.g.pd > 20`
   },
   {
-    name: 'shop',
+    name: 'key-find',
+    what: 'an emerald key crystal in the wall, never sold',
+    enter: true,
+    setup: `
+      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
+      const pk = __cw.keyPockets(0).pockets.find((p) => p.id === 'emerald');
+      const KX = pk.cells[0][0], KD = pk.cells[0][1];
+      __cw.g.ground.gates = [0];
+      const dug = [];
+      for (let d = KD - 5; d <= KD - 1; d++) for (let x = KX - 3; x <= KX + 3; x++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = KX; __cw.g.pd = KD - 2;
+      __cw.resetBlocks();
+      __cw.advance(0.8);
+      document.getElementById('toast').style.opacity = '0';
+    `,
+    assert: `__cw.g.pd > 2`
+  },
+  {
+    name: 'surface',
+    what: 'the pad and the first cut, the way every run starts',
+    enter: true,
+    setup: `
+      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
+      __cw.R.held = 'down';
+      for (let i = 0; i < 12; i++) __cw.advance(0.5);
+    `,
+    assert: `__cw.g.pd > 2`
+  },
+  {
+    name: 'core',
+    what: 'a barrier core lit once its three Anchors are broken',
+    enter: true,
+    setup: `
+      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
+      const CX = __cw.coreColumn(0), CD = __cw.gateDepth(0);
+      const dug = [];
+      for (let d = 0; d <= CD - 4; d++) dug.push(CX + ',' + d);
+      for (let x = CX - 4; x <= CX + 4; x++) for (let d = CD - 4; d <= CD - 1; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.lit = __cw.gateAnchors(0).slice();
+      __cw.g.up.drill = 4; __cw.g.up.scan = 3;
+      __cw.g.px = CX; __cw.g.pd = CD - 3;
+      __cw.resetBlocks();
+      __cw.advance(2.5);
+    `,
+    assert: `__cw.g.pd > 2`
+  },
+  {
+    name: 'bay',
     what: 'the fitting bay at the first gate, where Sink is sold',
-    /* Round seventeen: the walked shop is gone, and the bay at a gate is the
-       one that shows both halves - the ship on its lift, and a card the pad
-       never sells. Reached the way a player reaches it: standing at the
-       gate's station and pressing the button. */
+    /* Reached the way a player reaches it: standing at the gate's station and
+       pressing the button. */
     enter: true,
     setup: `
       __cw.g.credits = 250000; __cw.g.best.depth = 200; __cw.g.ground.gates = [0];
@@ -123,6 +143,26 @@ const STATES = [
     waitFor: `__cw.roomReady()`,
     after: `__cw.advance(1.5)`,
     assert: `__cw.roomPlace() === 0`
+  },
+  {
+    name: 'anchor',
+    what: 'a broken Anchor and the plinth it leaves in the dug hall',
+    enter: true,
+    setup: `
+      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
+      const hall = __cw.hallEye();
+      const AX = hall.px, AD = hall.pd + 2;
+      const dug = [];
+      for (let d = AD - 7; d <= AD + 5; d++) for (let x = AX - 6; x <= AX + 6; x++) {
+        if (Math.abs(x - AX) <= 1 && Math.abs(d - AD) <= 1) continue;
+        dug.push(x + ',' + d);
+      }
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.lit = [1];
+      __cw.g.px = AX; __cw.g.pd = AD - 3;
+      __cw.resetBlocks();
+      __cw.advance(0.6);
+    `
   }
 ];
 
@@ -242,11 +282,11 @@ console.log('icon             icon.png (from public/icon-512.png)');
 /* The feature graphic, cut from one screenshot with the wordmark on the empty
    side - the same shape store.ps1 builds for the Godot games, through the same
    ffmpeg. */
-const featureSrc = join(SHOTS, '3-deep.png');
+const featureSrc = join(SHOTS, '3-surface.png');
 const feature = join(OUT, 'featureGraphic.png');
 const font = 'C\\:/Windows/Fonts/arial.ttf';
 execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', featureSrc,
-  '-vf', `crop=1010:493:35:980,scale=1024:500,drawtext=fontfile='${font}':text='The Lattice':fontcolor=white:fontsize=88:borderw=6:bordercolor=0x000000aa:x=56:y=h-text_h-46`,
+  '-vf', `crop=1080:527:0:560,scale=1024:500,drawtext=fontfile='${font}':text='The Lattice':fontcolor=white:fontsize=74:borderw=6:bordercolor=0x000000cc:x=36:y=h-text_h-84,drawtext=fontfile='${font}':text='Mining Adventure':fontcolor=0xffd27a:fontsize=38:borderw=5:bordercolor=0x000000cc:x=40:y=h-text_h-30`,
   '-pix_fmt', 'rgb24', feature], { stdio: 'inherit' });
 console.log('feature graphic  featureGraphic.png');
 
