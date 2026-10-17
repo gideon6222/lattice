@@ -1,1 +1,1 @@
-A dig-down mining game: break the Anchors and open the Vault at the center.
+A dig down mining game: drill for ore, upgrade your ship, open the Vault.

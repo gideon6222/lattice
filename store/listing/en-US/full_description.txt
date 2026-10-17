@@ -1,6 +1,6 @@
-A mining game with a lock on it. Anchors are buried across a planet, three under each of three barriers that nothing in your drill ship can touch. Break a barrier's three Anchors and its core lights up. Break the core and the way down opens. The last core is the door of the Vault at the center, and that is the end.
+The Lattice is a dig down mining game with a lock on it. Drill for ore, sell it, upgrade your ship and go deeper. Anchors are buried across a planet, three under each of three barriers that nothing in your drill ship can touch. Break a barrier's three Anchors and its core lights up. Break the core and the way down opens. The last core is the door of the Vault at the center, and that is the end.
 
-Hold down and the ship digs. Everything below you is rock until you cut it, and everything you cut is a shaft you have to climb back up. The whole planet is one world, 61 columns wide and 452 meters deep, in twelve regions that each have their own rock and their own rules.
+Hold down and the drill ship digs. Everything below you is rock until you cut it, and everything you cut is a shaft you have to climb back up. The whole planet is one world, 61 columns wide and 452 meters deep, in twelve regions that each have their own rock and their own rules.
 
 DIG WHERE YOU LIKE
 There is no route. The whole face is diggable, so the shaft is whatever shape you make it, and the one you cut on the way down is the one you climb on the way back. Cutting straight is fast and cutting wide finds more. Marks at the top of the screen fill as you break a depth's Anchors, so the game never stops telling you what it wants.
@@ -26,4 +26,4 @@ Seven devices are buried out there and none of them is for sale, among them a cu
 THE FITTING BAY
 Sell the haul at the pad and fit it to the ship. Every upgrade is a card that says what it does and what it will cost you, in credits and in keys. Every barrier you open has a bay of its own, a save point, and something the pad will never sell.
 
-Plays in the browser or installed from the store. Free, with no wait timers, no ads, no in-app purchases, no accounts and no analytics. Your progress is saved on your device and nothing you do is sent anywhere.
+If you like a mining game where you dig down at your own pace, drill your own shaft and decide when to turn back, this one is built for it. Plays in the browser or installed from the store. Free, with no wait timers, no ads, no in-app purchases, no accounts and no analytics. Your progress is saved on your device and nothing you do is sent anywhere.
