@@ -18,6 +18,8 @@ pacing = ["node", "tools/pacing.mjs"]
 film-hullgifts = ["node", "tools/filmstrip.mjs", "hullgifts"]
 shot-hullgifts = ["node", "tools/shot.mjs", "hullgifts"]
 build = ["npm.cmd", "run", "build"]
+## The release check's scripted tour (tools/film-tour.mjs): first launch, menu, first minute, each screen and one of each mechanic, played with no input, its own video at 450x975.
+film_tour = ["node", "tools/film-tour.mjs", "--write-movie", ".studio/film/tour/run.webm"]
 crates =["node", "tools/crates.mjs"]
 film-beacon = ["node", "tools/filmstrip.mjs", "beacon"]
 film-arc = ["node", "tools/filmstrip.mjs", "arc"]
