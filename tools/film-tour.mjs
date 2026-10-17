@@ -19,30 +19,41 @@
 
    Usage: node tools/film-tour.mjs --write-movie .studio/film/tour/run.webm */
 
-import { chromium } from '@playwright/test';
 import { existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { dirname, extname, join, resolve } from 'node:path';
 
-const ROOT = resolve(process.cwd());
+/* `--root DIR` points the tour at another checkout (the desk films a clean `git archive` copy of
+   a rev, which has no node_modules and no dist). Default: the folder it runs in. */
+const rootAt = process.argv.indexOf('--root');
+const ROOT = resolve(rootAt > 0 ? process.argv[rootAt + 1] : process.cwd());
 const DIST = join(ROOT, 'dist');
 const LIMIT_MS = 12 * 60_000; // under the desk's 15 minute cap, whatever the machine does
 const W = 450, H = 975;
 
 const at = process.argv.indexOf('--write-movie');
 if (at < 0 || !process.argv[at + 1]) {
-  console.error('usage: node tools/film-tour.mjs --write-movie <path>');
+  console.error('usage: node tools/film-tour.mjs --write-movie <path> [--root DIR]');
   process.exit(2);
 }
 const OUT = resolve(process.argv[at + 1]);
 
-if (!existsSync(join(DIST, 'index.html'))) {
-  console.log('tour: no dist, building');
-  const b = spawnSync('npm', ['run', 'build'], { cwd: ROOT, stdio: 'inherit', shell: true });
-  if (b.status !== 0) process.exit(1);
+/* What ships at this rev, never a stale dist: install if the checkout has no modules (a fresh
+   copy), then build. */
+function npm(args) {
+  const r = spawnSync('npm', args, { cwd: ROOT, stdio: 'inherit', shell: true });
+  if (r.status !== 0) process.exit(1);
 }
+if (!existsSync(join(ROOT, 'node_modules'))) {
+  console.log('tour: no node_modules, npm ci');
+  npm(['ci', '--no-audit', '--no-fund']);
+}
+console.log('tour: building');
+npm(['run', 'build']);
+
+const { chromium } = await import('@playwright/test');
 
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
