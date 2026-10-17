@@ -169,11 +169,25 @@ export function foundBanner(name: string, what: string, kind: 'device' | 'supply
       : kind === 'key' ? 'IN THE HOLD · BANKED AT THE PAD, NEVER SOLD'
       : 'IN THE HOLD · SELL IT AT THE PAD';
   }
+  /* The action column grows down by BALLAST, SHOP and HOME at the pad, so the
+     card's fixed top lands under them. Sit below whichever buttons show now. */
+  placeFound();
   ui.found.classList.add('on');
   foundT = 4.0;
 }
+/* Run again every frame the card is up: the pad's buttons are shown by the HUD
+   update that follows the landing, after the card is first placed. */
+function placeFound() {
+  const f = ui.found, acts = document.getElementById('actions');
+  if (!f || !acts) return;
+  f.style.top = '';
+  const parentTop = f.offsetParent ? f.offsetParent.getBoundingClientRect().top : 0;
+  const clear = acts.getBoundingClientRect().bottom - parentTop + 10;
+  if (clear > f.offsetTop) f.style.top = clear + 'px';
+}
 export function tickFound(dt: number) {
   if (foundT <= 0) return;
+  placeFound();
   foundT -= dt;
   if (foundT <= 0 && ui.found) ui.found.classList.remove('on');
 }

@@ -715,13 +715,13 @@ export function buildRoom(): Room | null {
     { g: makeGauge('BALLAST'), read: () => g.ground.ballast }
   ];
   gauges.forEach((gg, i) => {
-    gg.g.group.position.set(0.9 + i * 0.46, 0.72, -2.28);
+    gg.g.group.position.set(0.45 + i * 0.46, 0.72, -2.28);
     root.add(gg.g.group);
   });
   const gaugeBoard = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.62, 0.1), ironMat);
-  gaugeBoard.position.set(1.36, 0.72, -2.36);
+  gaugeBoard.position.set(0.91, 0.72, -2.36);
   root.add(gaugeBoard);
-  rivetRow(root, 0.66, 0.44, -2.3, 1.4, 6);
+  rivetRow(root, 0.21, 0.44, -2.3, 1.4, 6);
   const crt = makeCrt(1.0, 1.25);
   crt.mesh.position.set(-1.4, 0.35, -2.28);
   root.add(crt.mesh);

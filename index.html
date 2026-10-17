@@ -447,7 +447,7 @@
      when there is one (round seventeen, AJ). */
   .chip.place{line-height:1.25;}
   .chip.place #depth{color:var(--ink); font-variant-numeric:tabular-nums;}
-  #trait{font-size:9.5px; letter-spacing:.14em; color:var(--dim);}
+  #trait{font-size:10.5px; letter-spacing:.14em; color:var(--dim);}
   #trait:empty{display:none;}
   .top{align-items:flex-start;}
   .money{display:flex; flex-direction:column; align-items:flex-end; gap:5px;}
@@ -460,10 +460,17 @@
      pip is a ring rather than nothing, so the row always shows how many there
      ARE - the campaign's length is information the player should have on day
      one, and a row that grew as you lit them would hide it. */
-  #anchors{margin-top:7px; display:flex; justify-content:center; gap:7px;}
+  #anchors{margin-top:7px; display:flex; justify-content:center; align-items:center; gap:8px;}
+  /* The row names itself: a bare row of rings read as decoration to a first-time
+     player (release check, 2026-10-17). Pips are 9px with a ring that clears
+     3:1 on dark rock, and the word says what they count. */
+  #anchors::before{
+    content:"ANCHORS"; font-size:10.5px; font-weight:700; letter-spacing:.14em;
+    color:#b4c0d4; text-shadow:0 1px 3px #000, 0 0 6px #000; margin-right:2px;
+  }
   #anchors i{
-    width:6px; height:6px; border-radius:50%; display:block;
-    border:1px solid var(--line); background:transparent;
+    width:9px; height:9px; border-radius:50%; display:block;
+    border:1.5px solid #9aa8c0; background:rgba(0,0,0,.45);
     transition:background var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease), border-color var(--t-base) var(--ease);
   }
   /* A broken Anchor and an open core are the wrongness colour, round
@@ -474,7 +481,7 @@
   /* The Vault is the tenth thing in the row and reads as different because it
      IS different: it is not an Anchor, it is what they open. Dimmed until the
      ninth is lit, then it is the only thing on the row still to do. */
-  #anchors i.vault{width:7px; height:7px; border-radius:1px; transform:rotate(45deg); margin-left:6px;}
+  #anchors i.vault{width:9px; height:9px; border-radius:1px; transform:rotate(45deg); margin-left:6px;}
   #anchors i.vault.open{background:var(--wrong); border-color:#fff; box-shadow:0 0 9px var(--wrong);}
   #savedMark{
     position:absolute; left:50%; top:calc(env(safe-area-inset-top, 0px) + 92px); transform:translate(-50%, -6px);
@@ -525,10 +532,10 @@
     opacity:0; transform:translateY(-10px); transition:opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
   }
   #found.on{opacity:1; transform:none;}
-  #found .fhead{font-size:9.5px; letter-spacing:.22em; color:#00ff41; opacity:.8;}
+  #found .fhead{font-size:11px; letter-spacing:.22em; color:#00ff41; opacity:.8;}
   #found .fname{font-size:18px; font-weight:800; letter-spacing:.03em; margin-top:3px; color:#e8ffe8;}
   #found .fwhat{font-size:12px; line-height:1.5; color:#9fd8ab; margin-top:4px;}
-  #found .ffit{font-size:9.5px; letter-spacing:.16em; color:#00ff41; margin-top:8px;}
+  #found .ffit{font-size:11px; letter-spacing:.16em; color:#00ff41; margin-top:8px;}
 
   /* ---------- the fuel reserve, and running out of it ----------
 

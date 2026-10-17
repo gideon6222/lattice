@@ -131,6 +131,12 @@ function startDig(tx: number, td: number, dir: Dir) {
     if (t >= 0) { toast(barrierSays(t, g.ground.lit)); barrierSaid = clock; }
   }
   if (!b || b.hard === Infinity) return;
+  /* A cyst's wall looks like any rock and cuts four times slower; say so the
+     first time it is touched in a session, and what sinking through costs. */
+  if (b.id === 'cystshell' && !shellSaid) {
+    shellSaid = true;
+    toast('Dense Shell · slow to drill, and sinking through it costs hull');
+  }
   {
     const t = { x: tx, d: td };
     /* lift this cell out of the instanced terrain into a real mesh, so the
@@ -157,6 +163,7 @@ let hurtClock = 99, hullWas = -1;
 let endFrame: EndFrame | null = null;
 /* When the barrier last said what opens it (AE). */
 let barrierSaid = -99;
+let shellSaid = false;
 /* How long the lean holds, how far toward the cell it goes, how much closer,
    and how long after a hit it will not start. */
 const KEY_HOLD = 0.6, KEY_LEAN = 0.35, KEY_ZOOM = 1.2, KEY_HOLD_SAFE = 1;

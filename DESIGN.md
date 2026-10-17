@@ -3983,3 +3983,16 @@ reward for having played before.
 
 New finds (Flare Line, Arc Lance) use hashed cells on their own offsets, 263 and 269, like 257 in
 `finds.ts`, so no existing world value moves. `test/baseline/blocks-frozen.json` must not change.
+
+## Release check, 2026-10-17 (lattice 6b71dad)
+
+The first-time-player bot's walk findings, one line each.
+
+- 1 fixed. The pad's DEVICE RECOVERED card now sits below whichever buttons the action column shows (BALLAST, SHOP, HOME grow it at the pad), re-placed every frame it is up.
+- 2 fixed. The bay's wall gauges moved 0.45 m left, so all three dials fit a portrait screen.
+- 3 wrong in part. The faint Copper card in frame 4 is the NEW MINERAL card caught mid fade-in (frame 6's Silver card is the same card at full opacity, bright text on a near-black plate). Small text raised: card heads and footers 9.5 to 11 px, the region trait line 9.5 to 10.5 px.
+- 4 DECIDED: both zeroes kill and the hold is lost (F3), kept on purpose. It is not unseen: the fuel dial draws the climb-home reserve band, and the game says "Fuel: enough to get home and little else" then "TURN BACK" before the tank is dry.
+- 5 made visible. The first Dense Shell touched in a session says "Dense Shell · slow to drill, and sinking through it costs hull". The four-times hardness and hull cost stay (cysts, tier 2).
+- 6 made visible. The Anchor row was already in the HUD but was 6 px faint rings. It is now labelled ANCHORS, with 9 px pips and a ring that reads on dark rock.
+- 7 DECIDED: the whole top row is the dock (`atSurface()`), already recorded above and in his playtest words. A pad-only dock is a different game and stays unchosen until he asks.
+- 8 DECIDED: the first sale buying several rungs is the known fault 2 in `journal/legacy-plan.md`. Fixing it is a balance change to `pacing.mjs`, not a polish fix, so it stays a measured watch item.
