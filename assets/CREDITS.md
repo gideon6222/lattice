@@ -19,6 +19,7 @@ Anything imported from now on is appended by that script automatically.
 | 2026-09-30 | Kenney, Impact Sounds 1.0 (kenney.nl/assets/impact-sounds) | `impactMining`, `impactSoft_heavy`, `impactMetal_heavy`, `impactWood_light`, `impactGlass_light` takes, OGG | CC0 | `assets/sfx-src/impact*.ogg`, license in `assets/sfx-src/kenney-License.txt` |
 | 2026-09-30 | OpenGameArt, "75 CC0 breaking / falling / hit sfx" (opengameart.org/content/75-cc0-breaking-falling-hit-sfx) | rock breaking and rock falling takes, OGG | CC0 | `assets/sfx-src/bfh1_*.ogg` |
 | 2026-09-30 | OpenGameArt, "100 CC0 SFX #2" (opengameart.org/content/100-cc0-sfx-2) | stones, air, machine loop, thunder, switch, lock, OGG | CC0 | `assets/sfx-src/sfx100v2_*.ogg` |
+| 2026-10-18 | own work, a render of the game's world plus code (art round 2026-10-17-lattice-store-icon-r2, take 1 "into the gold"), AI-made none | the Play store icon, 512×512 PNG | own work | `store/listing/en-US/images/icon.png` |
 
 **The recordings folder, `sfx-src`, holds only the CC0 files in the three rows above.** They are
 source material: `tools/sfx.py` renders the game's sounds from them into `public/sfx/`, and none
