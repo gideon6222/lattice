@@ -1,0 +1,376 @@
+{
+ "boxes": [
+  {
+   "area": "bay guidance",
+   "title": "The bay's Next line leads to the barrier and feats stay dark until met",
+   "items": [
+    "C1",
+    "C2",
+    "A14"
+   ],
+   "usd": 6.0,
+   "how": "Code: in src/sim/bay.ts a feat is named and shown only once its counter has moved or its hazard is in reach, and the Next line then falls through to the nearest dig and the barrier with its three Anchors, per DESIGN.md's own 'then the barrier or depth that opens a rung' and his words 'Make sure the player knows the objective'; this also removes the Resonance Tip card at 32 m so one screen shows one next goal.",
+   "place": ""
+  },
+  {
+   "area": "words and legibility",
+   "title": "Goal words say what counts, the Dense Shell cause is shown every time, small text is readable",
+   "items": [
+    "A3",
+    "A5",
+    "A7",
+    "C4",
+    "B0"
+   ],
+   "usd": 7.0,
+   "how": "Code and words: name the thing in each feat goal without adding a count to the Next line, show the sink-damage cause each time hull is lost to a Dense Shell (rate-limited), give the feat gift card its own EARNED head with the feat's done line and one name for the shop, lift small-text contrast and move the X clear of THE WAY OPENS body text, and commit LOOK.md confirming the draft style.",
+   "place": ""
+  },
+  {
+   "area": "barrier and Anchor feedback",
+   "title": "The gate reads as a wall, a broken core warns of its cost, the last hint lands before the door",
+   "items": [
+    "A8",
+    "A10",
+    "C3"
+   ],
+   "usd": 7.0,
+   "how": "Code: draw the gate row as a visible wall with a spark when drilled (look only, the barrierSays text stays), add one line to the core card that the heat line, dust and tremors worsen, and move hint 3 to when the last tier 3 Anchor breaks or core 3 first glows; each new roll uses its own seed offset and blocks-frozen.json is untouched.",
+   "place": ""
+  },
+  {
+   "area": "ore sorter",
+   "title": "The Ore Sorter never swaps out a key",
+   "items": [
+    "A11"
+   ],
+   "usd": 3.0,
+   "how": "Code: in src/sim the Sorter skips key ores when choosing the lowest-value ore to replace, with a pure test; the sim wall is kept.",
+   "place": ""
+  }
+ ],
+ "later": [],
+ "answers": [
+  {
+   "id": "A4",
+   "answer": "KEEP",
+   "reason": "An on-screen d-pad is a standard control and nothing on screen misleads, so a watch only.",
+   "milestone": "",
+   "against_his_words": "",
+   "what": "Movement is only the on-screen d-pad and buttons in the bottom corner (`src/input.ts` wires 'all d-pad, keyboard and button wiring'). A first tap mid-screen does nothing. The first-run intro is 'tap to go faster', which does not teach this. The frames show no move prompt on the first play screen (fr",
+   "bot": "A",
+   "members": [
+    "A4"
+   ]
+  },
+  {
+   "id": "A6",
+   "answer": "KEEP",
+   "reason": "The card is short and true, banner placement was already fixed, and C4 changes its head in the box above.",
+   "milestone": "",
+   "against_his_words": "",
+   "what": "The DEVICE RECOVERED card for Ore Sorter reads 'Swaps the cheapest ore in a full hold for a richer find. FITTED \u00b7 UPGRADE IT AT THE OUTFITTER'. It says what the device does but not how much it changes. The card is a short banner, shown without pausing play. At the pad it sits below BALLAST and SHOP,",
+   "bot": "A",
+   "members": [
+    "A6"
+   ]
+  },
+  {
+   "id": "A14",
+   "answer": "TAKE",
+   "reason": "It is the same fault as C2 and the bay box removes the early card.",
+   "milestone": "",
+   "against_his_words": "",
+   "what": "In tour frame 7 (Rustmoor, about 32 m) the bay's Next line says 'Ore Sorter, sell a full hold' (a HOLD item). The open DRILL tab shows a different sealed card, Resonance Tip. The catalog says Resonance Tip is first shown 'past 60 m', not at 32 m. Two different next goals appear on one screen, and th",
+   "bot": "A",
+   "members": [
+    "A14"
+   ]
+  },
+  {
+   "id": "A15",
+   "answer": "KEEP",
+   "reason": "Flecks and keys differ by shape and the design notes already carry it as a watch on the phone.",
+   "milestone": "",
+   "against_his_words": "",
+   "what": "Each Anchor broken adds violet flecks to plain rock, two per cell, in 8%, 16% and 24% of cells for Anchors 1 to 3. Their colour is 0x8a5ad0, close to amethyst (a060ff) and umbrite (9d7bff). Keys are glowing crystal fans, so the shape is meant to tell them apart. The design notes already flag this as",
+   "bot": "A",
+   "members": [
+    "A15"
+   ]
+  },
+  {
+   "id": "A17",
+   "answer": "LATER",
+   "reason": "Key supply balance needs a real phone read of how often keys are found before any number moves.",
+   "milestone": "Z2 A real phone read, before V0",
+   "against_his_words": "",
+   "what": "Keys come from fixed one-cell pockets: amethyst 40, emerald 40, ruby 36, magmite 40, coreite 20, umbrite 10, Solmarrow 5. One rung asks for one key, or two for a common one. Drill ends on Solmarrow (5 pockets), while Hull Plating and Cooling Rig both end on umbrite (10 pockets between two lines). Ea",
+   "bot": "A",
+   "members": [
+    "A17"
+   ],
+   "found_in": "MILESTONES.md"
+  },
+  {
+   "id": "C1",
+   "answer": "TAKE",
+   "reason": "The one pointer should lead to the barrier, as DESIGN.md promises and as he asked on 2026-09-18.",
+   "milestone": "",
+   "against_his_words": "",
+   "what": "The bay's one guidance line always names an unwon feat first, and every feat counts as reachable at 0 m. So for the whole first tier, and likely into the second, it reads \"Ore Sorter, sell a full hold\", then \"Pressure Seal, ride out some gas\", then \"Resonance Tip, keep cutting hard rock\". The Salvag",
+   "bot": "C",
+   "members": [
+    "C1"
+   ]
+  },
+  {
+   "id": "C2",
+   "answer": "TAKE",
+   "reason": "A goal should name something the player has met, and he wants things hidden until they are earned.",
+   "milestone": "",
+   "against_his_words": "",
+   "what": "The gas feat and the hard-rock feat are shown from the first dock, before the player has met either. The DRILL rack's sealed card for the Resonance Tip appears at 32 m and says \"keep cutting hard rock\". Rock that counts (hardness 5 or more) barely exists that shallow. The Next line, from the item ab",
+   "bot": "C",
+   "members": [
+    "C2"
+   ]
+  },
+  {
+   "id": "C3",
+   "answer": "TAKE",
+   "reason": "All three hints should climb toward the reveal, as he asked 'hint at it as you get closer to the end'.",
+   "milestone": "",
+   "against_his_words": "",
+   "what": "The last and plainest foreshadowing line (\"Whatever they were built to hold has three fewer ways to stay in\") is only due once the third gate is open. It shows 20 s or more later, and only near a spent core. The third gate is the Vault's door, with the Vault one row below. The player who taps GO DOW",
+   "bot": "C",
+   "members": [
+    "C3"
+   ]
+  },
+  {
+   "id": "C4",
+   "answer": "TAKE",
+   "reason": "A reward that never says what earned it cannot be linked to the effort.",
+   "milestone": "",
+   "against_his_words": "",
+   "what": "A feat's gift arrives on the same card as a dug-up device, \"DEVICE RECOVERED \u00b7 FITTED \u00b7 UPGRADE IT AT THE OUTFITTER\". It never says it was earned, or by what act. So the full hold that earned the Ore Sorter goes unthanked, and the player cannot link reward to effort. The card also names a room calle",
+   "bot": "C",
+   "members": [
+    "C4"
+   ]
+  }
+ ],
+ "keep_musts": {},
+ "coordinator": [],
+ "errors": [],
+ "wide": [],
+ "game": "lattice",
+ "rev": "ece0d0f",
+ "dry": false,
+ "model": "sonnet",
+ "effort": "medium",
+ "tries": 1,
+ "cost": 0.0,
+ "source": "the loop's findings.json",
+ "at": "2026-10-18T23:53:18+00:00",
+ "ship_line": "C: 4 advice, 4 taken, 0 kept, 0 later",
+ "counts": {
+  "C": {
+   "advice": 4,
+   "TAKE": 4,
+   "KEEP": 0,
+   "LATER": 0
+  },
+  "other": {
+   "advice": 5,
+   "TAKE": 1,
+   "KEEP": 3,
+   "LATER": 1
+  }
+ },
+ "items": {
+  "A3": {
+   "tag": "should",
+   "bot": "A",
+   "what": "Resonance Tip reads 'Handed over when you keep cutting hard rock'. Pressure Seal's goal is 'ride out some gas'. Both are running totals across runs, and the Next line is deliberately never given a count, so it shows no number and no progress. I can't tell which rock counts as hard, or whether the unlock is a few cells or hundreds. This is by design (Fable: a fraction in the Next line is an XP bar). It is only a problem if a new player cannot connect natural digging to the goal. Without `src/` I could not read how the feats are counted, so I could not confirm that natural play counts.",
+   "where": "full",
+   "members": [
+    "A3"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A4": {
+   "tag": "advice",
+   "bot": "A",
+   "what": "Movement is only the on-screen d-pad and buttons in the bottom corner (`src/input.ts` wires 'all d-pad, keyboard and button wiring'). A first tap mid-screen does nothing. The first-run intro is 'tap to go faster', which does not teach this. The frames show no move prompt on the first play screen (frame 4). An on-screen d-pad is a standard control, so this is a watch only. The player was reported as having no complaint about it.",
+   "where": "full",
+   "members": [
+    "A4"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A5": {
+   "tag": "should",
+   "bot": "A",
+   "what": "Dense Shell is four times harder and costs hull when I sink through it. The warning appears only the first time one is touched in a session ('slow to drill, and sinking through it costs hull'). If I miss that line, the damage has no visible cause. The same release check kept 'both zeroes kill and the hold is lost' on purpose, which is only softened by a fuel reserve band on the dial.",
+   "where": "full",
+   "members": [
+    "A5"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A6": {
+   "tag": "advice",
+   "bot": "A",
+   "what": "The DEVICE RECOVERED card for Ore Sorter reads 'Swaps the cheapest ore in a full hold for a richer find. FITTED \u00b7 UPGRADE IT AT THE OUTFITTER'. It says what the device does but not how much it changes. The card is a short banner, shown without pausing play. At the pad it sits below BALLAST and SHOP, which is where the player is most likely to be looking at those buttons.",
+   "where": "full",
+   "members": [
+    "A6"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A7": {
+   "tag": "should",
+   "bot": "A",
+   "what": "In the 'THE WAY OPENS' panel, the body text is dim grey-violet on purple, and the X button sits on top of the first line of it ('Whatever was' is clipped). Other small text is hard to read: the 'Next:' line in the bay, the ANCHORS pips, and the gauge readouts.",
+   "where": "full",
+   "members": [
+    "A7"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A8": {
+   "tag": "should",
+   "bot": "A",
+   "what": "The simulation marks the gate row as `gate`, which is uncuttable. blocks.ts draws those cells as the rock the row runs through, and the field is a thin additive strip between two rails. A first-timer who drills into it makes no progress and sees no damage. The only explanation is a line from `barrierSays`, shown at most once every 4 seconds. It says how many Anchors still hold the gate, never where they are. The text is by design; the look is the part a new player can't read.",
+   "where": "systems",
+   "members": [
+    "A8"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A10": {
+   "tag": "should",
+   "bot": "A",
+   "what": "By design (the story is that you are freeing something bad), every Anchor broken makes things worse. Each one adds BALLAST_ANCHOR_BITE 0.05 to the drain. Each core broken moves the heat line up 12 m (199 to 187, 175, 163 m), adds 0.35 dust and makes tremors come 0.3 faster. The core card shown in the tour only names the ability it gives (the Hollow) and the barrier opening. A tunnel that was safe at 190 m can start hurting the hull after the next core, and nothing on the card says so. The drain clock reads about 12, 10 and 8 minutes at the three cores. Ballast, SEAL and the dial are hidden until the first core, so the player isn't shown the drain until it is already running.",
+   "where": "systems",
+   "members": [
+    "A10"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A11": {
+   "tag": "should",
+   "bot": "A",
+   "what": "The Ore Sorter swaps out 'the lowest-value ore it carries' for the new find. Keys (amethyst, emerald, ruby, magmite, coreite, umbrite, Solmarrow) are 'worth nothing on the haul readout' because they are banked, never sold. So by value they are the lowest ore in the hold. The rule 'keep keys first' comes only at later rungs, so at the first rung a key in the hold can be the item swapped out. Keys are one-cell pockets, and Solmarrow has only 5 in the whole world. The Sorter and the key system both change the same hold, and the first rung does not protect keys. The Return Beacon keeps 50-90% of the hold. The design does not say whether keys are in that share.",
+   "where": "systems",
+   "members": [
+    "A11"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A14": {
+   "tag": "advice",
+   "bot": "A",
+   "what": "In tour frame 7 (Rustmoor, about 32 m) the bay's Next line says 'Ore Sorter, sell a full hold' (a HOLD item). The open DRILL tab shows a different sealed card, Resonance Tip. The catalog says Resonance Tip is first shown 'past 60 m', not at 32 m. Two different next goals appear on one screen, and the sealed card appears earlier than the catalog says. Another reviewer covers the shop, so this is only a watch item.",
+   "where": "systems",
+   "members": [
+    "A14"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A15": {
+   "tag": "advice",
+   "bot": "A",
+   "what": "Each Anchor broken adds violet flecks to plain rock, two per cell, in 8%, 16% and 24% of cells for Anchors 1 to 3. Their colour is 0x8a5ad0, close to amethyst (a060ff) and umbrite (9d7bff). Keys are glowing crystal fans, so the shape is meant to tell them apart. The design notes already flag this as 'watch on the phone'. A new player at 85-205 m, where amethyst pockets sit, could read flecks as keys or keys as flecks. A key is worth a whole ladder rung; a fleck is nothing.",
+   "where": "systems",
+   "members": [
+    "A15"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "A17": {
+   "tag": "advice",
+   "bot": "A",
+   "what": "Keys come from fixed one-cell pockets: amethyst 40, emerald 40, ruby 36, magmite 40, coreite 20, umbrite 10, Solmarrow 5. One rung asks for one key, or two for a common one. Drill ends on Solmarrow (5 pockets), while Hull Plating and Cooling Rig both end on umbrite (10 pockets between two lines). Each gate's supply deal costs a different key: gate 1 Fuel Cell for 1 amethyst (40 pockets), gate 2 Hull Patch for 1 ruby (36), gate 3 Bulwark Field for 1 coreite (20). The deeper gate deal is paid in a scarcer key. Nothing here is broken yet. It could become a grind late, because 'a rung asks for one key' leaves no spare for the 5-pocket key.",
+   "where": "systems",
+   "members": [
+    "A17"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "B0": {
+   "tag": "should",
+   "bot": "B",
+   "what": "Commit LOOK.md: the tag has none, so B wrote only a draft style and named no change. Confirm the draft or write the game's own.",
+   "where": "LOOK.md",
+   "members": [
+    "B0"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "C1": {
+   "tag": "advice",
+   "bot": "C",
+   "what": "The bay's one guidance line always names an unwon feat first, and every feat counts as reachable at 0 m. So for the whole first tier, and likely into the second, it reads \"Ore Sorter, sell a full hold\", then \"Pressure Seal, ride out some gas\", then \"Resonance Tip, keep cutting hard rock\". The Salvage Magnet below 20 m, the Receiver, the Survey and the Hull Plating behind the first core only get named once all three feats are done. The barrier itself is never named at all. The game's one pointer spends its early hours on side feats, not on the Anchors and the gate.",
+   "where": "unlock: Next line",
+   "members": [
+    "C1"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "C2": {
+   "tag": "advice",
+   "bot": "C",
+   "what": "The gas feat and the hard-rock feat are shown from the first dock, before the player has met either. The DRILL rack's sealed card for the Resonance Tip appears at 32 m and says \"keep cutting hard rock\". Rock that counts (hardness 5 or more) barely exists that shallow. The Next line, from the item above, says \"ride out some gas\" before any gas pocket is met. Each feat names a thing the game has not shown yet.",
+   "where": "unlock: Pressure Seal / Resonance Tip",
+   "members": [
+    "C2"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "C3": {
+   "tag": "advice",
+   "bot": "C",
+   "what": "The last and plainest foreshadowing line (\"Whatever they were built to hold has three fewer ways to stay in\") is only due once the third gate is open. It shows 20 s or more later, and only near a spent core. The third gate is the Vault's door, with the Vault one row below. The player who taps GO DOWN is likely in the Vault and its ending before that line can show. So it likely shows after the reveal, if at all, and only two hints come before it.",
+   "where": "story: hint 3 / the Vault",
+   "members": [
+    "C3"
+   ],
+   "must_rule": null,
+   "place": ""
+  },
+  "C4": {
+   "tag": "advice",
+   "bot": "C",
+   "what": "A feat's gift arrives on the same card as a dug-up device, \"DEVICE RECOVERED \u00b7 FITTED \u00b7 UPGRADE IT AT THE OUTFITTER\". It never says it was earned, or by what act. So the full hold that earned the Ore Sorter goes unthanked, and the player cannot link reward to effort. The card also names a room called \"Outfitter\", which the bay calls FITTING BAY and the pad button calls SHOP.",
+   "where": "unlock: Ore Sorter",
+   "members": [
+    "C4"
+   ],
+   "must_rule": null,
+   "place": ""
+  }
+ },
+ "dropped": 2,
+ "decided": [
+  "DECIDED: keep as it is: Movement is only the on-screen d-pad and buttons in the bottom corner (`src/input.ts` wires 'all d-pad, keyboard and button wiring'). | release loop ece0d0f A4 KEEP: An on-screen d-pad is a standard control and nothing on screen misleads, so a watch only.",
+  "DECIDED: keep as it is: The DEVICE RECOVERED card for Ore Sorter reads 'Swaps the cheapest ore in a full hold for a richer find. | release loop ece0d0f A6 KEEP: The card is short and true, banner placement was already fixed, and C4 changes its head in the box above.",
+  "DECIDED: keep as it is: Each Anchor broken adds violet flecks to plain rock, two per cell, in 8%, 16% and 24% of cells for Anchors 1 to 3. | release loop ece0d0f A15 KEEP: Flecks and keys differ by shape and the design notes already carry it as a watch on the phone."
+ ]
+}
