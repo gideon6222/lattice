@@ -33,7 +33,7 @@ export const RELEASES_BEFORE_PLAY = 52;
 
 export const CHANGELOG: Release[] = [
   {
-    version: '0.57.0', date: '2026-10-03', title: 'Found and earned',
+    version: '0.57.0', date: '2026-10-18', title: 'Found and earned',
     notes: [
       'The fitting bay shows only what you own: three lines at most on a rack, one sealed mount that says how to get it, a Next line on top, and your supplies in a KIT drawer. Autopilot and the Repair Drone have a CREW rack of their own.',
       'A Ledger opens from the pause sheet with DEVICES, FEATS and RELICS, so you can see what you have done and what it handed you.',
@@ -42,6 +42,8 @@ export const CHANGELOG: Release[] = [
       'The first ship you lose leaves a black box on the pad: the Return Beacon. Hold HOME for two seconds underground, once a run, and the ship climbs to the pad with a share of the hold and all your keys.',
       'Two new finds wait in crates: a Flare Line beside an old wreck lights a dark pocket for a minute, and an Arc Lance in an Anchor hall breaks a whole vein of ore. Each has a part on the hull.',
       'Cleaner menus: one big PLAY on the title, a pause sheet with RESUME first and SETTINGS beside it, the long list behind MORE, and one X in the top corner of every sheet.',
+      'Clearer guidance: the bay\'s Next line leads you to the dig and the barrier, each feat names what counts once you have met it, an earned gift says EARNED, and a Dense Shell tells you why it cost hull.',
+      'Easier to read and feel: small text is larger, the Anchor row is labeled, the barrier looks like a wall and sparks as you drill it, a broken core warns of its cost, and the last hint comes before the Vault\'s door.',
       'Bots that play the game end to end pace the whole ladder: your first purchase comes within two runs, the Ore Sorter by the third, and no rung asks for more than four runs of saving.'
     ]
   },
