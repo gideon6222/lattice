@@ -21,8 +21,8 @@
                        "path":  "C:/dev/keys/upload.keystore",
                        "alias":  "upload"
                    },
-    "appVersionName":  "0.56.0",
-    "appVersionCode":  7,
+    "appVersionName":  "0.57.0",
+    "appVersionCode":  8,
     "shortcuts":  [
 
                   ],
@@ -50,5 +50,5 @@
     "retainedBundles":  [
 
                         ],
-    "appVersion":  "0.56.0"
+    "appVersion":  "0.57.0"
 }
