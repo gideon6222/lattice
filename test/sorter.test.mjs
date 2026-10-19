@@ -73,6 +73,18 @@ test('a key in the hold is never the one put down', () => {
   assert.equal(H.sortSwap(cargo, 45, 45, rich.id, 3), null);
 });
 
+test('a key beside money ore is never put down, at any rung, for any incoming ore', () => {
+  const money = H.ORES.filter((o) => !H.isKey(o.id)).sort((a, b) => a.value - b.value);
+  const cheap = money[0], inc = money[money.length - 1];
+  for (const key of H.KEY_ORES) for (const level of [1, 2, 3]) {
+    const cargo = { [key]: 3, [cheap.id]: 2 };
+    const weight = 3 * H.DEF[key].wt + 2 * cheap.wt;
+    const out = H.sortSwap(cargo, weight, weight, inc.id, level);
+    assert.notEqual(out, key, key + ' rung ' + level);
+    assert.ok(out === null || out === cheap.id, key + ' rung ' + level + ': ' + out);
+  }
+});
+
 test('the Sorter is a hold line with three rungs, handed over by the first feat', () => {
   const u = H.UPGRADES.find((x) => x.key === 'sorter');
   assert.ok(u);
