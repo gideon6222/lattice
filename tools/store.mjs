@@ -3,33 +3,39 @@
    The Godot games do this with `scripts\store.ps1`, which drives their
    `Main.dev_seek` through `scripts\shot.gd`. This game is a web game and has
    neither, but it has the same seam under a different name: `window.__cw`, the
-   debug handle `scripts/filmstrip.mjs` already drives. So this is filmstrip's
-   driver with three differences.
+   debug handle `tools/filmstrip.mjs` already drives.
 
-   IT SHOOTS AT 1080x1920, not at the 375x812 the e2e and the contact sheet use.
-   Play takes a phone screenshot between 320 and 3840 on a side and at most 2:1,
-   and the phone's own 1080x2340 is 2.167:1 and is REJECTED. 1080x1920 is 16:9
-   and is what every Godot game here ships, so the listing is consistent across
-   the seven apps.
+   IT SHOOTS AT 1080x1920, the 9:16 Play needs for its recommendation formats
+   (install-drivers.md S2 and G6). The phone's own 1080x2340 is 2.167:1 and is
+   REJECTED. Each frame is drawn at twice that (2160x3840) and scaled down by
+   ffmpeg, which is the antialiasing a still deserves and a phone frame cannot
+   afford.
 
-   IT TAKES ONE FRAME PER STATE rather than a sequence. A contact sheet is about
-   motion; a listing is four still pictures a stranger reads in a second.
+   AT THE HIGH TIER. The game loads the PC's saved visuals choice, and a fresh
+   browser context has none, so it would draw at medium. A still tool applies
+   the tier it wants (studio lesson, yardling 2026-10-01).
 
-   AND IT CHECKS WHAT IT WROTE. Every image is measured against Play's limits
-   before this exits, and the screenshots are measured against each other: four
-   identical frames means the setup never took effect, which is exactly how the
-   Godot pipeline shipped four blank rectangles before its own check was added.
-   A size that is legal proves nothing about whether the game is in the picture.
+   CLOSER THAN PLAY. The 2026-10-18 store art audit: "The ship is small in every
+   shot. Zoom the camera in for the store shots so the ship reads at thumbnail
+   size." The game's camera frames 18 rows. After a state's setup the camera is
+   pulled in by `zoom` and nudged by `ox`/`oy` (world cells), then the frame is
+   redrawn by `tick(0)`, which moves nothing in the world: every follow is an
+   exponential approach on the step, and a step of zero is no motion.
+
+   THE HUD IS HIDDEN in the play shots and a caption band sits over the top of
+   each picture, in the game's own Chakra Petch. The band is 15% of the frame
+   (Play allows about 20% of text). The fitting bay keeps its own screen,
+   because there the screen is the thing being shown.
 
    Usage:
-     npm run build && node scripts/store.mjs
+     npm run build && node tools/store.mjs [--only name,name] [--no-feature]
 
-   Everything lands in store/listing/en-US/images/. Commit it. The dashboard's
-   store lane sends that folder to Play, and only when autoListing is on. */
+   Everything lands in store/listing/en-US/images/. Commit it. The coordinator
+   syncs that folder to Play. */
 
 import { chromium } from '@playwright/test';
 import { createServer } from 'node:http';
-import { readFile, mkdir, writeFile, copyFile } from 'node:fs/promises';
+import { readFile, mkdir, rm, readdir, rename } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,101 +45,150 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
 const OUT = join(ROOT, 'store', 'listing', 'en-US', 'images');
 const SHOTS = join(OUT, 'phoneScreenshots');
-/* Its own port, for the reason playwright.config.ts gives at length: several
-   games build on this machine at once and a Vite default port is not this
-   game's. */
+const RAW = join(ROOT, 'test-results', 'store-raw');
+/* Its own port: several games build on this machine at once. */
 const PORT = 4321;
 const W = 1080;
 const H = 1920;
+const SCALE = 2;
+
+const args = process.argv.slice(2);
+/* STORE_ONLY too, since `studio run store-shots` takes no arguments. */
+const onlyArg = args.includes('--only') ? args[args.indexOf('--only') + 1].split(',')
+  : process.env.STORE_ONLY ? process.env.STORE_ONLY.split(',') : null;
+const doFeature = !args.includes('--no-feature') && (!onlyArg || onlyArg.includes('feature'));
 
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.webmanifest': 'application/manifest+json',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
+  '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp',
   '.glb': 'model/gltf-binary', '.woff2': 'font/woff2', '.ico': 'image/x-icon'
 };
 
-/* The eight moments worth putting in front of a stranger, the first two in play. Each `setup` runs on
-   the same `window.__cw` handle filmstrip uses, so this file cannot reach a
-   state the game cannot actually be in. */
+/* Run in the page before every state: every ore already met (or the first
+   find's flash washes the frame white), and a finder for the richest patch of
+   ore in a depth range, so a shot stands in front of what the world really put
+   there rather than a cell typed into this file. */
+const PRELUDE = `
+  __cw.g.seenOre = __cw.ORES.map((o) => o.id);
+  window.__isOre = (x, d) => {
+    const b = __cw.blockAt(x, d);
+    return b && __cw.ORES.some((o) => o.id === b.id) ? b.id : null;
+  };
+  window.__richest = (d0, d1, wx, wy, kinds) => {
+    let best = null;
+    for (let x = 6; x < __cw.W - 6; x++) for (let d = d0; d <= d1; d++) {
+      const seen = new Set(); let n = 0;
+      for (let i = -wx; i <= wx; i++) for (let j = -wy; j <= wy; j++) {
+        const id = __isOre(x + i, d + j);
+        if (id && (!kinds || kinds.includes(id))) { n++; seen.add(id); }
+      }
+      const s = n + seen.size * 3;
+      if (!best || s > best.s) best = { x, d, s, n, kinds: [...seen] };
+    }
+    return best;
+  };
+`;
+
+/* A mid-game ship: the hardware a player has a few hours in, so the ship in
+   every picture is the dressed one rather than the bare starter. */
+const DRESS = `
+  Object.assign(__cw.g.up, { drill: 4, cargo: 3, thrust: 4, tank: 4, cool: 4, scan: 2, hull: 5, magnet: 1 });
+  __cw.setDrillTier(4); __cw.setUpgradeHardware(__cw.g.up);
+`;
+
+/* Eight moments, eight different places. The first three sell the core fun at
+   a glance: the drill in ore, the colors down there, and the pad you sell at. */
 const STATES = [
   {
-    name: 'digging',
-    what: 'the drill in the rock, the shaft lit behind it',
+    name: 'drill-seam',
+    caption: 'Drill deep for <b>shiny ore</b>',
     enter: true,
-    /* `advance` alone does not descend: the ship digs because a control is HELD,
-       and `R.held` is the seam filmstrip's dig scene drives. The shallow ores
-       are marked as met, or the first copper's flash washes the picture white. */
     setup: `
-      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
+      ${DRESS}
+      const r = __richest(64, 110, 2, 3, ['gold', 'amethyst', 'silver']);
+      const X = r.x, D = r.d - 2;
       const dug = [];
-      for (let d = 0; d <= 40; d++) dug.push('6,' + d);
-      for (let x = 2; x <= 10; x++) dug.push(x + ',28');
+      for (let d = 0; d <= D - 1; d++) dug.push(X + ',' + d);
       __cw.g.dug = new Set(dug);
-      __cw.g.px = 6; __cw.g.pd = 26;
+      __cw.g.px = X; __cw.g.pd = D - 1;
+      __cw.resetBlocks();
+      __cw.advance(0.6);
       __cw.R.held = 'down';
-      for (let i = 0; i < 10; i++) __cw.advance(0.4);
+      __cw.advance(0.55);
     `,
+    frame: { zoom: 0.55, oy: -0.6 },
     assert: `__cw.g.pd > 20`
   },
   {
-    name: 'key-find',
-    what: 'an emerald key crystal in the wall, never sold',
+    name: 'gem-tunnel',
+    caption: 'Treasure in <b>every layer</b>',
+    /* A side tunnel through the richest row of the deep middle, lit end to end
+       by the ship's own Flare Line, the way a player sees a whole wall at once. */
     enter: true,
     setup: `
-      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
+      ${DRESS}
+      __cw.g.best.depth = 400; __cw.g.ground.gates = [0, 1];
+      __cw.g.found.push('flare'); __cw.g.up.flare = 4;
+      const r = __richest(140, 200, 3, 3, ['ruby', 'emerald', 'amethyst', 'gold', 'magmite']);
+      const X = r.x, D = r.d;
+      const dug = [];
+      for (let d = 0; d <= D; d++) dug.push((X + 2) + ',' + d);
+      for (let x = X - 3; x <= X + 2; x++) dug.push(x + ',' + D);
+      __cw.g.dug = new Set(dug);
+      __cw.g.px = X + 1; __cw.g.pd = D; __cw.g.face = 'left';
+      __cw.resetBlocks();
+      __cw.advance(0.5);
+      __cw.throwFlare();
+      __cw.advance(1.5);
+    `,
+    frame: { zoom: 0.62, ox: -1.2 },
+    assert: `__cw.g.pd > 100`
+  },
+  {
+    name: 'surface',
+    caption: 'Sell your haul, <b>dive again</b>',
+    enter: true,
+    setup: `
+      ${DRESS}
+      __cw.R.held = 'down';
+      __cw.advance(1.2);
+    `,
+    frame: { zoom: 0.8, ox: 1.2, oy: 2.2 },
+    assert: `__cw.g.pd > 0.5`
+  },
+  {
+    name: 'key-find',
+    caption: 'Find the <b>crystal keys</b>',
+    enter: true,
+    setup: `
+      ${DRESS}
       const pk = __cw.keyPockets(0).pockets.find((p) => p.id === 'emerald');
       const KX = pk.cells[0][0], KD = pk.cells[0][1];
       __cw.g.ground.gates = [0];
       const dug = [];
-      for (let d = KD - 5; d <= KD - 1; d++) for (let x = KX - 3; x <= KX + 3; x++) dug.push(x + ',' + d);
+      for (let d = 0; d <= KD - 2; d++) dug.push(KX + ',' + d);
       __cw.g.dug = new Set(dug);
       __cw.g.px = KX; __cw.g.pd = KD - 2;
       __cw.resetBlocks();
       __cw.advance(0.8);
-      document.getElementById('toast').style.opacity = '0';
     `,
+    frame: { zoom: 0.5, oy: -1.0 },
     assert: `__cw.g.pd > 2`
   },
   {
-    name: 'surface',
-    what: 'the pad and the first cut, the way every run starts',
-    enter: true,
-    setup: `
-      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
-      __cw.R.held = 'down';
-      for (let i = 0; i < 12; i++) __cw.advance(0.5);
-    `,
-    assert: `__cw.g.pd > 2`
-  },
-  {
-    name: 'core',
-    what: 'a barrier core lit once its three Anchors are broken',
-    enter: true,
-    setup: `
-      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
-      const CX = __cw.coreColumn(0), CD = __cw.gateDepth(0);
-      const dug = [];
-      for (let d = 0; d <= CD - 4; d++) dug.push(CX + ',' + d);
-      for (let x = CX - 4; x <= CX + 4; x++) for (let d = CD - 4; d <= CD - 1; d++) dug.push(x + ',' + d);
-      __cw.g.dug = new Set(dug);
-      __cw.g.ground.lit = __cw.gateAnchors(0).slice();
-      __cw.g.up.drill = 4; __cw.g.up.scan = 3;
-      __cw.g.px = CX; __cw.g.pd = CD - 3;
-      __cw.resetBlocks();
-      __cw.advance(2.5);
-    `,
-    assert: `__cw.g.pd > 2`
-  },
-  {
-    name: 'bay',
-    what: 'the fitting bay at the first gate, where Sink is sold',
+    name: 'upgrade-bay',
+    caption: 'Upgrade your <b>drill ship</b>',
     /* Reached the way a player reaches it: standing at the gate's station and
-       pressing the button. */
+       pressing the button. A mid-game purse, not a debug one. The bay is a
+       screen with its own header, so the band goes above it, not over it. */
     enter: true,
+    hud: true,
+    bandAbove: true,
     setup: `
-      __cw.g.credits = 250000; __cw.g.best.depth = 200; __cw.g.ground.gates = [0];
-      for (const k of ['amethyst','emerald','ruby']) __cw.g.stock[k] = 6;
+      ${DRESS}
+      __cw.g.credits = 18450; __cw.g.best.depth = 140; __cw.g.ground.gates = [0];
+      for (const k of ['amethyst','emerald','ruby']) __cw.g.stock[k] = 3;
       __cw.g.px = __cw.coreColumn(0); __cw.g.pd = __cw.gateDepth(0) - 1;
       __cw.advance(0.5);
       document.getElementById('btnShop').click();
@@ -141,30 +196,109 @@ const STATES = [
     /* The room's models arrive in their own chunk the first time the bay
        opens; a shot before they land is a ship in a black void. */
     waitFor: `__cw.roomReady()`,
-    after: `__cw.advance(1.5)`,
+    after: `__cw.selectSystem && __cw.selectSystem('drill'); __cw.advance(1.5)`,
     assert: `__cw.roomPlace() === 0`
   },
   {
-    name: 'anchor',
-    what: 'a broken Anchor and the plinth it leaves in the dug hall',
+    name: 'glowing-deep',
+    caption: 'Dig to the <b>glowing deep</b>',
+    /* Past the third barrier, where the ores light themselves: the richest
+       patch of magmite and coreite, a flare thrown along a short cut. */
     enter: true,
     setup: `
-      __cw.g.seenOre = ['copper', 'iron', 'silver', 'gold'];
-      const hall = __cw.hallEye();
-      const AX = hall.px, AD = hall.pd + 2;
+      ${DRESS}
+      __cw.g.best.depth = 420; __cw.g.ground.gates = [0, 1, 2];
+      __cw.g.ground.lit = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+      __cw.g.found.push('flare'); __cw.g.up.flare = 4;
+      __cw.g.up.drill = 8; __cw.setDrillTier(8);
+      const r = __richest(255, 330, 3, 3, ['coreite', 'magmite', 'ruby', 'umbrite']);
+      const X = r.x, D = r.d;
       const dug = [];
-      for (let d = AD - 7; d <= AD + 5; d++) for (let x = AX - 6; x <= AX + 6; x++) {
-        if (Math.abs(x - AX) <= 1 && Math.abs(d - AD) <= 1) continue;
-        dug.push(x + ',' + d);
-      }
+      /* Cut the other way from shot two, so the two tunnels are not twins. */
+      for (let d = 0; d <= D; d++) dug.push((X - 2) + ',' + d);
+      for (let x = X - 2; x <= X + 3; x++) dug.push(x + ',' + D);
       __cw.g.dug = new Set(dug);
-      __cw.g.ground.lit = [1];
-      __cw.g.px = AX; __cw.g.pd = AD - 3;
+      __cw.g.px = X - 1; __cw.g.pd = D; __cw.g.face = 'right';
       __cw.resetBlocks();
-      __cw.advance(0.6);
-    `
+      __cw.advance(0.5);
+      __cw.throwFlare();
+      __cw.advance(1.5);
+    `,
+    frame: { zoom: 0.56, ox: 1.2, oy: 0.6 },
+    assert: `__cw.g.pd > 250`
+  },
+  {
+    name: 'barrier-core',
+    caption: 'Smash the <b>barrier core</b>',
+    enter: true,
+    setup: `
+      ${DRESS}
+      const CX = __cw.coreColumn(0), CD = __cw.gateDepth(0);
+      const dug = [];
+      for (let d = 0; d <= CD - 4; d++) dug.push(CX + ',' + d);
+      for (let x = CX - 4; x <= CX + 4; x++) for (let d = CD - 4; d <= CD - 1; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.lit = __cw.gateAnchors(0).slice();
+      __cw.g.px = CX; __cw.g.pd = CD - 3;
+      __cw.resetBlocks();
+      __cw.advance(2.5);
+    `,
+    frame: { zoom: 0.62, oy: -0.8 },
+    assert: `__cw.g.pd > 2`
+  },
+  {
+    name: 'vault',
+    caption: 'Open the <b>Vault</b> at the core',
+    /* The Vault's door with all nine Anchors broken, the ship at its sill.
+       (The ending's own burst was tried: at a still it reads as an empty red
+       room, because the door is already gone.) */
+    enter: true,
+    setup: `
+      ${DRESS}
+      const VX = __cw.VAULT_CORE_X, VD = __cw.VAULT_CORE_D;
+      const dug = [];
+      for (let x = VX - 5; x <= VX + 5; x++) for (let d = VD - 6; d <= VD - 1; d++) dug.push(x + ',' + d);
+      __cw.g.dug = new Set(dug);
+      __cw.g.ground.lit = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+      __cw.g.ground.gates = [0, 1];
+      __cw.g.px = VX; __cw.g.pd = VD - 2;
+      __cw.resetBlocks();
+      __cw.advance(2.5);
+    `,
+    frame: { zoom: 0.58, oy: -0.8 },
+    assert: `__cw.g.pd > 300`
   }
 ];
+
+/* The feature graphic: the ship cutting into the gold, the same subject as his
+   icon pick, right of center so Play's play button in the middle never sits on
+   it, no text (art KNOWLEDGE R14, thumbnails.md section 4). */
+const FEATURE = {
+  name: 'feature',
+  enter: true,
+  /* Shot one's seam, with a flare thrown left along a short side cut first so
+     the ore left of the ship is lit rather than a black void. */
+  setup: `
+    ${DRESS}
+    __cw.g.best.depth = 400; __cw.g.ground.gates = [0, 1];
+    __cw.g.found.push('flare'); __cw.g.up.flare = 4;
+    const r = __richest(64, 110, 2, 3, ['gold', 'amethyst', 'silver']);
+    const X = r.x, D = r.d - 2;
+    const dug = [];
+    for (let d = 0; d <= D - 1; d++) dug.push(X + ',' + d);
+    for (let x = X - 5; x < X; x++) dug.push(x + ',' + (D - 2));
+    __cw.g.dug = new Set(dug);
+    __cw.g.px = X; __cw.g.pd = D - 2; __cw.g.face = 'left';
+    __cw.resetBlocks();
+    __cw.advance(0.4);
+    __cw.throwFlare();
+    __cw.advance(0.3);
+    __cw.g.face = 'down';
+    __cw.R.held = 'down';
+    __cw.advance(0.9);
+  `,
+  frame: { zoom: 0.6, ox: -2.4, oy: -0.2 }
+};
 
 function serve() {
   return new Promise((ok) => {
@@ -183,16 +317,132 @@ function serve() {
   });
 }
 
-/* PNG IHDR. Written out rather than pulled in, because this repo keeps its
-   dependency list short on purpose and one header read is not worth a package.
-   Read each byte as a NUMBER before shifting - the same trap that had the
-   studio dashboard reading a 1080x1920 screenshot as 56x128. */
-async function pngSize(path) {
+/* PNG IHDR, read byte by byte as numbers. */
+async function pngInfo(path) {
   const b = await readFile(path);
   if (b.length < 26 || b[0] !== 0x89 || b[1] !== 0x50) return null;
   const w = (b[16] << 24) + (b[17] << 16) + (b[18] << 8) + b[19];
   const h = (b[20] << 24) + (b[21] << 16) + (b[22] << 8) + b[23];
-  return { w, h };
+  return { w, h, colorType: b[25], bytes: b.length };
+}
+
+const HIDE_HUD = `#hud,#actions,#cluster,#ctrl,#kit,#toast,#savedMark,#found,#anchors,#callLamp,
+  #keyNear,#timedWrap,#ord,#abil,#event{display:none!important}`;
+
+const BAND = `
+  #storeBand{position:fixed;left:0;top:0;width:100%;height:288px;z-index:99999;pointer-events:none;
+    display:flex;align-items:center;justify-content:center;padding:0 48px 30px;box-sizing:border-box;
+    background:linear-gradient(to bottom,rgba(9,8,12,.94) 0,rgba(9,8,12,.88) 72%,rgba(9,8,12,0) 100%)}
+  #storeBand span{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:74px;line-height:1.05;
+    color:#fff;text-align:center;letter-spacing:.5px;text-shadow:0 4px 0 rgba(0,0,0,.55)}
+  #storeBand b{color:#ffc84a}`;
+
+async function shoot(browser, state, file, vw, vh) {
+  const ctx = await browser.newContext({ viewport: { width: vw, height: vh }, deviceScaleFactor: SCALE, hasTouch: true });
+  /* The tier before the bundle reads it. */
+  await ctx.addInitScript(() => { try { localStorage.setItem('coreward.visuals', 'high'); } catch { /* none */ } });
+  const page = await ctx.newPage();
+  page.on('console', (m) => { if (m.type() === 'error') problems.push(state.name + ': ' + m.text()); });
+  page.on('pageerror', (e) => problems.push(state.name + ': UNCAUGHT: ' + e.message));
+
+  await page.goto('http://127.0.0.1:' + PORT + '/?debug');
+  await page.waitForFunction(() => !!window.__cw, null, { timeout: 30_000 });
+  await page.waitForFunction(
+    () => document.getElementById('boot').classList.contains('hidden'), null, { timeout: 30_000 });
+  await page.evaluate(() => document.fonts.ready);
+
+  /* A state about PLAY crosses the way in first, the way a player does. */
+  if (state.enter) {
+    await page.evaluate(() => {
+      const skip = document.getElementById('introSkip');
+      if (skip && !document.getElementById('intro').classList.contains('hidden')) skip.click();
+      const cont = document.getElementById('btnContinue');
+      if (cont && !document.getElementById('title').classList.contains('hidden')) {
+        (cont.disabled ? document.getElementById('btnNewGame') : cont).click();
+      }
+    });
+    await page.evaluate(() => window.__cw.advance(8));
+    await page.waitForFunction(() => window.__cw.g.mode === 'play', null, { timeout: 15_000 });
+  }
+
+  await page.evaluate(PRELUDE);
+  await page.evaluate(state.setup);
+  if (state.waitFor) await page.waitForFunction(state.waitFor, null, { timeout: 20_000 });
+  if (state.after) await page.evaluate(state.after);
+
+  /* Assert the STATE, not the picture: two frames of this game are never
+     byte-identical, so only the game's own terms say the shot arrived. */
+  if (state.assert) {
+    const got = await page.evaluate(state.assert);
+    if (!got) {
+      const pd = await page.evaluate(() => window.__cw.g.pd);
+      throw new Error(`state '${state.name}' never arrived: ${state.assert} was false (depth ${pd})`);
+    }
+  }
+
+  if (state.frame) {
+    await page.evaluate((f) => {
+      const c = window.__cw.camera;
+      const p = window.__cw.player.position;
+      /* Centered on the ship (the follow lags a teleport), then pulled in. */
+      c.position.x = p.x + (f.ox || 0);
+      c.position.y = p.y + (f.oy || 0);
+      c.position.z = c.position.z * (f.zoom || 1);
+      window.__cw.R.shake = 0;
+      window.__cw.tick(0, true);
+    }, state.frame);
+  }
+
+  const overlay = state.caption && !state.bandAbove;
+  const css = (state.hud ? '' : HIDE_HUD) + (overlay ? BAND : '');
+  if (css) await page.addStyleTag({ content: css });
+  if (overlay) {
+    await page.evaluate((cap) => {
+      const d = document.createElement('div');
+      d.id = 'storeBand';
+      d.innerHTML = '<span>' + cap + '</span>';
+      document.body.appendChild(d);
+    }, state.caption);
+  }
+  await page.evaluate(() => document.fonts.ready);
+  /* The page composites the canvas as last drawn; a paint for the band. */
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.screenshot({ path: file });
+  const where = await page.evaluate(() => [window.__cw.g.px, Math.round(window.__cw.g.pd)]);
+  await ctx.close();
+  return where;
+}
+
+/* The same band, drawn on its own, for a screen that has a header of its own
+   and is shot BAND_H shorter: the band then sits above it rather than over it. */
+const BAND_H = 288;
+async function bandAbove(browser, caption, shotFile) {
+  const ctx = await browser.newContext({ viewport: { width: W, height: BAND_H }, deviceScaleFactor: SCALE });
+  const page = await ctx.newPage();
+  /* On the game's own origin first, or the font is a cross-origin load. */
+  await page.goto('http://127.0.0.1:' + PORT + '/band');
+  await page.setContent(`<html><head><style>
+    @font-face{font-family:'Chakra Petch';font-weight:700;src:url('/fonts/chakrapetch-700.woff2')}
+    html,body{margin:0;background:#09080c}
+    ${BAND.replace('rgba(9,8,12,0) 100%', 'rgba(9,8,12,.88) 100%')}
+  </style></head><body><div id="storeBand"><span>${caption}</span></div></body></html>`);
+  await page.evaluate(() => document.fonts.load("700 80px 'Chakra Petch'"));
+  await page.evaluate(() => document.fonts.ready);
+  const bandFile = shotFile.replace(/\.png$/, '.band.png');
+  await page.screenshot({ path: bandFile });
+  await ctx.close();
+  const tmp = shotFile.replace(/\.png$/, '.stack.png');
+  execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', bandFile, '-i', shotFile,
+    '-filter_complex', 'vstack=inputs=2', tmp], { stdio: 'inherit' });
+  await rm(shotFile);
+  await rm(bandFile);
+  await rename(tmp, shotFile);
+}
+
+/* Down to the listing size, 24-bit RGB with no alpha. */
+function downscale(src, dst, w, h) {
+  execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', src,
+    '-vf', `scale=${w}:${h}:flags=lanczos`, '-pix_fmt', 'rgb24', dst], { stdio: 'inherit' });
 }
 
 if (!existsSync(DIST)) {
@@ -201,117 +451,62 @@ if (!existsSync(DIST)) {
 }
 
 await mkdir(SHOTS, { recursive: true });
+await mkdir(RAW, { recursive: true });
+
+/* A full run replaces the whole set, so a renamed shot leaves no orphan. */
+if (!onlyArg) {
+  for (const f of await readdir(SHOTS)) if (f.endsWith('.png')) await rm(join(SHOTS, f));
+}
 
 const server = await serve();
 const browser = await chromium.launch({
-  /* Headless Chrome has no GPU, so WebGL comes from SwiftShader - the same
-     arguments playwright.config.ts passes, and for the same reason. */
+  /* Headless Chrome has no GPU, so WebGL comes from SwiftShader, as in
+     playwright.config.ts. */
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
 });
 
 const problems = [];
 const written = [];
+let feature = null;
 
 try {
   for (const [i, state] of STATES.entries()) {
-    const page = await browser.newPage({ viewport: { width: W, height: H }, hasTouch: true });
-    page.on('console', (m) => { if (m.type() === 'error') problems.push(state.name + ': ' + m.text()); });
-    page.on('pageerror', (e) => problems.push(state.name + ': UNCAUGHT: ' + e.message));
-
-    await page.goto('http://127.0.0.1:' + PORT + '/?debug');
-    await page.waitForFunction(() => !!window.__cw, null, { timeout: 20_000 });
-    await page.waitForFunction(
-      () => document.getElementById('boot').classList.contains('hidden'), null, { timeout: 20_000 });
-
-    /* A state about PLAY has to cross the way in first, the same way the e2e
-       does: skipping it with a flag would make the one screen every player
-       sees the one screen nothing exercises. */
-    if (state.enter) {
-      await page.evaluate(() => {
-        const skip = document.getElementById('introSkip');
-        if (skip && !document.getElementById('intro').classList.contains('hidden')) skip.click();
-        const cont = document.getElementById('btnContinue');
-        if (cont && !document.getElementById('title').classList.contains('hidden')) {
-          (cont.disabled ? document.getElementById('btnNewGame') : cont).click();
-        }
-      });
-      await page.evaluate(() => window.__cw.advance(8));
-      await page.waitForFunction(() => window.__cw.g.mode === 'play', null, { timeout: 15_000 });
-    }
-
-    await page.evaluate(state.setup);
-    if (state.waitFor) await page.waitForFunction(state.waitFor, null, { timeout: 15_000 });
-    if (state.after) await page.evaluate(state.after);
-
-    /* **Assert the STATE, not the picture.** Two screenshots of this game are
-       never byte-identical - the stars twinkle and the lamp flickers - so a
-       pixel comparison cannot tell "deep" from "the surface". Each state says
-       in the game's own terms what it means to have arrived, and a state that
-       did not arrive is a listing image of the wrong thing. */
-    if (state.assert) {
-      const got = await page.evaluate(state.assert);
-      if (!got) {
-        const pd = await page.evaluate(() => window.__cw.g.pd);
-        throw new Error(
-          `state '${state.name}' never arrived: ${state.assert} was false (depth ${pd})`);
-      }
-    }
-
-    /* A real frame has to be painted after the state moves, or every capture is
-       the frame before it. */
-    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-
+    if (onlyArg && !onlyArg.includes(state.name)) continue;
+    const raw = join(RAW, state.name + '.png');
+    const where = await shoot(browser, state, raw, W, state.bandAbove ? H - BAND_H : H);
+    if (state.bandAbove) await bandAbove(browser, state.caption, raw);
     const file = join(SHOTS, (i + 1) + '-' + state.name + '.png');
-    await page.screenshot({ path: file });
+    downscale(raw, file, W, H);
     written.push(file);
-    console.log('screenshot %d  %d-%s.png  (%s)', i + 1, i + 1, state.name, state.what);
-    await page.close();
+    console.log('screenshot %d  %s  at %s  "%s"', i + 1, state.name, where.join(','), state.caption.replace(/<\/?b>/g, ''));
+  }
+  if (doFeature) {
+    const raw = join(RAW, 'feature.png');
+    await shoot(browser, FEATURE, raw, 1024, 500);
+    feature = join(OUT, 'featureGraphic.png');
+    downscale(raw, feature, 1024, 500);
+    console.log('feature graphic  featureGraphic.png');
   }
 } finally {
   await browser.close();
   server.close();
 }
 
-/* The icon. public/icon-512.png is already exactly what Play asks for, so this
-   copies rather than re-rendering and risking a different picture in the store
-   than on the home screen. */
-const iconSrc = join(ROOT, 'public', 'icon-512.png');
-await copyFile(iconSrc, join(OUT, 'icon.png'));
-console.log('icon             icon.png (from public/icon-512.png)');
-
-/* The feature graphic, cut from one screenshot with the wordmark on the empty
-   side - the same shape store.ps1 builds for the Godot games, through the same
-   ffmpeg. */
-const featureSrc = join(SHOTS, '3-surface.png');
-const feature = join(OUT, 'featureGraphic.png');
-const font = 'C\\:/Windows/Fonts/arial.ttf';
-execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', featureSrc,
-  '-vf', `crop=1080:527:0:560,scale=1024:500,drawtext=fontfile='${font}':text='The Lattice':fontcolor=white:fontsize=74:borderw=6:bordercolor=0x000000cc:x=36:y=h-text_h-84,drawtext=fontfile='${font}':text='Mining Adventure':fontcolor=0xffd27a:fontsize=38:borderw=5:bordercolor=0x000000cc:x=40:y=h-text_h-30`,
-  '-pix_fmt', 'rgb24', feature], { stdio: 'inherit' });
-console.log('feature graphic  featureGraphic.png');
-
-/* Everything Play measures, plus the one thing it cannot: whether the game is
-   actually in the picture. */
+/* Everything Play measures, plus whether the game is actually in the picture. */
 let bad = 0;
-const digests = new Map();
-for (const f of [join(OUT, 'icon.png'), feature, ...written]) {
-  const sz = await pngSize(f);
+for (const f of [feature, ...written].filter(Boolean)) {
+  const sz = await pngInfo(f);
   const name = f.split(/[\\/]/).pop();
   if (!sz) { console.log('  %s  NOT A PNG', name); bad++; continue; }
   let ok;
-  if (name === 'icon.png') ok = sz.w === 512 && sz.h === 512;
-  else if (name === 'featureGraphic.png') ok = sz.w === 1024 && sz.h === 500;
-  else {
-    const ratio = Math.max(sz.w, sz.h) / Math.max(1, Math.min(sz.w, sz.h));
-    ok = sz.w >= 320 && sz.h >= 320 && sz.w <= 3840 && sz.h <= 3840 && ratio <= 2.0;
-  }
-  console.log('  %s %sx%s  %s', name.padEnd(24), sz.w, sz.h, ok ? 'ok' : 'REJECTED BY PLAY');
+  if (name === 'featureGraphic.png') ok = sz.w === 1024 && sz.h === 500 && sz.colorType === 2;
+  else ok = sz.w === W && sz.h === H && sz.bytes <= 8 * 1024 * 1024;
+  console.log('  %s %sx%s %s KB  %s', name.padEnd(24), sz.w, sz.h, Math.round(sz.bytes / 1024), ok ? 'ok' : 'REJECTED BY PLAY');
   if (!ok) bad++;
 }
 
-/* Two screenshots byte-for-byte equal mean a setup never took effect. The Godot
-   pipeline shipped four identical blank frames past a check that only measured
-   their size, which is what this exists to stop happening here. */
+/* Two shots byte-for-byte equal mean a setup never took effect. */
+const digests = new Map();
 for (const f of written) {
   const hash = (await readFile(f)).toString('base64');
   const name = f.split(/[\\/]/).pop();
