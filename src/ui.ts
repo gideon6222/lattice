@@ -152,18 +152,19 @@ let foundT = 0;
    different promises. A device is bolted on and its ladder opens; a supply is
    in the hold and the counter will restock it. Saying "FITTED" over a Fuel
    Cell would be a small lie in the one place the game is teaching. */
-export function foundBanner(name: string, what: string, kind: 'device' | 'supply' | 'ore' | 'key' = 'device') {
+export function foundBanner(name: string, what: string, kind: 'device' | 'feat' | 'supply' | 'ore' | 'key' = 'device') {
   if (!ui.found || !ui.foundName || !ui.foundWhat) return;
   ui.foundName.textContent = name;
   ui.foundWhat.textContent = what;
   const head = ui.found.querySelector('.fhead');
   const fit = ui.found.querySelector('.ffit');
   if (head) head.textContent = kind === 'device' ? 'DEVICE RECOVERED'
+    : kind === 'feat' ? 'EARNED'
     : kind === 'supply' ? 'NEW SUPPLY' : kind === 'key' ? 'NEW KEY' : 'NEW MINERAL';
   if (fit) {
-    fit.textContent = kind === 'device'
-      ? 'FITTED · UPGRADE IT AT THE OUTFITTER'
-      : kind === 'supply' ? 'IN THE HOLD · THE OUTFITTER STOCKS IT NOW'
+    fit.textContent = kind === 'device' || kind === 'feat'
+      ? 'FITTED · UPGRADE IT IN THE SHOP'
+      : kind === 'supply' ? 'IN THE HOLD · THE SHOP STOCKS IT NOW'
       /* A key is never sold (round seventeen, AK), so the ore line would be
          the one wrong instruction on the card. */
       : kind === 'key' ? 'IN THE HOLD · BANKED AT THE PAD, NEVER SOLD'

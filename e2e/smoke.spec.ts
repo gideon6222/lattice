@@ -5644,7 +5644,7 @@ async function giftBay(page: Page, counter: string, short: number, key: string, 
     } else w.countFeat(a);
   }, act);
   await expect(page.locator('#found'), 'no banner when the feat was won').toHaveClass(/on/);
-  await expect(page.locator('#found .fhead')).toHaveText('DEVICE RECOVERED');
+  await expect(page.locator('#found .fhead')).toHaveText('EARNED');
   expect(await page.evaluate((k) => (window as any).__cw.g.up[k], key), key + ' was not handed over').toBe(1);
   if (act === 'lose') await page.locator('#evBtn').dispatchEvent('click');
   await page.evaluate(() => {

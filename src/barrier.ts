@@ -86,7 +86,9 @@ const fieldMat = new THREE.ShaderMaterial({
       float warp = n(vec2(vLmPos.x * 0.4, uTime * 0.25)) * 2.0;
       float s = n(p + vec2(warp, 0.0)) * n(p * 2.3 - vec2(0.0, uTime * 0.6));
       float edge = pow(abs(vUv.y - 0.5) * 2.0, 6.0);
-      float a = 0.05 + s * 0.16 + edge * 0.12;
+      /* A wall, not a haze: a steady body of light the whole row long, with
+         the wavers moving through it, so a first-timer reads it as solid. */
+      float a = 0.20 + s * 0.30 + edge * 0.16;
       gl_FragColor = vec4(uTint * a * coreGlow(vLmPos), 1.0);
     }`
 });

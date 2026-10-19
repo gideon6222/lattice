@@ -61,7 +61,7 @@ import { useBeacon, sell, goSurface, die, tremor, lodeCollapse, collectHere, gra
 import { HARD_ROCK } from './sim/feats';
 import { sortSwap, applySwap } from './sim/sorter';
 import { tipWork } from './sim/hazards';
-import { coreOpens, openGate, gateAtDepth, barrierSays, spentCoreNear } from './sim/gate';
+import { coreOpens, openGate, gateAtDepth, barrierSays, spentCoreNear, gateReady, GATE_COUNT } from './sim/gate';
 import { HINTS } from './sim/hints';
 import { hasAbility, SINK_RATE, SINK_HULL, HOLLOW_DRAIN } from './sim/ability';
 import { drawHollow } from './hollow';
@@ -130,6 +130,13 @@ function startDig(tx: number, td: number, dir: Dir) {
     const t = gateAtDepth(td);
     if (t >= 0) { toast(barrierSays(t, g.ground.lit)); barrierSaid = clock; }
   }
+  /* And a spark where the drill meets it, so a touch that makes no progress
+     still shows something took the hit. */
+  if (b && b.id === 'gate' && clock - barrierSparkT > 0.35) {
+    spray(worldX(tx), -td, 0xbfd4ff, 10, 4, 0.5);
+    R.shake = Math.max(R.shake, 0.15);
+    barrierSparkT = clock;
+  }
   if (!b || b.hard === Infinity) return;
   /* A cyst's wall looks like any rock and cuts four times slower; say so the
      first time it is touched in a session, and what sinking through costs. */
@@ -164,6 +171,9 @@ let endFrame: EndFrame | null = null;
 /* When the barrier last said what opens it (AE). */
 let barrierSaid = -99;
 let shellSaid = false;
+let shellHurtSaid = -Infinity;
+let lastHintReadyT = -1;
+let barrierSparkT = -99;
 /* How long the lean holds, how far toward the cell it goes, how much closer,
    and how long after a hit it will not start. */
 const KEY_HOLD = 0.6, KEY_LEAN = 0.35, KEY_ZOOM = 1.2, KEY_HOLD_SAFE = 1;
@@ -848,6 +858,14 @@ export function tick(raw: number, draw = true) {
           g.hull -= dmg;
           R.run.hullGas += dmg;
           R.hullCause = 'sink';
+          /* Name the cause each time a Dense Shell is what costs hull, not
+             only the first touch of the session; rate-limited so a long sink
+             through the shell is one line, not a stream. */
+          const inShell = blockAt(Math.round(g.px), Math.round(g.pd));
+          if (inShell && inShell.id === 'cystshell' && clock - shellHurtSaid > 6) {
+            toast('Dense Shell · sinking through it costs hull');
+            shellHurtSaid = clock;
+          }
           R.shake = Math.max(R.shake, 0.35);
           if (Math.random() < moved * 1.4) {
             const b = blockAt(Math.round(g.px), Math.round(g.pd));
@@ -932,6 +950,19 @@ export function tick(raw: number, draw = true) {
       const line = HINTS[g.hintsShown];
       g.hintsShown++;
       if (line) toast(line);
+    }
+    /* The last hint is the plainest, and the third core is the Vault's door, so
+       waiting for a spent core would show it after the ending. It is due as
+       soon as the last tier's Anchors are all broken and the third core
+       glows, a few seconds on so it is not under the Anchor card. */
+    if (g.hintsShown === GATE_COUNT - 1 && g.ground.gates.length === GATE_COUNT - 1) {
+      if (gateReady(GATE_COUNT - 1, g.ground.lit)) {
+        if (lastHintReadyT < 0) lastHintReadyT = clock;
+        else if (clock - lastHintReadyT > 6) {
+          g.hintsShown++;
+          toast(HINTS[GATE_COUNT - 1]);
+        }
+      }
     }
 
     const gateNow = gateHere();

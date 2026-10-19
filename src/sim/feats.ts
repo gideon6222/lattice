@@ -38,9 +38,9 @@ export interface Feat {
 export const FEATS: Feat[] = [
   { key: 'fullHold', name: 'Full Hold', act: 'sell a full hold', done: 'Sold a hold filled to the brim.',
     counter: 'hold', at: 1, gift: 'sorter' },
-  { key: 'ridOutGas', name: 'Gas Ridden Out', act: 'ride out some gas', done: 'Rode out the gas pockets and kept the ship.',
+  { key: 'ridOutGas', name: 'Gas Ridden Out', act: 'ride out the green gas pockets', done: 'Rode out the gas pockets and kept the ship.',
     counter: 'gas', at: 4, gift: 'seal' },
-  { key: 'hardRock', name: 'Hard Rock Cut', act: 'keep cutting hard rock', done: 'Cut a long way through the hard rock.',
+  { key: 'hardRock', name: 'Hard Rock Cut', act: 'keep cutting the dense hard rock deep down', done: 'Cut a long way through the hard rock.',
     counter: 'hard', at: 40, gift: 'tip' },
   { key: 'shipLost', name: 'A Ship Lost', act: 'lose a ship', done: 'Lost a ship, and a black box was left on the pad.',
     counter: 'lost', at: 1, gift: 'beacon' }

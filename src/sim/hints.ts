@@ -40,7 +40,7 @@ import { GATE_COUNT } from './gate';
 export const HINTS: string[] = [
   'The core went out instantly. Nothing that dark should stop that easily.',
   'Two cores spent, and the rock past each one runs warmer than before.',
-  'Three gates open now. Whatever they were built to hold has three fewer ways to stay in.'
+  'Every Anchor is broken now. Whatever they were built to hold has nine fewer ways to stay in.'
 ];
 
 /* `GATE_COUNT` is round fifteen's own count of gate-breaking moments; a

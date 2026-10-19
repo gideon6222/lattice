@@ -46,3 +46,7 @@ test('past the last gate, the count holds rather than growing or throwing', () =
   assert.deepEqual(H.hintsFor(H.GATE_COUNT + 3), H.HINTS);
   assert.equal(H.hintAt(H.GATE_COUNT + 3), H.HINTS[H.HINTS.length - 1]);
 });
+
+test('the last hint is due before the third gate opens, so it does not say a gate is open', () => {
+  assert.ok(!/gates? open/i.test(H.HINTS[H.GATE_COUNT - 1]), H.HINTS[H.GATE_COUNT - 1]);
+});

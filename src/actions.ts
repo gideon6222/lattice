@@ -91,7 +91,7 @@ function announceFeats(won: Feat[]) {
     if (!g.found.includes(key)) g.found.push(key);
     g.up[key] = Math.max(g.up[key] || 0, 1);
     const u = UPGRADES.find((x) => x.key === key);
-    foundBanner(u ? u.name : key, FEAT_DEVICES[key].blurb);
+    foundBanner(u ? u.name : key, f.done + ' ' + FEAT_DEVICES[key].blurb, 'feat');
   }
   save();
 }
@@ -963,7 +963,8 @@ export function coreBroken(tier: number) {
         'under it - one wall of worked stone deep - and it is open. Your map ' +
         'knows where it is.'
       : 'The core gives, and the barrier goes with it. Whatever was held here is ' +
-        'held no longer, and the ground below is yours.' +
+        'held no longer, and the ground below is yours. It has a cost: the heat starts ' +
+        'higher up, the dust is thicker and the tremors come sooner.' +
         (gift ? '  Something of it is in the ship now: ' + gift.name.toUpperCase() +
                 '. ' + gift.blurb : ''),
     door ? 'GO DOWN' : 'DESCEND',
