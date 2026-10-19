@@ -29,6 +29,7 @@ menus-sheet = ["node", "tools/menusheet.mjs", "sheet", "test-results/menus-befor
 film-flare =["node", "tools/filmstrip.mjs", "flare"]
 e2e-times = ["node", "tools/e2e-times.mjs"]
 store-shots =["node", "tools/store.mjs"]
+event-art = ["node", "tools/event-art.mjs"]
 cg-media =["node", "tools/crazygames-media.mjs"]
 crazygames = ["node", "tools/crazygames-check.mjs"]
 
