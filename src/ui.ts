@@ -656,7 +656,7 @@ function placeNow(): Place { return docked() ? -1 : gateHere(); }
 
 /* The lines a system shows, in the order the table lists them: what this
    counter stocks (see vendor.ts; found devices included, unfound ones not). */
-function bayState(): BayState { return { depth: g.best.depth, found: g.found }; }
+function bayState(): BayState { return { depth: g.best.depth, found: g.found, tally: g.tally }; }
 /* Only what the shelf rule shows (BA): at most three owned lines a system. */
 export function bayLines(sys: SystemKey): Upgrade[] {
   const rack = bayRack(sys, bayState()).lines;

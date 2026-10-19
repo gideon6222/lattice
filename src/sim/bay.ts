@@ -21,10 +21,10 @@
    (Counsel, 2026-10-02: the Next line must never name a Cooling Rig while core
    one stands.) */
 
-import { UPGRADES, TIER_DEPTHS, SYSTEMS, type SystemKey } from './config';
+import { UPGRADES, TIER_DEPTHS, SYSTEMS, GAS, type SystemKey } from './config';
 import { FINDS, ROOM_FINDS, FOUND_KEYS } from './finds';
-import { depthTier, gateDepth } from './gate';
-import { FEATS, FEAT_DEVICES } from './feats';
+import { depthTier, gateDepth, GATE_COUNT } from './gate';
+import { FEATS, FEAT_DEVICES, type Tally, type Counter } from './feats';
 import type { Upgrade } from '../types';
 
 /* How a thing comes to the ship. `core` is a rung that opens when a barrier's
@@ -104,7 +104,18 @@ export interface BayState {
   depth: number;
   /* Keys of the devices dug up. */
   found: readonly string[];
+  /* What the player has done so far. Absent for a hypothetical save that has
+     done nothing. */
+  tally?: Readonly<Tally>;
 }
+
+/* A feat is named only once the player has met its thing: its counter has
+   moved, or the thing is in reach (a full hold from the first magnet depth,
+   gas from the first pocket, hard rock from the deep rock). Before that the
+   Next line points at the dig and the barrier instead. */
+const FEAT_IN_REACH: Record<Counter, number> = { hold: 20, gas: GAS.min, hard: 60, lost: Infinity };
+const featMet = (counter: Counter, st: BayState) =>
+  (st.tally?.[counter] || 0) > 0 || st.depth >= FEAT_IN_REACH[counter];
 
 const ownable = (u: Upgrade, st: BayState) =>
   (!FOUND_KEYS.has(u.key) || st.found.includes(u.key)) && st.depth >= u.unlock;
@@ -122,6 +133,10 @@ function shown(u: Upgrade, st: BayState): boolean {
   if (FEAT_DEVICES[u.key]?.dark) return false;
   const r = routeOf(u);
   const edge = reachEdge(st.depth);
+  if (r.kind === 'feat') {
+    const feat = FEATS.find((x) => x.key === FEAT_DEVICES[u.key].feat);
+    return !!feat && featMet(feat.counter, st) && r.at <= edge;
+  }
   if (r.kind === 'found') {
     const f = find(u.key);
     return !!f && f.below < edge && st.depth >= f.below - SHADOW_LEAD && r.at <= edge;
@@ -164,6 +179,8 @@ export function nextLine(st: BayState): string | null {
   for (const u of UPGRADES) {
     const r = routeOf(u);
     if (r.kind !== 'feat' || FEAT_DEVICES[u.key]?.dark || ownable(u, st) || r.at > reachEdge(st.depth)) continue;
+    const feat = FEATS.find((x) => x.key === FEAT_DEVICES[u.key].feat);
+    if (!feat || !featMet(feat.counter, st)) continue;
     if (!best || r.at < best.route.at) best = { key: u.key, name: u.name, route: r };
   }
   if (best) return 'Next: ' + best.name + ', ' + best.route.act;
@@ -171,7 +188,14 @@ export function nextLine(st: BayState): string | null {
     const sh = bayRack(s.key, st).shadow;
     if (sh && (!best || sh.route.at < best.route.at)) best = sh;
   }
-  if (!best) return null;
+  if (!best) {
+    /* No dig or rung left to name: the barrier is the objective. */
+    const t = depthTier(st.depth);
+    if (t >= GATE_COUNT) return null;
+    return t === GATE_COUNT - 1
+      ? "Next: break the three Anchors that hold the Vault's door"
+      : 'Next: break the three Anchors that hold the barrier';
+  }
   return best.route.kind === 'found'
     ? 'Next: ? ' + best.route.act
     : 'Next: ' + best.name + ', ' + best.route.act;

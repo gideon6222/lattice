@@ -99,11 +99,18 @@ test('the Next line is one line, in the right shape, and never carries a count',
     assert.ok(!line.includes('\n'), line);
     assert.ok(!/\d+ of \d+/.test(line), line);
   }
-  assert.equal(H.nextLine(stateAt(0)), 'Next: Ore Sorter, sell a full hold');
-  assert.equal(H.nextLine(stateAt(0, ['sorter'])), 'Next: Pressure Seal, ride out some gas');
-  assert.equal(H.nextLine(stateAt(0, ['sorter', 'seal'])), 'Next: Resonance Tip, keep cutting hard rock');
+  // Feats stay dark until met: a fresh save is told the dig, not an errand.
+  assert.equal(H.nextLine(stateAt(0)), 'Next: ? in the rock below 20 m');
+  assert.equal(H.nextLine(stateAt(20)), 'Next: Ore Sorter, sell a full hold');
+  assert.equal(H.nextLine(stateAt(40, ['sorter'])), 'Next: Pressure Seal, ride out some gas');
+  assert.equal(H.nextLine(stateAt(60, ['sorter', 'seal'])), 'Next: Resonance Tip, keep cutting hard rock');
+  assert.equal(H.nextLine({ depth: 0, found: [], tally: { hold: 0, gas: 1, hard: 0, lost: 0 } }), 'Next: Pressure Seal, ride out some gas');
   assert.equal(H.nextLine(stateAt(0, ['sorter', 'seal', 'tip'])), 'Next: ? in the rock below 20 m');
   assert.equal(H.nextLine(stateAt(60, ['magnet', 'receiver', 'survey', 'flare', 'sorter', 'seal', 'tip'])), 'Next: Hull Plating, break the first core');
+});
+
+test('the Resonance Tip card is not shown at 32 m', () => {
+  for (const s of H.SYSTEMS) assert.notEqual(H.bayRack(s.key, stateAt(32)).shadow?.key, 'tip');
 });
 
 test('a first run is told about the nearest dig, before it has found anything', () => {

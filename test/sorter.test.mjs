@@ -87,9 +87,10 @@ test('the hold rack names the Sorter\'s route before the feat, and owns it after
   /* The dig outranks the gift for the rack's one shadow; the Next line leads
      with the gift, an act that can be done now. */
   assert.equal(H.bayRack('hold', { depth: 0, found: [] }).shadow.key, 'magnet');
-  assert.equal(H.bayRack('hold', { depth: 0, found: ['magnet'] }).shadow.key, 'sorter');
+  assert.equal(H.bayRack('hold', { depth: 0, found: ['magnet'] }).shadow, null);
+  assert.equal(H.bayRack('hold', { depth: 20, found: ['magnet'] }).shadow.key, 'sorter');
   assert.equal(H.routeOf(H.UPGRADES.find((u) => u.key === 'sorter')).kind, 'feat');
-  assert.equal(H.nextLine({ depth: 0, found: [] }), 'Next: Ore Sorter, sell a full hold');
+  assert.equal(H.nextLine({ depth: 20, found: [] }), 'Next: Ore Sorter, sell a full hold');
   const after = H.bayRack('hold', { depth: 0, found: ['sorter'] });
   assert.ok(after.lines.some((u) => u.key === 'sorter'));
 });
